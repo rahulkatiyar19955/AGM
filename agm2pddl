@@ -1,0 +1,7 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from parseAGM import *
+
+agmFD = AGMFileData.fromFile('example.agm', verbose=True)
+agmFD.toFile('example2.agm')

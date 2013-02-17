@@ -1,0 +1,252 @@
+spacePattern=3;
+lineThickness=2;
+name=gammar2;
+vertexDiameter=68;
+shortPattern=1;
+nodeThickness=2;
+longPattern=3;
+
+modelGravity
+{
+	{
+		s:start;
+	}
+	=>
+	{
+		g:gravity;
+		gualzru:robot;
+		gualzru->g(link);
+	}
+};
+
+lookFloor
+{
+	{
+		g:gravity;
+		gualzru:robot;
+		gualzru->g(link);
+	}
+	=>
+	{
+		g:gravity;
+		gualzru:robot;
+		gualzru->g(lookTowards);
+	}
+};
+
+
+modelHeight
+{
+	{
+		g:gravity;
+		gualzru:robot;
+		gualzru->g(lookTowards);
+	}
+	=>
+	{
+		g:floor;
+		gualzru:robot;
+		gualzru->g(lookTowards);
+		gualzru->g(in);
+	}
+};
+
+
+lookPerpendicularFloor
+{
+	{
+		floor:floor;
+		gualzru:robot;
+		gualzru->floor(lookTowards);
+	}
+	=>
+	{
+		floor:floor;
+		gualzru:robot;
+		gualzru->floor(lookPerpendicular);
+	}
+};
+
+
+modelYaw
+{
+	{
+		floor:floor;
+		gualzru:robot;
+		gualzru->floor(lookPerpendicular);
+	}
+	=>
+	{
+		floor:orientedFloor;
+		gualzru:robot;
+		gualzru->floor(lookPerpendicular);
+	}
+};
+
+lookFirstWall
+{
+	{
+		floor:orientedFloor;
+		gualzru:robot;
+		gualzru->floor(lookPerpendicular);
+	}
+	=>
+	{
+		floor:orientedFloor;
+		gualzru:robot;
+		w1:notModeledWall;
+		w2:notModeledWall;
+		w3:notModeledWall;
+		w4:notModeledWall;
+		gualzru->w1(looks);
+		floor->w1(linked);
+		w1->w2(linked);
+		w2->w3(linked);
+		w3->w4(linked);
+	}
+};
+
+lookNextWall
+{
+	{
+		gualzru:robot;
+		w1:wall;
+		w2:notModeledWall;
+		gualzru->w1(looks);
+		w1->w2(linked);
+	}
+	=>
+	{
+		gualzru:robot;
+		w1:wall;
+		w2:notModeledWall;
+		gualzru->w2(looks);
+		w1->w2(linked);
+	}
+};
+
+modelWall
+{
+	{
+		gualzru:robot;
+		w1:notModeledWall;
+		gualzru->w1(looks);
+	}
+	=>
+	{
+		gualzru:robot;
+		w1:wall;
+		gualzru->w1(looks);
+	}
+};
+
+modelLastWall
+{
+	{
+		robot:robot;
+		floor:orientedFloor;
+		w1:wall;
+		w2:wall;
+		w3:wall;
+		w4:notModeledWall;
+		robot->w4(looks);
+		floor->w1(linked);
+		w1->w2(linked);
+		w2->w3(linked);
+		w3->w4(linked);
+	}
+	=>
+	{
+		robot:robot;
+		floor:room;
+		w1:wall;
+		w2:wall;
+		w3:wall;
+		w4:wall;
+		robot->w4(looks);
+		floor->w1(linked);
+		w1->w2(linked);
+		w2->w3(linked);
+		w3->w4(linked);
+	}
+};
+
+detectObstacle
+{
+	{
+		room:room;
+		gualzru:robot;
+		gualzru->room(in);
+	}
+	=>
+	{
+		room:room;
+		gualzru:robot;
+		obstacle:obstacle;
+		gualzru->room(in);
+		obstacle->room(in);
+	}
+};
+
+modelTable
+{
+	{
+		room:room;
+		gualzru:robot;
+		obstacle:obstacle;
+		gualzru->room(in);
+		obstacle->room(in);
+	}
+	=>
+	{
+		room:room;
+		gualzru:robot;
+		obstacle:table;
+		gualzru->room(in);
+		obstacle->room(in);
+	}
+};
+
+detectObjectInTable
+{
+	{
+		room:room;
+		gualzru:robot;
+		table:table;
+		gualzru->room(in);
+		table->room(in);
+	}
+	=>
+	{
+		room:room;
+		gualzru:robot;
+		table:table;
+		object:object;
+		gualzru->room(in);
+		table->room(in);
+		object->table(in);
+	}
+};
+
+modelMugInTable
+{
+	{
+		room:room;
+		gualzru:robot;
+		table:table;
+		object:object;
+		gualzru->room(in);
+		table->room(in);
+		object->table(in);
+	}
+	=>
+	{
+		room:room;
+		gualzru:robot;
+		table:table;
+		object:mug;
+		gualzru->room(in);
+		table->room(in);
+		object->table(in);
+	}
+};
