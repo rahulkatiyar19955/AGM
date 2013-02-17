@@ -2,6 +2,12 @@
 # -*- coding: utf-8 -*-
 
 from parseAGM import *
+import sys
 
-agmFD = AGMFileData.fromFile('example.agm', verbose=True)
-agmFD.toFile('example2.agm')
+if len(sys.argv)==3:
+	inputFile   = sys.argv[1]
+	outputFile  = sys.argv[2]
+	agmData = AGMFileData.fromFile(inputFile, verbose=False)
+	agmData.generatePDDL(outputFile)
+else:
+	print '\n'+sys.argv[0], ' <inputFile.agm>  <outputFile.pddl>\n'

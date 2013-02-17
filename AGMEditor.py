@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  ---------------------
-#  -----  AGMTool  -----
-#  ---------------------
+#  -----------------------
+#  -----  AGMEditor  -----
+#  -----------------------
 #
 #  A libre graph grammar drawing tool.
 #
@@ -29,7 +29,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 from PyQt4.QtSvg import *
 from PyQt4.Qt import *
-from ui_guiAGMTool import Ui_MainWindow
+from ui_guiAGMEditor import Ui_MainWindow
 from ui_appearance import Ui_Appearance
 
 from parseAGM import *
@@ -327,7 +327,7 @@ class Appearance(QWidget):
 		dashPattern.append(self.ui.shortPattern.value() * lineThickness)
 		dashPattern.append(self.ui.spacePattern.value() * lineThickness)
 
-class AGMTool(QMainWindow):
+class AGMEditor(QMainWindow):
 	def __init__(self):
 		QMainWindow.__init__(self)
 		self.ui = Ui_MainWindow()
@@ -456,11 +456,11 @@ if __name__ == '__main__':
 				agmData = AGMFileData.fromFile(inputFile, verbose=False)
 				agmData.generatePDDL(outputFile)
 		else:
-			clase = AGMTool()
+			clase = AGMEditor()
 			clase.openFromFile(sys.argv[1])
 			clase.show()
 			app.exec_()
 	else:
-			clase = AGMTool()
+			clase = AGMEditor()
 			clase.show()
 			app.exec_()

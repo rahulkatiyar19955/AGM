@@ -19,7 +19,7 @@ ENDMACRO( WRAP_PYTHON_UI )
 #)
 #ADD_CUSTOM_TARGET(exec_graphmars ALL DEPENDS graphmars )
 
-WRAP_PYTHON_UI( guiAGMTool appearance )
+WRAP_PYTHON_UI( guiAGMEditor appearance )
 
 # Program destination directory
 # SET( DEST_DIR "/usr/local/bin/")
