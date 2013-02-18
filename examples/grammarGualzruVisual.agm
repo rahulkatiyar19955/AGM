@@ -1,6 +1,7 @@
+name=grammarGualzruVisual;
+
 spacePattern=3;
 lineThickness=2;
-name=grammarGualzruVisual;
 vertexDiameter=40;
 shortPattern=1;
 nodeThickness=2;

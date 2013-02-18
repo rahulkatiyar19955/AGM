@@ -1,5 +1,8 @@
 from pyparsing import Word, alphas, alphanums, nums, OneOrMore, Optional, Suppress, ZeroOrMore, Group, StringEnd
 import math
+import traceback
+import itertools
+
 
 def distance(x1, y1, x2, y2):
 	return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
@@ -24,6 +27,12 @@ class AGMLink(object):
 		v = ''
 		if not self.enabled: v = 'q '
 		return '\t\t'+str(self.a)+'->'+str(self.b)+'('+v+str(self.linkType)+')'
+	def __cmp__(self, other):
+		this =  self.linkType+ self.a+ self.b
+		nhis = other.linkType+other.a+other.b
+		return this.__cmp__(nhis)
+	def __str__(self):
+		return self.a+'-->'+self.b+' ('+self.linkType+')'
 
 class AGMGraph(object):
 	def __init__(self, nodes, links, side='n'):
@@ -64,7 +73,7 @@ class AGMGraph(object):
 			return -1, -1
 
 	@staticmethod
-	def parseGraphFromAST(i, verbose=False):
+	def parseGraphFromAST(i, verbose=False, pddlVerbose=False):
 		if verbose: print '\t{'
 		nodes = dict()
 		for t in i.nodes:
@@ -140,7 +149,7 @@ class AGMRule(object):
 			self.lhs = AGMGraph(self, dict(), [])
 			self.rhs = AGMGraph(self, dict(), [])
 	@staticmethod
-	def parseRuleFromAST(i, verbose=False):
+	def parseRuleFromAST(i, verbose=False, pddlVerbose=False):
 		if verbose: print '\nRule:', i.name
 		LHS = AGMGraph.parseGraphFromAST(i.lhs, verbose)
 		if verbose: print '\t===>'
@@ -158,21 +167,102 @@ class AGMRule(object):
 		for name,node in self.lhs.nodes.items():
 			ret += ' (IS'+node.sType+' ?'+name+')'
 		return ret
-	def unknownNodesPDDLPreconditions(self):
-		ret  = ''
+	def forgetNodesPDDLList(self):
+		return list(set(self.lhs.nodes).difference(set(self.rhs.nodes)))
+	def newNodesPDDLList(self):
+		return list(set(self.rhs.nodes).difference(set(self.lhs.nodes)))
+	def anyNewOrForgotten(self):
+		if len(self.newNodesPDDLList())==0:
+			if len(self.newNodesPDDLList())==0:
+				return False
+		return True
+	def newNodesPDDLPreconditions(self, newList, pddlVerbose=False):
+		ret = ''
+		if len(newList)>0:
+			if pddlVerbose: print 'PRECONDITIONS firstunknown in newList', newList[0] 
+			ret += ' (firstunknown' + ' ?' + newList[0] + ')'
+		i = 1
+		while i < len(newList):
+			if pddlVerbose: print 'PRECONDITIONS unknownorder', newList[i-1], newList[i]
+			ret += ' (unknownorder ?' + newList[i-1] + ' ?' + newList[i] + ')'
+			i += 1
 		return ret
-	def toPDDL(self):
+	def differentNodesPDDLPreconditions(self):
+		ret = ''
+		for i in itertools.combinations(self.nodeNames(), 2):
+			ret += ' (not(= ?' + i[0] + ' ?' + i[1] + '))'
+		return ret
+	def stayingNodeNames(self):
+		return set(self.lhs.nodeNames()).intersection(set(self.rhs.nodeNames()))
+	def typeChangesPDDLEffects(self, pddlVerbose=False):
+		ret = ''
+		stay = self.stayingNodeNames()
+		for n in stay:
+			typeL = self.lhs.nodes[n].sType
+			typeR = self.rhs.nodes[n].sType
+			if typeL != typeR:
+				if pddlVerbose: print 'EFFECTS modify', n
+				ret += ' (not(IS'+typeL + ' ?' + n +')) (IS'+typeR + ' ?' + n +')'
+		return ret
+	def newAndForgottenNodesPDDLEffects(self, newList, pddlVerbose=False):
+		ret = ''
+		# Handle new nodes
+		i = 0
+		while i < len(newList):
+			newNode = newList[i]
+			if i==0:
+				if pddlVerbose: print 'EFFECTS create FIRST', newNode
+				ret += ' (not (firstunknown ?' + newNode + '))'
+			else:
+				if pddlVerbose: print 'EFFECTS create THEN', newNode, '('+newList[i-1]+')'
+				ret += ' (not (unknownorder ?' + newList[i-1] + ' ?' + newNode + '))'
+			ret += ' (IS' + self.rhs.nodes[newNode].sType + ' ?' + newNode + ')'
+			i += 1
+		# Handle nodes to forget
+		i = 0
+		forgetList = self.forgetNodesPDDLList()
+		while i < len(forgetList):
+			forgetNode = forgetList[i]
+			if i==0:
+				if pddlVerbose: print 'EFFECTS forget FIRST', forgetNode
+				ret += ' (firstunknown ?' + forgetNode + ')'
+			else:
+				if pddlVerbose: print 'EFFECTS forget THEN', forgetNode, '('+forgetList[i-1]+')'
+				ret += ' (unknownorder ?' + forgetList[i-1] + ' ?' + forgetNode + ')'
+			ret += ' (not((IS' + self.lhs.nodes[forgetNode].sType+ ' ?' + forgetNode + '))'
+			i += 1
+		return ret
+	def linkPatternsPDDLEffects(self, pddlVerbose=False):
+		ret = ''
+		initialLinkSet   = set(self.lhs.links)
+		posteriorLinkSet = set(self.rhs.links)
+		createLinks =  posteriorLinkSet.difference(initialLinkSet)
+		for link in createLinks:
+			if pddlVerbose: print 'NEWLINK', str(link)
+			ret += ' ('+link.linkType + ' ?'+ link.a +' ?'+ link.b + ')'
+		deleteLinks =  initialLinkSet.difference(posteriorLinkSet)
+		for link in deleteLinks:
+			if pddlVerbose: print 'REMOVELINK', str(link)
+			ret += ' (not ('+link.linkType + ' ?'+ link.a +' ?'+ link.b + '))'
+		return ret
+	def toPDDL(self, pddlVerbose=False):
+		if pddlVerbose: print '--((', self.name, '))--'
 		string  = '\t(:action ' + self.name + '\n'
 		string += '\t\t:parameters ('
 		for n in self.nodeNames():
 			string += ' ?' + n
 		string += ' )\n'
-		string += '\t\t:precondition (and '
-		string += self.existingNodesPDDLPreconditions() + ' '
-		string += self.unknownNodesPDDLPreconditions()
+		string += '\t\t:precondition (and'
+		string += self.existingNodesPDDLPreconditions()
+		newList = self.newNodesPDDLList()
+		string += self.newNodesPDDLPreconditions(newList)
+		string += self.differentNodesPDDLPreconditions()
 		string += ' )\n'
-		string += '\t\t:effect (and '
-		string += '  (increase (total-cost) 1) )\n'
+		string += '\t\t:effect (and'
+		string += self.typeChangesPDDLEffects()
+		string += self.newAndForgottenNodesPDDLEffects(newList)
+		string += self.linkPatternsPDDLEffects()
+		string += ' (increase (total-cost) 1) )\n'
 		string += '\t)\n'
 		return string
 	def nodeTypes(self):
@@ -236,7 +326,7 @@ class AGMFileData(object):
 		self.agm.addRule(rule)
 
 	@staticmethod
-	def fromFile(filename, verbose=False):
+	def fromFile(filename, verbose=False, pddlVerbose=False):
 		# Clear previous data
 		agmFD = AGMFileData()
 		agmFD.properties = dict()
@@ -269,6 +359,7 @@ class AGMFileData(object):
 
 
 		verbose = False
+		pddlVerbose = False
 
 		# Parse input file
 		result = agm.parseString(open(filename, 'r').read())
