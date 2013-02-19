@@ -1,7 +1,6 @@
-name=grammarGualzruVisual
-
 spacePattern=3
 lineThickness=2
+name=final
 vertexDiameter=40
 shortPattern=1
 nodeThickness=2
@@ -14,7 +13,7 @@ modelGravity
 	}
 	=>
 	{
-		g:gravity(337,116)
+		g:gravity(339,127)
 		gualzru:robot(135,129)
 		gualzru->g(link)
 	}
@@ -54,14 +53,14 @@ modelHeight
 lookPerpendicularFloor
 {
 	{
-		gualzru:robot(104,144)
 		floor:floor(327,147)
+		gualzru:robot(104,144)
 		gualzru->floor(lookTowards)
 	}
 	=>
 	{
-		gualzru:robot(110,149)
 		floor:floor(404,151)
+		gualzru:robot(110,149)
 		gualzru->floor(lookPerpendicular)
 	}
 }
@@ -69,14 +68,14 @@ lookPerpendicularFloor
 modelYaw
 {
 	{
-		gualzru:robot(101,151)
 		floor:floor(386,153)
+		gualzru:robot(101,151)
 		gualzru->floor(lookPerpendicular)
 	}
 	=>
 	{
-		gualzru:robot(108,138)
 		floor:orientedFloor(392,137)
+		gualzru:robot(108,138)
 		gualzru->floor(lookPerpendicular)
 	}
 }
@@ -84,103 +83,107 @@ modelYaw
 lookFirstWall
 {
 	{
-		gualzru:robot(121,136)
 		floor:orientedFloor(389,140)
+		gualzru:robot(121,136)
 		gualzru->floor(lookPerpendicular)
 	}
 	=>
 	{
-		floor:orientedFloor(94,223)
-		w4:notModeledWall(448,82)
-		w3:notModeledWall(333,151)
-		w2:notModeledWall(266,82)
-		w1:notModeledWall(149,132)
-		gualzru:robot(89,35)
+		floor:orientedFloor(67,273)
+		w4:notModeledWall(598,149)
+		w3:notModeledWall(424,167)
+		w2:notModeledWall(254,143)
+		w1:notModeledWall(68,164)
+		gualzru:robot(68,74)
 		gualzru->w1(looks)
-		floor->w1(linked)
-		w1->w2(linked)
-		w2->w3(linked)
-		w3->w4(linked)
+		floor->w1(link)
+		w1->w2(link)
+		w2->w3(link)
+		w3->w4(link)
 	}
 }
 
 lookNextWall
 {
 	{
-		w2:notModeledWall(437,67)
-		w1:wall(209,107)
-		gualzru:robot(56,159)
+		w2:notModeledWall(468,232)
+		w1:wall(150,236)
+		gualzru:robot(228,89)
 		gualzru->w1(looks)
-		w1->w2(linked)
+		w1->w2(link)
 	}
 	=>
 	{
-		w2:notModeledWall(419,68)
-		w1:wall(197,145)
-		gualzru:robot(120,61)
+		w2:notModeledWall(485,222)
+		w1:wall(128,228)
+		gualzru:robot(206,84)
 		gualzru->w2(looks)
-		w1->w2(linked)
+		w1->w2(link)
 	}
 }
 
 modelWall
 {
 	{
-		w1:notModeledWall(391,169)
+		w2:notModeledWall(473,243)
+		w1:notModeledWall(253,244)
 		gualzru:robot(102,114)
 		gualzru->w1(looks)
+		w1->w2(link)
 	}
 	=>
 	{
-		w1:wall(347,134)
-		gualzru:robot(92,102)
+		w2:notModeledWall(521,227)
+		w1:wall(293,227)
+		gualzru:robot(155,106)
 		gualzru->w1(looks)
+		w1->w2(link)
 	}
 }
 
 modelLastWall
 {
 	{
-		floor:orientedFloor(54,216)
+		floor:orientedFloor(47,315)
 		robot:robot(372,62)
-		w4:notModeledWall(369,237)
-		w3:wall(150,159)
-		w2:wall(258,78)
-		w1:wall(75,56)
+		w4:notModeledWall(560,165)
+		w3:wall(386,198)
+		w2:wall(207,157)
+		w1:wall(48,181)
 		robot->w4(looks)
-		floor->w1(linked)
-		w1->w2(linked)
-		w2->w3(linked)
-		w3->w4(linked)
+		floor->w1(link)
+		w1->w2(link)
+		w2->w3(link)
+		w3->w4(link)
 	}
 	=>
 	{
-		floor:room(455,203)
-		robot:robot(287,223)
-		w4:wall(88,216)
-		w3:wall(72,133)
-		w2:wall(97,38)
-		w1:wall(394,51)
+		floor:room(77,350)
+		robot:robot(388,67)
+		w4:wall(617,191)
+		w3:wall(475,238)
+		w2:wall(272,183)
+		w1:wall(75,210)
 		robot->w4(looks)
-		floor->w1(linked)
-		w1->w2(linked)
-		w2->w3(linked)
-		w3->w4(linked)
+		floor->w1(link)
+		w1->w2(link)
+		w2->w3(link)
+		w3->w4(link)
 	}
 }
 
 detectObstacle
 {
 	{
-		room:room(370,151)
+		room:room(285,257)
 		gualzru:robot(130,132)
 		gualzru->room(in)
 	}
 	=>
 	{
-		obstacle:obstacle(408,139)
-		room:room(168,209)
-		gualzru:robot(114,83)
+		obstacle:obstacle(478,119)
+		room:room(318,245)
+		gualzru:robot(112,102)
 		gualzru->room(in)
 		obstacle->room(in)
 	}
@@ -189,17 +192,17 @@ detectObstacle
 modelTable
 {
 	{
-		obstacle:obstacle(426,161)
-		room:room(145,185)
-		gualzru:robot(203,76)
+		obstacle:obstacle(464,95)
+		room:room(289,244)
+		gualzru:robot(119,103)
 		gualzru->room(in)
 		obstacle->room(in)
 	}
 	=>
 	{
-		obstacle:table(363,204)
-		room:room(138,239)
-		gualzru:robot(240,65)
+		obstacle:table(506,112)
+		room:room(285,252)
+		gualzru:robot(110,100)
 		gualzru->room(in)
 		obstacle->room(in)
 	}
@@ -208,18 +211,18 @@ modelTable
 detectObjectInTable
 {
 	{
-		table:table(378,217)
-		room:room(128,197)
-		gualzru:robot(221,91)
+		table:table(385,166)
+		room:room(251,249)
+		gualzru:robot(115,161)
 		gualzru->room(in)
 		table->room(in)
 	}
 	=>
 	{
-		table:table(424,237)
-		object:object(355,92)
-		room:room(96,216)
-		gualzru:robot(130,73)
+		table:table(377,172)
+		object:object(517,76)
+		room:room(248,256)
+		gualzru:robot(124,165)
 		gualzru->room(in)
 		table->room(in)
 		object->table(in)
@@ -230,19 +233,19 @@ modelMugInTable
 {
 	{
 		table:table(392,182)
-		object:object(190,199)
-		room:room(365,86)
-		gualzru:robot(106,71)
+		object:object(538,63)
+		room:room(273,276)
+		gualzru:robot(86,124)
 		gualzru->room(in)
 		table->room(in)
 		object->table(in)
 	}
 	=>
 	{
-		table:table(401,209)
-		object:mug(72,249)
-		room:room(436,82)
-		gualzru:robot(68,44)
+		table:table(417,191)
+		object:mug(575,71)
+		room:room(277,289)
+		gualzru:robot(84,121)
 		gualzru->room(in)
 		table->room(in)
 		object->table(in)

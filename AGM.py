@@ -114,7 +114,7 @@ class AGMGraph(object):
 		else:
 			print 'no ndoe'
 	def addEdge(self, a, b):
-		print 'Add edge', a, b
+		#print 'Add edge', a, b
 		self.links.append(AGMLink(a, b, 'link', True))
 
 	def toString(self):
@@ -188,13 +188,10 @@ class AGM(object):
 		self.rules.append(rule)
 
 class AGMFileData(object):
-	def __init__(self, filename=''):
+	def __init__(self):
 		object.__init__(self)
-		if len(filename) == 0:
-			self.properties = dict()
-			self.agm = AGM()
-		else:
-			self = AGMFileData.fromFile(filename)
+		self.properties = dict()
+		self.agm = AGM()
 
 	def addRule(self, rule):
 		self.agm.addRule(rule)

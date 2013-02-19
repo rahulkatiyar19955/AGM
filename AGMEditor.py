@@ -421,7 +421,7 @@ class AGMEditor(QMainWindow):
 	def openFromFile(self, path):
 		print 'Opening', path
 		if path[-4:] != '.agm': path = path + '.agm'
-		self.agmData = AGMFileData.fromFile(path, verbose=True)
+		self.agmData = AGMFileDataParsing.fromFile(path, verbose=True)
 		self.ui.rulesList.clear()
 		for rule in self.agmData.agm.rules:
 			q = QListWidgetItem()
