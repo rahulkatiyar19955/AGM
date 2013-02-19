@@ -159,15 +159,15 @@ class AGMRulePDDL:
 		print 'Stack      ', stack
 		print 'Reused     ', reused
 		print '--- ignoring reused...  ---'
-		forgetList2 = [x for x in forgetList if not x in reused]
+		forgetList2 = [x for x in forgetList if not x in newList]
 		print 'Forget list 2', forgetList2
-		newList2 = [x for x in newList if not x in reused]
+		newList2 = [x for x in newList if not x in forgetList]
 		print 'New list 2   ', newList2
 		print '------------------------------------------------------------------------'
 		# Same old, same old
 		if len(forgetList2)==0 and len(newList2)==0:
 			pass
-		# Insertions
+		# NEW NODES: we must pop some symbols from the stack
 		elif len(forgetList2)==0 and len(newList2)>0:
 			if len(stack)>1:
 				last = stack.pop()
@@ -179,9 +179,17 @@ class AGMRulePDDL:
 				ret += ' (not (unknownorder ?' + last + ' ?' + nextn + '))'
 				last = nextn
 			ret += ' (firstunknown ?' + last + ')'
-		# Deletions
+		# FORGET NODES: we must push some symbols from the stack
 		elif len(forgetList2)>0 and len(newList2)==0:
-			pass
+			last = forgetList2.pop()
+			ret += ' (firstunknown ?' + last + ')'
+			while len(forgetList2)>0:
+				nextn = forgetList2.pop()
+				ret += ' (unknownorder ?' + last + ' ?' + nextn + ')'
+				last = nextn
+			ret += ' (unknownorder ?' + last + ' ?' + stack[-1] + '))'
+			ret += ' (not (firstunknown ?' + stack[-1] + '))'
+			
 		# Internal error :-D
 		else:
 			raise Exception(":-)")
