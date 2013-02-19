@@ -53,14 +53,14 @@ modelHeight
 lookPerpendicularFloor
 {
 	{
-		floor:floor(327,147)
 		gualzru:robot(104,144)
+		floor:floor(327,147)
 		gualzru->floor(lookTowards)
 	}
 	=>
 	{
-		floor:floor(404,151)
 		gualzru:robot(110,149)
+		floor:floor(404,151)
 		gualzru->floor(lookPerpendicular)
 	}
 }
@@ -68,14 +68,14 @@ lookPerpendicularFloor
 modelYaw
 {
 	{
-		floor:floor(386,153)
 		gualzru:robot(101,151)
+		floor:floor(386,153)
 		gualzru->floor(lookPerpendicular)
 	}
 	=>
 	{
-		floor:orientedFloor(392,137)
 		gualzru:robot(108,138)
+		floor:orientedFloor(392,137)
 		gualzru->floor(lookPerpendicular)
 	}
 }
@@ -83,17 +83,17 @@ modelYaw
 lookFirstWall
 {
 	{
-		floor:orientedFloor(389,140)
-		gualzru:robot(121,136)
+		gualzru:robot(121,75)
+		floor:orientedFloor(120,305)
 		gualzru->floor(lookPerpendicular)
 	}
 	=>
 	{
-		floor:orientedFloor(67,273)
-		w4:notModeledWall(598,149)
-		w3:notModeledWall(424,167)
-		w2:notModeledWall(254,143)
-		w1:notModeledWall(68,164)
+		floor:orientedFloor(70,318)
+		w4:notModeledWall(598,163)
+		w3:notModeledWall(434,189)
+		w2:notModeledWall(238,166)
+		w1:notModeledWall(72,184)
 		gualzru:robot(68,74)
 		gualzru->w1(looks)
 		floor->w1(link)
