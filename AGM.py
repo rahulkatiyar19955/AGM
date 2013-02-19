@@ -30,10 +30,33 @@ class AGMLink(object):
 		if not self.enabled: v = 'q '
 		return '\t\t'+str(self.a)+'->'+str(self.b)+'('+v+str(self.linkType)+')'
 	def __cmp__(self, other):
+		#print '__cmp__'
 		this =  self.linkType+ self.a+ self.b
 		nhis = other.linkType+other.a+other.b
-		return this.__cmp__(nhis)
+		if this < nhis: return -1
+		if this > nhis: return +1
+		return 0
+	def __eq__(self, other):
+		#print '__eq__', self, other
+		this =  self.linkType+ self.a+ self.b
+		nhis = other.linkType+other.a+other.b
+		if this == nhis:
+			#print '=='
+			return True
+		#print '!='
+		return False
+	def __ne__(self, other):
+		#print '__ne__'
+		this =  self.linkType+ self.a+ self.b
+		nhis = other.linkType+other.a+other.b
+		if this == nhis:
+			return False
+		return True
+	def __hash__(self):
+		return len(self.a+self.b+self.linkType)
 	def __str__(self):
+		return self.a+'-->'+self.b+' ('+self.linkType+')'
+	def __repr__(self):
 		return self.a+'-->'+self.b+' ('+self.linkType+')'
 
 class AGMGraph(object):

@@ -2,6 +2,9 @@ import itertools
 
 AGMStackLastUsedName = 'stackAGMInternal'
 
+def translateList(alist, dictionary):
+	return [dictionary[x] for x in alist]
+
 #
 # AGM to PDDL
 #
@@ -37,7 +40,7 @@ class AGMPDDL:
 			linkSet = linkSet.union(r.linkTypes())
 		writeString += '\n'
 		for t in linkSet:
-			writeString += '\t\t('+t+' ?u)\n'
+			writeString += '\t\t('+t+' ?u ?v)\n'
 		return writeString
 	@staticmethod
 	def typePredicatesPDDL(agm):
@@ -68,11 +71,8 @@ class AGMRulePDDL:
 			nodeDict[newList[i]] = stack[-1-i]
 		for n in rule.stayingNodeList():
 			nodeDict[n] = n
-		print 'C', stack
-		print 'Quitar', len(forgetList)
 		for i in range(len(forgetList)):
 			reused.append(stack.pop())
-		print 'C', stack
 
 		return stack, reused, nodeDict
 	@staticmethod
@@ -97,13 +97,14 @@ class AGMRulePDDL:
 		string += '\t\t:precondition (and'
 		string += AGMRulePDDL.existingNodesPDDLTypes(rule, nodeDict) # TYPE preconditions
 		string += AGMRulePDDL.stackPDDLPreconditions(rule, stack, forgetList, newList, nodeDict) # Include precondition for nodes to be created
-		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule, nodeDict) # Avoid using the same node more than once "!="
+		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule.stayingNodeList()+stack+reused) # Avoid using the same node more than once "!="
+		string += AGMRulePDDL.linkPatternsPDDLPreconditions(rule, nodeDict)
 		string += ' )\n'
 
 
 		string += '\t\t:effect (and'
 		string += AGMRulePDDL.typeChangesPDDLEffects(rule, nodeDict) # TYPE changes for staying nodes
-		string += AGMRulePDDL.stackHandlingPDDLEffects(rule, forgetList, stack, nodeDict) # Stack handling
+		string += AGMRulePDDL.stackHandlingPDDLEffects(rule, forgetList, newList, stack, reused, nodeDict) # Stack handling
 		string += AGMRulePDDL.newAndForgetNodesTypesPDDLEffects(rule, newList, forgetList, nodeDict) # TYPE assignment for created nod
 		string += AGMRulePDDL.linkPatternsPDDLEffects(rule, nodeDict)
 		string += ' (increase (total-cost) 1) )\n'
@@ -135,28 +136,55 @@ class AGMRulePDDL:
 			last = top
 		return ret
 	@staticmethod
-	def differentNodesPDDLPreconditions(rule, nodeDict):
+	def differentNodesPDDLPreconditions(nodesToUse):
 		ret = ''
-		for i in itertools.combinations(rule.nodeNames(), 2):
-			ret += ' (not(= ?' + nodeDict[i[0]] + ' ?' + nodeDict[i[1]] + '))'
+		for i in itertools.combinations(nodesToUse, 2):
+			if i[0] != i[1]:
+				ret += ' (not(= ?' + i[0] + ' ?' + i[1] + '))'
 		return ret
 
 	#
 	# E  F  F  E  C  T  S
 	#
 	@staticmethod
-	def stackHandlingPDDLEffects(rule, forgetList, stack_, nodeDict, pddlVerbose=False):
+	def stackHandlingPDDLEffects(rule, forgetList_, newList_, stack_, reused, nodeDict, pddlVerbose=False):
 		ret = ''
 		stack = stack_[:]
+		forgetList = translateList(forgetList_, nodeDict)
+		newList = translateList(newList_, nodeDict)
 		last = ''
-		if len(stack)>1:
-			last = stack.pop()
-			ret += ' (not (firstunknown ?' + last + '))'
-		while len(stack)>0:
-			nextn = stack.pop()
-			ret += ' (not (unknownorder ?' + last + ' ?' + nextn + '))'
-			last = nextn
-		ret += ' (firstunknown ?' + last + ')'
+		print '------------------------------------------------------------------------'
+		print 'Forget list', forgetList
+		print 'New list   ', newList
+		print 'Stack      ', stack
+		print 'Reused     ', reused
+		print '--- ignoring reused...  ---'
+		forgetList2 = [x for x in forgetList if not x in reused]
+		print 'Forget list 2', forgetList2
+		newList2 = [x for x in newList if not x in reused]
+		print 'New list 2   ', newList2
+		print '------------------------------------------------------------------------'
+		# Same old, same old
+		if len(forgetList2)==0 and len(newList2)==0:
+			pass
+		# Insertions
+		elif len(forgetList2)==0 and len(newList2)>0:
+			if len(stack)>1:
+				last = stack.pop()
+				ret += ' (not (firstunknown ?' + last + '))'
+			else:
+				raise Exception(":->")
+			while len(stack)>0:
+				nextn = stack.pop()
+				ret += ' (not (unknownorder ?' + last + ' ?' + nextn + '))'
+				last = nextn
+			ret += ' (firstunknown ?' + last + ')'
+		# Deletions
+		elif len(forgetList2)>0 and len(newList2)==0:
+			pass
+		# Internal error :-D
+		else:
+			raise Exception(":-)")
 		return ret
 	@staticmethod
 	def newAndForgetNodesTypesPDDLEffects(rule, newList, forgetList, nodeDict, pddlVerbose=False):
@@ -171,16 +199,38 @@ class AGMRulePDDL:
 	@staticmethod
 	def linkPatternsPDDLEffects(rule, nodeDict, pddlVerbose=False):
 		ret = ''
-		initialLinkSet   = set(rule.lhs.links)
-		posteriorLinkSet = set(rule.rhs.links)
+		# Substitute links names in a copy of the links
+		Llinks = rule.lhs.links[:]
+		initialLinkSet = set()
+		for link in Llinks:
+			link.a = nodeDict[link.a]
+			link.b = nodeDict[link.b]
+			initialLinkSet.add(link)
+		Rlinks = rule.rhs.links[:]
+		posteriorLinkSet = set()
+		for link in Rlinks:
+			link.a = nodeDict[link.a]
+			link.b = nodeDict[link.b]
+			posteriorLinkSet.add(link)
+		#print 'L', initialLinkSet
+		#print 'R', posteriorLinkSet
 		createLinks =  posteriorLinkSet.difference(initialLinkSet)
+		#print 'create', createLinks
 		for link in createLinks:
-			if pddlVerbose: print 'NEWLINK', str(link)
-			ret += ' ('+link.linkType + ' ?'+ nodeDict[link.a] +' ?'+ nodeDict[link.b] + ')'
-		deleteLinks =  initialLinkSet.difference(posteriorLinkSet)
+			print 'NEWLINK', str(link)
+			ret += ' ('+link.linkType + ' ?'+ link.a +' ?'+ link.b + ')'
+		deleteLinks = initialLinkSet.difference(posteriorLinkSet)
+		#print 'delete', deleteLinks
 		for link in deleteLinks:
-			if pddlVerbose: print 'REMOVELINK', str(link)
-			ret += ' (not ('+link.linkType + ' ?'+ nodeDict[link.a] +' ?'+ nodeDict[link.b] + '))'
+			print 'REMOVELINK', str(link)
+			ret += ' (not ('+link.linkType + ' ?'+ link.a +' ?'+ link.b + '))'
+		return ret
+	@staticmethod
+	def linkPatternsPDDLPreconditions(rule, nodeDict, pddlVerbose=False):
+		ret = ''
+		for link in rule.lhs.links:
+			if pddlVerbose: print 'LINK', str(link)
+			ret += ' ('+link.linkType + ' ?'+ nodeDict[link.a] +' ?'+ nodeDict[link.b] + ')'
 		return ret
 	@staticmethod
 	def typeChangesPDDLEffects(rule, nodeDict, pddlVerbose=False):
