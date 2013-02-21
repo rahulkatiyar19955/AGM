@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>AGM by ljmanso</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">AGM</h1>
+        <p class="header">Active Grammar-based Modeling</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/ljmanso/AGM/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/ljmanso/AGM/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/ljmanso/AGM">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/ljmanso">ljmanso</a></p>
+
+
+      </header>
+      <section>
+        <p>A graph-grammar is a powerful tool that can be used to describe how a robot can build and modify its world model. Such information can be used for several purposes:</p>
+
+<ul>
+<li>Generating plans to perceive the world</li>
+<li>Generating plans to modify the world</li>
+<li>Verifying world model modifications</li>
+</ul><p>AGM is a tool used to develop graph-grammars and compile them to PDDL, which is the de facto standard for AI planning. This is a necessary step since, in order to achieve our goals, we will be using AI planners.</p>
+
+<h2>Status</h2>
+
+<p>Still in development.</p>
+
+<h2>Download</h2>
+
+<p>Use the GIT repository: git://github.com/ljmanso/AGM.git, e.g.:</p>
+
+<p><code>git clone git://github.com/ljmanso/AGM.git</code></p>
+
+<h2>Usage</h2>
+
+<p>An example AGM file can be found in the following link: <a href="https://github.com/ljmanso/AGM/blob/master/examples/grammarGualzru.agm">grammarGualzru.pddl</a></p>
+
+<h3>Visual editor</h3>
+
+<p><code>python AGMEditor.py</code></p>
+
+<h3>Compiler</h3>
+
+<p><code>python agm2pddl &lt;inputFile.agm&gt; &lt;outputFile.pddl&gt;</code></p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
