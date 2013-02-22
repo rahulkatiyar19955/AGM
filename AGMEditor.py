@@ -146,6 +146,7 @@ class GraphDraw(QWidget):
 		h = float(h)
 		w2 = w/2
 		h2 = h/2
+		painter.fillRect(QRectF(0, 0, w, h), Qt.white)
 		painter.drawLine(QLine(0,   0, w-1,   0))
 		painter.drawLine(QLine(0, h-1, w-1, h-1))
 		painter.drawLine(QLine(0,   0, 0,   h-1))
@@ -158,26 +159,31 @@ class GraphDraw(QWidget):
 		painter.setFont(self.main.fontDialog.selectedFont())
 		for w in self.graph.nodes:
 			v = self.graph.nodes[w]
-			x1 = v.pos[0]
-			y1 = v.pos[1]
-			grid = 5
-			if x1 % grid > grid/2:
-				x1 = x1 + grid - (x1 % grid)
+			grid = 10
+			if v.pos[0] % grid > grid/2:
+				v.pos[0] = v.pos[0] + grid - (v.pos[0] % grid)
 			else:
-				x1 = x1 - (x1 % grid)
-			if x1 % grid > grid/2:
-				x1 = y1 + grid - (y1 % grid)
+				v.pos[0] = v.pos[0] - (v.pos[0] % grid)
+			if v.pos[0] % grid > grid/2:
+				v.pos[0] = v.pos[1] + grid - (v.pos[1] % grid)
 			else:
-				y1 = y1 - (y1 % grid)
+				v.pos[1] = v.pos[1] - (v.pos[1] % grid)
 			if True:#v.enabled:
 				painter.setBrush(QBrush())
 			else:
 				painter.setBrush(QColor(120, 120, 120, 255))
-			painter.drawEllipse(x1-(vertexDiameter/2), y1-(vertexDiameter/2), vertexDiameter, vertexDiameter)
-			rect = painter.boundingRect(QRectF(float(x1), float(y1), 400, 200), Qt.AlignLeft, v.name)
-			painter.drawText(QPointF(float(x1)-rect.width()/2, float(y1              )), v.name)
-			rect = painter.boundingRect(QRectF(float(x1), float(y1), 400, 200), Qt.AlignLeft, str(v.sType))
-			painter.drawText(QPointF(float(x1)-rect.width()/2, float(y1+rect.height())), str(v.sType))
+			# Draw node
+			painter.drawEllipse(v.pos[0]-(vertexDiameter/2), v.pos[1]-(vertexDiameter/2), vertexDiameter, vertexDiameter)
+			# Temp
+			align = Qt.AlignLeft
+			# Draw identifier
+			rect = painter.boundingRect(QRectF(float(v.pos[0]), float(v.pos[1]), 1, 1), align, str(v.name))
+			rect.translate(-rect.width()/2, -rect.height())
+			painter.drawText(rect, align, str(v.name))
+			# Draw type
+			rect = painter.boundingRect(QRectF(float(v.pos[0]), float(v.pos[1]), 1, 1), align, str(v.sType))
+			rect.translate(-rect.width()/2, 0)
+			painter.drawText(rect, align, str(v.sType))
 		for e in self.graph.links:
 			v1 = self.graph.nodes[e.a]
 			v2 = self.graph.nodes[e.b]
@@ -205,12 +211,21 @@ class GraphDraw(QWidget):
 				painter.setPen(pen)
 				painter.setBrush(QColor(255, 0, 0))
 			painter.drawLine(xinit, yinit, xend, yend)
-			rect = painter.boundingRect(QRectF(float(xinit), float(yinit), 400, 200), Qt.AlignLeft, str(v.sType))
-			if abs(math.cos(angleR))>abs(math.sin(angleR)):
-				painter.drawText(QPointF(float(0.55*xinit+0.45*xend), float(0.55*yinit+0.45*yend+rect.height())), str(e.linkType))
-			else:
-				painter.drawText(QPointF((0.55*xinit+0.45*xend)+rect.width(), float(0.55*yinit+0.45*yend)), str(e.linkType))
+
+			lpos = [(xinit + xend)/2, (yinit + yend) / 2]
+			align = Qt.AlignLeft
+			rect = painter.boundingRect(QRectF(float(lpos[0]), float(lpos[1]), 1, 1), align, str(e.linkType))
+			rect.translate(-rect.width()/2, -rect.height()/2)
+			
+			painter.setBrush(QColor(255, 255, 255))
+			#painter.setPen(QColor(255, 0, 0))
+			painter.fillRect(QRectF(rect.x()-4, rect.y()-4, rect.width()+8, rect.height()+8), Qt.black)
+			#painter.setPen(QColor(0, 255, 0))
+			painter.fillRect(QRectF(rect.x()-2, rect.y()-2, rect.width()+4, rect.height()+4), Qt.white)
+			#painter.setPen(QColor(0, 0, 255))
+			painter.drawText(rect, align, str(e.linkType))
 			vw = 0.5*vertexDiameter
+			painter.setBrush(QColor(0, 0, 0))
 			painter.drawPie(xend-vw/2, yend-vw/2, vw, vw, (-angleD-20)*16, 40*16)
 	def mousePressEvent(self, e):
 		global vertexDiameter
@@ -291,7 +306,7 @@ class Appearance(QWidget):
 		self.ui = Ui_Appearance()
 		self.ui.setupUi(self)
 		global vertexDiameter
-		self.ui.radius.setValue(vertexDiameter/2)
+		self.ui.radius.setValue(34)
 		global nodeThickness
 		self.ui.nodeThickness.setValue(nodeThickness)
 		global lineThickness
