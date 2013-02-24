@@ -43,7 +43,7 @@ modelHeight
 	}
 	=>
 	{
-		g:floor(413,145)
+		g:plane(413,145)
 		gualzru:robot(136,142)
 		gualzru->g(lookTowards)
 		gualzru->g(in)
@@ -54,13 +54,13 @@ lookPerpendicularFloor
 {
 	{
 		gualzru:robot(104,144)
-		floor:floor(327,147)
+		floor:plane(327,147)
 		gualzru->floor(lookTowards)
 	}
 	=>
 	{
 		gualzru:robot(110,149)
-		floor:floor(404,151)
+		floor:plane(404,151)
 		gualzru->floor(lookPerpendicular)
 	}
 }
@@ -69,13 +69,13 @@ modelYaw
 {
 	{
 		gualzru:robot(101,151)
-		floor:floor(386,153)
+		floor:plane(386,153)
 		gualzru->floor(lookPerpendicular)
 	}
 	=>
 	{
 		gualzru:robot(108,138)
-		floor:orientedFloor(392,137)
+		floor:oFloor(392,137)
 		gualzru->floor(lookPerpendicular)
 	}
 }
@@ -84,16 +84,16 @@ lookFirstWall
 {
 	{
 		gualzru:robot(121,75)
-		floor:orientedFloor(120,305)
+		floor:oFloor(120,305)
 		gualzru->floor(lookPerpendicular)
 	}
 	=>
 	{
-		floor:orientedFloor(70,318)
-		w4:notModeledWall(598,163)
-		w3:notModeledWall(434,189)
-		w2:notModeledWall(238,166)
-		w1:notModeledWall(72,184)
+		floor:oFloor(70,318)
+		w4:notWall(598,163)
+		w3:notWall(434,189)
+		w2:notWall(238,166)
+		w1:notWall(72,184)
 		gualzru:robot(68,74)
 		gualzru->w1(looks)
 		floor->w1(link)
@@ -106,7 +106,7 @@ lookFirstWall
 lookNextWall
 {
 	{
-		w2:notModeledWall(468,232)
+		w2:notWall(468,232)
 		w1:wall(150,236)
 		gualzru:robot(228,89)
 		gualzru->w1(looks)
@@ -114,7 +114,7 @@ lookNextWall
 	}
 	=>
 	{
-		w2:notModeledWall(485,222)
+		w2:notWall(485,222)
 		w1:wall(128,228)
 		gualzru:robot(206,84)
 		gualzru->w2(looks)
@@ -125,15 +125,15 @@ lookNextWall
 modelWall
 {
 	{
-		w2:notModeledWall(473,243)
-		w1:notModeledWall(253,244)
+		w2:notWall(473,243)
+		w1:notWall(253,244)
 		gualzru:robot(102,114)
 		gualzru->w1(looks)
 		w1->w2(link)
 	}
 	=>
 	{
-		w2:notModeledWall(521,227)
+		w2:notWall(521,227)
 		w1:wall(293,227)
 		gualzru:robot(155,106)
 		gualzru->w1(looks)
@@ -144,9 +144,9 @@ modelWall
 modelLastWall
 {
 	{
-		floor:orientedFloor(47,315)
+		floor:oFloor(47,315)
 		robot:robot(372,62)
-		w4:notModeledWall(560,165)
+		w4:notWall(560,165)
 		w3:wall(386,198)
 		w2:wall(207,157)
 		w1:wall(48,181)

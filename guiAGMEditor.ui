@@ -186,7 +186,7 @@
   </action>
   <action name="actionGraphmar">
    <property name="text">
-    <string>Graphmar</string>
+    <string>AGMEditor</string>
    </property>
   </action>
   <action name="actionAddRule">

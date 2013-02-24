@@ -184,9 +184,18 @@ class GraphDraw(QWidget):
 			rect = painter.boundingRect(QRectF(float(v.pos[0]), float(v.pos[1]), 1, 1), align, str(v.sType))
 			rect.translate(-rect.width()/2, 0)
 			painter.drawText(rect, align, str(v.sType))
-		for e in self.graph.links:
+		linkindex = 0
+		for linkindex in range(len(self.graph.links)):
+			e = self.graph.links[linkindex]
 			v1 = self.graph.nodes[e.a]
 			v2 = self.graph.nodes[e.b]
+			pos = 0
+			linkGroupCount = 0
+			for linkindex2 in range(len(self.graph.links)):
+				lp = self.graph.links[linkindex2]
+				if e.a == lp.a and e.b == lp.b:
+					if linkindex == linkindex2: pos = int(linkGroupCount)
+					linkGroupCount = linkGroupCount + 1
 			angleR = math.atan2(v1.pos[1]-v2.pos[1], v1.pos[0]-v2.pos[0])
 			angleD = angleR*(57.2957795)
 			xinc = v2.pos[0] - v1.pos[0]
@@ -212,20 +221,24 @@ class GraphDraw(QWidget):
 				painter.setBrush(QColor(255, 0, 0))
 			painter.drawLine(xinit, yinit, xend, yend)
 
-			lpos = [(xinit + xend)/2, (yinit + yend) / 2]
+
+			vw2 = 0.125*vertexDiameter
+			lpos1 = [(xinit + xend)/2, (yinit + yend) / 2]
+			langle = math.atan2(yend-yinit, xend-xinit)
+			lpos  = [lpos1[0]-vw2*math.cos(langle), lpos1[1]-vw2*math.sin(langle)]
 			align = Qt.AlignLeft
 			rect = painter.boundingRect(QRectF(float(lpos[0]), float(lpos[1]), 1, 1), align, str(e.linkType))
-			rect.translate(-rect.width()/2, -rect.height()/2)
+			rect.translate(-rect.width()/2, -rect.height()/2) # Right now it will be centered on the link's center
+			linkHeight = rect.height()+6
+			linkGroupBase = (-linkGroupCount+1)*linkHeight/2
+			rect.translate(0, linkHeight*pos + linkGroupBase) # Right now it will be centered on the link's center
 			
 			painter.setBrush(QColor(255, 255, 255))
-			#painter.setPen(QColor(255, 0, 0))
-			painter.fillRect(QRectF(rect.x()-4, rect.y()-4, rect.width()+8, rect.height()+8), Qt.black)
-			#painter.setPen(QColor(0, 255, 0))
-			painter.fillRect(QRectF(rect.x()-2, rect.y()-2, rect.width()+4, rect.height()+4), Qt.white)
-			#painter.setPen(QColor(0, 0, 255))
+			painter.fillRect(QRectF(rect.x()-4, rect.y()-3, rect.width()+8, rect.height()+6), Qt.black)
+			painter.fillRect(QRectF(rect.x()-2, rect.y()-1.5, rect.width()+4, rect.height()+3), Qt.white)
 			painter.drawText(rect, align, str(e.linkType))
-			vw = 0.5*vertexDiameter
 			painter.setBrush(QColor(0, 0, 0))
+			vw = 0.5*vertexDiameter
 			painter.drawPie(xend-vw/2, yend-vw/2, vw, vw, (-angleD-20)*16, 40*16)
 	def mousePressEvent(self, e):
 		global vertexDiameter
@@ -382,6 +395,10 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionOpen,              SIGNAL("triggered(bool)"),        self.open)
 		self.connect(self.ui.actionQuit,              SIGNAL("triggered(bool)"),        self.close)
 		self.timer.start(20)
+		self.ui.toolsList.setCurrentRow(4)
+		self.selectTool(4)
+		self.ui.toolsList.setCurrentRow(4)
+		self.selectTool(4)
 	def draw(self):
 		self.lhsPainter.update()
 		self.rhsPainter.update()
