@@ -312,7 +312,6 @@ class GraphDraw(QWidget):
 		if self.main.tool == 'Node - Move':
 			self.graph.moveNode(self.pressName, e.x(), e.y(), vertexDiameter)
 
-
 class Appearance(QWidget):
 	def __init__(self):
 		QWidget.__init__(self)
@@ -394,11 +393,14 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionSave,              SIGNAL("triggered(bool)"),        self.save)
 		self.connect(self.ui.actionOpen,              SIGNAL("triggered(bool)"),        self.open)
 		self.connect(self.ui.actionQuit,              SIGNAL("triggered(bool)"),        self.close)
+		self.connect(self.ui.actionGraphmar,          SIGNAL("triggered(bool)"),        self.about)
 		self.timer.start(20)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
+	def about(self):
+		QMessageBox.information(self, "About", "Active Grammar-based Modeling:\nhttps://github.com/ljmanso/AGM/wiki")
 	def draw(self):
 		self.lhsPainter.update()
 		self.rhsPainter.update()

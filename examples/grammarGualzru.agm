@@ -75,7 +75,7 @@ modelYaw
 	=>
 	{
 		gualzru:robot(108,138)
-		floor:oFloor(392,137)
+		floor:floor(392,137)
 		gualzru->floor(lookPerpendicular)
 	}
 }
@@ -84,12 +84,12 @@ lookFirstWall
 {
 	{
 		gualzru:robot(121,75)
-		floor:oFloor(120,305)
+		floor:floor(120,305)
 		gualzru->floor(lookPerpendicular)
 	}
 	=>
 	{
-		floor:oFloor(70,318)
+		floor:floor(70,318)
 		w4:notWall(598,163)
 		w3:notWall(434,189)
 		w2:notWall(238,166)
@@ -144,7 +144,7 @@ modelWall
 modelLastWall
 {
 	{
-		floor:oFloor(47,315)
+		floor:floor(47,315)
 		robot:robot(372,62)
 		w4:notWall(560,165)
 		w3:wall(386,198)
