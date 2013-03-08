@@ -1,0 +1,5 @@
+(modelGravity u1 u0 s)
+(lookFloor s u0 u1)
+(modelHeight s u0 u1)
+(lookPerpendicularFloor u0 s u1)
+(modelYaw u0 s u1)
