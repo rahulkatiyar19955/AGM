@@ -3,3 +3,4 @@
 (modelHeight s u0 u1)
 (lookPerpendicularFloor u0 s u1)
 (modelYaw u0 s u1)
+(lookFirstWall u0 s u5 u4 u3 u2 u1)

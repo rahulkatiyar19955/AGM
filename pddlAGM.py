@@ -63,7 +63,7 @@ class AGMRulePDDL:
 		stackSize = max(len(forgetList), len(newList))
 		for n in range(stackSize):
 			stack.append('stack'+str(n))
-		print 'Stack', stackSize, stack
+		#print 'Stack', stackSize, stack
 		nodeDict = dict()
 		for i in range(len(forgetList)):
 			nodeDict[forgetList[i]] = stack[-1-i]
@@ -77,18 +77,18 @@ class AGMRulePDDL:
 		return stack, reused, nodeDict
 	@staticmethod
 	def toPDDL(rule, pddlVerbose=False):
-		print '-----------------------------'
-		print rule.name
+		#print '-----------------------------'
+		#print rule.name
 		newList = rule.newNodesList()
-		print 'New:   ', newList
+		#print 'New:   ', newList
 		forgetList = rule.forgetNodesList()
-		print 'Forget:', forgetList
+		#print 'Forget:', forgetList
 		stack, reused, nodeDict = AGMRulePDDL.computePDDLMemoryStackAndDictionary(rule, newList, forgetList)
-		print 'Stack:    ', stack
-		print 'Reused:    ', stack
-		print 'Node dict:', nodeDict
+		#print 'Stack:    ', stack
+		#print 'Reused:    ', stack
+		#print 'Node dict:', nodeDict
 
-		if pddlVerbose: print '--((', rule.name, '))--'
+		#if pddlVerbose: print '--((', rule.name, '))--'
 		string  = '\t(:action ' + rule.name + '\n'
 		string += '\t\t:parameters ('
 		for n in rule.stayingNodeList()+stack+reused:
@@ -97,7 +97,7 @@ class AGMRulePDDL:
 		string += '\t\t:precondition (and'
 		string += AGMRulePDDL.existingNodesPDDLTypes(rule, nodeDict) # TYPE preconditions
 		string += AGMRulePDDL.stackPDDLPreconditions(rule, stack, forgetList, newList, nodeDict) # Include precondition for nodes to be created
-		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule.stayingNodeList()+stack+reused) # Avoid using the same node more than once "!="
+		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule.stayingNodeList()+reused) # Avoid using the same node more than once "!=". NOT INCLUDING THOSE IN THE STACK
 		string += AGMRulePDDL.linkPatternsPDDLPreconditions(rule, nodeDict)
 		string += ' )\n'
 
@@ -125,13 +125,13 @@ class AGMRulePDDL:
 		ret = ''
 		stackCopy = stack[:]
 		first = stackCopy.pop()
-		print 'Prime', first
-		if pddlVerbose: print 'PRECONDITIONS firstunknown in newList', first
+		#print 'Prime', first
+		#if pddlVerbose: print 'PRECONDITIONS firstunknown in newList', first
 		ret += ' (firstunknown' + ' ?' + first + ')'
 		last = first
 		while len(stackCopy)>0:
 			top = stackCopy.pop()
-			if pddlVerbose: print 'PRECONDITIONS unknownorder', last, top
+			#if pddlVerbose: print 'PRECONDITIONS unknownorder', last, top
 			ret += ' (unknownorder ?' + last + ' ?' + top + ')'
 			last = top
 		return ret
@@ -153,17 +153,17 @@ class AGMRulePDDL:
 		forgetList = translateList(forgetList_, nodeDict)
 		newList = translateList(newList_, nodeDict)
 		last = ''
-		print '------------------------------------------------------------------------'
-		print 'Forget list', forgetList
-		print 'New list   ', newList
-		print 'Stack      ', stack
-		print 'Reused     ', reused
-		print '--- ignoring reused...  ---'
+		#print '------------------------------------------------------------------------'
+		#print 'Forget list', forgetList
+		#print 'New list   ', newList
+		#print 'Stack      ', stack
+		#print 'Reused     ', reused
+		#print '--- ignoring reused...  ---'
 		forgetList2 = [x for x in forgetList if not x in newList]
-		print 'Forget list 2', forgetList2
+		#print 'Forget list 2', forgetList2
 		newList2 = [x for x in newList if not x in forgetList]
-		print 'New list 2   ', newList2
-		print '------------------------------------------------------------------------'
+		#print 'New list 2   ', newList2
+		#print '------------------------------------------------------------------------'
 		# Same old, same old
 		if len(forgetList2)==0 and len(newList2)==0:
 			pass
@@ -225,19 +225,19 @@ class AGMRulePDDL:
 		createLinks =  posteriorLinkSet.difference(initialLinkSet)
 		#print 'create', createLinks
 		for link in createLinks:
-			print 'NEWLINK', str(link)
+			#print 'NEWLINK', str(link)
 			ret += ' ('+link.linkType + ' ?'+ link.a +' ?'+ link.b + ')'
 		deleteLinks = initialLinkSet.difference(posteriorLinkSet)
 		#print 'delete', deleteLinks
 		for link in deleteLinks:
-			print 'REMOVELINK', str(link)
+			#print 'REMOVELINK', str(link)
 			ret += ' (not ('+link.linkType + ' ?'+ link.a +' ?'+ link.b + '))'
 		return ret
 	@staticmethod
 	def linkPatternsPDDLPreconditions(rule, nodeDict, pddlVerbose=False):
 		ret = ''
 		for link in rule.lhs.links:
-			if pddlVerbose: print 'LINK', str(link)
+			#if pddlVerbose: print 'LINK', str(link)
 			ret += ' ('+link.linkType + ' ?'+ nodeDict[link.a] +' ?'+ nodeDict[link.b] + ')'
 		return ret
 	@staticmethod
@@ -248,7 +248,7 @@ class AGMRulePDDL:
 			typeL = rule.lhs.nodes[n].sType
 			typeR = rule.rhs.nodes[n].sType
 			if typeL != typeR:
-				if pddlVerbose: print 'EFFECTS modify', n
+				#if pddlVerbose: print 'EFFECTS modify', n
 				ret += ' (not(IS'+typeL + ' ?' + nodeDict[n] +')) (IS'+typeR + ' ?' + nodeDict[n] +')'
 		return ret
 
