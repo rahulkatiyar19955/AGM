@@ -394,11 +394,33 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionOpen,              SIGNAL("triggered(bool)"),        self.open)
 		self.connect(self.ui.actionQuit,              SIGNAL("triggered(bool)"),        self.close)
 		self.connect(self.ui.actionGraphmar,          SIGNAL("triggered(bool)"),        self.about)
+		self.connect(self.ui.tabWidget,               SIGNAL("currentChanged(int)"),    self.tabChanged)
+		self.connect(self.ui.addBehaviorButton,       SIGNAL("clicked()"),              self.newBehavior)
+		self.connect(self.ui.tabWidget,               SIGNAL("currentChanged(int)"),    self.tabChanged)
 		self.timer.start(20)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
+		self.tabChanged(self.ui.tabWidget.currentIndex())
+	def newBehavior(self):
+		self.ui.behaviorListWidget.setAlternatingRowColors(True)
+		#delegate = SpinBoxDelegate()
+		#self.ui.behaviorListWidget.setItemDelegate(delegate)
+		item1 = QListWidgetItem(self.ui.behaviorListWidget)
+		item1.setText("new behavior")
+		item1.setFlags(item1.flags() | Qt.ItemIsEditable)
+	def tabChanged(self, index):
+		if index == 0:
+			self.ui.productionsWidget.show()
+			self.ui.toolsWidget.show()
+			self.ui.behaviorsWidget.hide()
+		elif index == 1:
+			self.ui.productionsWidget.show()
+			self.ui.toolsWidget.hide()
+			self.ui.behaviorsWidget.show()
+		else:
+			print 'Internal error: AGMEditor::tabChanged: Unknown tab index'
 	def about(self):
 		QMessageBox.information(self, "About", "Active Grammar-based Modeling:\nhttps://github.com/ljmanso/AGM/wiki")
 	def draw(self):
