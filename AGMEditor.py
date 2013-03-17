@@ -414,11 +414,21 @@ class AGMEditor(QMainWindow):
 		if index == 0:
 			self.ui.productionsWidget.show()
 			self.ui.toolsWidget.show()
-			self.ui.behaviorsWidget.hide()
+			self.ui.behaviorsWidget.show()
+			self.ui.agentsDock.hide()
+			self.ui.agentConfigurationsDock.hide()
 		elif index == 1:
-			self.ui.productionsWidget.show()
+			self.ui.productionsWidget.hide()
 			self.ui.toolsWidget.hide()
 			self.ui.behaviorsWidget.show()
+			self.ui.agentsDock.show()
+			self.ui.agentConfigurationsDock.show()
+		elif index == 2:
+			self.ui.productionsWidget.hide()
+			self.ui.toolsWidget.hide()
+			self.ui.behaviorsWidget.hide()
+			self.ui.agentsDock.hide()
+			self.ui.agentConfigurationsDock.hide()
 		else:
 			print 'Internal error: AGMEditor::tabChanged: Unknown tab index'
 	def about(self):
