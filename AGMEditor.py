@@ -379,30 +379,46 @@ class AGMEditor(QMainWindow):
 		self.timer = QTimer()
 		self.tool = ''
 		self.appearance = Appearance()
-		self.connect(self.timer,                      SIGNAL('timeout()'),              self.draw)
-		self.connect(self.ui.toolsList,               SIGNAL('currentRowChanged(int)'), self.selectTool)
-		self.connect(self.ui.rulesList,               SIGNAL('currentRowChanged(int)'), self.changeRule)
-		self.connect(self.ui.actionChangeFont,        SIGNAL("triggered(bool)"),        self.changeFont)
-		self.connect(self.ui.actionChangeAppearance,  SIGNAL("triggered(bool)"),        self.changeAppearance)
-		self.connect(self.ui.actionAddRule,           SIGNAL("triggered(bool)"),        self.addRule)
-		self.connect(self.ui.actionRemoveCurrentRule, SIGNAL("triggered(bool)"),        self.removeCurrentRule)
-		self.connect(self.ui.actionRenameCurrentRule, SIGNAL("triggered(bool)"),        self.renameCurrentRule)
-		self.connect(self.ui.actionExport,            SIGNAL("triggered(bool)"),        self.exportRule)
-		self.connect(self.ui.actionGenerateCode,      SIGNAL("triggered(bool)"),        self.generateCode)
-		self.connect(self.ui.actionExportAllRules,    SIGNAL("triggered(bool)"),        self.exportAll)
-		self.connect(self.ui.actionSave,              SIGNAL("triggered(bool)"),        self.save)
-		self.connect(self.ui.actionOpen,              SIGNAL("triggered(bool)"),        self.open)
-		self.connect(self.ui.actionQuit,              SIGNAL("triggered(bool)"),        self.close)
-		self.connect(self.ui.actionGraphmar,          SIGNAL("triggered(bool)"),        self.about)
-		self.connect(self.ui.tabWidget,               SIGNAL("currentChanged(int)"),    self.tabChanged)
-		self.connect(self.ui.addBehaviorButton,       SIGNAL("clicked()"),              self.newBehavior)
-		self.connect(self.ui.tabWidget,               SIGNAL("currentChanged(int)"),    self.tabChanged)
+		self.connect(self.timer,                           SIGNAL('timeout()'),              self.draw)
+		self.connect(self.ui.toolsList,                    SIGNAL('currentRowChanged(int)'), self.selectTool)
+		self.connect(self.ui.rulesList,                    SIGNAL('currentRowChanged(int)'), self.changeRule)
+		self.connect(self.ui.actionChangeFont,             SIGNAL("triggered(bool)"),        self.changeFont)
+		self.connect(self.ui.actionChangeAppearance,       SIGNAL("triggered(bool)"),        self.changeAppearance)
+		self.connect(self.ui.actionAddRule,                SIGNAL("triggered(bool)"),        self.addRule)
+		self.connect(self.ui.actionRemoveCurrentRule,      SIGNAL("triggered(bool)"),        self.removeCurrentRule)
+		self.connect(self.ui.actionRenameCurrentRule,      SIGNAL("triggered(bool)"),        self.renameCurrentRule)
+		self.connect(self.ui.actionExport,                 SIGNAL("triggered(bool)"),        self.exportRule)
+		self.connect(self.ui.actionGenerateCode,           SIGNAL("triggered(bool)"),        self.generateCode)
+		self.connect(self.ui.actionExportAllRules,         SIGNAL("triggered(bool)"),        self.exportAll)
+		self.connect(self.ui.actionSave,                   SIGNAL("triggered(bool)"),        self.save)
+		self.connect(self.ui.actionOpen,                   SIGNAL("triggered(bool)"),        self.open)
+		self.connect(self.ui.actionQuit,                   SIGNAL("triggered(bool)"),        self.close)
+		self.connect(self.ui.actionGraphmar,               SIGNAL("triggered(bool)"),        self.about)
+		self.connect(self.ui.tabWidget,                    SIGNAL("currentChanged(int)"),    self.tabChanged)
+		#self.connect(self.ui.addBehaviorButton,           SIGNAL("clicked()"),              self.newBehavior)
+		self.connect(self.ui.tabWidget,                    SIGNAL("currentChanged(int)"),    self.tabChanged)
+		self.connect(self.ui.actionNew_agent,              SIGNAL("triggered(bool)"),        self.newAgent)
+		self.connect(self.ui.actionRemove_current_agent,   SIGNAL("triggered(bool)"),        self.removeCurrentAgent)
+		self.connect(self.ui.actionNew_configuration,      SIGNAL("triggered(bool)"),        self.newConfig)
+		self.connect(self.ui.actionRemove_current_config,  SIGNAL("triggered(bool)"),        self.removeCurrentConfig)
 		self.timer.start(20)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
 		self.tabChanged(self.ui.tabWidget.currentIndex())
+	def newAgent(self, val):
+		print 'newAgent', val
+		pass
+	def removeCurrentAgent(self, val):
+		print 'remove agent', val
+		pass
+	def newConfig(self, val):
+		print 'newConfig', val
+		pass
+	def removeCurrentConfig(self, val):
+		print 'remove config', val
+		pass
 	def newBehavior(self):
 		self.ui.behaviorListWidget.setAlternatingRowColors(True)
 		#delegate = SpinBoxDelegate()
@@ -417,18 +433,16 @@ class AGMEditor(QMainWindow):
 			self.ui.behaviorsWidget.show()
 			self.ui.agentsDock.hide()
 			self.ui.agentConfigurationsDock.hide()
+			self.ui.menuRules.setEnabled(True)
+			self.ui.menuBehaviors.setEnabled(False)
 		elif index == 1:
 			self.ui.productionsWidget.hide()
 			self.ui.toolsWidget.hide()
 			self.ui.behaviorsWidget.show()
 			self.ui.agentsDock.show()
 			self.ui.agentConfigurationsDock.show()
-		elif index == 2:
-			self.ui.productionsWidget.hide()
-			self.ui.toolsWidget.hide()
-			self.ui.behaviorsWidget.hide()
-			self.ui.agentsDock.hide()
-			self.ui.agentConfigurationsDock.hide()
+			self.ui.menuRules.setEnabled(False)
+			self.ui.menuBehaviors.setEnabled(True)
 		else:
 			print 'Internal error: AGMEditor::tabChanged: Unknown tab index'
 	def about(self):

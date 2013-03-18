@@ -87,7 +87,7 @@
      <x>0</x>
      <y>0</y>
      <width>1057</width>
-     <height>23</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -131,6 +131,10 @@
     <property name="title">
      <string>Behaviors</string>
     </property>
+    <addaction name="actionNew_agent"/>
+    <addaction name="actionRemove_current_agent"/>
+    <addaction name="actionNew_configuration"/>
+    <addaction name="actionRemove_current_config"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -298,6 +302,26 @@
   <action name="actionRenameCurrentRule">
    <property name="text">
     <string>Rename current rule</string>
+   </property>
+  </action>
+  <action name="actionNew_agent">
+   <property name="text">
+    <string>New agent</string>
+   </property>
+  </action>
+  <action name="actionRemove_current_agent">
+   <property name="text">
+    <string>Remove current agent</string>
+   </property>
+  </action>
+  <action name="actionNew_configuration">
+   <property name="text">
+    <string>New configuration</string>
+   </property>
+  </action>
+  <action name="actionRemove_current_config">
+   <property name="text">
+    <string>Remove current configuration</string>
    </property>
   </action>
  </widget>

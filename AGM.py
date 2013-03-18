@@ -106,7 +106,7 @@ class AGMGraph(object):
 		if found:
 			del self.nodes[name]
 		else:
-			print 'no ndoe'
+			pass#print 'no ndoe'
 	def moveNode(self, name, x, y, diameter):
 		name, found = self.getNameRelaxed(x, y, diameter)
 		if found:
