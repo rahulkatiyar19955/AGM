@@ -1,0 +1,17 @@
+spacePattern=3
+lineThickness=2
+name=simple
+vertexDiameter=68
+shortPattern=1
+nodeThickness=2
+longPattern=3
+
+new rule
+{
+	{
+	}
+	=>
+	{
+	}
+}
+
