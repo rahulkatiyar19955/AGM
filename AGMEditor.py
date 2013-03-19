@@ -379,60 +379,129 @@ class AGMEditor(QMainWindow):
 		self.timer = QTimer()
 		self.tool = ''
 		self.appearance = Appearance()
-		self.connect(self.timer,                           SIGNAL('timeout()'),              self.draw)
-		self.connect(self.ui.toolsList,                    SIGNAL('currentRowChanged(int)'), self.selectTool)
-		self.connect(self.ui.rulesList,                    SIGNAL('currentRowChanged(int)'), self.changeRule)
-		self.connect(self.ui.actionChangeFont,             SIGNAL("triggered(bool)"),        self.changeFont)
-		self.connect(self.ui.actionChangeAppearance,       SIGNAL("triggered(bool)"),        self.changeAppearance)
-		self.connect(self.ui.actionAddRule,                SIGNAL("triggered(bool)"),        self.addRule)
-		self.connect(self.ui.actionRemoveCurrentRule,      SIGNAL("triggered(bool)"),        self.removeCurrentRule)
-		self.connect(self.ui.actionRenameCurrentRule,      SIGNAL("triggered(bool)"),        self.renameCurrentRule)
-		self.connect(self.ui.actionExport,                 SIGNAL("triggered(bool)"),        self.exportRule)
-		self.connect(self.ui.actionGenerateCode,           SIGNAL("triggered(bool)"),        self.generateCode)
-		self.connect(self.ui.actionExportAllRules,         SIGNAL("triggered(bool)"),        self.exportAll)
-		self.connect(self.ui.actionSave,                   SIGNAL("triggered(bool)"),        self.save)
-		self.connect(self.ui.actionOpen,                   SIGNAL("triggered(bool)"),        self.open)
-		self.connect(self.ui.actionQuit,                   SIGNAL("triggered(bool)"),        self.close)
-		self.connect(self.ui.actionGraphmar,               SIGNAL("triggered(bool)"),        self.about)
-		self.connect(self.ui.tabWidget,                    SIGNAL("currentChanged(int)"),    self.tabChanged)
-		#self.connect(self.ui.addBehaviorButton,           SIGNAL("clicked()"),              self.newBehavior)
-		self.connect(self.ui.tabWidget,                    SIGNAL("currentChanged(int)"),    self.tabChanged)
-		self.connect(self.ui.actionNew_agent,              SIGNAL("triggered(bool)"),        self.newAgent)
-		self.connect(self.ui.actionRemove_current_agent,   SIGNAL("triggered(bool)"),        self.removeCurrentAgent)
-		self.connect(self.ui.actionNew_configuration,      SIGNAL("triggered(bool)"),        self.newConfig)
-		self.connect(self.ui.actionRemove_current_config,  SIGNAL("triggered(bool)"),        self.removeCurrentConfig)
+		self.connect(self.timer,                               SIGNAL('timeout()'),                                            self.draw)
+		self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),                               self.selectTool)
+		self.connect(self.ui.rulesList,                        SIGNAL('currentRowChanged(int)'),                               self.changeRule)
+		self.connect(self.ui.actionChangeFont,                 SIGNAL("triggered(bool)"),                                      self.changeFont)
+		self.connect(self.ui.actionChangeAppearance,           SIGNAL("triggered(bool)"),                                      self.changeAppearance)
+		self.connect(self.ui.actionAddRule,                    SIGNAL("triggered(bool)"),                                      self.addRule)
+		self.connect(self.ui.actionRemoveCurrentRule,          SIGNAL("triggered(bool)"),                                      self.removeCurrentRule)
+		self.connect(self.ui.actionRenameCurrentRule,          SIGNAL("triggered(bool)"),                                      self.renameCurrentRule)
+		self.connect(self.ui.actionExport,                     SIGNAL("triggered(bool)"),                                      self.exportRule)
+		self.connect(self.ui.actionGenerateCode,               SIGNAL("triggered(bool)"),                                      self.generateCode)
+		self.connect(self.ui.actionExportAllRules,             SIGNAL("triggered(bool)"),                                      self.exportAll)
+		self.connect(self.ui.actionSave,                       SIGNAL("triggered(bool)"),                                      self.save)
+		self.connect(self.ui.actionOpen,                       SIGNAL("triggered(bool)"),                                      self.open)
+		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),                                      self.close)
+		self.connect(self.ui.actionGraphmar,                   SIGNAL("triggered(bool)"),                                      self.about)
+		self.connect(self.ui.tabWidget,                        SIGNAL("currentChanged(int)"),                                  self.tabChanged)
+		self.connect(self.ui.tabWidget,                        SIGNAL("currentChanged(int)"),                                  self.tabChanged)
+		self.connect(self.ui.actionNew_agent,                  SIGNAL("triggered(bool)"),                                      self.newAgent)
+		self.connect(self.ui.actionRemove_current_agent,       SIGNAL("triggered(bool)"),                                      self.removeCurrentAgent)
+		self.connect(self.ui.actionNew_configuration,          SIGNAL("triggered(bool)"),                                      self.newConfig)
+		self.connect(self.ui.actionRemove_current_config,      SIGNAL("triggered(bool)"),                                      self.removeCurrentConfig)
+		self.connect(self.ui.actionNew_agent_state,            SIGNAL("triggered(bool)"),                                      self.newAgentState)
+		self.connect(self.ui.actionRemove_current_agent_state, SIGNAL("triggered(bool)"),                                      self.removeCurrentAgentState)
+
+
+
+		self.connect(self.ui.configurationListWidget, SIGNAL("currentTextChanged(QString)"), self.nameChanged)
+		self.ui.configurationListWidget.clicked.connect(self.redrawConfigurationTable)
+		self.ui.agentListWidget.clicked.connect(self.redrawConfigurationTable)
+		self.ui.agentStatesListWidget.clicked.connect(self.redrawConfigurationTable)
+		
+
 		self.timer.start(20)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
 		self.tabChanged(self.ui.tabWidget.currentIndex())
+
+	def nameChanged(self, name=""):
+		print 'Changed!', name
+		
+		for c_i in range(len(self.agmData.agm.configurations)):
+			c = self.agmData.agm.configurations[c_i]
+			c.name = self.ui.configurationListWidget.model().index(c_i,0).data(Qt.DisplayRole).toString()
+		for a_i in range(len(self.agmData.agm.agents)):
+			a = self.agmData.agm.agents[a_i]
+			a.name = self.ui.agentListWidget.model().index(a_i,0).data(Qt.DisplayRole).toString()
+			if a_i == self.ui.agentListWidget.currentIndex():
+				for s_i in range(len(a.states)):
+					s = a.states
+					s.name = self.ui.agentStatesListWidget.model().index(s_i,0).data(Qt.DisplayRole).toString()
+
+	def redrawConfigurationTable(self, b=None):
+		self.nameChanged()
+		print 'Configurations'
+		for c in self.agmData.agm.configurations:
+			print c.name
+		print 'Agents'
+		for a in self.agmData.agm.agents:
+			print a.name
+			for s in a.states:
+				print '  ', s
+
+		self.ui.tableWidget.clear()
+		self.ui.tableWidget.setRowCount(len(self.agmData.agm.agents))
+		self.ui.tableWidget.setColumnCount(2)
+		text = self.ui.configurationListWidget.currentItem().text()
+		for config in self.agmData.agm.configurations:
+			if text == config.name:
+				for i in range(len(self.agmData.agm.agents)):
+					agent = self.agmData.agm.agents[i]
+					self.ui.tableWidget.setItem(i, 0, QTableWidgetItem(QString(agent.name)))
+					combo = QComboBox()
+					for s in agent.states:
+						combo.addItem(s.name)
+					self.ui.tableWidget.setCellWidget(i,1,combo)
+
+	def newConfig(self, val):
+		self.agmData.agm.addConfiguration('new configuration')
+		self.ui.configurationListWidget.setAlternatingRowColors(True)
+		item1 = QListWidgetItem(self.ui.configurationListWidget)
+		item1.setText("new configuration")
+		item1.setFlags(item1.flags() | Qt.ItemIsEditable)
+		self.ui.configurationListWidget.setCurrentRow(self.ui.configurationListWidget.count()-1)
+		self.redrawConfigurationTable()
+
 	def newAgent(self, val):
-		print 'newAgent', val
-		pass
+		self.agmData.agm.addAgent('new agent')
+		self.ui.agentListWidget.setAlternatingRowColors(True)
+		item1 = QListWidgetItem(self.ui.agentListWidget)
+		item1.setText("new agent")
+		item1.setFlags(item1.flags() | Qt.ItemIsEditable)
+		self.ui.agentListWidget.setCurrentRow(self.ui.agentListWidget.count()-1)
+		self.redrawConfigurationTable()
+
+	def newAgentState(self, val):
+		self.agmData.agm.addAgentState(str(self.ui.agentListWidget.currentItem().text()), 'new agent state')
+		self.ui.agentStatesListWidget.setAlternatingRowColors(True)
+		item1 = QListWidgetItem(self.ui.agentStatesListWidget)
+		item1.setText("new agent state")
+		item1.setFlags(item1.flags() | Qt.ItemIsEditable)
+		self.ui.agentStatesListWidget.setCurrentRow(self.ui.agentStatesListWidget.count()-1)
+		self.redrawConfigurationTable()
+
+	def removeCurrentAgentState(self, val):
+		print 'remove agent configuration', val
+		self.redrawConfigurationTable()
 	def removeCurrentAgent(self, val):
 		print 'remove agent', val
-		pass
-	def newConfig(self, val):
-		print 'newConfig', val
-		pass
+		self.redrawConfigurationTable()
 	def removeCurrentConfig(self, val):
 		print 'remove config', val
-		pass
-	def newBehavior(self):
-		self.ui.behaviorListWidget.setAlternatingRowColors(True)
-		#delegate = SpinBoxDelegate()
-		#self.ui.behaviorListWidget.setItemDelegate(delegate)
-		item1 = QListWidgetItem(self.ui.behaviorListWidget)
-		item1.setText("new behavior")
-		item1.setFlags(item1.flags() | Qt.ItemIsEditable)
+		self.redrawConfigurationTable()
+
+
 	def tabChanged(self, index):
 		if index == 0:
 			self.ui.productionsWidget.show()
 			self.ui.toolsWidget.show()
 			self.ui.behaviorsWidget.show()
 			self.ui.agentsDock.hide()
-			self.ui.agentConfigurationsDock.hide()
+			self.ui.agentStatesDock.hide()
 			self.ui.menuRules.setEnabled(True)
 			self.ui.menuBehaviors.setEnabled(False)
 		elif index == 1:
@@ -440,7 +509,7 @@ class AGMEditor(QMainWindow):
 			self.ui.toolsWidget.hide()
 			self.ui.behaviorsWidget.show()
 			self.ui.agentsDock.show()
-			self.ui.agentConfigurationsDock.show()
+			self.ui.agentStatesDock.show()
 			self.ui.menuRules.setEnabled(False)
 			self.ui.menuBehaviors.setEnabled(True)
 		else:

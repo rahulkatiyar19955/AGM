@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1057</width>
-    <height>725</height>
+    <width>843</width>
+    <height>549</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -86,8 +86,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1057</width>
-     <height>19</height>
+     <width>843</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -131,10 +131,12 @@
     <property name="title">
      <string>Behaviors</string>
     </property>
-    <addaction name="actionNew_agent"/>
-    <addaction name="actionRemove_current_agent"/>
     <addaction name="actionNew_configuration"/>
     <addaction name="actionRemove_current_config"/>
+    <addaction name="actionNew_agent"/>
+    <addaction name="actionRemove_current_agent"/>
+    <addaction name="actionNew_agent_state"/>
+    <addaction name="actionRemove_current_agent_state"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -196,7 +198,7 @@
     <set>Qt::BottomDockWidgetArea</set>
    </property>
    <property name="windowTitle">
-    <string>      Behavior name</string>
+    <string>      Configuration name</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -204,7 +206,7 @@
    <widget class="QWidget" name="dockWidgetContents_2">
     <layout class="QVBoxLayout" name="verticalLayout_5">
      <item>
-      <widget class="QListWidget" name="behaviorListWidget"/>
+      <widget class="QListWidget" name="configurationListWidget"/>
      </item>
     </layout>
    </widget>
@@ -224,9 +226,9 @@
     </layout>
    </widget>
   </widget>
-  <widget class="QDockWidget" name="agentConfigurationsDock">
+  <widget class="QDockWidget" name="agentStatesDock">
    <property name="windowTitle">
-    <string>      Agent configurations</string>
+    <string>      Agent states</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>8</number>
@@ -234,7 +236,7 @@
    <widget class="QWidget" name="dockWidgetContents_5">
     <layout class="QVBoxLayout" name="verticalLayout_8">
      <item>
-      <widget class="QListWidget" name="configurationListWidget"/>
+      <widget class="QListWidget" name="agentStatesListWidget"/>
      </item>
     </layout>
    </widget>
@@ -322,6 +324,16 @@
   <action name="actionRemove_current_config">
    <property name="text">
     <string>Remove current configuration</string>
+   </property>
+  </action>
+  <action name="actionNew_agent_state">
+   <property name="text">
+    <string>New agent state</string>
+   </property>
+  </action>
+  <action name="actionRemove_current_agent_state">
+   <property name="text">
+    <string>Remove current agent state</string>
    </property>
   </action>
  </widget>

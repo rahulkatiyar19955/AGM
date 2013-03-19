@@ -149,6 +149,7 @@ class AGMRule(object):
 		self.name = name
 		self.lhs = lhs
 		self.rhs = rhs
+		self.configuration = ''
 		if lhs == None or rhs == None:
 			self.lhs = AGMGraph(self, dict(), [])
 			self.rhs = AGMGraph(self, dict(), [])
@@ -179,13 +180,42 @@ class AGMRule(object):
 	def linkTypes(self):
 		return self.lhs.linkTypes().union(self.rhs.linkTypes())
 
+class AGMAgent(object):
+	def __init__(self, name):
+		self.name = name
+		self.index = -1
+		self.states = []
+class AGMConfiguration(object):
+	def __init__(self, name):
+		self.name = name
+		self.index = -1
+class AGMAgentState(object):
+	def __init__(self, name):
+		self.name = name
+		self.index = -1
 
 class AGM(object):
 	def __init__(self):
 		object.__init__(self)
 		self.rules = []
+		self.agents = []
+		self.configurations = []
 	def addRule(self, rule):
 		self.rules.append(rule)
+	def addConfiguration(self, conf):
+		c = AGMConfiguration(conf)
+		c.index = len(self.configurations)
+		self.configurations.append(c)
+	def addAgent(self, agent):
+		a = AGMAgent(agent)
+		a.index = len(self.agents)
+		self.agents.append(a)
+	def addAgentState(self, agent, name):
+		for i in range(len(self.agents)):
+			if self.agents[i].name == agent:
+				s = AGMAgentState(name)
+				s.index = len(self.agents[i].states)
+				self.agents[i].states.append(s)
 
 class AGMFileData(object):
 	def __init__(self):
