@@ -232,7 +232,7 @@ class GraphDraw(QWidget):
 			linkHeight = rect.height()+6
 			linkGroupBase = (-linkGroupCount+1)*linkHeight/2
 			rect.translate(0, linkHeight*pos + linkGroupBase) # Right now it will be centered on the link's center
-			
+
 			painter.setBrush(QColor(255, 255, 255))
 			painter.fillRect(QRectF(rect.x()-4, rect.y()-3, rect.width()+8, rect.height()+6), Qt.black)
 			painter.fillRect(QRectF(rect.x()-2, rect.y()-1.5, rect.width()+4, rect.height()+3), Qt.white)
@@ -250,7 +250,7 @@ class GraphDraw(QWidget):
 				self.graph.removeNode(e.x(), e.y(), vertexDiameter)
 			else:
 				print 'No node'
-			
+
 		elif self.main.tool == 'Node - Rename':
 			x, y = self.graph.getCenter(e.x(), e.y(), vertexDiameter)
 			if x>=0:
@@ -405,11 +405,15 @@ class AGMEditor(QMainWindow):
 
 
 
-		self.connect(self.ui.configurationListWidget, SIGNAL("currentTextChanged(QString)"), self.nameChanged)
+		self.connect(self.ui.configurationListWidget, SIGNAL("currentTextChanged(QString)"), self.uiElementChanged)
+		self.connect(self.ui.agentListWidget, SIGNAL("currentTextChanged(QString)"), self.uiElementChanged)
+		self.connect(self.ui.agentListWidget, SIGNAL("currentRowChanged(int)"), self.redrawAgentStates)
 		self.ui.configurationListWidget.clicked.connect(self.redrawConfigurationTable)
 		self.ui.agentListWidget.clicked.connect(self.redrawConfigurationTable)
 		self.ui.agentStatesListWidget.clicked.connect(self.redrawConfigurationTable)
-		
+
+		self.connect(self.ui.agentStatesListWidget, SIGNAL("currentTextChanged(QString)"), self.uiElementChanged)
+		self.connect(self.ui.agentStatesListWidget, SIGNAL("itemChanged(QListWidgetItem"), self.uiElementChanged)
 
 		self.timer.start(20)
 		self.ui.toolsList.setCurrentRow(4)
@@ -418,9 +422,9 @@ class AGMEditor(QMainWindow):
 		self.selectTool(4)
 		self.tabChanged(self.ui.tabWidget.currentIndex())
 
-	def nameChanged(self, name=""):
-		print 'Changed!', name
-		
+	def uiElementChanged(self, name="", re=True):
+		print 'UI Change!', name
+
 		for c_i in range(len(self.agmData.agm.configurations)):
 			c = self.agmData.agm.configurations[c_i]
 			c.name = self.ui.configurationListWidget.model().index(c_i,0).data(Qt.DisplayRole).toString()
@@ -431,31 +435,41 @@ class AGMEditor(QMainWindow):
 				for s_i in range(len(a.states)):
 					s = a.states
 					s.name = self.ui.agentStatesListWidget.model().index(s_i,0).data(Qt.DisplayRole).toString()
+		if re: self.redrawConfigurationTable(re=False)
 
-	def redrawConfigurationTable(self, b=None):
-		self.nameChanged()
-		print 'Configurations'
-		for c in self.agmData.agm.configurations:
-			print c.name
-		print 'Agents'
-		for a in self.agmData.agm.agents:
-			print a.name
-			for s in a.states:
-				print '  ', s
+	def redrawAgentStates(self):
+		self.disconnect(self.ui.agentListWidget, SIGNAL("currentRowChanged(int)"), self.redrawAgentStates)
+		self.ui.agentStatesListWidget.clear()
+		a = self.agmData.agm.agents[self.ui.agentListWidget.currentIndex().row()]
+		for s in a.states:
+			self.ui.agentStatesListWidget.setAlternatingRowColors(True)
+			item1 = QListWidgetItem(self.ui.agentStatesListWidget)
+			item1.setText(s.name)
+			item1.setFlags(item1.flags() | Qt.ItemIsEditable)
+			self.ui.agentStatesListWidget.setCurrentRow(self.ui.agentStatesListWidget.count()-1)
+		self.connect(self.ui.agentListWidget, SIGNAL("currentRowChanged(int)"), self.redrawAgentStates)
 
+	def redrawConfigurationTable(self, b=None, re=True):
+		if re: self.uiElementChanged(re=False)
+		print 'Redraw'
 		self.ui.tableWidget.clear()
 		self.ui.tableWidget.setRowCount(len(self.agmData.agm.agents))
 		self.ui.tableWidget.setColumnCount(2)
-		text = self.ui.configurationListWidget.currentItem().text()
-		for config in self.agmData.agm.configurations:
-			if text == config.name:
-				for i in range(len(self.agmData.agm.agents)):
-					agent = self.agmData.agm.agents[i]
-					self.ui.tableWidget.setItem(i, 0, QTableWidgetItem(QString(agent.name)))
-					combo = QComboBox()
-					for s in agent.states:
-						combo.addItem(s.name)
-					self.ui.tableWidget.setCellWidget(i,1,combo)
+		if self.ui.configurationListWidget.currentItem() != None:
+			text = self.ui.configurationListWidget.currentItem().text()
+			for config in self.agmData.agm.configurations:
+				if text == config.name:
+					print 'Configuration', text
+					for i in range(len(self.agmData.agm.agents)):
+						agent = self.agmData.agm.agents[i]
+						print '  Agent', agent.name
+						self.ui.tableWidget.setItem(i, 0, QTableWidgetItem(QString(agent.name)))
+						combo = QComboBox()
+						for s in agent.states:
+							print '    State', s.name
+							combo.addItem(s.name)
+						self.ui.tableWidget.setCellWidget(i,1,combo)
+		self.ui.tableWidget.resizeColumnsToContents()
 
 	def newConfig(self, val):
 		self.agmData.agm.addConfiguration('new configuration')
@@ -583,13 +597,13 @@ class AGMEditor(QMainWindow):
 		global vertexDiameter
 		self.agmData.properties['vertexDiameter'] = vertexDiameter
 		global nodeThickness
-		self.agmData.properties['nodeThickness'] = nodeThickness 
+		self.agmData.properties['nodeThickness'] = nodeThickness
 		global lineThickness
-		self.agmData.properties['lineThickness'] = lineThickness 
+		self.agmData.properties['lineThickness'] = lineThickness
 		global longPattern
-		self.agmData.properties['longPattern'] = longPattern 
+		self.agmData.properties['longPattern'] = longPattern
 		global shortPattern
-		self.agmData.properties['shortPattern'] = shortPattern 
+		self.agmData.properties['shortPattern'] = shortPattern
 		global spacePattern
 		self.agmData.properties['spacePattern'] = spacePattern
 		self.agmData.toFile(path)
