@@ -354,7 +354,7 @@ class Appearance(QWidget):
 		dashPattern.append(self.ui.shortPattern.value() * lineThickness)
 		dashPattern.append(self.ui.spacePattern.value() * lineThickness)
 
-		
+
 class AGMEditor(QMainWindow):
 	def __init__(self):
 		QMainWindow.__init__(self)
@@ -460,7 +460,7 @@ class AGMEditor(QMainWindow):
 		else:
 			print 'waaaaaaaaaaat'
 		self.redrawConfigurationTable()
-		
+
 	def redrawAgentStates(self):
 		self.ui.agentStatesListWidget.clear()
 		a = self.agmData.agm.agents[self.ui.agentListWidget.currentIndex().row()]
@@ -616,7 +616,8 @@ class AGMEditor(QMainWindow):
 			self.ui.rulesList.addItem(q)
 		self.changeRule(0)
 	def save(self):
-		path = str(QFileDialog.getSaveFileName(self, "Save as", "", "*.agm"))
+		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.agm")[0]
+		print path
 		self.agmData.properties['name'] = path.split('/')[-1].split('.')[0]
 		global vertexDiameter
 		self.agmData.properties['vertexDiameter'] = vertexDiameter

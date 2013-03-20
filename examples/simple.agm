@@ -6,12 +6,21 @@ shortPattern=1
 nodeThickness=2
 longPattern=3
 
-new rule
+nerule
 {
 	{
+		room1:room(339,127)
+		room2:room(339,127)
+		door:door(135,129)
+		free:ok(135,129)
+		gualzru:robot(135,129)
 	}
 	=>
 	{
+		room1:room(339,127)
+		room2:room(339,127)
+		door:door(135,129)
+		free:ok(135,129)
+		gualzru:robot(135,129)
 	}
 }
-
