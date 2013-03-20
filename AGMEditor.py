@@ -154,7 +154,7 @@ class GraphDraw(QWidget):
 		pen = QPen()
 		pen.setWidth(nodeThickness)
 		painter.setPen(pen)
-		brush = QBrush(QGradient.LinearGradient)
+		brush = QBrush(QLinearGradient())
 		painter.setBrush(brush)
 		painter.setFont(self.main.fontDialog.selectedFont())
 		for w in self.graph.nodes:
