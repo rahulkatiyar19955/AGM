@@ -1,7 +1,7 @@
 spacePattern=3
 lineThickness=2
-name=final
-vertexDiameter=40
+name=grammarGualzru
+vertexDiameter=68
 shortPattern=1
 nodeThickness=2
 longPattern=3
@@ -9,12 +9,12 @@ longPattern=3
 modelGravity
 {
 	{
-		s:start(193,116)
+		s:start(40,40)
 	}
 	=>
 	{
-		g:gravity(339,127)
-		gualzru:robot(135,129)
+		g:gravity(220,40)
+		gualzru:robot(40,40)
 		gualzru->g(link)
 	}
 }
@@ -22,14 +22,14 @@ modelGravity
 lookFloor
 {
 	{
-		g:gravity(317,118)
-		gualzru:robot(132,119)
+		g:gravity(220,40)
+		gualzru:robot(40,40)
 		gualzru->g(link)
 	}
 	=>
 	{
-		g:gravity(394,133)
-		gualzru:robot(129,132)
+		g:gravity(250,40)
+		gualzru:robot(40,40)
 		gualzru->g(lookTowards)
 	}
 }
@@ -37,14 +37,14 @@ lookFloor
 modelHeight
 {
 	{
-		g:gravity(379,119)
-		gualzru:robot(127,118)
+		g:gravity(250,40)
+		gualzru:robot(40,40)
 		gualzru->g(lookTowards)
 	}
 	=>
 	{
-		g:plane(413,145)
-		gualzru:robot(136,142)
+		g:plane(250,40)
+		gualzru:robot(40,40)
 		gualzru->g(lookTowards)
 		gualzru->g(in)
 	}
@@ -53,14 +53,14 @@ modelHeight
 lookPerpendicularFloor
 {
 	{
-		gualzru:robot(104,144)
-		floor:plane(327,147)
+		floor:plane(270,40)
+		gualzru:robot(40,40)
 		gualzru->floor(lookTowards)
 	}
 	=>
 	{
-		gualzru:robot(110,149)
-		floor:plane(404,151)
+		floor:plane(290,40)
+		gualzru:robot(40,40)
 		gualzru->floor(lookPerpendicular)
 	}
 }
@@ -68,14 +68,14 @@ lookPerpendicularFloor
 modelYaw
 {
 	{
-		gualzru:robot(101,151)
-		floor:plane(386,153)
+		floor:plane(290,40)
+		gualzru:robot(40,40)
 		gualzru->floor(lookPerpendicular)
 	}
 	=>
 	{
-		gualzru:robot(108,138)
-		floor:floor(392,137)
+		floor:floor(290,40)
+		gualzru:robot(40,40)
 		gualzru->floor(lookPerpendicular)
 	}
 }
@@ -83,18 +83,18 @@ modelYaw
 lookFirstWall
 {
 	{
-		gualzru:robot(121,75)
-		floor:floor(120,305)
+		floor:floor(160,160)
+		gualzru:robot(40,40)
 		gualzru->floor(lookPerpendicular)
 	}
 	=>
 	{
-		floor:floor(70,318)
-		w4:notWall(598,163)
-		w3:notWall(434,189)
-		w2:notWall(238,166)
-		w1:notWall(72,184)
-		gualzru:robot(68,74)
+		floor:floor(180,160)
+		w4:notWall(370,60)
+		w3:notWall(270,160)
+		w2:notWall(170,60)
+		w1:notWall(50,160)
+		gualzru:robot(50,40)
 		gualzru->w1(looks)
 		floor->w1(link)
 		w1->w2(link)
@@ -106,17 +106,17 @@ lookFirstWall
 lookNextWall
 {
 	{
-		w2:notWall(468,232)
-		w1:wall(150,236)
-		gualzru:robot(228,89)
+		w2:notWall(330,40)
+		w1:wall(180,120)
+		gualzru:robot(40,40)
 		gualzru->w1(looks)
 		w1->w2(link)
 	}
 	=>
 	{
-		w2:notWall(485,222)
-		w1:wall(128,228)
-		gualzru:robot(206,84)
+		w2:notWall(320,40)
+		w1:wall(170,120)
+		gualzru:robot(40,40)
 		gualzru->w2(looks)
 		w1->w2(link)
 	}
@@ -125,17 +125,17 @@ lookNextWall
 modelWall
 {
 	{
-		w2:notWall(473,243)
-		w1:notWall(253,244)
-		gualzru:robot(102,114)
+		w2:notWall(310,40)
+		w1:notWall(170,140)
+		gualzru:robot(40,40)
 		gualzru->w1(looks)
 		w1->w2(link)
 	}
 	=>
 	{
-		w2:notWall(521,227)
-		w1:wall(293,227)
-		gualzru:robot(155,106)
+		w2:notWall(330,40)
+		w1:wall(190,140)
+		gualzru:robot(40,40)
 		gualzru->w1(looks)
 		w1->w2(link)
 	}
@@ -144,12 +144,12 @@ modelWall
 modelLastWall
 {
 	{
-		floor:floor(47,315)
-		robot:robot(372,62)
-		w4:notWall(560,165)
-		w3:wall(386,198)
-		w2:wall(207,157)
-		w1:wall(48,181)
+		floor:floor(40,160)
+		robot:robot(180,40)
+		w4:notWall(370,40)
+		w3:wall(270,150)
+		w2:wall(130,150)
+		w1:wall(40,40)
 		robot->w4(looks)
 		floor->w1(link)
 		w1->w2(link)
@@ -158,12 +158,12 @@ modelLastWall
 	}
 	=>
 	{
-		floor:room(77,350)
-		robot:robot(388,67)
-		w4:wall(617,191)
-		w3:wall(475,238)
-		w2:wall(272,183)
-		w1:wall(75,210)
+		floor:room(40,160)
+		robot:robot(160,40)
+		w4:wall(360,40)
+		w3:wall(270,150)
+		w2:wall(130,150)
+		w1:wall(40,40)
 		robot->w4(looks)
 		floor->w1(link)
 		w1->w2(link)
@@ -175,15 +175,15 @@ modelLastWall
 detectObstacle
 {
 	{
-		room:room(285,257)
-		gualzru:robot(130,132)
+		room:room(180,40)
+		gualzru:robot(40,40)
 		gualzru->room(in)
 	}
 	=>
 	{
-		obstacle:obstacle(478,119)
-		room:room(318,245)
-		gualzru:robot(112,102)
+		obstacle:obstacle(330,40)
+		room:room(180,40)
+		gualzru:robot(40,40)
 		gualzru->room(in)
 		obstacle->room(in)
 	}
@@ -192,17 +192,17 @@ detectObstacle
 modelTable
 {
 	{
-		obstacle:obstacle(464,95)
-		room:room(289,244)
-		gualzru:robot(119,103)
+		obstacle:obstacle(300,40)
+		room:room(170,40)
+		gualzru:robot(40,40)
 		gualzru->room(in)
 		obstacle->room(in)
 	}
 	=>
 	{
-		obstacle:table(506,112)
-		room:room(285,252)
-		gualzru:robot(110,100)
+		obstacle:table(290,40)
+		room:room(160,40)
+		gualzru:robot(40,40)
 		gualzru->room(in)
 		obstacle->room(in)
 	}
@@ -211,18 +211,18 @@ modelTable
 detectObjectInTable
 {
 	{
-		table:table(385,166)
-		room:room(251,249)
-		gualzru:robot(115,161)
+		table:table(280,40)
+		room:room(160,40)
+		gualzru:robot(40,40)
 		gualzru->room(in)
 		table->room(in)
 	}
 	=>
 	{
-		table:table(377,172)
-		object:object(517,76)
-		room:room(248,256)
-		gualzru:robot(124,165)
+		table:table(280,40)
+		object:object(400,40)
+		room:room(160,40)
+		gualzru:robot(40,40)
 		gualzru->room(in)
 		table->room(in)
 		object->table(in)
@@ -232,20 +232,20 @@ detectObjectInTable
 modelMugInTable
 {
 	{
-		table:table(392,182)
-		object:object(538,63)
-		room:room(273,276)
-		gualzru:robot(86,124)
+		table:table(280,40)
+		object:object(400,40)
+		room:room(160,40)
+		gualzru:robot(40,40)
 		gualzru->room(in)
 		table->room(in)
 		object->table(in)
 	}
 	=>
 	{
-		table:table(417,191)
-		object:mug(575,71)
-		room:room(277,289)
-		gualzru:robot(84,121)
+		table:table(280,40)
+		object:mug(400,40)
+		room:room(160,40)
+		gualzru:robot(40,40)
 		gualzru->room(in)
 		table->room(in)
 		object->table(in)

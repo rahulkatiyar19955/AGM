@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 #
 #  -----------------------
-#  -----  AGMEditor  -----
+#  -----  AGGLEditor  -----
 #  -----------------------
 #
 #  A libre graph grammar drawing tool.
 #
-#    Copyright (C) 2011-2011 by Luis J. Manso
+#    Copyright (C) 2012-2013 by Luis J. Manso
 #
 #    Graphmar is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -29,10 +29,10 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtSvg import *
 #from PySide.Qt import *
-from ui_guiAGMEditor import Ui_MainWindow
+from ui_guiAGGLEditor import Ui_MainWindow
 from ui_appearance import Ui_Appearance
 
-from parseAGM import *
+from parseAGGL import *
 
 # Code generator
 #from cogapp import Cog
@@ -139,6 +139,18 @@ class GraphDraw(QWidget):
 		self.painter.setRenderHint(QPainter.Antialiasing, True)
 		self.paintOnPainter(self.painter, self.size().width(), self.size().height())
 		self.painter = None
+	def export(self, path):
+		generator = QSvgGenerator()
+		generator.setFileName(path)
+		generator.setSize(self.size());
+		generator.setViewBox(QRect(0, 0, self.size().width(), self.size().height()))
+		generator.setTitle("PyQtSVNGenerator")
+		generator.setDescription("SVG generated using Qt+Python")
+		svgPainter = QPainter()
+		svgPainter.begin(generator)
+		self.paintOnPainter(svgPainter, self.size().width(), self.size().height())
+		svgPainter.end()
+
 	def paintOnPainter(self, painter, w, h):
 		global vertexDiameter
 		global nodeThickness
@@ -551,7 +563,7 @@ class AGMEditor(QMainWindow):
 			self.ui.menuRules.setEnabled(False)
 			self.ui.menuBehaviors.setEnabled(True)
 		else:
-			print 'Internal error: AGMEditor::tabChanged: Unknown tab index'
+			print 'Internal error: AGGLEditor::tabChanged: Unknown tab index'
 	def about(self):
 		QMessageBox.information(self, "About", "Active Grammar-based Modeling:\nhttps://github.com/ljmanso/AGM/wiki")
 	def draw(self):
@@ -595,7 +607,7 @@ class AGMEditor(QMainWindow):
 		lhs = self.lhsPainter.graph
 		rhs = self.rhsPainter.graph
 		for i in range(len(self.agmData.agm.rules)):
-			rule = self.rulesagmData.agm.rules[i]
+			rule = self.agmData.agm.rules[i]
 			self.lhsPainter.graph = rule.lhs
 			self.lhsPainter.export(str(path)+'/rule'+str(i)+'_lhs.svg')
 			self.rhsPainter.graph = rule.rhs
