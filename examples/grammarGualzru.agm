@@ -1,7 +1,7 @@
 spacePattern=3
 lineThickness=2
 name=grammarGualzru
-vertexDiameter=68
+vertexDiameter=50
 shortPattern=1
 nodeThickness=2
 longPattern=3
@@ -37,13 +37,13 @@ lookFloor
 modelHeight
 {
 	{
-		g:gravity(250,40)
+		g:gravity(270,40)
 		gualzru:robot(40,40)
 		gualzru->g(lookTowards)
 	}
 	=>
 	{
-		g:plane(250,40)
+		g:plane(290,40)
 		gualzru:robot(40,40)
 		gualzru->g(lookTowards)
 		gualzru->g(in)
@@ -106,16 +106,16 @@ lookFirstWall
 lookNextWall
 {
 	{
-		w2:notWall(330,40)
-		w1:wall(180,120)
+		w2:notWall(270,40)
+		w1:wall(160,120)
 		gualzru:robot(40,40)
 		gualzru->w1(looks)
 		w1->w2(link)
 	}
 	=>
 	{
-		w2:notWall(320,40)
-		w1:wall(170,120)
+		w2:notWall(230,40)
+		w1:wall(120,120)
 		gualzru:robot(40,40)
 		gualzru->w2(looks)
 		w1->w2(link)
@@ -175,14 +175,14 @@ modelLastWall
 detectObstacle
 {
 	{
-		room:room(180,40)
+		room:room(170,40)
 		gualzru:robot(40,40)
 		gualzru->room(in)
 	}
 	=>
 	{
-		obstacle:obstacle(330,40)
-		room:room(180,40)
+		obstacle:obstacle(300,40)
+		room:room(170,40)
 		gualzru:robot(40,40)
 		gualzru->room(in)
 		obstacle->room(in)
@@ -200,8 +200,8 @@ modelTable
 	}
 	=>
 	{
-		obstacle:table(290,40)
-		room:room(160,40)
+		obstacle:table(300,40)
+		room:room(170,40)
 		gualzru:robot(40,40)
 		gualzru->room(in)
 		obstacle->room(in)
@@ -219,9 +219,9 @@ detectObjectInTable
 	}
 	=>
 	{
-		table:table(280,40)
-		object:object(400,40)
-		room:room(160,40)
+		table:table(300,40)
+		object:object(430,40)
+		room:room(170,40)
 		gualzru:robot(40,40)
 		gualzru->room(in)
 		table->room(in)
@@ -242,9 +242,9 @@ modelMugInTable
 	}
 	=>
 	{
-		table:table(280,40)
-		object:mug(400,40)
-		room:room(160,40)
+		table:table(300,40)
+		object:mug(430,40)
+		room:room(170,40)
 		gualzru:robot(40,40)
 		gualzru->room(in)
 		table->room(in)

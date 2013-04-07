@@ -143,15 +143,16 @@ class GraphDraw(QWidget):
 		generator = QSvgGenerator()
 		generator.setFileName(path)
 		generator.setSize(self.size());
+		#print str(self.size().width())+"x"+str(self.size().height())
 		generator.setViewBox(QRect(0, 0, self.size().width(), self.size().height()))
 		generator.setTitle("PyQtSVNGenerator")
 		generator.setDescription("SVG generated using Qt+Python")
 		svgPainter = QPainter()
 		svgPainter.begin(generator)
-		self.paintOnPainter(svgPainter, self.size().width(), self.size().height())
+		self.paintOnPainter(svgPainter, self.size().width()*5, self.size().height()*5, drawlines=False)
 		svgPainter.end()
 
-	def paintOnPainter(self, painter, w, h):
+	def paintOnPainter(self, painter, w, h, drawlines=True):
 		global vertexDiameter
 		global nodeThickness
 		w = float(w)
@@ -159,10 +160,11 @@ class GraphDraw(QWidget):
 		w2 = w/2
 		h2 = h/2
 		painter.fillRect(QRectF(0, 0, w, h), Qt.white)
-		painter.drawLine(QLine(0,   0, w-1,   0))
-		painter.drawLine(QLine(0, h-1, w-1, h-1))
-		painter.drawLine(QLine(0,   0, 0,   h-1))
-		painter.drawLine(QLine(w-1, 0, w-1, h-1))
+		if drawlines:
+			painter.drawLine(QLine(0,   0, w-1,   0))
+			painter.drawLine(QLine(0, h-1, w-1, h-1))
+			painter.drawLine(QLine(0,   0, 0,   h-1))
+			painter.drawLine(QLine(w-1, 0, w-1, h-1))
 		pen = QPen()
 		pen.setWidth(nodeThickness)
 		painter.setPen(pen)
