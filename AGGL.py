@@ -232,7 +232,7 @@ class AGMFileData(object):
 			writeString += str(k) + '=' + str(v) + '\n'
 		writeString += '\n'
 		for r in self.agm.rules:
-			writeString = writeString + r + '\n\n'
+			writeString = writeString + r.toString() + '\n\n'
 		w = open(filename, 'w')
 		w.write(writeString)
 		w.close()

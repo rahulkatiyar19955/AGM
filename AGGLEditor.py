@@ -152,6 +152,15 @@ class GraphDraw(QWidget):
 		self.paintOnPainter(svgPainter, self.size().width()*5, self.size().height()*5, drawlines=False)
 		svgPainter.end()
 
+	def exportPNG(self, path):
+		pixmap = QPixmap(self.size())
+		painter = QPainter(pixmap)
+		#painter.begin()
+		self.paintOnPainter(painter, self.size().width()*5, self.size().height()*5, drawlines=False)
+		painter.end()
+		pixmap.save(path, "png")
+		
+
 	def paintOnPainter(self, painter, w, h, drawlines=True):
 		global vertexDiameter
 		global nodeThickness
@@ -248,8 +257,9 @@ class GraphDraw(QWidget):
 			rect.translate(0, linkHeight*pos + linkGroupBase) # Right now it will be centered on the link's center
 
 			painter.setBrush(QColor(255, 255, 255))
-			painter.fillRect(QRectF(rect.x()-4, rect.y()-3, rect.width()+8, rect.height()+6), Qt.black)
-			painter.fillRect(QRectF(rect.x()-2, rect.y()-1.5, rect.width()+4, rect.height()+3), Qt.white)
+			d = 2
+			painter.fillRect(QRectF(rect.x()-4+d, rect.y()-3, rect.width()+8, rect.height()+6), Qt.black)
+			painter.fillRect(QRectF(rect.x()-2+d, rect.y()-1.5, rect.width()+4, rect.height()+3), Qt.white)
 			painter.drawText(rect, align, str(e.linkType))
 			painter.setBrush(QColor(0, 0, 0))
 			vw = 0.5*vertexDiameter
@@ -405,6 +415,7 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionExport,                     SIGNAL("triggered(bool)"),                                      self.exportRule)
 		self.connect(self.ui.actionGenerateCode,               SIGNAL("triggered(bool)"),                                      self.generateCode)
 		self.connect(self.ui.actionExportAllRules,             SIGNAL("triggered(bool)"),                                      self.exportAll)
+		self.connect(self.ui.actionExportAllRulesPNG,          SIGNAL("triggered(bool)"),                                      self.exportAllPNG)
 		self.connect(self.ui.actionSave,                       SIGNAL("triggered(bool)"),                                      self.save)
 		self.connect(self.ui.actionOpen,                       SIGNAL("triggered(bool)"),                                      self.open)
 		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),                                      self.close)
@@ -614,6 +625,18 @@ class AGMEditor(QMainWindow):
 			self.lhsPainter.export(str(path)+'/rule'+str(i)+'_lhs.svg')
 			self.rhsPainter.graph = rule.rhs
 			self.rhsPainter.export(str(path)+'/rule'+str(i)+'_rhs.svg')
+		self.lhsPainter.graph = lhs
+		self.rhsPainter.graph = rhs
+	def exportAllPNG (self):
+		path = str(QFileDialog.getExistingDirectory(self, "Export all rules", ""))
+		lhs = self.lhsPainter.graph
+		rhs = self.rhsPainter.graph
+		for i in range(len(self.agmData.agm.rules)):
+			rule = self.agmData.agm.rules[i]
+			self.lhsPainter.graph = rule.lhs
+			self.lhsPainter.exportPNG(str(path)+'/rule'+str(i)+'_lhs.png')
+			self.rhsPainter.graph = rule.rhs
+			self.rhsPainter.exportPNG(str(path)+'/rule'+str(i)+'_rhs.png')
 		self.lhsPainter.graph = lhs
 		self.rhsPainter.graph = rhs
 	def open(self):

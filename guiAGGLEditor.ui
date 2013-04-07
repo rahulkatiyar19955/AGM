@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -87,7 +87,7 @@
      <x>0</x>
      <y>0</y>
      <width>843</width>
-     <height>25</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -125,6 +125,7 @@
     </property>
     <addaction name="actionExport"/>
     <addaction name="actionExportAllRules"/>
+    <addaction name="actionExportAllRulesPNG"/>
     <addaction name="actionGenerateCode"/>
    </widget>
    <widget class="QMenu" name="menuBehaviors">
@@ -334,6 +335,11 @@
   <action name="actionRemove_current_agent_state">
    <property name="text">
     <string>Remove current agent state</string>
+   </property>
+  </action>
+  <action name="actionExportAllRulesPNG">
+   <property name="text">
+    <string>Export to PNG all rules</string>
    </property>
   </action>
  </widget>
