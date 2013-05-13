@@ -183,23 +183,34 @@ class AGMRule(object):
 class AGMAgent(object):
 	def __init__(self, name):
 		self.name = name
-		self.index = -1
-		self.states = []
+		self.states = dict()
+	def addState(self, statename):
+		self.states[statename] = AGMAgentState(statename, self.name)
+	def addUnnamedState(self):
+		initialName = self.name + 'State'
+		possibleNumber = len(self.states)
+		name = initialName + possibleNumber
+		while name in self.states.keys():
+			possibleNumber = possibleNumber + 1
+			name = initialName + possibleNumber
+		self.addState(name)
+		return name
+
 class AGMConfiguration(object):
 	def __init__(self, name):
 		self.name = name
-		self.index = -1
+
 class AGMAgentState(object):
-	def __init__(self, name):
+	def __init__(self, name, parentName):
 		self.name = name
-		self.index = -1
+		self.parentName = parentName
 
 class AGM(object):
 	def __init__(self):
 		object.__init__(self)
 		self.rules = []
-		self.agents = []
-		self.configurations = []
+		self.agents = dict()
+		self.configurations = dict()
 	def addRule(self, rule):
 		self.rules.append(rule)
 	def addConfiguration(self, conf):
@@ -207,15 +218,18 @@ class AGM(object):
 		c.index = len(self.configurations)
 		self.configurations.append(c)
 	def addAgent(self, agent):
-		a = AGMAgent(agent)
-		a.index = len(self.agents)
-		self.agents.append(a)
+		self.agents.append(AGMAgent(agent))
+	def addUnnamedAgent(self):
+		initialName = 'agent'
+		possibleNumber = len(self.agents)
+		name = initialName + possibleNumber
+		while name in self.agents.keys():
+			possibleNumber = possibleNumber + 1
+			name = initialName + possibleNumber
+		self.addAgent(name)
+		return name
 	def addAgentState(self, agent, name):
-		for i in range(len(self.agents)):
-			if self.agents[i].name == agent:
-				s = AGMAgentState(name)
-				s.index = len(self.agents[i].states)
-				self.agents[i].states.append(s)
+		self.agents[agent].addState(name)
 
 class AGMFileData(object):
 	def __init__(self):

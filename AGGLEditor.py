@@ -529,7 +529,7 @@ class AGMEditor(QMainWindow):
 		self.redrawConfigurationTable()
 
 	def newAgent(self, val):
-		self.agmData.agm.addAgent('new agent')
+		name = self.agmData.agm.addUnnamedAgent
 		self.ui.agentListWidget.setAlternatingRowColors(True)
 		item1 = QListWidgetItem(self.ui.agentListWidget)
 		item1.setText("new agent")
@@ -640,7 +640,7 @@ class AGMEditor(QMainWindow):
 		self.lhsPainter.graph = lhs
 		self.rhsPainter.graph = rhs
 	def open(self):
-		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.agm"))
+		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.agm")[0])
 		self.openFromFile(path)
 	def openFromFile(self, path):
 		print 'Opening', path
