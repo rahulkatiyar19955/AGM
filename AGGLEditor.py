@@ -380,7 +380,7 @@ class Appearance(QWidget):
 
 
 class AGMEditor(QMainWindow):
-	def __init__(self):
+	def __init__(self, filePath=''):
 		QMainWindow.__init__(self)
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
@@ -439,10 +439,12 @@ class AGMEditor(QMainWindow):
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
 		self.tabChanged(self.ui.tabWidget.currentIndex())
-		#self.connect(self.timer, SIGNAL("timeout()"), self.redrawConfigurationTable)
-		self.newConfig(True)
-		self.newAgent(True)
-		self.newAgentState(True)
+		
+		if len(filePath)>0:
+			self.openFromFile(filePath)
+		else:
+			self.newConfig(True)
+			self.newAgent(True)
 
 
 		self.ui.agentStatesListWidget.clicked.connect(self.statesClicked)
@@ -454,40 +456,41 @@ class AGMEditor(QMainWindow):
 
 	def configurationsClicked(self):
 		print 'Configurations clicked'
-		for c_i in range(self.ui.configurationListWidget.count()):
-			c = self.agmData.agm.configurations[c_i]
-			print 'Config', c.name,
-			c.name = self.ui.configurationListWidget.model().index(c_i,0).data(Qt.DisplayRole)
-			print ' ==> ', c.name
-		self.redrawConfigurationTable()
+		#for c_i in range(self.ui.configurationListWidget.count()):
+			#c = self.agmData.agm.configurations[c_i]
+			#print 'Config', c.name,
+			#c.name = self.ui.configurationListWidget.model().index(c_i,0).data(Qt.DisplayRole)
+			#print ' ==> ', c.name
+		#self.redrawConfigurationTable()
 	def agentsClicked(self):
 		print 'Agents clicked!'
-		for a_i in range(len(self.agmData.agm.agents)):
-			a = self.agmData.agm.agents[a_i]
-			print 'Agent', a.name,
-			a.name = self.ui.agentListWidget.model().index(a_i,0).data(Qt.DisplayRole)
-			print ' ==> ', a.name
-		self.redrawAgentStates()
-		self.redrawConfigurationTable()
+		#for a_i in range(len(self.agmData.agm.agents)):
+			#a = self.agmData.agm.agents[a_i]
+			#print 'Agent', a.name,
+			#a.name = self.ui.agentListWidget.model().index(a_i,0).data(Qt.DisplayRole)
+			#print ' ==> ', a.name
+		#self.redrawAgentStates()
+		#self.redrawConfigurationTable()
 	def statesClicked(self):
-		print 'UI Change!'
-		a_i = self.ui.agentListWidget.currentIndex().row()
-		a = self.agmData.agm.agents[a_i]
-		print 'Agent', a.name,
-		a.name = self.ui.agentListWidget.model().index(a_i,0).data(Qt.DisplayRole)
-		print ' ==> ', a.name
-		print a_i, self.ui.agentListWidget.currentIndex().row()
-		if a_i == self.ui.agentListWidget.currentIndex().row():
-			print 'current index'
-			for s_i in range(len(a.states)):
-				s = a.states[s_i]
-				s.name = self.ui.agentStatesListWidget.model().index(s_i,0).data(Qt.DisplayRole)
-		else:
-			print 'waaaaaaaaaaat'
-		self.redrawConfigurationTable()
+		print 'states list clicked!'
+		#a_i = self.ui.agentListWidget.currentIndex().row()
+		#a = self.agmData.agm.agents[a_i]
+		#print 'Agent', a.name,
+		#a.name = self.ui.agentListWidget.model().index(a_i,0).data(Qt.DisplayRole)
+		#print ' ==> ', a.name
+		#print a_i, self.ui.agentListWidget.currentIndex().row()
+		#if a_i == self.ui.agentListWidget.currentIndex().row():
+			#print 'current index'
+			#for s_i in range(len(a.states)):
+				#s = a.states[s_i]
+				#s.name = self.ui.agentStatesListWidget.model().index(s_i,0).data(Qt.DisplayRole)
+		#else:
+			#print 'waaaaaaaaaaat'
+		#self.redrawConfigurationTable()
 
 	def redrawAgentStates(self):
 		self.ui.agentStatesListWidget.clear()
+		return
 		a = self.agmData.agm.agents[self.ui.agentListWidget.currentIndex().row()]
 		print 'States for', a.name
 		for s in a.states:
@@ -500,13 +503,25 @@ class AGMEditor(QMainWindow):
 
 	def redrawConfigurationTable(self, b=None, re=True):
 		#if re: self.uiElementChanged(re=False)
-		print 'Redraw'
+		print 'Redraw', len(self.agmData.agm.configurations), len(self.agmData.agm.agents)
+		self.ui.tableWidget.setRowCount(len(self.agmData.agm.configurations))
+		self.ui.tableWidget.setColumnCount(len(self.agmData.agm.agents))
+		count = 0
+		for config in self.agmData.agm.configurations:
+			self.ui.tableWidget.setVerticalHeaderItem(count, QTableWidgetItem(config))
+			count+=1
+		count = 0
+		for agent in self.agmData.agm.agents:
+			self.ui.tableWidget.setHorizontalHeaderItem(count, QTableWidgetItem(agent))
+			count+=1
+		return
+
 		self.ui.tableWidget.clear()
 		self.ui.tableWidget.setRowCount(len(self.agmData.agm.agents))
 		self.ui.tableWidget.setColumnCount(2)
 		text = self.ui.configurationListWidget.currentItem().text()
 		for config in self.agmData.agm.configurations:
-			if text == config.name:
+			if text == self.agmData.agm.configurations[config].name:
 				print 'Configuration', text
 				for i in range(len(self.agmData.agm.agents)):
 					agent = self.agmData.agm.agents[i]
@@ -520,33 +535,32 @@ class AGMEditor(QMainWindow):
 		self.ui.tableWidget.resizeColumnsToContents()
 
 	def newConfig(self, val):
-		self.agmData.agm.addConfiguration('new configuration')
 		self.ui.configurationListWidget.setAlternatingRowColors(True)
+		name = self.agmData.agm.addUnnamedConfiguration()
 		item1 = QListWidgetItem(self.ui.configurationListWidget)
-		item1.setText("new configuration")
+		item1.setText(name)
 		item1.setFlags(item1.flags() | Qt.ItemIsEditable)
-		self.ui.configurationListWidget.setCurrentRow(self.ui.configurationListWidget.count()-1)
 		self.redrawConfigurationTable()
 
 	def newAgent(self, val):
-		name = self.agmData.agm.addUnnamedAgent
 		self.ui.agentListWidget.setAlternatingRowColors(True)
+		name = self.agmData.agm.addUnnamedAgent()
 		item1 = QListWidgetItem(self.ui.agentListWidget)
-		item1.setText("new agent")
+		item1.setText(name)
 		item1.setFlags(item1.flags() | Qt.ItemIsEditable)
-		self.ui.agentListWidget.setCurrentRow(self.ui.agentListWidget.count()-1)
 		self.redrawConfigurationTable()
 
 	def newAgentState(self, val):
-		self.agmData.agm.addAgentState(str(self.ui.agentListWidget.currentItem().text()), 'new agent state')
-		self.ui.agentStatesListWidget.setAlternatingRowColors(True)
-		item1 = QListWidgetItem(self.ui.agentStatesListWidget)
-		item1.setText("new agent state")
-		item1.setFlags(item1.flags() | Qt.ItemIsEditable)
-		self.ui.agentStatesListWidget.setCurrentRow(self.ui.agentStatesListWidget.count()-1)
-		self.redrawAgentStates()
+		print str(self.ui.agentListWidget.currentItem().text())
+		#self.agmData.agm.addAgentState(str(self.ui.agentListWidget.currentItem().text()), 'new agent state')
+		#self.ui.agentStatesListWidget.setAlternatingRowColors(True)
+		#item1 = QListWidgetItem(self.ui.agentStatesListWidget)
+		#item1.setText("new agent state")
+		#item1.setFlags(item1.flags() | Qt.ItemIsEditable)
+		#self.ui.agentStatesListWidget.setCurrentRow(self.ui.agentStatesListWidget.count()-1)
+		#self.redrawAgentStates()
 		#self.redrawConfigurationTable()
-
+		pass
 	def removeCurrentAgentState(self, val):
 		print 'remove agent configuration', val
 		self.redrawConfigurationTable()
@@ -681,8 +695,7 @@ if __name__ == '__main__':
 				agmData = AGMFileData.fromFile(inputFile, verbose=False)
 				agmData.generatePDDL(outputFile)
 		else:
-			clase = AGMEditor()
-			clase.openFromFile(sys.argv[1])
+			clase = AGMEditor(sys.argv[1])
 			clase.show()
 			app.exec_()
 	else:

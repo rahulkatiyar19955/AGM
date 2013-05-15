@@ -215,21 +215,33 @@ class AGM(object):
 		self.rules.append(rule)
 	def addConfiguration(self, conf):
 		c = AGMConfiguration(conf)
-		c.index = len(self.configurations)
-		self.configurations.append(c)
+		self.configurations[c.name] = c
 	def addAgent(self, agent):
-		self.agents.append(AGMAgent(agent))
+		a = AGMAgent(agent)
+		self.agents[agent] = a
 	def addUnnamedAgent(self):
 		initialName = 'agent'
 		possibleNumber = len(self.agents)
-		name = initialName + possibleNumber
+		name = initialName + str(possibleNumber)
 		while name in self.agents.keys():
 			possibleNumber = possibleNumber + 1
-			name = initialName + possibleNumber
+			name = initialName + str(possibleNumber)
 		self.addAgent(name)
 		return name
+	def addUnnamedConfiguration(self):
+		initialName = 'configuration'
+		possibleNumber = len(self.configurations)
+		name = initialName + str(possibleNumber)
+		while name in self.configurations.keys():
+			possibleNumber = possibleNumber + 1
+			name = initialName + str(possibleNumber)
+		self.addConfiguration(name)
+		return name
 	def addAgentState(self, agent, name):
-		self.agents[agent].addState(name)
+		try:
+			self.agents[agent].addState(name)
+		except:
+			print 'No',agent, 'agent'
 
 class AGMFileData(object):
 	def __init__(self):
