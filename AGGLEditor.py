@@ -143,7 +143,6 @@ class GraphDraw(QWidget):
 		generator = QSvgGenerator()
 		generator.setFileName(path)
 		generator.setSize(self.size());
-		#print str(self.size().width())+"x"+str(self.size().height())
 		generator.setViewBox(QRect(0, 0, self.size().width(), self.size().height()))
 		generator.setTitle("PyQtSVNGenerator")
 		generator.setDescription("SVG generated using Qt+Python")
@@ -447,20 +446,14 @@ class AGMEditor(QMainWindow):
 			self.newAgent(True)
 
 	def redrawConfigurationTable(self, b=None, re=True):
-		#if re: self.uiElementChanged(re=False)
-		#print 'Redraw', len(self.agmData.agm.configurations), len(self.agmData.agm.agents)
 		self.ui.tableWidget.setRowCount(len(self.agmData.agm.configurations))
 		self.ui.tableWidget.setColumnCount(len(self.agmData.agm.agents))
 		count = 0
-		#print 'configs'
-		for config in self.agmData.agm.configurations:
-			#print config
+		for config in self.agmData.agm.configurationList:
 			self.ui.tableWidget.setVerticalHeaderItem(count, QTableWidgetItem(config))
 			count+=1
 		count = 0
-		#print 'agents'
-		for agent in self.agmData.agm.agents:
-			#print agent
+		for agent in self.agmData.agm.agentList:
 			self.ui.tableWidget.setHorizontalHeaderItem(count, QTableWidgetItem(agent))
 			count+=1
 		self.ui.tableWidget.resizeColumnsToContents()
@@ -528,14 +521,16 @@ class AGMEditor(QMainWindow):
 		rows = len(table)
 		cols = len(table[0])
 		print "table: ", table
+		print "agents: ", self.agmData.agm.agentList
+		print "confs: ", self.agmData.agm.configurationList
 		assert rows == len(self.agmData.agm.configurations), "the size of the table ("+str(rows)+") does not match with the number of configurations ("+str(len(self.agmData.agm.configurations))+")"
 		assert cols == len(self.agmData.agm.agents), "the size of the table does not match with the number of agents"
 
 		conf=0
-		for c in self.agmData.agm.configurations:
+		for c in self.agmData.agm.configurationList:
 			print c, table[conf]
 			conf += 1
-		for agentName in self.agmData.agm.agents:
+		for agentName in self.agmData.agm.agentList:
 			cols = self.ui.tableWidget.columnCount()
 			for i in range(cols):
 				if self.ui.tableWidget.horizontalHeaderItem(i).text() == agentName:
@@ -547,12 +542,12 @@ class AGMEditor(QMainWindow):
 						self.ui.tableWidget.setCellWidget(r,i,combo)
 			self.ui.tableWidget.resizeColumnsToContents()
 
-		
-		for agent in self.agmData.agm.agents:
+		print 'AGENT LIST', self.agmData.agm.agentList
+		for agent in self.agmData.agm.agentList:
 			print "AGENT", agent
 			# Find which column corresponds to the current agent: c
 			c = -1
-			for ag in range(len(self.agmData.agm.agents)):
+			for ag in range(len(self.agmData.agm.agentList)):
 				if self.ui.tableWidget.horizontalHeaderItem(ag).text() == agent:
 					c = ag
 			assert c != -1, "wrooooooong"
@@ -561,7 +556,7 @@ class AGMEditor(QMainWindow):
 			print "valid states for agent", agent, validStateNames
 			for i in range(len(self.agmData.agm.configurations)):
 				print 'size of the table', self.ui.tableWidget.rowCount(), self.ui.tableWidget.columnCount()
-				assert table[i][c] in validStateNames, "invalid state name for row "+str(i)+" column "+str(c)+": "+table[i][c]
+				assert table[i][c] in validStateNames, "invalid state name ("+table[i][c]+") for row "+str(i)+" column "+str(c)+" for agent "+agent
 				item = self.ui.tableWidget.cellWidget(i,c)
 				print i, c, '-->', item
 				idx = item.findText(table[i][c])

@@ -216,12 +216,16 @@ class AGM(object):
 		self.rules = []
 		self.agents = dict()
 		self.configurations = dict()
+		self.agentList = []
+		self.configurationList = []
 	def addRule(self, rule):
 		self.rules.append(rule)
 	def addConfiguration(self, conf):
+		if not conf in self.configurationList: self.configurationList.append(conf)
 		c = AGMConfiguration(conf)
 		self.configurations[c.name] = c
 	def addAgent(self, agent):
+		if not agent in self.agentList: self.agentList.append(agent)
 		a = AGMAgent(agent)
 		self.agents[agent] = a
 	def addUnnamedAgent(self):

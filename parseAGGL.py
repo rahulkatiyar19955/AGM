@@ -78,7 +78,7 @@ class AGMFileDataParsing:
 		result = agm.parseString(open(filename, 'r').read())
 		if verbose: print "Result:\n",result
 
-		# Fill AGMFileData and AGM data		
+		# Fill AGMFileData and AGM data
 		if verbose: print '\nProperties:', len(result.props)
 		number = 0
 		gotName = False
@@ -99,10 +99,13 @@ class AGMFileDataParsing:
 		
 		agmFD.parsedAgents = dict()
 		for agent in result.agents:
-			#print agent.agentName, 'sera', agent.stateList
+			print agent.agentName, 'sera', agent.stateList
+			agmFD.agm.agentList.append(agent.agentName)
 			agmFD.parsedAgents[agent.agentName] = agent.stateList
 		print agmFD.parsedAgents
 		agmFD.parsedConfigurations = result.configurations
+		for c in result.configurations:
+			agmFD.agm.configurationList.append(c)
 		agmFD.parsedTable = result.table
 
 		if verbose: print '\nRules:', len(result.rules)

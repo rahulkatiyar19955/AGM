@@ -5,7 +5,47 @@ vertexDiameter=68
 shortPattern=1
 nodeThickness=2
 longPattern=3
-
+==============================================
+agents
+{
+	pitchNRoll ( off enabled )
+	yaw ( off enabled )
+	saccade ( off downwards frontal firstWall nextWall specific)
+	distance ( off floor wall maintenance )
+	wander ( off enabled)
+	unknownFinder (off floor table)
+	obstacleModeler ( off enabled )
+	objectModeler ( off enabled )
+}
+configurations
+{
+	pitchAndRoll
+	lookUnknownFloor
+	heightBehavior
+	lookPerpendicularFloor
+	yaw
+	lookFirstWall
+	modelWall
+	lookNextWall
+	maintainWallDistances
+	insertUnknownStuff
+	obstaclesSaccade
+}
+table
+{
+	enabled off      off       off         off     off   off off
+	off     off      downwards off         off     off   off off
+	off     off      off       floor       off     off   off off
+	off     off      frontal   off         off     off   off off
+	off     enabled  off       off         off     off   off off
+	off     enabled  firstWall maintenance off     off   off off
+	off     off      off       wall        off     off   off off
+	off     enabled  nextWall  maintenance off     off   off off
+	off     enabled  off       maintenance enabled off   off off
+	off     enabled  off       maintenance enabled floor off off
+	off     enabled  specific  maintenance off     off   off off
+}
+==============================================
 modelGravity
 {
 	{
