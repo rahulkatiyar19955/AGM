@@ -195,6 +195,11 @@ class AGMAgent(object):
 			name = initialName + str(possibleNumber)
 		self.addState(AGMAgentState(name,self.name))
 		return name
+	def validStateNames(self):
+		r = []
+		for x in self.states:
+			r.append(self.states[x].name)
+		return r
 
 class AGMConfiguration(object):
 	def __init__(self, name):

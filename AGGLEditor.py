@@ -496,7 +496,7 @@ class AGMEditor(QMainWindow):
 				if stateName == '':
 					stateName = self.agmData.agm.addUnnamedAgentState(agentName)
 				else:
-					self.agmData.agm.addAgentState(agentName, AGMAgentState(stateName, agentName))
+					self.agmData.agm.addAgentState(agentName, stateName)
 				item1 = QListWidgetItem(stateName, self.ui.agentStatesListWidget)
 				self.ui.agentStatesListWidget.addItem(item1)
 				cols = self.ui.tableWidget.columnCount()
@@ -513,21 +513,60 @@ class AGMEditor(QMainWindow):
 				self.ui.tableWidget.resizeColumnsToContents()
 				return
 		self.redrawConfigurationTable()
-	def drawCombos(self):
-		print 'draw combos!'
+	def listToTable(self, l, n):
+		t =  [l[i:i+n] for i in range(0, len(l), n)]
+		length = None
+		for i in t:
+			if length == None:
+				length = len(t)
+			else:
+				assert len(t) == length, "not squared table"
+		return t
+	def processTableAndDrawCombos(self):
+		print '\n\ndraw combos!'
+		table = self.listToTable(self.agmData.parsedTable, len(self.agmData.parsedAgents))
+		rows = len(table)
+		cols = len(table[0])
+		print "table: ", table
+		assert rows == len(self.agmData.agm.configurations), "the size of the table ("+str(rows)+") does not match with the number of configurations ("+str(len(self.agmData.agm.configurations))+")"
+		assert cols == len(self.agmData.agm.agents), "the size of the table does not match with the number of agents"
+
+		conf=0
+		for c in self.agmData.agm.configurations:
+			print c, table[conf]
+			conf += 1
 		for agentName in self.agmData.agm.agents:
 			cols = self.ui.tableWidget.columnCount()
 			for i in range(cols):
 				if self.ui.tableWidget.horizontalHeaderItem(i).text() == agentName:
 					rows = self.ui.tableWidget.rowCount()
 					for r in range(rows):
-						print i
 						combo = QComboBox()
 						for s in self.agmData.agm.agents[agentName].states:
-							print '    State', s.name
-							combo.addItem(s.name)
+							combo.addItem(s)
 						self.ui.tableWidget.setCellWidget(r,i,combo)
 			self.ui.tableWidget.resizeColumnsToContents()
+
+		
+		for agent in self.agmData.agm.agents:
+			print "AGENT", agent
+			# Find which column corresponds to the current agent: c
+			c = -1
+			for ag in range(len(self.agmData.agm.agents)):
+				if self.ui.tableWidget.horizontalHeaderItem(ag).text() == agent:
+					c = ag
+			assert c != -1, "wrooooooong"
+			# Valid state nanmes for agent
+			validStateNames = self.agmData.agm.agents[agent].validStateNames()
+			print "valid states for agent", agent, validStateNames
+			for i in range(len(self.agmData.agm.configurations)):
+				print 'size of the table', self.ui.tableWidget.rowCount(), self.ui.tableWidget.columnCount()
+				assert table[i][c] in validStateNames, "invalid state name for row "+str(i)+" column "+str(c)+": "+table[i][c]
+				item = self.ui.tableWidget.cellWidget(i,c)
+				print i, c, '-->', item
+				idx = item.findText(table[i][c])
+				self.ui.tableWidget.cellWidget(i,c).setCurrentIndex(idx)
+
 
 	def removeCurrentAgentState(self, val):
 		print 'remove agent configuration', val
@@ -554,7 +593,8 @@ class AGMEditor(QMainWindow):
 			self.ui.toolsWidget.hide()
 			self.ui.behaviorsWidget.show()
 			self.ui.agentsDock.show()
-			self.ui.agentStatesDock.show()
+			#self.ui.agentStatesDock.show()
+			self.ui.agentStatesDock.hide()
 			self.ui.menuRules.setEnabled(False)
 			self.ui.menuBehaviors.setEnabled(True)
 		else:
@@ -636,7 +676,7 @@ class AGMEditor(QMainWindow):
 		for config in self.agmData.parsedConfigurations:
 			self.newConfig(name=config)
 
-		self.drawCombos()
+		self.processTableAndDrawCombos()
 
 		self.ui.rulesList.clear()
 		for rule in self.agmData.agm.rules:

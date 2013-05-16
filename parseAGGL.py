@@ -73,7 +73,7 @@ class AGMFileDataParsing:
 
 		verbose = False
 
-		print 'PARSEANDOOOOOOOOOOO'
+		#print 'PARSEANDOOOOOOOOOOO'
 		# Parse input file
 		result = agm.parseString(open(filename, 'r').read())
 		if verbose: print "Result:\n",result
@@ -99,7 +99,7 @@ class AGMFileDataParsing:
 		
 		agmFD.parsedAgents = dict()
 		for agent in result.agents:
-			print agent.agentName, 'sera', agent.stateList
+			#print agent.agentName, 'sera', agent.stateList
 			agmFD.parsedAgents[agent.agentName] = agent.stateList
 		print agmFD.parsedAgents
 		agmFD.parsedConfigurations = result.configurations
@@ -111,5 +111,5 @@ class AGMFileDataParsing:
 			if verbose: print '\nRule:('+str(number)+')'
 			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, verbose))
 			number += 1
-		print 'PARSEANDOOOOOOOOOOO FIN'
+		#print 'PARSEANDOOOOOOOOOOO FIN'
 		return agmFD
