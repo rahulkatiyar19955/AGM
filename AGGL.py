@@ -189,11 +189,11 @@ class AGMAgent(object):
 	def addUnnamedState(self):
 		initialName = self.name + 'State'
 		possibleNumber = len(self.states)
-		name = initialName + possibleNumber
+		name = initialName + str(possibleNumber)
 		while name in self.states.keys():
 			possibleNumber = possibleNumber + 1
-			name = initialName + possibleNumber
-		self.addState(name)
+			name = initialName + str(possibleNumber)
+		self.addState(AGMAgentState(name,self.name))
 		return name
 
 class AGMConfiguration(object):
@@ -237,11 +237,11 @@ class AGM(object):
 			name = initialName + str(possibleNumber)
 		self.addConfiguration(name)
 		return name
-	def addAgentState(self, agent, name):
-		try:
-			self.agents[agent].addState(name)
-		except:
-			print 'No',agent, 'agent'
+	def addUnnamedAgentState(self, agent):
+		return self.agents[agent].addUnnamedState()
+	def addAgentState(self, agent, statename):
+		return self.agents[agent].addState(statename)
+
 
 class AGMFileData(object):
 	def __init__(self):

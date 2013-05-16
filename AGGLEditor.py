@@ -446,121 +446,89 @@ class AGMEditor(QMainWindow):
 			self.newConfig(True)
 			self.newAgent(True)
 
-
-		self.ui.agentStatesListWidget.clicked.connect(self.statesClicked)
-		self.ui.configurationListWidget.clicked.connect(self.configurationsClicked)
-		self.ui.agentListWidget.clicked.connect(self.agentsClicked)
-
-		print ''
-		print ''
-
-	def configurationsClicked(self):
-		print 'Configurations clicked'
-		#for c_i in range(self.ui.configurationListWidget.count()):
-			#c = self.agmData.agm.configurations[c_i]
-			#print 'Config', c.name,
-			#c.name = self.ui.configurationListWidget.model().index(c_i,0).data(Qt.DisplayRole)
-			#print ' ==> ', c.name
-		#self.redrawConfigurationTable()
-	def agentsClicked(self):
-		print 'Agents clicked!'
-		#for a_i in range(len(self.agmData.agm.agents)):
-			#a = self.agmData.agm.agents[a_i]
-			#print 'Agent', a.name,
-			#a.name = self.ui.agentListWidget.model().index(a_i,0).data(Qt.DisplayRole)
-			#print ' ==> ', a.name
-		#self.redrawAgentStates()
-		#self.redrawConfigurationTable()
-	def statesClicked(self):
-		print 'states list clicked!'
-		#a_i = self.ui.agentListWidget.currentIndex().row()
-		#a = self.agmData.agm.agents[a_i]
-		#print 'Agent', a.name,
-		#a.name = self.ui.agentListWidget.model().index(a_i,0).data(Qt.DisplayRole)
-		#print ' ==> ', a.name
-		#print a_i, self.ui.agentListWidget.currentIndex().row()
-		#if a_i == self.ui.agentListWidget.currentIndex().row():
-			#print 'current index'
-			#for s_i in range(len(a.states)):
-				#s = a.states[s_i]
-				#s.name = self.ui.agentStatesListWidget.model().index(s_i,0).data(Qt.DisplayRole)
-		#else:
-			#print 'waaaaaaaaaaat'
-		#self.redrawConfigurationTable()
-
-	def redrawAgentStates(self):
-		self.ui.agentStatesListWidget.clear()
-		return
-		a = self.agmData.agm.agents[self.ui.agentListWidget.currentIndex().row()]
-		print 'States for', a.name
-		for s in a.states:
-			print s.name
-			self.ui.agentStatesListWidget.setAlternatingRowColors(True)
-			item1 = QListWidgetItem(self.ui.agentStatesListWidget)
-			item1.setText(s.name)
-			item1.setFlags(item1.flags() | Qt.ItemIsEditable)
-			self.ui.agentStatesListWidget.setCurrentRow(self.ui.agentStatesListWidget.count()-1)
-
 	def redrawConfigurationTable(self, b=None, re=True):
 		#if re: self.uiElementChanged(re=False)
-		print 'Redraw', len(self.agmData.agm.configurations), len(self.agmData.agm.agents)
+		#print 'Redraw', len(self.agmData.agm.configurations), len(self.agmData.agm.agents)
 		self.ui.tableWidget.setRowCount(len(self.agmData.agm.configurations))
 		self.ui.tableWidget.setColumnCount(len(self.agmData.agm.agents))
 		count = 0
+		#print 'configs'
 		for config in self.agmData.agm.configurations:
+			#print config
 			self.ui.tableWidget.setVerticalHeaderItem(count, QTableWidgetItem(config))
 			count+=1
 		count = 0
+		#print 'agents'
 		for agent in self.agmData.agm.agents:
+			#print agent
 			self.ui.tableWidget.setHorizontalHeaderItem(count, QTableWidgetItem(agent))
 			count+=1
-		return
-
-		self.ui.tableWidget.clear()
-		self.ui.tableWidget.setRowCount(len(self.agmData.agm.agents))
-		self.ui.tableWidget.setColumnCount(2)
-		text = self.ui.configurationListWidget.currentItem().text()
-		for config in self.agmData.agm.configurations:
-			if text == self.agmData.agm.configurations[config].name:
-				print 'Configuration', text
-				for i in range(len(self.agmData.agm.agents)):
-					agent = self.agmData.agm.agents[i]
-					print '  Agent', agent.name
-					self.ui.tableWidget.setItem(i, 0, QTableWidgetItem(agent.name))
-					combo = QComboBox()
-					for s in agent.states:
-						print '    State', s.name
-						combo.addItem(s.name)
-					self.ui.tableWidget.setCellWidget(i,1,combo)
 		self.ui.tableWidget.resizeColumnsToContents()
 
-	def newConfig(self, val):
+	def newConfig(self, val=True, name=''):
 		self.ui.configurationListWidget.setAlternatingRowColors(True)
-		name = self.agmData.agm.addUnnamedConfiguration()
+		if name == '':
+			name = self.agmData.agm.addUnnamedConfiguration()
 		item1 = QListWidgetItem(self.ui.configurationListWidget)
 		item1.setText(name)
-		item1.setFlags(item1.flags() | Qt.ItemIsEditable)
+		self.agmData.agm.addConfiguration(name)
 		self.redrawConfigurationTable()
 
-	def newAgent(self, val):
+	def newAgent(self, val=True, name=''):
 		self.ui.agentListWidget.setAlternatingRowColors(True)
-		name = self.agmData.agm.addUnnamedAgent()
+		if name == '':
+			name = self.agmData.agm.addUnnamedAgent()
 		item1 = QListWidgetItem(self.ui.agentListWidget)
 		item1.setText(name)
-		item1.setFlags(item1.flags() | Qt.ItemIsEditable)
+		self.agmData.agm.addAgent(name)
+		
 		self.redrawConfigurationTable()
 
-	def newAgentState(self, val):
-		print str(self.ui.agentListWidget.currentItem().text())
-		#self.agmData.agm.addAgentState(str(self.ui.agentListWidget.currentItem().text()), 'new agent state')
-		#self.ui.agentStatesListWidget.setAlternatingRowColors(True)
-		#item1 = QListWidgetItem(self.ui.agentStatesListWidget)
-		#item1.setText("new agent state")
-		#item1.setFlags(item1.flags() | Qt.ItemIsEditable)
-		#self.ui.agentStatesListWidget.setCurrentRow(self.ui.agentStatesListWidget.count()-1)
-		#self.redrawAgentStates()
-		#self.redrawConfigurationTable()
-		pass
+	def newAgentState(self, val=True, agentName='', stateName=''):
+		if agentName == '':
+			try:
+				agentName = str(self.ui.agentListWidget.currentItem().text())
+			except:
+				return
+		agent = self.agmData.agm.agents[agentName]
+		for a in self.agmData.agm.agents:
+			if agentName == a:
+				if stateName == '':
+					stateName = self.agmData.agm.addUnnamedAgentState(agentName)
+				else:
+					self.agmData.agm.addAgentState(agentName, AGMAgentState(stateName, agentName))
+				item1 = QListWidgetItem(stateName, self.ui.agentStatesListWidget)
+				self.ui.agentStatesListWidget.addItem(item1)
+				cols = self.ui.tableWidget.columnCount()
+				for i in range(cols):
+					if self.ui.tableWidget.horizontalHeaderItem(i).text() == agentName:
+						rows = self.ui.tableWidget.rowCount()
+						for r in range(rows):
+							print i
+							combo = QComboBox()
+							for s in agent.states:
+								print '    State', s.name
+								combo.addItem(s.name)
+							self.ui.tableWidget.setCellWidget(r,i,combo)
+				self.ui.tableWidget.resizeColumnsToContents()
+				return
+		self.redrawConfigurationTable()
+	def drawCombos(self):
+		print 'draw combos!'
+		for agentName in self.agmData.agm.agents:
+			cols = self.ui.tableWidget.columnCount()
+			for i in range(cols):
+				if self.ui.tableWidget.horizontalHeaderItem(i).text() == agentName:
+					rows = self.ui.tableWidget.rowCount()
+					for r in range(rows):
+						print i
+						combo = QComboBox()
+						for s in self.agmData.agm.agents[agentName].states:
+							print '    State', s.name
+							combo.addItem(s.name)
+						self.ui.tableWidget.setCellWidget(r,i,combo)
+			self.ui.tableWidget.resizeColumnsToContents()
+
 	def removeCurrentAgentState(self, val):
 		print 'remove agent configuration', val
 		self.redrawConfigurationTable()
@@ -599,7 +567,6 @@ class AGMEditor(QMainWindow):
 		for r in range(len(self.agmData.agm.rules)):
 			item = self.ui.rulesList.item(r)
 			item.setText(self.agmData.agm.rules[r].name)
-
 	def selectTool(self, tool):
 		self.tool = str(self.ui.toolsList.item(tool).text())
 	def changeFont(self):
@@ -660,12 +627,25 @@ class AGMEditor(QMainWindow):
 		print 'Opening', path
 		if path[-4:] != '.agm': path = path + '.agm'
 		self.agmData = AGMFileDataParsing.fromFile(path, verbose=True)
+		# Include parsed agents
+		for agent in self.agmData.parsedAgents:
+			self.newAgent(name=agent)
+			for state in self.agmData.parsedAgents[agent]:
+				self.newAgentState(agentName=agent, stateName=state)
+		# Include pared configurations
+		for config in self.agmData.parsedConfigurations:
+			self.newConfig(name=config)
+
+		self.drawCombos()
+
 		self.ui.rulesList.clear()
 		for rule in self.agmData.agm.rules:
 			q = QListWidgetItem()
 			q.setText(rule.name)
 			self.ui.rulesList.addItem(q)
-		self.changeRule(0)
+		#self.changeRule(0)
+		self.redrawConfigurationTable()
+		self.ui.agentStatesListWidget.clear()
 	def save(self):
 		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.agm")[0]
 		print path

@@ -87,7 +87,7 @@
      <x>0</x>
      <y>0</y>
      <width>843</width>
-     <height>20</height>
+     <height>19</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -329,7 +329,7 @@
   </action>
   <action name="actionNew_agent_state">
    <property name="text">
-    <string>New agent state</string>
+    <string>New state for the current agent</string>
    </property>
   </action>
   <action name="actionRemove_current_agent_state">
