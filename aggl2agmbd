@@ -1,0 +1,23 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from AGGL import *
+from parseAGGL import *
+from pddlAGGL import *
+import sys
+
+ret = 0
+try:
+	if len(sys.argv)==3:
+		inputFile   = sys.argv[1]
+		outputFile  = sys.argv[2]
+		agmData = AGMFileDataParsing.fromFile(inputFile, verbose=False)
+		agmData.generateAGMBehaviorDescription(outputFile)
+	else:
+		print '\n'+sys.argv[0], ' <inputFile.aggl>  <outputFile.agmbd>\n'
+		ret = 1
+except:
+	print 'Error'
+	ret = -1
+	
+sys.exit(ret)
