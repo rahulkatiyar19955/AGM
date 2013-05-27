@@ -301,7 +301,7 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	}
 	for (uint32_t e=0; e<target->edges.size(); ++e)
 	{
-		stringStream << "				(" << target->edges[e].toString(target) << ")\n";
+		stringStream << "				(" << target->edges[e].toString(target.get()) << ")\n";
 	}
 	stringStream << "			)\n";
 	stringStream << "		)\n";
@@ -410,4 +410,12 @@ int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 
 
 
+void AGMModel::setSymbols(std::vector<AGMModelSymbol::SPtr> s)
+{
+	symbols = s;
+}
 
+void AGMModel::setEdges(std::vector<AGMModelEdge> e)
+{
+	edges = e;
+}

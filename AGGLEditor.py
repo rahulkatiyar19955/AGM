@@ -444,6 +444,8 @@ class AGMEditor(QMainWindow):
 		else:
 			self.newConfig(True)
 			self.newAgent(True)
+		
+		self.ui.rulesList.setCurrentRow(0)
 
 	def redrawConfigurationTable(self, b=None, re=True):
 		self.ui.tableWidget.setRowCount(len(self.agmData.agm.configurations))

@@ -48,12 +48,16 @@ public:
 	int32_t getIndexByIdentifier(int32_t targetId) const;
 
 
+	float string2float(const std::string &s) const { return ::str2float(s); }
 
 	/// PLANNING RELATED !!
 	std::string generatePDDLProblem(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName="problemName") const;
 
+	void setSymbols(std::vector<AGMModelSymbol::SPtr> s);
+	void setEdges(std::vector<AGMModelEdge> e);
 
-// private:
+	
+	
 	std::vector<AGMModelSymbol::SPtr> symbols;
 	std::vector<AGMModelEdge> edges;
 private:	

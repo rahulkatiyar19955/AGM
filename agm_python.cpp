@@ -2,9 +2,13 @@
 
 #include <boost/python.hpp>
 
+#include "agm_modelEdge.h"
+#include "agm_modelSymbols.h"
 #include "agm.h"
 
 using namespace boost::python;
+
+// 	 .def("", &::)
 
 BOOST_PYTHON_MODULE(libagm)
 {
@@ -12,45 +16,54 @@ BOOST_PYTHON_MODULE(libagm)
 	 .def("print", &AGM::print)
 	;
 
-// 	class_<AGMModel>("AGMModel", init<>())
-// 	 .def("clear", &AGMModel::clear)
-// 	;
 
-/*	
-	class AGMModel
-{
-	AGMModel(const AGMModel::SPtr &src);
-	AGMModel(const AGMModel &src);
-	AGMModel& operator=(const AGMModel &src);
+	class_<AGMModelEdge>("AGMModelEdge", init<>()) 
+	 .def(init<int, int, std::string>())
+	 .def(init<const AGMModelEdge&>())
+	 .def("getLabel", &AGMModelEdge::getLabel)
+	 .def("getSymbolPair", &AGMModelEdge::getSymbolPair)
+	 .def("setLabel", &AGMModelEdge::setLabel)
+	 .def("setSymbolPair", &AGMModelEdge::setSymbolPair)
+	 .def("toString", &AGMModelEdge::toString)
+	;
+	
+	
+	
+	
+	
+	class_<AGMModelSymbol>("AGMModelSymbol", init<>()) 
+	 .def(init<std::string>())
+	 .def(init<int32_t, std::string>())
+	 .def(init<int32_t, std::string, std::map<std::string, std::string> >())
+	 .def(init<const AGMModelSymbol&>())
+	;
 
-	/// SET's
-	void clear();
-	int32_t insertSymbol(AGMModelSymbol::SPtr s);
-	void resetLastId();
+		
+	class_<AGMModel>("AGMModel", init<>()) 
+	 // Constructors
+	 .def(init<boost::shared_ptr<AGMModel> >())
+	 .def(init<AGMModel &>())
+	 .def("string2float", &AGMModel::string2float)
+	 // (S/G)ets
+	 .def("clear", &AGMModel::clear)
+	 .def("insertSymbol", &AGMModel::insertSymbol)
+	 .def("resetLastId", &AGMModel::resetLastId)
+	 .def("numberOfEdges", &AGMModel::numberOfEdges)
+	 .def("numberOfSymbols", &AGMModel::numberOfSymbols)
+	 .def("indexOfSymbol", &AGMModel::indexOfSymbol)
+	 .def("indexOfFirstSymbolByType", &AGMModel::indexOfFirstSymbolByType)
+	 .def("indexOfFirstSymbolByValues", &AGMModel::indexOfFirstSymbolByValues)
+	 .def("getSymbols", &AGMModel::getSymbols)
+	 .def("getEdges", &AGMModel::getEdges)
+	 .def("setSymbols", &AGMModel::setSymbols)
+	 .def("setEdges", &AGMModel::setEdges)
+	 .def("getIdentifierByName", &AGMModel::getIdentifierByName)
+	 .def("getIdentifierByType", &AGMModel::getIdentifierByType)
+	 .def("getLinkedID", &AGMModel::getLinkedID)
+	 .def("getIndexByIdentifier", &AGMModel::getIndexByIdentifier)
+	 .def("generatePDDLProblem", &AGMModel::generatePDDLProblem)
+	;
 
-	/// GET's
-	AGMModelSymbol::SPtr getSymbol(int32_t identif) const;
-	int32_t numberOfEdges() const;
-	int32_t numberOfSymbols() const;
-	int32_t indexOfSymbol(const AGMModelSymbol::SPtr &value, int32_t from=0) const;
-	int32_t indexOfFirstSymbolByValues(const AGMModelSymbol &value, int32_t from=0) const;
-	int32_t indexOfFirstSymbolByType(const std::string &value, int32_t from=0) const;
-	std::vector<AGMModelSymbol::SPtr> getSymbols() const;
-	std::vector<AGMModelEdge> getEdges() const;
-	AGMModelSymbol::SPtr &symbol(uint32_t index);
-	AGMModelEdge &edge(uint32_t index);
-
-	int32_t getIdentifierByName(std::string name) const;
-	int32_t getIdentifierByType(std::string type, int32_t i=0) const;
-	int32_t getLinkedID(int32_t id, std::string linkname, int32_t i=0) const;
-	int32_t getIndexByIdentifier(int32_t targetId) const;
-
-	std::string generatePDDLProblem(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName="problemName") const;
-
-	std::vector<AGMModelSymbol::SPtr> symbols;
-	std::vector<AGMModelEdge> edges;
-
-	*/
 	
 }
 

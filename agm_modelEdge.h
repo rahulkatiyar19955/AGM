@@ -16,12 +16,18 @@ public:
 	AGMModelEdge(const AGMModelEdge &src);
 	AGMModelEdge& operator=(const AGMModelEdge &src);
 
-	std::string linking;
-	std::pair<int32_t, int32_t> symbolPair;
+	std::string getLabel() const;
+	std::pair<int32_t, int32_t> getSymbolPair() const;
+	void setLabel(std::string l);
+	void setSymbolPair(std::pair<int32_t, int32_t> p);
 
-	std::string toString(const AGMModel::SPtr &world) const;
+// 	std::string toString(const boost::shared_ptr<AGMModel> &world);
 	std::string toString(const AGMModel *world) const;
 
+	
+// protected:
+	std::string linking;
+	std::pair<int32_t, int32_t> symbolPair;
 private:
 	void setFrom(const AGMModelEdge &src);
 };

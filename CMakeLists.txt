@@ -31,9 +31,12 @@ link_directories(${Boost_LIBRARY_DIRS})
 
 # get python
 find_package(PythonLibs REQUIRED)
+MESSAGE(STATUS "DIRS ${PYTHON_INCLUDE_DIRS}")
+MESSAGE(STATUS "LIBS ${PYTHON_LIBRARIES}")
+SET(PYTHON_LIBRARIES "/usr/lib/python2.7/config/libpython2.7.so")
+MESSAGE(STATUS "LIBS ${PYTHON_LIBRARIES}")
 include_directories(${PYTHON_INCLUDE_DIRS})
 link_directories(${PYTHON_LIBRARIES})
-
 
 SET (AGM_CODE
   agm.cpp
@@ -49,6 +52,6 @@ SET (AGM_CODE
 add_library(agm SHARED ${AGM_CODE} )
 target_link_libraries(agm ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 
-
-# add_executable ( testagm testagm.cpp  )
-# target_link_libraries ( testagm  -L. -lagm )
+add_executable ( testagm testagm.cpp  )
+target_link_libraries ( testagm  -L. -lagm  ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+add_dependencies(testagm agm)

@@ -38,10 +38,10 @@ void AGMModelEdge::setFrom(const AGMModelEdge &src)
 
 
 
-std::string AGMModelEdge::toString(const AGMModel::SPtr &world) const
-{
-	return toString(world.get());
-}
+// std::string AGMModelEdge::toString(const AGMModel::SPtr &world) const
+// {
+// 	return toString(world.get());
+// }
 
 
 std::string AGMModelEdge::toString(const AGMModel *world) const
@@ -77,3 +77,22 @@ std::string AGMModelEdge::toString(const AGMModel *world) const
 
 
 
+std::string AGMModelEdge::getLabel() const
+{
+	return linking;
+}
+
+std::pair<int32_t, int32_t> AGMModelEdge::getSymbolPair() const
+{
+	return symbolPair;
+}
+
+void AGMModelEdge::setLabel(std::string l)
+{
+	linking = l;
+}
+
+void AGMModelEdge::setSymbolPair(std::pair<int32_t, int32_t> p)
+{
+	symbolPair = p;
+}

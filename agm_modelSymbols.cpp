@@ -12,10 +12,22 @@ AGMModelSymbol::AGMModelSymbol()
 	identifier = AGMModelSymbol::getNewId();
 }
 
-AGMModelSymbol::AGMModelSymbol(int32_t identifier, std::string typ, std::map<std::string, std::string> atr)
+AGMModelSymbol::AGMModelSymbol(std::string typ)
 {
 	symbolType = typ;
-	identifier = identifier;
+	identifier = AGMModelSymbol::getNewId();
+}
+
+AGMModelSymbol::AGMModelSymbol(int32_t id, std::string typ)
+{
+	identifier = id;
+	symbolType = typ;
+}
+
+AGMModelSymbol::AGMModelSymbol(int32_t id, std::string typ, std::map<std::string, std::string> atr)
+{
+	identifier = id;
+	symbolType = typ;
 	attributes = atr;
 }
 
@@ -65,5 +77,33 @@ int32_t AGMModelSymbol::getLastId()
 	return ret;
 }
 
+
+
+std::string AGMModelSymbol::symboltype() const
+{
+	return symbolType;
+}
+
+
+void AGMModelSymbol::setType(std::string t)
+{
+	symbolType = t;
+}
+
+
+void AGMModelSymbol::setIdentifier(int32_t t)
+{
+	identifier = t;
+}
+
+void AGMModelSymbol::setAttribute(std::string a, std::string v)
+{
+	attributes[a] = v;
+}
+
+std::string AGMModelSymbol::getAttribute(std::string a)
+{
+	return attributes[a];
+}
 
 
