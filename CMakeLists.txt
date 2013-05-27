@@ -12,18 +12,33 @@ MACRO( WRAP_PYTHON_UI )
   ENDFOREACH( input_file )
 ENDMACRO( WRAP_PYTHON_UI )
 
-#ADD_CUSTOM_COMMAND (
-#	OUTPUT graphmars
-#	COMMAND cp graphmars.py graphmars
-#	COMMAND chmod 755 graphmars
-#)
-#ADD_CUSTOM_TARGET(exec_graphmars ALL DEPENDS graphmars )
-
 WRAP_PYTHON_UI( guiAGGLEditor appearance )
 
-# Program destination directory
-# SET( DEST_DIR "/usr/local/bin/")
-# INSTALL(FILES monitorComp       DESTINATION ${DEST_DIR} PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE )
+
+# get boost
+find_package(Boost COMPONENTS system thread REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
 
 
+set(CMAKE_CXX_FLAGS "-Wall -Wfatal-errors " )
 
+INCLUDE_DIRECTORIES ( . )
+
+
+SET (AGM_CODE
+  agm.cpp
+  agm_behavior.cpp
+  agm_model.cpp
+  agm_modelEdge.cpp
+  agm_modelPrinter.cpp
+  agm_modelSymbols.cpp
+)
+
+
+add_library(agm SHARED ${AGM_CODE} )
+target_link_libraries(agm ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+
+
+add_executable ( testagm testagm.cpp  )
+target_link_libraries ( testagm  -L. -lagm )

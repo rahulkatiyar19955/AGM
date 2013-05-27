@@ -14,7 +14,7 @@ try:
 		agmData = AGMFileDataParsing.fromFile(inputFile, verbose=False)
 		agmData.generatePDDL(outputFile)
 	else:
-		print '\n'+sys.argv[0], ' <inputFile.agm>  <outputFile.pddl>\n'
+		print '\n'+sys.argv[0], ' <inputFile.aggl>  <outputFile.pddl>\n'
 		ret = 1
 except:
 	print 'Error'

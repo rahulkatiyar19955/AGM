@@ -276,4 +276,9 @@ class AGMFileData(object):
 		w = open(filename, 'w')
 		w.write(AGMPDDL.toPDDL(self.agm, self.properties["name"]))
 		w.close()
+		
+	def generateAGMBehaviorDescription(self, filename):
+		w = open(filename, 'w')
+		w.write(AGMBD.toAGMBehaviorDescription(self.agm, self.properties["name"]))
+		w.close()
 				
