@@ -5,17 +5,16 @@
 #include "agm.h"
 
 
-
-
 /*
  * 
  *   A G M
  * 
  */
 
-AGM::AGM(std::string pddlFile, std::string agmbdFile)
+AGM::AGM(std::string pddlFile_, std::string agmbdFile_)
 {
-	loadFromFile(pddlFile, agmbdFile);
+	pddlFile = pddlFile_;
+	loadFromFile(pddlFile_, agmbdFile_);
 }
 
 void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
@@ -37,7 +36,7 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 				switch(line[0])
 				{
 					case 'A':
-						for (int v=1; v<words.size(); v++)
+						for (uint32_t v=1; v<words.size(); v++)
 						{
 							if (v==1)
 							{
@@ -56,7 +55,7 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 						}
 						break;
 					case 'C':
-						for (int v=1; v<words.size(); v++)
+						for (uint32_t v=1; v<words.size(); v++)
 						{
 							r = table.addConfiguration(words[v]);
 							if (r==false)
@@ -132,6 +131,13 @@ void AGM::print()
 {
 	table.print();
 }
+
+bool checkModel(AGMModel::SPtr model)
+{
+	return false;
+}
+
+
 
 
 
