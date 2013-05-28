@@ -1,4 +1,4 @@
-cmake_minimum_required( VERSION 2.6 )
+cmake_minimum_required( VERSION 2.8)
 
 
 MACRO( WRAP_PYTHON_UI )
@@ -32,8 +32,6 @@ link_directories(${Boost_LIBRARY_DIRS})
 # get python
 find_package(PythonLibs REQUIRED)
 MESSAGE(STATUS "DIRS ${PYTHON_INCLUDE_DIRS}")
-MESSAGE(STATUS "LIBS ${PYTHON_LIBRARIES}")
-SET(PYTHON_LIBRARIES "/usr/lib/python2.7/config/libpython2.7.so")
 MESSAGE(STATUS "LIBS ${PYTHON_LIBRARIES}")
 include_directories(${PYTHON_INCLUDE_DIRS})
 link_directories(${PYTHON_LIBRARIES})
