@@ -9,9 +9,12 @@ public:
 	void print();
 
 	bool checkModel(AGMModel::SPtr model);
-// 	updateModel
-// 	acceptModel
-	
+	bool proposeModel(AGMModel::SPtr model);
+	bool updateModel(AGMModelSymbol);
+
+	std::string pddlProblemForTarget(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName);
+
+
 private:
 	std::string pddlFile;
 	AGMBehaviorDescription table;

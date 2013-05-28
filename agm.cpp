@@ -132,9 +132,28 @@ void AGM::print()
 	table.print();
 }
 
-bool checkModel(AGMModel::SPtr model)
+
+std::string AGM::pddlProblemForTarget(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName)
+{
+	return currentModel.generatePDDLProblem(target, unknowns, domainName, problemName);
+}
+
+
+bool AGM::checkModel(AGMModel::SPtr model)
 {
 	return false;
+}
+
+
+bool AGM::proposeModel(AGMModel::SPtr model)
+{
+	return true;
+}
+
+
+bool AGM::updateModel(AGMModelSymbol)
+{
+	return true;
 }
 
 
