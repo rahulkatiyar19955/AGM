@@ -30,7 +30,7 @@ class AGMRuleParsing:
 		LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 		if verbose: print '\t===>'
 		RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-		return AGMRule(i.name, LHS, RHS)
+		return AGMRule(i.name, i.config, LHS, RHS)
 
 
 class AGMFileDataParsing:
@@ -45,7 +45,7 @@ class AGMFileDataParsing:
 		# Define AGM's DSL meta-model
 		an = Word(alphanums)
 		nu = Word(nums)
-		sep = Suppress("==============================================")
+		sep = Suppress("===")
 		eq = Suppress("=")
 		cn = Suppress(":") 
 		lk = Suppress("->")
@@ -63,7 +63,7 @@ class AGMFileDataParsing:
 		link  = Group(an.setResultsName("lhs") + lk + an.setResultsName("rhs") + po + Optional(no).setResultsName("no") + an.setResultsName("linkType") + pc)
 		node  = Group(an.setResultsName("symbol") + cn + an.setResultsName("symbolType") + Optional(po + nu.setResultsName("x") + co + nu.setResultsName("y") + pc))
 		graph = Group(op + ZeroOrMore(node).setResultsName("nodes") + ZeroOrMore(link).setResultsName("links") + cl)
-		rule  = Group(an.setResultsName("name") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
+		rule  = Group(an.setResultsName("name") + cn + an.setResultsName("config")  + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
 		prop  = Group(an.setResultsName("prop") + eq + an.setResultsName("value"))
 		agent = Group(an.setResultsName("agentName") + po + OneOrMore(an).setResultsName("stateList") + pc )
 		agents =    ag + op + OneOrMore(agent).setResultsName("agents")      + cl
@@ -73,7 +73,6 @@ class AGMFileDataParsing:
 
 		verbose = False
 
-		#print 'PARSEANDOOOOOOOOOOO'
 		# Parse input file
 		result = agm.parseString(open(filename, 'r').read())
 		if verbose: print "Result:\n",result
@@ -95,14 +94,13 @@ class AGMFileDataParsing:
 					print 'This is not a valid float:', i.value
 			number += 1
 		if not gotName:
-			print 'SHIIIIIIIT no name'
+			print 'drats! no name'
 		
 		agmFD.parsedAgents = dict()
 		for agent in result.agents:
-			print agent.agentName, 'sera', agent.stateList
 			agmFD.agm.agentList.append(agent.agentName)
 			agmFD.parsedAgents[agent.agentName] = agent.stateList
-		print agmFD.parsedAgents
+
 		agmFD.parsedConfigurations = result.configurations
 		for c in result.configurations:
 			agmFD.agm.configurationList.append(c)
@@ -112,7 +110,6 @@ class AGMFileDataParsing:
 		number = 0
 		for i in result.rules:
 			if verbose: print '\nRule:('+str(number)+')'
-			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, verbose))
+			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i,  verbose))
 			number += 1
-		#print 'PARSEANDOOOOOOOOOOO FIN'
 		return agmFD

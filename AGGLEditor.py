@@ -122,11 +122,12 @@ class RuleRenamer(QLineEdit):
 
 
 class GraphDraw(QWidget):
-	def __init__(self, parentw, main):
+	def __init__(self, parentw, main, name=''):
+		self.name = name
 		QWidget.__init__(self, parentw)
 		self.parentW = parentw
 		self.main = main
-		self.graph = AGMGraph(dict(), [])
+		self.graph = AGMGraph()
 		self.pressName = -1
 		self.releaseName = -1
 		self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -266,28 +267,28 @@ class GraphDraw(QWidget):
 	def mousePressEvent(self, e):
 		global vertexDiameter
 		if self.main.tool == 'Node - Add':
-			self.graph.addNode(e.x(), e.y(), 'a', 'type')
+			try:
+				self.lastNumber
+			except:
+				self.lastNumber = 1
+			self.graph.addNode(e.x(), e.y(), 'newid'+str(self.lastNumber)+self.name, 'type')
+			self.lastNumber +=1
+			
 		elif self.main.tool == 'Node - Remove':
 			x, y = self.graph.getName(e.x(), e.y(), vertexDiameter)
 			if x>=0:
 				self.graph.removeNode(e.x(), e.y(), vertexDiameter)
-			else:
-				print 'No node'
 
 		elif self.main.tool == 'Node - Rename':
 			x, y = self.graph.getCenter(e.x(), e.y(), vertexDiameter)
 			if x>=0:
 				r = NodeNameReader(x, y, self)
 				r.setFocus(Qt.OtherFocusReason)
-			else:
-				print 'No node'
 		elif self.main.tool == 'Node - Change type':
 			x, y = self.graph.getCenter(e.x(), e.y(), vertexDiameter)
 			if x>=0:
 				r = NodeTypeReader(x, y, self)
 				r.setFocus(Qt.OtherFocusReason)
-			else:
-				print 'No node'
 		elif self.main.tool == 'Node - Move':
 			self.pressName, found = self.graph.getName(e.x(), e.y(), 100)
 			if not found: self.pressName = ''
@@ -397,15 +398,15 @@ class AGMEditor(QMainWindow):
 		self.fontDialog = QFontDialog(self)
 		self.font = self.fontDialog.selectedFont()
 		self.agmData = AGMFileData()
-		self.lhsPainter = GraphDraw(self.ui.lhsParentWidget, self)
-		self.rhsPainter = GraphDraw(self.ui.rhsParentWidget, self)
-		self.addRule()
+		self.lhsPainter = GraphDraw(self.ui.lhsParentWidget, self, "LHS")
+		self.rhsPainter = GraphDraw(self.ui.rhsParentWidget, self, "RHS")
 		self.timer = QTimer()
 		self.tool = ''
 		self.appearance = Appearance()
 		self.connect(self.timer,                               SIGNAL('timeout()'),                                            self.draw)
 		self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),                               self.selectTool)
 		self.connect(self.ui.rulesList,                        SIGNAL('currentRowChanged(int)'),                               self.changeRule)
+		self.connect(self.ui.configurationListWidget,          SIGNAL('currentRowChanged(int)'),                               self.changeConfig)
 		self.connect(self.ui.actionChangeFont,                 SIGNAL("triggered(bool)"),                                      self.changeFont)
 		self.connect(self.ui.actionChangeAppearance,           SIGNAL("triggered(bool)"),                                      self.changeAppearance)
 		self.connect(self.ui.actionAddRule,                    SIGNAL("triggered(bool)"),                                      self.addRule)
@@ -420,17 +421,12 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),                                      self.close)
 		self.connect(self.ui.actionGraphmar,                   SIGNAL("triggered(bool)"),                                      self.about)
 		self.connect(self.ui.tabWidget,                        SIGNAL("currentChanged(int)"),                                  self.tabChanged)
-		self.connect(self.ui.tabWidget,                        SIGNAL("currentChanged(int)"),                                  self.tabChanged)
 		self.connect(self.ui.actionNew_agent,                  SIGNAL("triggered(bool)"),                                      self.newAgent)
 		self.connect(self.ui.actionRemove_current_agent,       SIGNAL("triggered(bool)"),                                      self.removeCurrentAgent)
 		self.connect(self.ui.actionNew_configuration,          SIGNAL("triggered(bool)"),                                      self.newConfig)
 		self.connect(self.ui.actionRemove_current_config,      SIGNAL("triggered(bool)"),                                      self.removeCurrentConfig)
 		self.connect(self.ui.actionNew_agent_state,            SIGNAL("triggered(bool)"),                                      self.newAgentState)
 		self.connect(self.ui.actionRemove_current_agent_state, SIGNAL("triggered(bool)"),                                      self.removeCurrentAgentState)
-
-
-
-
 
 		self.timer.start(20)
 		self.ui.toolsList.setCurrentRow(4)
@@ -442,6 +438,7 @@ class AGMEditor(QMainWindow):
 		if len(filePath)>0:
 			self.openFromFile(filePath)
 		else:
+			self.addRule()
 			self.newConfig(True)
 			self.newAgent(True)
 		
@@ -476,8 +473,8 @@ class AGMEditor(QMainWindow):
 		item1 = QListWidgetItem(self.ui.agentListWidget)
 		item1.setText(name)
 		self.agmData.agm.addAgent(name)
-		
 		self.redrawConfigurationTable()
+		self.newAgentState(agentName=name)
 
 	def newAgentState(self, val=True, agentName='', stateName=''):
 		if agentName == '':
@@ -486,27 +483,19 @@ class AGMEditor(QMainWindow):
 			except:
 				return
 		agent = self.agmData.agm.agents[agentName]
-		for a in self.agmData.agm.agents:
-			if agentName == a:
-				if stateName == '':
-					stateName = self.agmData.agm.addUnnamedAgentState(agentName)
-				else:
-					self.agmData.agm.addAgentState(agentName, stateName)
-				item1 = QListWidgetItem(stateName, self.ui.agentStatesListWidget)
-				self.ui.agentStatesListWidget.addItem(item1)
-				cols = self.ui.tableWidget.columnCount()
-				for i in range(cols):
-					if self.ui.tableWidget.horizontalHeaderItem(i).text() == agentName:
-						rows = self.ui.tableWidget.rowCount()
-						for r in range(rows):
-							print i
-							combo = QComboBox()
-							for s in agent.states:
-								print '    State', s.name
-								combo.addItem(s.name)
-							self.ui.tableWidget.setCellWidget(r,i,combo)
-				self.ui.tableWidget.resizeColumnsToContents()
-				return
+		if stateName == '':
+			stateName = self.agmData.agm.addUnnamedAgentState(agentName)
+		else:
+			self.agmData.agm.addAgentState(agentName, AGMAgentState(stateName, agentName))
+		for c in range(self.ui.tableWidget.columnCount()):
+			if self.ui.tableWidget.horizontalHeaderItem(c).text() == agentName:
+				for r in range(self.ui.tableWidget.rowCount()):
+					combo = QComboBox()
+					for s in agent.states:
+						combo.addItem(s.name)
+					self.ui.tableWidget.setCellWidget(r,c,combo)
+		self.ui.tableWidget.resizeColumnsToContents()
+		return
 		self.redrawConfigurationTable()
 	def listToTable(self, l, n):
 		t =  [l[i:i+n] for i in range(0, len(l), n)]
@@ -518,19 +507,14 @@ class AGMEditor(QMainWindow):
 				assert len(t) == length, "not squared table"
 		return t
 	def processTableAndDrawCombos(self):
-		print '\n\ndraw combos!'
 		table = self.listToTable(self.agmData.parsedTable, len(self.agmData.parsedAgents))
 		rows = len(table)
 		cols = len(table[0])
-		print "table: ", table
-		print "agents: ", self.agmData.agm.agentList
-		print "confs: ", self.agmData.agm.configurationList
 		assert rows == len(self.agmData.agm.configurations), "the size of the table ("+str(rows)+") does not match with the number of configurations ("+str(len(self.agmData.agm.configurations))+")"
 		assert cols == len(self.agmData.agm.agents), "the size of the table does not match with the number of agents"
 
 		conf=0
 		for c in self.agmData.agm.configurationList:
-			print c, table[conf]
 			conf += 1
 		for agentName in self.agmData.agm.agentList:
 			cols = self.ui.tableWidget.columnCount()
@@ -540,13 +524,11 @@ class AGMEditor(QMainWindow):
 					for r in range(rows):
 						combo = QComboBox()
 						for s in self.agmData.agm.agents[agentName].states:
-							combo.addItem(s)
+							combo.addItem(s.name)
 						self.ui.tableWidget.setCellWidget(r,i,combo)
 			self.ui.tableWidget.resizeColumnsToContents()
 
-		print 'AGENT LIST', self.agmData.agm.agentList
 		for agent in self.agmData.agm.agentList:
-			print "AGENT", agent
 			# Find which column corresponds to the current agent: c
 			c = -1
 			for ag in range(len(self.agmData.agm.agentList)):
@@ -555,24 +537,18 @@ class AGMEditor(QMainWindow):
 			assert c != -1, "wrooooooong"
 			# Valid state nanmes for agent
 			validStateNames = self.agmData.agm.agents[agent].validStateNames()
-			print "valid states for agent", agent, validStateNames
 			for i in range(len(self.agmData.agm.configurations)):
-				print 'size of the table', self.ui.tableWidget.rowCount(), self.ui.tableWidget.columnCount()
 				assert table[i][c] in validStateNames, "invalid state name ("+table[i][c]+") for row "+str(i)+" column "+str(c)+" for agent "+agent
 				item = self.ui.tableWidget.cellWidget(i,c)
-				print i, c, '-->', item
 				idx = item.findText(table[i][c])
 				self.ui.tableWidget.cellWidget(i,c).setCurrentIndex(idx)
 
 
 	def removeCurrentAgentState(self, val):
-		print 'remove agent configuration', val
 		self.redrawConfigurationTable()
 	def removeCurrentAgent(self, val):
-		print 'remove agent', val
 		self.redrawConfigurationTable()
 	def removeCurrentConfig(self, val):
-		print 'remove config', val
 		self.redrawConfigurationTable()
 
 
@@ -582,7 +558,6 @@ class AGMEditor(QMainWindow):
 			self.ui.toolsWidget.show()
 			self.ui.behaviorsWidget.show()
 			self.ui.agentsDock.hide()
-			self.ui.agentStatesDock.hide()
 			self.ui.menuRules.setEnabled(True)
 			self.ui.menuBehaviors.setEnabled(False)
 		elif index == 1:
@@ -590,8 +565,6 @@ class AGMEditor(QMainWindow):
 			self.ui.toolsWidget.hide()
 			self.ui.behaviorsWidget.show()
 			self.ui.agentsDock.show()
-			#self.ui.agentStatesDock.show()
-			self.ui.agentStatesDock.hide()
 			self.ui.menuRules.setEnabled(False)
 			self.ui.menuBehaviors.setEnabled(True)
 		else:
@@ -612,7 +585,9 @@ class AGMEditor(QMainWindow):
 		self.appearance.show()
 	def addRule(self):
 		self.ui.rulesList.addItem('Rule ' + str(len(self.agmData.agm.rules)))
-		self.agmData.agm.addRule(AGMRule('new rule', AGMGraph(dict(), [], 'L'), AGMGraph(dict(), [], 'R')))
+		l = AGMGraph(side='L')
+		r = AGMGraph(side='R')
+		self.agmData.agm.addRule(AGMRule('newRule', l, r))
 	def removeCurrentRule(self):
 		pos = self.ui.rulesList.currentRow()
 		self.agmData.agm.rules = self.agmData.agm.rules[:pos] + self.agmData.agm.rules[pos+1:]
@@ -624,8 +599,28 @@ class AGMEditor(QMainWindow):
 	def changeRule(self, ruleN):
 		self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
 		self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
+
+		#self.disconnect(self.ui.configurationListWidget,       SIGNAL('currentRowChanged(int)'),                               self.changeConfig)
+		currRule = self.ui.rulesList.currentItem().text()
+		currConf = self.agmData.agm.getConfigRule(currRule)
+		found = -1
+		if currConf != None:
+			for l in range(self.ui.configurationListWidget.count()):
+				if self.ui.configurationListWidget.item(l).text() == currConf:
+					found = l
+					break
+		if currConf!=None:
+			if found == -1 and self.ui.configurationListWidget.count() > 0:
+				sys.exit(1)
+		if found > 0:
+			self.ui.configurationListWidget.setCurrentRow(found)
+		#self.connect(self.ui.configurationListWidget,          SIGNAL('currentRowChanged(int)'),                               self.changeConfig)
+	def changeConfig(self, configN):
+		currRule = self.ui.rulesList.currentItem().text()
+		currConf = self.ui.configurationListWidget.currentItem().text()
+		self.agmData.agm.setConfigRule(currRule, currConf)
 	def generateCode(self):
-		print 'Generate'
+		pass
 	def exportRule(self):
 		path = str(QFileDialog.getSaveFileName(self, "Export rule", "", "*.svg"))
 		if path[-4:] == '.svg': path = path[:-4]
@@ -661,7 +656,6 @@ class AGMEditor(QMainWindow):
 		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.agm")[0])
 		self.openFromFile(path)
 	def openFromFile(self, path):
-		print 'Opening', path
 		if path[-4:] != '.agm': path = path + '.agm'
 		self.agmData = AGMFileDataParsing.fromFile(path, verbose=True)
 		# Include parsed agents
@@ -682,10 +676,8 @@ class AGMEditor(QMainWindow):
 			self.ui.rulesList.addItem(q)
 		#self.changeRule(0)
 		self.redrawConfigurationTable()
-		self.ui.agentStatesListWidget.clear()
 	def save(self):
 		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.agm")[0]
-		print path
 		self.agmData.properties['name'] = path.split('/')[-1].split('.')[0]
 		global vertexDiameter
 		self.agmData.properties['vertexDiameter'] = vertexDiameter
@@ -699,7 +691,20 @@ class AGMEditor(QMainWindow):
 		self.agmData.properties['shortPattern'] = shortPattern
 		global spacePattern
 		self.agmData.properties['spacePattern'] = spacePattern
+	
+		self.agmData.tableString = self.setTableStringForAGMData()
+
 		self.agmData.toFile(path)
+
+	def setTableStringForAGMData(self):
+		writeString = 'table\n'
+		writeString += '{\n'
+		for r in range(self.ui.tableWidget.rowCount()):
+			for c in range(self.ui.tableWidget.columnCount()):
+				writeString += ' ' + self.ui.tableWidget.cellWidget(r, c).currentText()
+			writeString += '\n'
+		writeString += '}\n'
+		return writeString
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)

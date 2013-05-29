@@ -5,7 +5,7 @@ vertexDiameter=68
 shortPattern=1
 nodeThickness=2
 longPattern=3
-==============================================
+===
 agents
 {
  agentOne ( oneOff oneOn )
@@ -18,8 +18,8 @@ table
 	oneOn  twoOn  threeOff 
 	oneOff twoOff threeOn
 }
-==============================================
-modelGravity
+===
+modelGravity : configOne
 {
 	{
 		s:start(40,40)
@@ -32,7 +32,7 @@ modelGravity
 	}
 }
 
-lookFloor
+lookFloor : configTwo
 {
 	{
 		g:gravity(170,40)
@@ -47,7 +47,7 @@ lookFloor
 	}
 }
 
-modelHeight
+modelHeight : configOne
 {
 	{
 		g:gravity(270,40)
@@ -63,7 +63,7 @@ modelHeight
 	}
 }
 
-lookPerpendicularFloor
+lookPerpendicularFloor : configTwo
 {
 	{
 		gualzru:robot(40,40)
@@ -78,7 +78,7 @@ lookPerpendicularFloor
 	}
 }
 
-modelYaw
+modelYaw : configOne
 {
 	{
 		gualzru:robot(40,40)
@@ -93,7 +93,7 @@ modelYaw
 	}
 }
 
-lookFirstWall
+lookFirstWall : configTwo
 {
 	{
 		gualzru:robot(40,40)
@@ -116,7 +116,7 @@ lookFirstWall
 	}
 }
 
-lookNextWall
+lookNextWall : configOne
 {
 	{
 		w2:notWall(270,40)
@@ -135,7 +135,7 @@ lookNextWall
 	}
 }
 
-modelWall
+modelWall : configTwo
 {
 	{
 		w2:notWall(310,40)
@@ -154,7 +154,7 @@ modelWall
 	}
 }
 
-modelLastWall
+modelLastWall : configOne
 {
 	{
 		floor:floor(40,160)
@@ -184,7 +184,7 @@ modelLastWall
 	}
 }
 
-detectObstacle
+detectObstacle : configTwo
 {
 	{
 		room:room(170,110)
@@ -201,7 +201,7 @@ detectObstacle
 	}
 }
 
-approachObstacle
+approachObstacle : configOne
 {
 	{
 		obstacle:obstacle(300,40)
@@ -221,7 +221,7 @@ approachObstacle
 	}
 }
 
-modelTable
+modelTable : configTwo
 {
 	{
 		obstacle:obstacle(300,40)
@@ -242,7 +242,7 @@ modelTable
 	}
 }
 
-detectObjectInTable
+detectObjectInTable : configOne
 {
 	{
 		table:table(300,40)
@@ -265,7 +265,7 @@ detectObjectInTable
 	}
 }
 
-modelMugInTable
+modelMugInTable : configTwo
 {
 	{
 		table:table(300,40)

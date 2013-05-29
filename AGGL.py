@@ -30,23 +30,18 @@ class AGMLink(object):
 		if not self.enabled: v = 'q '
 		return '\t\t'+str(self.a)+'->'+str(self.b)+'('+v+str(self.linkType)+')'
 	def __cmp__(self, other):
-		#print '__cmp__'
 		this =  self.linkType+ self.a+ self.b
 		nhis = other.linkType+other.a+other.b
 		if this < nhis: return -1
 		if this > nhis: return +1
 		return 0
 	def __eq__(self, other):
-		#print '__eq__', self, other
 		this =  self.linkType+ self.a+ self.b
 		nhis = other.linkType+other.a+other.b
 		if this == nhis:
-			#print '=='
 			return True
-		#print '!='
 		return False
 	def __ne__(self, other):
-		#print '__ne__'
 		this =  self.linkType+ self.a+ self.b
 		nhis = other.linkType+other.a+other.b
 		if this == nhis:
@@ -60,8 +55,12 @@ class AGMLink(object):
 		return self.a+'-->'+self.b+' ('+self.linkType+')'
 
 class AGMGraph(object):
-	def __init__(self, nodes, links, side='n'):
+	def __init__(self, nodes=None, links=None, side='n'):
 		object.__init__(self)
+		if links == None:
+			links = list()
+		if nodes == None:
+			nodes = dict()
 		self.nodes = nodes
 		self.links = links
 		self.side = side
@@ -106,15 +105,14 @@ class AGMGraph(object):
 		if found:
 			del self.nodes[name]
 		else:
-			pass#print 'no ndoe'
+			pass
 	def moveNode(self, name, x, y, diameter):
 		name, found = self.getNameRelaxed(x, y, diameter)
 		if found:
 			self.nodes[name].pos = [x, y]
 		else:
-			print 'no ndoe'
+			pass
 	def addEdge(self, a, b):
-		#print 'Add edge', a, b
 		self.links.append(AGMLink(a, b, 'link', True))
 
 	def toString(self):
@@ -144,17 +142,18 @@ class AGMGraph(object):
 		return ret
 
 class AGMRule(object):
-	def __init__(self, name='', lhs=None, rhs=None):
+	def __init__(self, name='', config='', lhs=None, rhs=None):
 		object.__init__(self)
 		self.name = name
 		self.lhs = lhs
 		self.rhs = rhs
-		self.configuration = ''
-		if lhs == None or rhs == None:
-			self.lhs = AGMGraph(self, dict(), [])
-			self.rhs = AGMGraph(self, dict(), [])
+		self.configuration = config
+		if lhs == None:
+			self.lhs = AGMGraph()
+		if rhs == None:
+			self.rhs = AGMGraph()
 	def toString(self):
-		ret = self.name + '\n{\n'
+		ret = self.name + ' : ' + self.configuration + '\n{\n'
 		ret += self.lhs.toString() + '\n'
 		ret += '\t=>\n'
 		ret += self.rhs.toString() + '\n'
@@ -184,8 +183,14 @@ class AGMAgent(object):
 	def __init__(self, name):
 		self.name = name
 		self.states = dict()
+		self.statesList = []
 	def addState(self, statename):
-		self.states[statename] = AGMAgentState(statename, self.name)
+		if type(statename) == type(''):
+			self.states[statename] = AGMAgentState(statename, self.name)
+		else:
+			self.states[statename] = statename
+		if not statename in self.statesList:
+			self.statesList.append(statename)
 	def addUnnamedState(self):
 		initialName = self.name + 'State'
 		possibleNumber = len(self.states)
@@ -200,6 +205,12 @@ class AGMAgent(object):
 		for x in self.states:
 			r.append(self.states[x].name)
 		return r
+	def toString(self):
+		s = self.name + ' ('
+		for n in self.statesList:
+			s += ' ' + n.name
+		s += ' )'
+		return s
 
 class AGMConfiguration(object):
 	def __init__(self, name):
@@ -250,6 +261,18 @@ class AGM(object):
 		return self.agents[agent].addUnnamedState()
 	def addAgentState(self, agent, statename):
 		return self.agents[agent].addState(statename)
+	def getConfigRule(self, rule):
+		ret = None
+		for r in self.rules:
+			if r.name == rule:
+				ret = r.configuration
+				break
+		return ret
+	def setConfigRule(self, rule, conf):
+		for r in self.rules:
+			if r.name == rule:
+				r.configuration = conf
+
 
 
 class AGMFileData(object):
@@ -265,7 +288,22 @@ class AGMFileData(object):
 		writeString = ''
 		for k,v in self.properties.items():
 			writeString += str(k) + '=' + str(v) + '\n'
-		writeString += '\n'
+		writeString += '===\n'
+		# Agents
+		writeString += 'agents\n'
+		writeString += '{\n'
+		for r in self.agm.agentList:
+			writeString = writeString + self.agm.agents[r].toString() + '\n'
+		writeString += '}\n'
+		# Configs
+		writeString += 'configurations'
+		writeString += '{ '
+		for r in self.agm.configurationList:
+			writeString = writeString + r + ' '
+		writeString += '}\n'
+		# Table
+		writeString += self.tableString
+		writeString += '===\n'
 		for r in self.agm.rules:
 			writeString = writeString + r.toString() + '\n\n'
 		w = open(filename, 'w')
