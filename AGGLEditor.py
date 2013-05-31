@@ -440,16 +440,12 @@ class AGMEditor(QMainWindow):
 		self.tabChanged(self.ui.tabWidget.currentIndex())
 		
 		if len(filePath)>0:
-			print 'LLLLLLL'
 			self.openFromFile(filePath)
-			print 'LLLLLLL'
 		else:
 			self.addRule()
 			frameinfo = getframeinfo(currentframe())
-			print frameinfo.filename, frameinfo.lineno
 			self.newConfig(val=True)
 			frameinfo = getframeinfo(currentframe())
-			print frameinfo.filename, frameinfo.lineno
 			self.newAgent(True)
 		self.ui.rulesList.setCurrentRow(0)
 	def redrawConfigurationTable(self, b=None, re=True):
@@ -612,14 +608,11 @@ class AGMEditor(QMainWindow):
 	def changeAppearance(self):
 		self.appearance.show()
 	def addRule(self):
-		print '0'
 		ddd = 'rule' + str(len(self.agmData.agm.rules))
 		self.ui.rulesList.addItem(ddd)
 		l = AGMGraph(side='L')
 		r = AGMGraph(side='R')
-		print '8'
 		self.agmData.agm.addRule(AGMRule(ddd, AGMConfiguration(''), l, r))
-		print '9'
 	def removeCurrentRule(self):
 		pos = self.ui.rulesList.currentRow()
 		self.agmData.agm.rules = self.agmData.agm.rules[:pos] + self.agmData.agm.rules[pos+1:]
@@ -629,23 +622,18 @@ class AGMEditor(QMainWindow):
 		r = RuleRenamer(self.width()/2, self.height()/2, self.agmData.agm.rules[pos], self)
 		r.setFocus(Qt.OtherFocusReason)
 	def changeRule(self, ruleN):
-		#print 'aaa', ruleN
 		self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
 		self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
 		currRule = self.ui.rulesList.currentItem().text()
-		print 'currRule', currRule
 		currConf = self.agmData.agm.getConfigRule(currRule)
-		print 'getConfigRule', currConf
 		found = -1
 		if currConf != None:
 			for l in range(self.ui.configurationListWidget.count()):
 				itemText = self.ui.configurationListWidget.item(l).text()
 				confName = currConf.name
 				if itemText == confName:
-					print 'itemText', itemText, 'confName', confName
 					found = l
 					break
-		print 'vvv', ruleN, currConf, currRule, found
 		if currConf!=None:
 			if found == -1 and self.ui.configurationListWidget.count() > 0 and currConf.name != '':
 				sys.exit(1)
@@ -661,7 +649,7 @@ class AGMEditor(QMainWindow):
 		path_agmbd = QFileDialog.getSaveFileName(self, "Save as", "", "*.agmbd")[0]
 		self.agmData.generateAGMBehaviorDescription(path_agmbd)
 	def exportRule(self):
-		path = str(QFileDialog.getSaveFileName(self, "Export rule", "", "*.agmbd"))
+		path = str(QFileDialog.getSaveFileName(self, "Export rule", "", "*"))
 		if path[-4:] == '.svg': path = path[:-4]
 		pathLHS = path + 'LHS.png'
 		self.lhsPainter.export(pathLHS)
@@ -692,13 +680,11 @@ class AGMEditor(QMainWindow):
 		self.lhsPainter.graph = lhs
 		self.rhsPainter.graph = rhs
 	def open(self):
-		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.agm")[0])
+		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.aggl")[0])
 		self.openFromFile(path)
 	def openFromFile(self, path):
-		if path[-4:] != '.agm': path = path + '.agm'
-		print 'MMMMMMMM'
+		if path[-5:] != '.aggl': path = path + '.aggl'
 		self.agmData = AGMFileDataParsing.fromFile(path, verbose=True)
-		print 'MMMMMMMM'
 		# Include parsed agents
 		for agent in self.agmData.parsedAgents:
 			self.newAgent(name=agent)
@@ -718,7 +704,7 @@ class AGMEditor(QMainWindow):
 		#self.changeRule(0)
 		self.redrawConfigurationTable()
 	def save(self):
-		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.agm")[0]
+		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
 		self.agmData.properties['name'] = path.split('/')[-1].split('.')[0]
 		global vertexDiameter
 		self.agmData.properties['vertexDiameter'] = vertexDiameter

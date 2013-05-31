@@ -155,19 +155,15 @@ class AGMRule(object):
 		self.name = name
 		self.lhs = lhs
 		self.rhs = rhs
-		print 'assign config for rule', name, '--weqr4wq->', config
 		self.configuration = config
 		if lhs == None:
 			self.lhs = AGMGraph()
 		if rhs == None:
 			self.rhs = AGMGraph()
 	def toString(self):
-		print 'tipo config AA', type(self.configuration)
 		if type(self.configuration) == type(AGMConfiguration('')):
-			print 'CHACHO 1'
 			ret = self.name + ' : ' + self.configuration.toString() + '\n{\n'
 		else:
-			print 'CHACHO 2'
 			ret = self.name + ' : #\n{\n'
 		ret += self.lhs.toString() + '\n'
 		ret += '\t=>\n'
@@ -231,7 +227,6 @@ class AGMConfiguration(object):
 	def __init__(self, name):
 		self.name = name
 	def toString(self):
-		print 'XXXX ', self.name
 		return self.name
 
 class AGMAgentState(object):
@@ -252,7 +247,6 @@ class AGM(object):
 	def addConfiguration(self, conf):
 		if type(conf) != type(AGMConfiguration('')):
 			raise BaseException
-		print conf
 		if not conf.name in self.configurationList:
 			self.configurationList.append(conf.name)
 		self.configurations[conf.name] = conf
@@ -286,25 +280,18 @@ class AGM(object):
 	def getConfigRule(self, rule):
 		if type(rule) == type(AGMRule('s')):
 			rule = rule.name
-		print 'Getting config for rule', rule
 		ret = None
 		for r in self.rules:
-			print '\t',r.name, '-', rule
 			if r.name == rule:
-				print r
-				print r.configuration
 				ret = r.configuration
 				break
-		print '\tgot <'+ret.name+'>', ret
 		return ret
 	def setConfigRule(self, rule, conf):
-		print 'Setting config for rule ', rule, conf
 		if type(conf) != type(AGMConfiguration('')):
 			conf = AGMConfiguration(conf)
 		found = False
 		for r in self.rules:
 			if r.name == rule:
-				print 'XXXXXXXXXXXXXXXXXXXXXXXX', conf, type(conf)
 				r.configuration = conf
 				found = True
 		if found == False:
@@ -352,10 +339,7 @@ class AGMFileData(object):
 		w.close()
 		
 	def generateAGMBehaviorDescription(self, filename):
-		print 'a'
 		w = open(filename, 'w')
-		print 'b'
 		w.write(AGMBD.toAGMBehaviorDescription(self.agm, self.properties["name"]))
-		print 'c'
 		w.close()
 				

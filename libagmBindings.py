@@ -14,7 +14,5 @@ d = model1.generatePDDLProblem(model2, 3, "domainName", "problemName")
 print d
 
 
-	#std::string generatePDDLProblem(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName="problemName") const;
-
 
 
