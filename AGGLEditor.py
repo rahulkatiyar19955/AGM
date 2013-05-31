@@ -525,6 +525,15 @@ class AGMEditor(QMainWindow):
 			else:
 				assert len(t) == length, "not squared table"
 		return t
+	def generateTableFromUI(self):
+		self.agmData.agm.table = []
+		for r in range(self.ui.tableWidget.rowCount()):
+			rowList = []
+			for c in range(self.ui.tableWidget.columnCount()):
+				combo = self.ui.tableWidget.cellWidget(r,c)
+				rowList.append(combo.currentText())
+			self.agmData.agm.table.append(rowList)
+
 	def processTableAndDrawCombos(self):
 		self.agmData.agm.table = self.listToTable(self.agmData.parsedTable, len(self.agmData.parsedAgents))
 		rows = len(self.agmData.agm.table)

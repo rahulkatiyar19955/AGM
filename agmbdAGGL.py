@@ -13,8 +13,9 @@ class AGMBD:
 			writeString += 'A '+ r
 			a = agm.agents[r]
 			for ass in a.statesList:
-				writeString += ' ' + ass
-		
+				writeString += ' ' + ass.name
+			writeString += '\n'
+
 		print 'B'
 		writeString += 'C'
 		for r in agm.configurationList:
@@ -22,8 +23,8 @@ class AGMBD:
 		writeString += '\n'
 
 		print 'C'
-		for i in ramge(len(agm.table)):
-			for j in ramge(len(agm.table[i])):
-				print i, j
+		for i in range(len(agm.table)):
+			for j in range(len(agm.table[i])):
+				writeString += 'S ' + agm.agentList[j] + ' ' + agm.configurationList[i] + ' ' + agm.table[i][j] + '\n'
 		print '------------------------------------------------------------'
 		return writeString
