@@ -4,6 +4,7 @@ import traceback
 import itertools
 
 from pddlAGGL import *
+from agmbdAGGL import *
 
 
 def distance(x1, y1, x2, y2):
@@ -114,7 +115,14 @@ class AGMGraph(object):
 			pass
 	def addEdge(self, a, b):
 		self.links.append(AGMLink(a, b, 'link', True))
-
+	def removeEdge(self, a, b):
+		i = 0
+		while i < len(self.links):
+			l = self.links[i]
+			if l.a == a and l.b == b:
+				del self.links[i]
+			else:
+				i += 1
 	def toString(self):
 		ret = '\t{\n'
 		for v in self.nodes.keys():
@@ -142,18 +150,25 @@ class AGMGraph(object):
 		return ret
 
 class AGMRule(object):
-	def __init__(self, name='', config='', lhs=None, rhs=None):
+	def __init__(self, name='', config=None, lhs=None, rhs=None):
 		object.__init__(self)
 		self.name = name
 		self.lhs = lhs
 		self.rhs = rhs
+		print 'assign config for rule', name, '--weqr4wq->', config
 		self.configuration = config
 		if lhs == None:
 			self.lhs = AGMGraph()
 		if rhs == None:
 			self.rhs = AGMGraph()
 	def toString(self):
-		ret = self.name + ' : ' + self.configuration + '\n{\n'
+		print 'tipo config AA', type(self.configuration)
+		if type(self.configuration) == type(AGMConfiguration('')):
+			print 'CHACHO 1'
+			ret = self.name + ' : ' + self.configuration.toString() + '\n{\n'
+		else:
+			print 'CHACHO 2'
+			ret = self.name + ' : #\n{\n'
 		ret += self.lhs.toString() + '\n'
 		ret += '\t=>\n'
 		ret += self.rhs.toString() + '\n'
@@ -215,6 +230,9 @@ class AGMAgent(object):
 class AGMConfiguration(object):
 	def __init__(self, name):
 		self.name = name
+	def toString(self):
+		print 'XXXX ', self.name
+		return self.name
 
 class AGMAgentState(object):
 	def __init__(self, name, parentName):
@@ -232,9 +250,12 @@ class AGM(object):
 	def addRule(self, rule):
 		self.rules.append(rule)
 	def addConfiguration(self, conf):
-		if not conf in self.configurationList: self.configurationList.append(conf)
-		c = AGMConfiguration(conf)
-		self.configurations[c.name] = c
+		if type(conf) != type(AGMConfiguration('')):
+			raise BaseException
+		print conf
+		if not conf.name in self.configurationList:
+			self.configurationList.append(conf.name)
+		self.configurations[conf.name] = conf
 	def addAgent(self, agent):
 		if not agent in self.agentList: self.agentList.append(agent)
 		a = AGMAgent(agent)
@@ -255,24 +276,39 @@ class AGM(object):
 		while name in self.configurations.keys():
 			possibleNumber = possibleNumber + 1
 			name = initialName + str(possibleNumber)
-		self.addConfiguration(name)
-		return name
+		c = AGMConfiguration(name)
+		self.addConfiguration(c)
+		return c
 	def addUnnamedAgentState(self, agent):
 		return self.agents[agent].addUnnamedState()
 	def addAgentState(self, agent, statename):
 		return self.agents[agent].addState(statename)
 	def getConfigRule(self, rule):
+		if type(rule) == type(AGMRule('s')):
+			rule = rule.name
+		print 'Getting config for rule', rule
 		ret = None
 		for r in self.rules:
+			print '\t',r.name, '-', rule
 			if r.name == rule:
+				print r
+				print r.configuration
 				ret = r.configuration
 				break
+		print '\tgot <'+ret.name+'>', ret
 		return ret
 	def setConfigRule(self, rule, conf):
+		print 'Setting config for rule ', rule, conf
+		if type(conf) != type(AGMConfiguration('')):
+			conf = AGMConfiguration(conf)
+		found = False
 		for r in self.rules:
 			if r.name == rule:
+				print 'XXXXXXXXXXXXXXXXXXXXXXXX', conf, type(conf)
 				r.configuration = conf
-
+				found = True
+		if found == False:
+			raise BaseException
 
 
 class AGMFileData(object):
@@ -299,7 +335,7 @@ class AGMFileData(object):
 		writeString += 'configurations'
 		writeString += '{ '
 		for r in self.agm.configurationList:
-			writeString = writeString + r + ' '
+			writeString = writeString + r.name + ' '
 		writeString += '}\n'
 		# Table
 		writeString += self.tableString
@@ -316,7 +352,10 @@ class AGMFileData(object):
 		w.close()
 		
 	def generateAGMBehaviorDescription(self, filename):
+		print 'a'
 		w = open(filename, 'w')
+		print 'b'
 		w.write(AGMBD.toAGMBehaviorDescription(self.agm, self.properties["name"]))
+		print 'c'
 		w.close()
 				

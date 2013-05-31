@@ -34,6 +34,10 @@ from ui_appearance import Ui_Appearance
 
 from parseAGGL import *
 
+
+from inspect import currentframe, getframeinfo
+
+
 # Code generator
 #from cogapp import Cog
 
@@ -436,14 +440,18 @@ class AGMEditor(QMainWindow):
 		self.tabChanged(self.ui.tabWidget.currentIndex())
 		
 		if len(filePath)>0:
+			print 'LLLLLLL'
 			self.openFromFile(filePath)
+			print 'LLLLLLL'
 		else:
 			self.addRule()
-			self.newConfig(True)
+			frameinfo = getframeinfo(currentframe())
+			print frameinfo.filename, frameinfo.lineno
+			self.newConfig(val=True)
+			frameinfo = getframeinfo(currentframe())
+			print frameinfo.filename, frameinfo.lineno
 			self.newAgent(True)
-		
 		self.ui.rulesList.setCurrentRow(0)
-
 	def redrawConfigurationTable(self, b=None, re=True):
 		self.ui.tableWidget.setRowCount(len(self.agmData.agm.configurations))
 		self.ui.tableWidget.setColumnCount(len(self.agmData.agm.agents))
@@ -457,19 +465,30 @@ class AGMEditor(QMainWindow):
 			count+=1
 		self.ui.tableWidget.resizeColumnsToContents()
 
-	def newConfig(self, val=True, name=''):
-		self.ui.configurationListWidget.setAlternatingRowColors(True)
-		if name == '':
-			name = self.agmData.agm.addUnnamedConfiguration()
+	def newConfig(self, val=True, config=''):
+		#self.ui.configurationListWidget.setAlternatingRowColors(True)
+		if config == '':
+			config = self.agmData.agm.addUnnamedConfiguration()
+		elif type(config) == type(''):
+			config = AGMConfiguration(config)
+			self.agmData.agm.addConfiguration(config)
+		else:
+			self.agmData.agm.addConfiguration(config)
 		item1 = QListWidgetItem(self.ui.configurationListWidget)
-		item1.setText(name)
-		self.agmData.agm.addConfiguration(name)
+		item1.setText(config.name)
 		self.redrawConfigurationTable()
+		for r in range(self.ui.tableWidget.rowCount()):
+			if self.ui.tableWidget.verticalHeaderItem(r).text() == config.name:
+				for c in range(self.ui.tableWidget.columnCount()):
+					combo = QComboBox()
+					agent = self.agmData.agm.agents[self.agmData.agm.agentList[c]]
+					for s in agent.states:
+						combo.addItem(s.name)
+					self.ui.tableWidget.setCellWidget(r,c,combo)
 
 	def newAgent(self, val=True, name=''):
 		self.ui.agentListWidget.setAlternatingRowColors(True)
-		if name == '':
-			name = self.agmData.agm.addUnnamedAgent()
+		if name == '': name = self.agmData.agm.addUnnamedAgent()
 		item1 = QListWidgetItem(self.ui.agentListWidget)
 		item1.setText(name)
 		self.agmData.agm.addAgent(name)
@@ -495,7 +514,7 @@ class AGMEditor(QMainWindow):
 						combo.addItem(s.name)
 					self.ui.tableWidget.setCellWidget(r,c,combo)
 		self.ui.tableWidget.resizeColumnsToContents()
-		return
+		#return
 		self.redrawConfigurationTable()
 	def listToTable(self, l, n):
 		t =  [l[i:i+n] for i in range(0, len(l), n)]
@@ -507,9 +526,9 @@ class AGMEditor(QMainWindow):
 				assert len(t) == length, "not squared table"
 		return t
 	def processTableAndDrawCombos(self):
-		table = self.listToTable(self.agmData.parsedTable, len(self.agmData.parsedAgents))
-		rows = len(table)
-		cols = len(table[0])
+		self.agmData.agm.table = self.listToTable(self.agmData.parsedTable, len(self.agmData.parsedAgents))
+		rows = len(self.agmData.agm.table)
+		cols = len(self.agmData.agm.table[0])
 		assert rows == len(self.agmData.agm.configurations), "the size of the table ("+str(rows)+") does not match with the number of configurations ("+str(len(self.agmData.agm.configurations))+")"
 		assert cols == len(self.agmData.agm.agents), "the size of the table does not match with the number of agents"
 
@@ -538,9 +557,9 @@ class AGMEditor(QMainWindow):
 			# Valid state nanmes for agent
 			validStateNames = self.agmData.agm.agents[agent].validStateNames()
 			for i in range(len(self.agmData.agm.configurations)):
-				assert table[i][c] in validStateNames, "invalid state name ("+table[i][c]+") for row "+str(i)+" column "+str(c)+" for agent "+agent
+				assert self.agmData.agm.table[i][c] in validStateNames, "invalid state name ("+self.agmData.agm.table[i][c]+") for row "+str(i)+" column "+str(c)+" for agent "+agent
 				item = self.ui.tableWidget.cellWidget(i,c)
-				idx = item.findText(table[i][c])
+				idx = item.findText(self.agmData.agm.table[i][c])
 				self.ui.tableWidget.cellWidget(i,c).setCurrentIndex(idx)
 
 
@@ -563,7 +582,7 @@ class AGMEditor(QMainWindow):
 		elif index == 1:
 			self.ui.productionsWidget.hide()
 			self.ui.toolsWidget.hide()
-			self.ui.behaviorsWidget.show()
+			self.ui.behaviorsWidget.hide()
 			self.ui.agentsDock.show()
 			self.ui.menuRules.setEnabled(False)
 			self.ui.menuBehaviors.setEnabled(True)
@@ -584,10 +603,14 @@ class AGMEditor(QMainWindow):
 	def changeAppearance(self):
 		self.appearance.show()
 	def addRule(self):
-		self.ui.rulesList.addItem('Rule ' + str(len(self.agmData.agm.rules)))
+		print '0'
+		ddd = 'rule' + str(len(self.agmData.agm.rules))
+		self.ui.rulesList.addItem(ddd)
 		l = AGMGraph(side='L')
 		r = AGMGraph(side='R')
-		self.agmData.agm.addRule(AGMRule('newRule', l, r))
+		print '8'
+		self.agmData.agm.addRule(AGMRule(ddd, AGMConfiguration(''), l, r))
+		print '9'
 	def removeCurrentRule(self):
 		pos = self.ui.rulesList.currentRow()
 		self.agmData.agm.rules = self.agmData.agm.rules[:pos] + self.agmData.agm.rules[pos+1:]
@@ -597,32 +620,39 @@ class AGMEditor(QMainWindow):
 		r = RuleRenamer(self.width()/2, self.height()/2, self.agmData.agm.rules[pos], self)
 		r.setFocus(Qt.OtherFocusReason)
 	def changeRule(self, ruleN):
+		#print 'aaa', ruleN
 		self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
 		self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
-
-		#self.disconnect(self.ui.configurationListWidget,       SIGNAL('currentRowChanged(int)'),                               self.changeConfig)
 		currRule = self.ui.rulesList.currentItem().text()
+		print 'currRule', currRule
 		currConf = self.agmData.agm.getConfigRule(currRule)
+		print 'getConfigRule', currConf
 		found = -1
 		if currConf != None:
 			for l in range(self.ui.configurationListWidget.count()):
-				if self.ui.configurationListWidget.item(l).text() == currConf:
+				itemText = self.ui.configurationListWidget.item(l).text()
+				confName = currConf.name
+				if itemText == confName:
+					print 'itemText', itemText, 'confName', confName
 					found = l
 					break
+		print 'vvv', ruleN, currConf, currRule, found
 		if currConf!=None:
-			if found == -1 and self.ui.configurationListWidget.count() > 0:
+			if found == -1 and self.ui.configurationListWidget.count() > 0 and currConf.name != '':
 				sys.exit(1)
-		if found > 0:
+		if found > -1:
 			self.ui.configurationListWidget.setCurrentRow(found)
-		#self.connect(self.ui.configurationListWidget,          SIGNAL('currentRowChanged(int)'),                               self.changeConfig)
 	def changeConfig(self, configN):
 		currRule = self.ui.rulesList.currentItem().text()
 		currConf = self.ui.configurationListWidget.currentItem().text()
 		self.agmData.agm.setConfigRule(currRule, currConf)
 	def generateCode(self):
-		pass
+		path_pddl = QFileDialog.getSaveFileName(self, "Save as", "", "*.pddl")[0]
+		self.agmData.generatePDDL(path_pddl)
+		path_agmbd = QFileDialog.getSaveFileName(self, "Save as", "", "*.agmbd")[0]
+		self.agmData.generateAGMBehaviorDescription(path_agmbd)
 	def exportRule(self):
-		path = str(QFileDialog.getSaveFileName(self, "Export rule", "", "*.svg"))
+		path = str(QFileDialog.getSaveFileName(self, "Export rule", "", "*.agmbd"))
 		if path[-4:] == '.svg': path = path[:-4]
 		pathLHS = path + 'LHS.png'
 		self.lhsPainter.export(pathLHS)
@@ -657,7 +687,9 @@ class AGMEditor(QMainWindow):
 		self.openFromFile(path)
 	def openFromFile(self, path):
 		if path[-4:] != '.agm': path = path + '.agm'
+		print 'MMMMMMMM'
 		self.agmData = AGMFileDataParsing.fromFile(path, verbose=True)
+		print 'MMMMMMMM'
 		# Include parsed agents
 		for agent in self.agmData.parsedAgents:
 			self.newAgent(name=agent)
@@ -665,7 +697,7 @@ class AGMEditor(QMainWindow):
 				self.newAgentState(agentName=agent, stateName=state)
 		# Include pared configurations
 		for config in self.agmData.parsedConfigurations:
-			self.newConfig(name=config)
+			self.newConfig(config=config)
 
 		self.processTableAndDrawCombos()
 

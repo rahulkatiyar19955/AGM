@@ -3,21 +3,24 @@
 
 from AGGL import *
 from parseAGGL import *
-from pddlAGGL import *
+from agmbdAGGL import *
 import sys
 
 ret = 0
-try:
-	if len(sys.argv)==3:
-		inputFile   = sys.argv[1]
-		outputFile  = sys.argv[2]
-		agmData = AGMFileDataParsing.fromFile(inputFile, verbose=False)
-		agmData.generateAGMBehaviorDescription(outputFile)
-	else:
-		print '\n'+sys.argv[0], ' <inputFile.aggl>  <outputFile.agmbd>\n'
-		ret = 1
-except:
-	print 'Error'
-	ret = -1
+#try:
+if len(sys.argv)==3:
+	inputFile   = sys.argv[1]
+	outputFile  = sys.argv[2]
+	print '1'
+	agmData = AGMFileDataParsing.fromFile(inputFile, verbose=False)
+	print '2'
+	agmData.generateAGMBehaviorDescription(outputFile)
+	print '3'
+else:
+	print '\n'+sys.argv[0], ' <inputFile.aggl>  <outputFile.agmbd>\n'
+	ret = 1
+#except:
+	#print 'Error'
+	#ret = -1
 	
 sys.exit(ret)

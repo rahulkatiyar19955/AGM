@@ -30,7 +30,7 @@ class AGMRuleParsing:
 		LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 		if verbose: print '\t===>'
 		RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-		return AGMRule(i.name, i.config, LHS, RHS)
+		return AGMRule(i.name, AGMConfiguration(i.config), LHS, RHS)
 
 
 class AGMFileDataParsing:
@@ -104,6 +104,8 @@ class AGMFileDataParsing:
 		agmFD.parsedConfigurations = result.configurations
 		for c in result.configurations:
 			agmFD.agm.configurationList.append(c)
+			agmFD.agm.configurations[c] = AGMConfiguration(c)
+			
 		agmFD.parsedTable = result.table
 
 		if verbose: print '\nRules:', len(result.rules)
@@ -112,4 +114,6 @@ class AGMFileDataParsing:
 			if verbose: print '\nRule:('+str(number)+')'
 			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i,  verbose))
 			number += 1
+			
 		return agmFD
+		
