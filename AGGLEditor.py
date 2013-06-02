@@ -482,14 +482,15 @@ class AGMEditor(QMainWindow):
 						combo.addItem(s.name)
 					self.ui.tableWidget.setCellWidget(r,c,combo)
 
-	def newAgent(self, val=True, name=''):
+	def newAgent(self, val=True, name='', createAgent=True):
 		self.ui.agentListWidget.setAlternatingRowColors(True)
 		if name == '': name = self.agmData.agm.addUnnamedAgent()
 		item1 = QListWidgetItem(self.ui.agentListWidget)
 		item1.setText(name)
 		self.agmData.agm.addAgent(name)
 		self.redrawConfigurationTable()
-		self.newAgentState(agentName=name)
+		if createAgent:
+			self.newAgentState(agentName=name)
 
 	def newAgentState(self, val=True, agentName='', stateName=''):
 		if agentName == '':
@@ -687,7 +688,7 @@ class AGMEditor(QMainWindow):
 		self.agmData = AGMFileDataParsing.fromFile(path, verbose=True)
 		# Include parsed agents
 		for agent in self.agmData.parsedAgents:
-			self.newAgent(name=agent)
+			self.newAgent(name=agent, createAgent=False)
 			for state in self.agmData.parsedAgents[agent]:
 				self.newAgentState(agentName=agent, stateName=state)
 		# Include pared configurations

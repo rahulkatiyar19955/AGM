@@ -5,7 +5,7 @@ vertexDiameter=68
 shortPattern=1
 nodeThickness=2
 longPattern=3
-==============================================
+===
 agents
 {
 	pitchNRoll ( off enabled )
@@ -45,8 +45,8 @@ table
 	off     enabled  off       maintenance enabled floor off off
 	off     enabled  specific  maintenance off     off   off off
 }
-==============================================
-modelGravity
+===
+modelGravity : pitchAndRoll
 {
 	{
 		s:start(40,40)
@@ -59,7 +59,7 @@ modelGravity
 	}
 }
 
-lookFloor
+lookFloor : pitchAndRoll
 {
 	{
 		g:gravity(170,40)
@@ -74,7 +74,7 @@ lookFloor
 	}
 }
 
-modelHeight
+modelHeight : pitchAndRoll
 {
 	{
 		g:gravity(270,40)
@@ -90,7 +90,7 @@ modelHeight
 	}
 }
 
-lookPerpendicularFloor
+lookPerpendicularFloor : pitchAndRoll
 {
 	{
 		gualzru:robot(40,40)
@@ -105,7 +105,7 @@ lookPerpendicularFloor
 	}
 }
 
-modelYaw
+modelYaw : pitchAndRoll
 {
 	{
 		gualzru:robot(40,40)
@@ -120,7 +120,7 @@ modelYaw
 	}
 }
 
-lookFirstWall
+lookFirstWall : pitchAndRoll
 {
 	{
 		gualzru:robot(40,40)
@@ -143,7 +143,7 @@ lookFirstWall
 	}
 }
 
-lookNextWall
+lookNextWall : pitchAndRoll
 {
 	{
 		w2:notWall(270,40)
@@ -162,7 +162,7 @@ lookNextWall
 	}
 }
 
-modelWall
+modelWall : pitchAndRoll
 {
 	{
 		w2:notWall(310,40)
@@ -181,7 +181,7 @@ modelWall
 	}
 }
 
-modelLastWall
+modelLastWall : pitchAndRoll
 {
 	{
 		floor:floor(40,160)
@@ -211,7 +211,7 @@ modelLastWall
 	}
 }
 
-detectObstacle
+detectObstacle : pitchAndRoll
 {
 	{
 		room:room(170,110)
@@ -228,7 +228,7 @@ detectObstacle
 	}
 }
 
-approachObstacle
+approachObstacle : pitchAndRoll
 {
 	{
 		obstacle:obstacle(300,40)
@@ -248,7 +248,7 @@ approachObstacle
 	}
 }
 
-modelTable
+modelTable : pitchAndRoll
 {
 	{
 		obstacle:obstacle(300,40)
@@ -269,7 +269,7 @@ modelTable
 	}
 }
 
-detectObjectInTable
+detectObjectInTable : pitchAndRoll
 {
 	{
 		table:table(300,40)
@@ -292,7 +292,7 @@ detectObjectInTable
 	}
 }
 
-modelMugInTable
+modelMugInTable : pitchAndRoll
 {
 	{
 		table:table(300,40)

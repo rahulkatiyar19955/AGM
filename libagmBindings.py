@@ -1,6 +1,6 @@
 from libagm import *
 
-acho = AGM("a", "example.agmbd")
+acho = AGM("gualzru.pddl", "gualzru.agmbd")
 
 model1  = AGMModel()
 model1.resetLastId()
@@ -12,6 +12,7 @@ model2.insertSymbol(AGMModelSymbol(2, "b"))
 
 d = model1.generatePDDLProblem(model2, 3, "domainName", "problemName")
 print d
+
 
 
 

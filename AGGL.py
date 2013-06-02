@@ -322,7 +322,7 @@ class AGMFileData(object):
 		writeString += 'configurations'
 		writeString += '{ '
 		for r in self.agm.configurationList:
-			writeString = writeString + r.name + ' '
+			writeString = writeString + r + ' '
 		writeString += '}\n'
 		# Table
 		writeString += self.tableString
