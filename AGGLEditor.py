@@ -432,7 +432,7 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionNew_agent_state,            SIGNAL("triggered(bool)"),                                      self.newAgentState)
 		self.connect(self.ui.actionRemove_current_agent_state, SIGNAL("triggered(bool)"),                                      self.removeCurrentAgentState)
 
-		self.timer.start(20)
+		self.timer.start(100)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
 		self.ui.toolsList.setCurrentRow(4)
