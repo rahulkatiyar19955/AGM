@@ -34,9 +34,11 @@ from ui_appearance import Ui_Appearance
 
 from parseAGGL import *
 
+import Ice, IceStorm
 
 from inspect import currentframe, getframeinfo
 
+from AGMModule import *
 
 global vertexDiameter
 vertexDiameter = 40
@@ -54,13 +56,76 @@ global dashPattern
 dashPattern = []
 
 
-from AGMModule import *
 
+def loadSliceFile(xxx):
+	ROBOCOMP = ''
+	try:
+		ROBOCOMP = os.environ['ROBOCOMP']
+	except:
+		if len(ROBOCOMP)<1:
+			print 'ROBOCOMP environment variable not set! Exiting.'
+			sys.exit()
 
+	sliceOpts = ''
+	for directory in os.environ['SLICE_PATH'].split(";"):
+		if len(directory)>0:
+			sliceOpts = sliceOpts + ' -I' + directory + ' '
+	sliceOpts = sliceOpts + ' -I. '
+	sliceOpts = sliceOpts + ' -I' + ROBOCOMP + '/Interfaces '
+	sliceOpts = sliceOpts + ' --all'
+
+	try:
+		#print '\nLooking in', ROBOCOMP+"/Interfaces"
+		Ice.loadSlice(sliceOpts+" "+ROBOCOMP+'/Interfaces/'+xxx)
+	except:
+		found = False
+		for p in os.environ['SLICE_PATH'].split(";"):
+			#print '\nLooking in', p, type(p)
+			Ice.loadSlice(sliceOpts+" "+p+xxx )
+			found = True
+			break
+			#except:
+				#pass
+		if not found:
+			print 'Couldn\'t load '+xxx+'. Verify that '+xxx+' is located in $ROBOCOM/Interfaces or $SLICE_PATH.'
+			sys.exit()
+			
+loadSliceFile("GualzruExecutive.ice")
+import RoboCompExecutive
+loadSliceFile("GualzruBehavior.ice")
+import RoboCompExecutive
+print "Module imported successfully! (ignore previous errors)"
+ic = None
 
 class AGMEditor(QMainWindow):
 	def __init__(self, filePath=''):
 		QMainWindow.__init__(self)
+		
+		self.ic = Ice.initialize(sys.argv)
+		
+		self.behaviorTopic = RoboCompGualzruBehavior::GualzruBehaviorTopicPrx()
+		try:
+			obj = self.ic.stringToProxy("IceStorm/TopicManager:tcp -p 9999")
+			topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
+			topic = None
+			while not topic:
+				try:
+					topic = topicManager.retrieve("GualzruBehavior")
+				except:
+					try:
+						topic = topicManager.create("GualzruBehavior")
+					except:
+						pass
+			pub = topic.getPublisher().ice_oneway()
+			behaviorTopic = RoboCompGualzruBehavior.GualzruBehaviorTopicPrx.uncheckedCast(pub)
+		except:
+			print "Can't connect to IceStorm!"
+			sys.exit(-1)
+
+		print "Can't connect to IceStorm!"
+		sys.exit(-1)
+		
+		
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.ui.toolsList.addItem('Node - Add')
