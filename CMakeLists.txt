@@ -13,7 +13,7 @@ MACRO( WRAP_PYTHON_UI )
   ENDFOREACH( input_file )
 ENDMACRO( WRAP_PYTHON_UI )
 
-WRAP_PYTHON_UI( guiAGGLEditor appearance )
+WRAP_PYTHON_UI( guiAGGLEditor guiAGMExecutiveClient appearance )
 
 
 

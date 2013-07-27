@@ -5,7 +5,7 @@ from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtSvg import *
 #from PySide.Qt import *
-from ui_guiAGGLEditor import Ui_MainWindow
+
 from ui_appearance import Ui_Appearance
 
 from parseAGGL import *
