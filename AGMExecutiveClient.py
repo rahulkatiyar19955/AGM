@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  -----------------------
+#  ---------------------------------
 #  -----  AGGLExecutiveClient  -----
-#  -----------------------
+#  ---------------------------------
 #
 #  A libre graph grammar drawing tool.
 #
-#    Copyright (C) 2012-2013 by Luis J. Manso
+#    Copyright (C) 2013 by Luis J. Manso
 #
 #    Graphmar is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -23,12 +23,13 @@
 #    along with Graphmar. If not, see <http://www.gnu.org/licenses/>.
 
 # Python distribution imports
-import sys, traceback, os, re, threading, time, string, math
+import sys, traceback, os, re, threading, time
+import copy, string, math
+
 # Qt interface
 from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtSvg import *
-#from PySide.Qt import *
 from ui_guiAGMExecutiveClient import Ui_MainWindow
 from ui_appearance import Ui_Appearance
 
@@ -101,7 +102,7 @@ class AGMExecutiveClient(QMainWindow):
 		QMainWindow.__init__(self)
 		
 		self.ic = Ice.initialize(sys.argv)
-		
+
 		self.behaviorTopic = None
 		try:
 			obj = self.ic.stringToProxy("IceStorm/TopicManager:tcp -p 9999")
@@ -121,6 +122,13 @@ class AGMExecutiveClient(QMainWindow):
 			print "Can't connect to IceStorm!"
 			sys.exit(-1)
 	
+		# Remote object connection
+		#try:
+		basePrx = self.ic.stringToProxy("gualzruexecutive:tcp -h localhost -p 10198")
+		self.executivePrx = RoboCompExecutive.ExecutivePrx.checkedCast(basePrx)
+		#except:
+			#print 'Cannot connect to the executive.'
+			#return
 
 		
 		self.ui = Ui_MainWindow()
@@ -138,15 +146,17 @@ class AGMExecutiveClient(QMainWindow):
 		self.ui.toolsList.addItem('Edge - Change type')
 		self.fontDialog = QFontDialog(self)
 		self.font = self.fontDialog.selectedFont()
-		self.agmData = AGMFileData()
 		self.lhsPainter = GraphDraw(self.ui.lhsParentWidget, self, "LHS")
 		self.rhsPainter = GraphDraw(self.ui.rhsParentWidget, self, "RHS")
 		self.timer = QTimer()
 		self.tool = ''
 		self.appearance = Appearance()
-		self.connect(self.timer,                               SIGNAL('timeout()'),                                            self.draw)
-		self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),                               self.selectTool)
-
+		self.connect(self.timer,                          SIGNAL('timeout()'),              self.draw)
+		self.connect(self.ui.toolsList,                   SIGNAL('currentRowChanged(int)'), self.selectTool)
+		self.connect(self.ui.actionRefresh_current_model, SIGNAL("triggered(bool)"),        self.refreshModel)
+		self.connect(self.ui.actionClear_proposal,        SIGNAL("triggered(bool)"),        self.clearProposal)
+  		self.connect(self.ui.actionSend_proposal,         SIGNAL("triggered(bool)"),        self.sendProposal)
+  
 		self.timer.start(100)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
@@ -156,31 +166,71 @@ class AGMExecutiveClient(QMainWindow):
 	def draw(self):
 		self.lhsPainter.update()
 		self.rhsPainter.update()
-		for r in range(len(self.agmData.agm.rules)):
-			item = self.ui.rulesList.item(r)
-			item.setText(self.agmData.agm.rules[r].name)
 	def selectTool(self, tool):
 		self.tool = str(self.ui.toolsList.item(tool).text())
 	def changeFont(self):
 		self.fontDialog.show()
 	def changeAppearance(self):
 		self.appearance.show()
+	def refreshModel(self):
+		world, target, plan = self.executivePrx.getData()
+		self.modelModified(world)
+	def clearProposal(self):
+		self.rhsPainter.graph = copy.deepcopy(self.lhsPainter.graph)
+	def sendProposal(self):
+		print 'sendProposal'
+
+	def modelModified(self, newModel):
+		print newModel
+
+		self.lhsPainter.graph.links = list()
+		self.lhsPainter.graph.nodes = dict()
+		
+		inte = 30
+		for node in newModel.nodes:
+			self.lhsPainter.graph.addNode(inte, inte, node.nodeIdentifier, node.nodeType)
+			inte += 30
+		for edge in newModel.edges:
+			self.lhsPainter.graph.addEdge(edge.a, edge.b, edge.edgeType)
+		inte = 0
+
+		if len(self.rhsPainter.graph.nodes) == 0:
+			self.rhsPainter.graph = copy.deepcopy(self.lhsPainter.graph)
+		
+	def modelUpdated(self, node):
+		print node
+
+class ExecutiveTopicI(RoboCompExecutive.ExecutiveTopic):
+	def __init__(self, wk):
+		RoboCompExecutive.ExecutiveTopic.__init__(self)
+		self.worker = wk
+	def modelModified(self, event, current):
+		self.worker.modelModified(event.newModel)
+	def modelUpdated(self, node, current):
+		self.worker.modelUpdated(node)
+
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
-	if len(sys.argv)>1:
-		if len(sys.argv)>3:
-			inputFile   = sys.argv[1]
-			compileFlag = sys.argv[2]
-			outputFile  = sys.argv[3]
-			if compileFlag == '-c':
-				agmData = AGMFileData.fromFile(inputFile, verbose=False)
-				agmData.generatePDDL(outputFile)
-		else:
-			clase = AGMExecutiveClient(sys.argv[1])
-			clase.show()
-			app.exec_()
-	else:
-			clase = AGMExecutiveClient()
-			clase.show()
-			app.exec_()
+	clase = AGMExecutiveClient()
+
+	obj = clase.ic.stringToProxy("IceStorm/TopicManager:tcp -p 9999")
+
+	topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
+	adapterT = clase.ic.createObjectAdapterWithEndpoints("ExecutiveTopic", "tcp -p 12201")
+
+	executiveTopic = ExecutiveTopicI(clase)
+	proxyT = adapterT.addWithUUID(executiveTopic).ice_oneway()
+	topic = None
+	try:
+		topic = topicManager.retrieve("ExecutiveTopic")
+		qos = None
+		topic.subscribeAndGetPublisher(qos, proxyT)
+	except:
+		print "Error! No topic found!\n"
+	adapterT.activate()
+
+	print 'aaa'
+
+	clase.show()
+	app.exec_()

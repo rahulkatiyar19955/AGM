@@ -71,8 +71,8 @@
      <string>Actions</string>
     </property>
     <addaction name="actionRefresh_current_model"/>
-    <addaction name="actionClear_proposal"/>
     <addaction name="actionSend_proposal"/>
+    <addaction name="actionClear_proposal"/>
    </widget>
    <addaction name="menuRefresh_current_model"/>
   </widget>

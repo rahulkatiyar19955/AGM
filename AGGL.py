@@ -113,8 +113,8 @@ class AGMGraph(object):
 			self.nodes[name].pos = [x, y]
 		else:
 			pass
-	def addEdge(self, a, b):
-		self.links.append(AGMLink(a, b, 'link', True))
+	def addEdge(self, a, b, linkname='link'):
+		self.links.append(AGMLink(a, b, linkname, True))
 	def removeEdge(self, a, b):
 		i = 0
 		while i < len(self.links):
