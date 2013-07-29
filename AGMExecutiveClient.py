@@ -82,7 +82,7 @@ def loadSliceFile(xxx):
 		found = False
 		for p in os.environ['SLICE_PATH'].split(";"):
 			#print '\nLooking in', p, type(p)
-			Ice.loadSlice(sliceOpts+" "+p+xxx )
+			Ice.loadSlice(sliceOpts+" "+p+'/'+xxx )
 			found = True
 			break
 			#except:
