@@ -75,8 +75,7 @@ def loadSliceFile(xxx):
 	sliceOpts = sliceOpts + ' -I' + ROBOCOMP + '/Interfaces '
 	sliceOpts = sliceOpts + ' --all'
 
-	try:
-		#print '\nLooking in', ROBOCOMP+"/Interfaces"
+	try: #print '\nLooking in', ROBOCOMP+"/Interfaces"
 		Ice.loadSlice(sliceOpts+" "+ROBOCOMP+'/Interfaces/'+xxx)
 	except:
 		found = False
@@ -85,8 +84,6 @@ def loadSliceFile(xxx):
 			Ice.loadSlice(sliceOpts+" "+p+'/'+xxx )
 			found = True
 			break
-			#except:
-				#pass
 		if not found:
 			print 'Couldn\'t load '+xxx+'. Verify that '+xxx+' is located in $ROBOCOM/Interfaces or $SLICE_PATH.'
 			sys.exit()
@@ -95,6 +92,8 @@ loadSliceFile("GualzruExecutive.ice")
 import RoboCompExecutive
 loadSliceFile("GualzruBehavior.ice")
 import RoboCompGualzruBehavior
+loadSliceFile("WorldModel.ice")
+import RoboCompWorldModel
 print "\n\nModules imported successfully! (ignore previous errors)"
 
 class AGMExecutiveClient(QMainWindow):
@@ -123,12 +122,12 @@ class AGMExecutiveClient(QMainWindow):
 			sys.exit(-1)
 	
 		# Remote object connection
-		#try:
-		basePrx = self.ic.stringToProxy("gualzruexecutive:tcp -h localhost -p 10198")
-		self.executivePrx = RoboCompExecutive.ExecutivePrx.checkedCast(basePrx)
-		#except:
-			#print 'Cannot connect to the executive.'
-			#return
+		try:
+			basePrx = self.ic.stringToProxy("gualzruexecutive:tcp -h localhost -p 10198")
+			self.executivePrx = RoboCompExecutive.ExecutivePrx.checkedCast(basePrx)
+		except:
+			print 'Cannot connect to the executive.'
+			return
 
 		
 		self.ui = Ui_MainWindow()
@@ -147,6 +146,7 @@ class AGMExecutiveClient(QMainWindow):
 		self.fontDialog = QFontDialog(self)
 		self.font = self.fontDialog.selectedFont()
 		self.lhsPainter = GraphDraw(self.ui.lhsParentWidget, self, "LHS")
+		self.lhsPainter.readOnly = True
 		self.rhsPainter = GraphDraw(self.ui.rhsParentWidget, self, "RHS")
 		self.timer = QTimer()
 		self.tool = ''
@@ -179,6 +179,32 @@ class AGMExecutiveClient(QMainWindow):
 		self.rhsPainter.graph = copy.deepcopy(self.lhsPainter.graph)
 	def sendProposal(self):
 		print 'sendProposal'
+		backModel = self.GualzruWorldFromGraph(self.lhsPainter.graph)
+		newModel = self.GualzruWorldFromGraph(self.rhsPainter.graph)
+		why = RoboCompWorldModel.BehaviorResultType.BehaviorBasedModification
+		sender = "AGMExecutiveClient"
+
+		ret = self.executivePrx.modificationProposal(RoboCompWorldModel.ModelEvent(sender=sender, why=why, backModel=backModel, newModel=newModel))
+		print 'Result:', ret
+
+	def GualzruWorldFromGraph(self, graph):
+		nodes = []
+		for nodeKey in graph.nodes.keys(): # name sType
+			node = graph.nodes[nodeKey]
+			nodes.append(RoboCompWorldModel.GualzruWorldNode(nodeType=node.sType, nodeIdentifier=int(node.name)))
+			
+		edges = []
+		for link in graph.links:  # a b linkType
+			e = RoboCompWorldModel.GualzruWorldEdge()
+			e.a = int(link.a)
+			e.b = int(link.b)
+			e.edgeType = link.linkType
+			edges.append(e)
+		return RoboCompWorldModel.GualzruWorld(nodes=nodes, edges=edges)
+
+
+
+
 
 	def modelModified(self, newModel):
 		print newModel
