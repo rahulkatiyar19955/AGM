@@ -100,6 +100,7 @@ class GraphDraw(QWidget):
 		self.parentW = parentw
 		self.main = main
 		self.graph = AGMGraph()
+		self.readOnly = False
 		self.pressName = -1
 		self.releaseName = -1
 		self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
@@ -237,6 +238,9 @@ class GraphDraw(QWidget):
 			vw = 0.5*vertexDiameter
 			painter.drawPie(xend-vw/2, yend-vw/2, vw, vw, (-angleD-20)*16, 40*16)
 	def mousePressEvent(self, e):
+		if self.readOnly == True and self.main.tool != 'Node - Move':
+			return
+
 		global vertexDiameter
 		if self.main.tool == 'Node - Add':
 			try:
