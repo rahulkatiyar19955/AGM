@@ -238,78 +238,87 @@ class GraphDraw(QWidget):
 			vw = 0.5*vertexDiameter
 			painter.drawPie(xend-vw/2, yend-vw/2, vw, vw, (-angleD-20)*16, 40*16)
 	def mousePressEvent(self, e):
-		if self.readOnly == True and self.main.tool != 'Node - Move':
-			return
+		tool = self.main.tool
+		if self.readOnly == True:
+			tool = 'Node - Move'
 
 		global vertexDiameter
-		if self.main.tool == 'Node - Add':
+		if tool == 'Node - Add':
 			try:
 				self.lastNumber
 			except:
 				self.lastNumber = 1
 			self.graph.addNode(e.x(), e.y(), 'newid'+str(self.lastNumber)+self.name, 'type')
 			self.lastNumber +=1
-			
-		elif self.main.tool == 'Node - Remove':
+
+		elif tool == 'Node - Remove':
 			x, y = self.graph.getName(e.x(), e.y(), vertexDiameter)
 			if x>=0:
 				self.graph.removeNode(e.x(), e.y(), vertexDiameter)
 
-		elif self.main.tool == 'Node - Rename':
+		elif tool == 'Node - Rename':
 			x, y = self.graph.getCenter(e.x(), e.y(), vertexDiameter)
 			if x>=0:
 				r = NodeNameReader(x, y, self)
 				r.setFocus(Qt.OtherFocusReason)
-		elif self.main.tool == 'Node - Change type':
+		elif tool == 'Node - Change type':
 			x, y = self.graph.getCenter(e.x(), e.y(), vertexDiameter)
 			if x>=0:
 				r = NodeTypeReader(x, y, self)
 				r.setFocus(Qt.OtherFocusReason)
-		elif self.main.tool == 'Node - Move':
+		elif tool == 'Node - Move':
 			self.pressName, found = self.graph.getName(e.x(), e.y(), 100)
 			if not found: self.pressName = ''
-		elif self.main.tool == 'Node - (Dis/En)able':
+		elif tool == 'Node - (Dis/En)able':
 			self.graph.switchNode(e.x(), e.y())
-		elif self.main.tool == 'Edge - Add':
+		elif tool == 'Edge - Add':
 			self.pressName, found = self.graph.getName(e.x(), e.y(), vertexDiameter)
 			if not found: self.pressName = ''
-		elif self.main.tool == 'Edge - Remove':
+		elif tool == 'Edge - Remove':
 			self.graph.removeEdge(e.x(), e.y())
-		elif self.main.tool == 'Edge - Rename':
+		elif tool == 'Edge - Rename':
 			self.graph.renameEdge(e.x(), e.y(), newName)
-		elif self.main.tool == 'Edge - (Dis/En)able':
+		elif tool == 'Edge - (Dis/En)able':
 			self.edgeSwitchA = self.graph.getName(e.x(), e.y(), vertexDiameter)
 	def mouseReleaseEvent(self, e):
-		if self.main.tool == 'Node - Add':
+		tool = self.main.tool
+		if self.readOnly == True:
+			tool = 'Node - Move'
+
+		if tool == 'Node - Add':
 			pass
-		elif self.main.tool == 'Node - Remove':
+		elif tool == 'Node - Remove':
 			pass
-		elif self.main.tool == 'Node - Rename':
+		elif tool == 'Node - Rename':
 			pass
-		elif self.main.tool == 'Node - Change type':
+		elif tool == 'Node - Change type':
 			pass
-		elif self.main.tool == 'Node - Move':
+		elif tool == 'Node - Move':
 			global vertexDiameter
 			self.graph.moveNode(self.pressName, e.x(), e.y(), vertexDiameter)
-		elif self.main.tool == 'Node - (Dis/En)able':
+		elif tool == 'Node - (Dis/En)able':
 			pass
-		elif self.main.tool == 'Edge - Add':
+		elif tool == 'Edge - Add':
 			self.releaseName, found = self.graph.getName(e.x(), e.y(), vertexDiameter)
 			if not found: self.releaseName = ''
 			if self.pressName != '' and self.releaseName != '':
 				self.graph.addEdge(self.pressName, self.releaseName)
-		elif self.main.tool == 'Edge - Remove':
+		elif tool == 'Edge - Remove':
 			pass
-		elif self.main.tool == 'Edge - Rename':
+		elif tool == 'Edge - Rename':
 			pass
-		elif self.main.tool == 'Edge - (Dis/En)able':
+		elif tool == 'Edge - (Dis/En)able':
 			self.edgeSwitchB = self.graph.getName(e.x(), e.y(), vertexDiameter)
 			for e in self.graph.edges:
 				if (e.a==self.edgeSwitchA and e.b==self.edgeSwitchB) or (e.a==self.edgeSwitchB and e.b==self.edgeSwitchA):
 					e.enabled = not e.enabled
 	def mouseMoveEvent(self, e):
+		tool = self.main.tool
+		if self.readOnly == True:
+			tool = 'Node - Move'
+
 		global vertexDiameter
-		if self.main.tool == 'Node - Move':
+		if tool == 'Node - Move':
 			self.graph.moveNode(self.pressName, e.x(), e.y(), vertexDiameter)
 
 

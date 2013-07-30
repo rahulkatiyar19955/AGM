@@ -53,3 +53,6 @@ target_link_libraries(agm ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 add_executable ( testagm testagm.cpp  )
 target_link_libraries ( testagm  -L. -lagm  ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
+
+INSTALL(FILES libagm.so DESTINATION /opt/robocomp/lib/ )
+INSTALL(FILES agm_behavior.h  agm.h  agm_modelDrawer.h  agm_modelEdge.h  agm_modelException.h  agm_model.h  agm_modelPrinter.h  agm_modelSymbols.h DESTINATION /opt/robocomp/include/ )
