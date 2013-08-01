@@ -1,4 +1,5 @@
 import itertools
+import sys
 
 #
 # AGM to PDDL
@@ -8,19 +9,28 @@ class AGMBD:
 	def toAGMBehaviorDescription(agm, name):
 		writeString = ''
 
-		for r in agm.agentList:
+		#print 'Agents:', agm.agentList
+		for r in agm.agm.agentList:
 			writeString += 'A '+ r
-			a = agm.agents[r]
+			try:
+				a = agm.agm.agents[r]
+			except KeyError as e:
+				print "There's no", r, "agent"
+				print "Agents:", agm.agm.agents
+				print '-------'
+				print e
+				sys.exit(1)
 			for ass in a.statesList:
 				writeString += ' ' + ass.name
 			writeString += '\n'
 
 		writeString += 'C'
-		for r in agm.configurationList:
+		for r in agm.agm.configurationList:
 			writeString += ' '+ r
 		writeString += '\n'
 
-		for i in range(len(agm.table)):
-			for j in range(len(agm.table[i])):
-				writeString += 'S ' + agm.agentList[j] + ' ' + agm.configurationList[i] + ' ' + agm.table[i][j] + '\n'
+		table = agm.listToTable(agm.parsedTable, len(agm.parsedAgents))
+		for i in range(len(table)):
+			for j in range(len(table[i])):
+				writeString += 'S ' + agm.agm.agentList[j] + ' ' + agm.agm.configurationList[i] + ' ' + table[i][j] + '\n'
 		return writeString

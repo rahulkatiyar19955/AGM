@@ -1,5 +1,4 @@
-#ifndef WORLDMODELSYMBOLS_H
-#define WORLDMODELSYMBOLS_H
+#pragma once
 
 #include <stdint.h>
 
@@ -66,5 +65,3 @@ public:
 
 
 
-
-#endif

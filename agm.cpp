@@ -48,7 +48,7 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 							}
 							if (r==false)
 							{
-								std::cout << "Error in the input agmbd file" << std::endl;
+								std::cout << "AGM::loadFromFile(): Error in the input agmbd file (1)" << std::endl;
 								std::cout << line << std::endl;
 								exit(-1);
 							}
@@ -60,7 +60,7 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 							r = table.addConfiguration(words[v]);
 							if (r==false)
 							{
-								std::cout << "Error in the input agmbd file" << std::endl;
+								std::cout << "AGM::loadFromFile(): Error in the input agmbd file (2)" << std::endl;
 								std::cout << line << std::endl;
 								exit(-1);
 							}
@@ -70,7 +70,7 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 						r = table.setConfigForAgent(words[1], words[2], words[3]);
 						if (r==false)
 						{
-							std::cout << "Error in the input agmbd file" << std::endl;
+							std::cout << "AGM::loadFromFile(): Error in the input agmbd file (3)" << std::endl;
 							std::cout << line << std::endl;
 							exit(-1);
 						}
@@ -78,7 +78,7 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 					case '#':
 						break;
 					default:
-						std::cout << "Error in the input agmbd file" << std::endl;
+						std::cout << "AGM::loadFromFile(): Error in the input agmbd file (4)" << std::endl;
 						std::cout << line << std::endl;
 						exit(-1);
 				}
@@ -91,40 +91,7 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 		std::cout << "Unable to open file" << std::cout;
 	}
 
-// 	return 0;
-/*
-	bool r;
-	r = table.addAgent("agent1");
-	r = table.addAgentState("agent1", "a1a");
-	r = table.addAgentState("agent1", "a1c");
-	r = table.addAgentState("agent1", "a1b");
-	r = table.addAgent("agent3");
-	r = table.addAgentState("agent3", "a3a");
-	r = table.addAgentState("agent3", "a3b");
-	r = table.addAgent("agent2");
-	r = table.addAgentState("agent2", "a2a");
-	r = table.addAgentState("agent2", "a2d");
-	r = table.addAgentState("agent2", "a2b");
-	r = table.addAgentState("agent2", "a2c");
-	
-	r = table.addConfiguration("do1");
-	r = table.addConfiguration("do3");
-	r = table.addConfiguration("do2");
-
-
-	r = table.setConfigForAgent("agent1", "do1", "a1a");
-	r = table.setConfigForAgent("agent1", "do2", "a1b");
-	r = table.setConfigForAgent("agent1", "do3", "a1c");
-	r = table.setConfigForAgent("agent2", "do1", "a2a");
-	r = table.setConfigForAgent("agent2", "do2", "a2b");
-	r = table.setConfigForAgent("agent2", "do3", "a2c");
-	r = table.setConfigForAgent("agent3", "do1", "a3a");
-	r = table.setConfigForAgent("agent3", "do2", "a3b");
-	r = table.setConfigForAgent("agent3", "do3", "a3a");
-*/
-
-	print();
-
+// 	print();
 }
 
 void AGM::print()

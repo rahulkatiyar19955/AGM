@@ -1,5 +1,4 @@
-#ifndef AGMMODEL_H
-#define AGMMODEL_H
+#pragma once
 
 #include <stdio.h>
 
@@ -65,4 +64,4 @@ private:
 
 };
 
-#endif
+

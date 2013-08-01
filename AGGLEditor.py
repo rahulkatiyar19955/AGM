@@ -188,15 +188,6 @@ class AGMEditor(QMainWindow):
 		self.ui.tableWidget.resizeColumnsToContents()
 		#return
 		self.redrawConfigurationTable()
-	def listToTable(self, l, n):
-		t =  [l[i:i+n] for i in range(0, len(l), n)]
-		length = None
-		for i in t:
-			if length == None:
-				length = len(t)
-			else:
-				assert len(t) == length, "not squared table"
-		return t
 	def generateTableFromUI(self):
 		self.agmData.agm.table = []
 		for r in range(self.ui.tableWidget.rowCount()):
@@ -207,7 +198,7 @@ class AGMEditor(QMainWindow):
 			self.agmData.agm.table.append(rowList)
 
 	def processTableAndDrawCombos(self):
-		self.agmData.agm.table = self.listToTable(self.agmData.parsedTable, len(self.agmData.parsedAgents))
+		self.agmData.agm.table = self.agmData.listToTable(self.agmData.parsedTable, len(self.agmData.parsedAgents))
 		rows = len(self.agmData.agm.table)
 		cols = len(self.agmData.agm.table[0])
 		assert rows == len(self.agmData.agm.configurations), "the size of the table ("+str(rows)+") does not match with the number of configurations ("+str(len(self.agmData.agm.configurations))+")"

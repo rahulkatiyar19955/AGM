@@ -36,6 +36,7 @@ class AGMRuleParsing:
 class AGMFileDataParsing:
 	@staticmethod
 	def fromFile(filename, verbose=False):
+		print 'Verbose:', verbose
 		# Clear previous data
 		agmFD = AGMFileData()
 		agmFD.properties = dict()
@@ -71,7 +72,6 @@ class AGMFileDataParsing:
 		confTable = tb + op + OneOrMore(an).setResultsName("table")          + cl
 		agm   = OneOrMore(prop).setResultsName("props") + sep + agents + behaviors + confTable + sep + OneOrMore(rule).setResultsName("rules") + StringEnd()
 
-		verbose = False
 
 		# Parse input file
 		result = agm.parseString(open(filename, 'r').read())
@@ -95,18 +95,21 @@ class AGMFileDataParsing:
 			number += 1
 		if not gotName:
 			print 'drats! no name'
-		
+
+		verbose=True
 		agmFD.parsedAgents = dict()
 		for agent in result.agents:
-			agmFD.agm.agentList.append(agent.agentName)
+			print 'AGENT', agent
+			agmFD.agm.addAgent(agent.agentName)
 			agmFD.parsedAgents[agent.agentName] = agent.stateList
-
+		verbose=False
 		agmFD.parsedConfigurations = result.configurations
 		for c in result.configurations:
 			agmFD.agm.configurationList.append(c)
 			agmFD.agm.configurations[c] = AGMConfiguration(c)
 			
 		agmFD.parsedTable = result.table
+		print '\n\nTABLE', agmFD.parsedTable
 
 		if verbose: print '\nRules:', len(result.rules)
 		number = 0

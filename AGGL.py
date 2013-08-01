@@ -340,6 +340,15 @@ class AGMFileData(object):
 		
 	def generateAGMBehaviorDescription(self, filename):
 		w = open(filename, 'w')
-		w.write(AGMBD.toAGMBehaviorDescription(self.agm, self.properties["name"]))
+		w.write(AGMBD.toAGMBehaviorDescription(self, self.properties["name"]))
 		w.close()
 				
+	def listToTable(self, l, n):
+		t =  [l[i:i+n] for i in range(0, len(l), n)]
+		length = None
+		for i in t:
+			if length == None:
+				length = len(t)
+			else:
+				assert len(t) == length, "not squared table"
+		return t

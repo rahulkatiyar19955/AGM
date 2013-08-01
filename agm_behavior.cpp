@@ -130,13 +130,18 @@ bool AGMBehaviorDescription::validStateForAgent(const AGMAgentName &agent, const
 	}
 	if (it != agents.end())
 	{
-		AGMStatesVector states = it->getStates();
-		AGMStatesVector::iterator it2 = std::find(states.begin(), states.end(), state);
-		if (it2 != states.end())
+// 		AGMStatesVector states = it->getStates();
+// 		AGMStatesVector::iterator it2 = std::find(states.begin(), states.end(), state);
+// 		if (it2 != states.end())
 			return true;
+// 		printf("NO SUCH STATE %s?\n", agent.c_str());
+// 		return false;
+	}
+	else
+	{
+		printf("NO SUCH AGENT %s?\n", agent.c_str());
 		return false;
 	}
-	return false;	
 }
 
 void AGMBehaviorDescription::print()

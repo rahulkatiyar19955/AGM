@@ -1,3 +1,5 @@
+#pragma once
+
 #include "agm_behavior.h"
 #include "agm_model.h"
 
@@ -15,7 +17,7 @@ public:
 	std::string pddlProblemForTarget(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName);
 
 
-private:
+// private:
 	std::string pddlFile;
 	AGMBehaviorDescription table;
 	AGMModel currentModel;

@@ -1,3 +1,5 @@
+#pragma once
+
 #include <stdio.h>
 #include <string>
 #include <vector>
@@ -8,6 +10,7 @@
 typedef std::string AGMState;
 typedef std::vector<AGMState> AGMStatesVector;
 typedef std::string AGMAgentName;
+
 class AGMAgent
 {
 public:
@@ -45,7 +48,7 @@ public:
 	bool tableIsValid();
 
 	void print();
-private:
+// private:
 	AGMConfigsVector configurations;
 	AGMAgentVector   agents;
 	AGMConfigTable   table;
