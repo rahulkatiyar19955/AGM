@@ -20,6 +20,7 @@ public:
 // private:
 	std::string pddlFile;
 	AGMBehaviorDescription table;
+	AGMActionToBehaviorMap action2behavior;
 	AGMModel currentModel;
 	void loadFromFile(std::string pddlFile, std::string agmbdFile);
 };

@@ -66,6 +66,15 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 							}
 						}
 						break;
+					case 'R':
+						if (words.size() != 3)
+						{
+							std::cout << "AGM::loadFromFile(): Error in the input agmbd file (5)" << std::endl;
+							std::cout << line << std::endl;
+							exit(-1);
+						}
+						action2behavior[words[1]] = words[2];
+						break;
 					case 'S':
 						r = table.setConfigForAgent(words[1], words[2], words[3]);
 						if (r==false)

@@ -7,10 +7,10 @@
 
 #include <algorithm>
 
+#include <worldModel.h>
+
 class AGMModelEdge;
 class AGMModelConverter;
-
-float str2float(const std::string &s);
 
 class AGMModel
 {

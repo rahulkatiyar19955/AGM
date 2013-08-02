@@ -11,6 +11,8 @@ typedef std::string AGMState;
 typedef std::vector<AGMState> AGMStatesVector;
 typedef std::string AGMAgentName;
 
+typedef std::map<std::string, std::string> AGMActionToBehaviorMap;
+
 class AGMAgent
 {
 public:

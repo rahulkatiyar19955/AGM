@@ -1,59 +1,79 @@
-#include "agm_model.h"
+#include "worldModel.h"
 
-#include "agm_modelEdge.h"
+#include "worldModelEdge.h"
 
 #include <algorithm>
 #include <list>
 
+float str2float(const std::string &s)
+{
+	if (s.size()<=0)
+	{
+		printf("dkeiodeji\n");
+		WORLDMODELEXCEPTION("dekiehdiwohffhew 3423\n");
+	}
 
-AGMModel::AGMModel()
+	float ret;
+	std::string str = s;
+	replace(str.begin(), str.end(), ',', '.');
+	std::istringstream istr(str);
+	istr.imbue(std::locale("C"));
+	istr >> ret;
+	return ret;
+}
+
+WorldModel::WorldModel()
 {
 }
 
-AGMModel::~AGMModel()
+WorldModel::~WorldModel()
 {
 	symbols.clear();
 	edges.clear();
 }
 
-AGMModel::AGMModel(const AGMModel::SPtr &src)
+WorldModel::WorldModel(const WorldModel::SPtr &src)
 {
-	//printf("AGMModel::AGMModel(const AGMModel::SPtr &src)\n");
+// 	printf("WorldModel::WorldModel(const WorldModel::SPtr &src)\n");
 	setFrom(*src);
 }
 
-AGMModel::AGMModel(const AGMModel &src)
+WorldModel::WorldModel(const WorldModel &src)
 {
-	//printf("AGMModel::AGMModel(const AGMModel &src)\n");
+// 	printf("WorldModel::WorldModel(const WorldModel &src)\n");
 	setFrom(src);
 }
 
-AGMModel &AGMModel::operator=(const AGMModel &src)
+WorldModel& WorldModel::operator=(const WorldModel &src)
 {
-	//printf("AGMModel& AGMModel::operator=(const AGMModel &src)\n");
+// 	printf("WorldModel& WorldModel::operator=(const WorldModel &src)\n");
 	setFrom(src);
 	return *this;
 }
 
-void AGMModel::setFrom(const AGMModel &src)
+void WorldModel::setFrom(const WorldModel &src)
 {
 	symbols.clear();
 	for (uint32_t i=0; i<src.symbols.size(); ++i)
 	{
-		AGMModelSymbol::SPtr symbolPtr;
-		symbolPtr = AGMModelSymbol::SPtr(new AGMModelSymbol(src.symbols[i]->identifier, src.symbols[i]->typeString(), src.symbols[i]->attributes));
+		WorldModelSymbol::SPtr symbolPtr;
+		symbolPtr = WorldModelSymbol::SPtr(new WorldModelSymbol());
+		symbolPtr->symbolType = src.symbols[i]->symbolType;
+		symbolPtr->identifier = src.symbols[i]->identifier;
+		symbolPtr->attributes = src.symbols[i]->attributes;
 		symbols.push_back(symbolPtr);
 	}
 
 	edges.clear();
 	for (uint32_t i=0; i<src.edges.size(); ++i)
 	{
-		AGMModelEdge edge(src.edges[i].symbolPair.first, src.edges[i].symbolPair.second, src.edges[i].linking);
+		WorldModelEdge edge(src.edges[i].symbolPair.first, src.edges[i].symbolPair.second, src.edges[i].linking);
 		edges.push_back(edge);
 	}
 }
 
-void AGMModel::resetLastId()
+
+void WorldModel::resetLastId()
 {
 	int64_t maxId = -1;
 	for (uint32_t i=0; i<symbols.size(); ++i)
@@ -63,28 +83,28 @@ void AGMModel::resetLastId()
 			maxId = symbols[i]->identifier + 1;
 		}
 	}
-	AGMModelSymbol::setLastID(maxId);
+	WorldModelSymbol::setLastID(maxId);
 }
 
-void AGMModel::clear()
+void WorldModel::clear()
 {
 		symbols.clear();
 		edges.clear();
 }
 
 
-int32_t AGMModel::numberOfEdges() const
+int32_t WorldModel::numberOfEdges() const
 {
 	return edges.size();
 }
 
-int32_t AGMModel::numberOfSymbols() const
+int32_t WorldModel::numberOfSymbols() const
 {
 	return symbols.size();
 }
 
 
-AGMModelSymbol::SPtr AGMModel::getSymbol(int32_t identif) const
+WorldModelSymbol::SPtr WorldModel::getSymbol(int32_t identif) const
 {
 	for (uint32_t i=0; i<symbols.size(); ++i)
 	{
@@ -97,7 +117,7 @@ AGMModelSymbol::SPtr AGMModel::getSymbol(int32_t identif) const
 	throw "No such symbol";
 }
 
-int32_t AGMModel::getIdentifierByName(std::string name) const
+int32_t WorldModel::getIdentifierByName(std::string name) const
 {
 	for (uint32_t i=0; i<symbols.size(); ++i)
 	{
@@ -111,14 +131,14 @@ int32_t AGMModel::getIdentifierByName(std::string name) const
 }
 
 
-int32_t AGMModel::insertSymbol(AGMModelSymbol::SPtr s)
+int32_t WorldModel::insertSymbol(WorldModelSymbol::SPtr s)
 {
 	symbols.push_back(s);
 	return (int)symbols.size();
 }
 
 
-int32_t AGMModel::indexOfSymbol(const AGMModelSymbol::SPtr &value, int32_t from) const
+int32_t WorldModel::indexOfSymbol(const WorldModelSymbol::SPtr &value, int32_t from) const
 {
 	for (uint32_t i=from; i<symbols.size(); ++i)
 	{
@@ -127,29 +147,29 @@ int32_t AGMModel::indexOfSymbol(const AGMModelSymbol::SPtr &value, int32_t from)
 			return i;
 		}
 	}
-	fprintf(stderr, "AGMModel::indexOfSymbol: unknown symbol \"%s\"\n", value->symbolType.c_str());
+	fprintf(stderr, "WorldModel::indexOfSymbol: unknown symbol \"%s\"\n", value->symbolType.c_str());
 	printf("%d\n", __LINE__);
 	return -1;
 }
 
-int32_t AGMModel::indexOfFirstSymbolByValues(const AGMModelSymbol &value, int32_t from) const
+int32_t WorldModel::indexOfFirstSymbolByValues(const WorldModelSymbol &value, int32_t from) const
 {
 	for (uint32_t i=from; i<symbols.size(); ++i)
 	{
-		AGMModelSymbol::SPtr p = symbols[i];
-		AGMModelSymbol no_ptr = *(p.get());
+		WorldModelSymbol::SPtr p = symbols[i];
+		WorldModelSymbol no_ptr = *(p.get());
 		if (no_ptr == value)
 		{
 			return i;
 		}
 	}
-	fprintf(stderr, "AGMModel::indexOfFirstSymbolByValues: no equal \"%s\"   %d\n", value.symbolType.c_str(), __LINE__);
+	fprintf(stderr, "WorldModel::indexOfFirstSymbolByValues: no equal \"%s\"   %d\n", value.symbolType.c_str(), __LINE__);
 	printf("%d\n", __LINE__);
 	return -1;
 }
 
 
-int32_t AGMModel::indexOfFirstSymbolByType(const std::string &value, int32_t from) const
+int32_t WorldModel::indexOfFirstSymbolByType(const std::string &value, int32_t from) const
 {
 	for (uint32_t i=from; i<symbols.size(); ++i)
 	{
@@ -158,13 +178,13 @@ int32_t AGMModel::indexOfFirstSymbolByType(const std::string &value, int32_t fro
 			return i;
 		}
 	}
-	fprintf(stderr, "AGMModel::indexOfFirstSymbolByType: \"%s\", (%d)\n", value.c_str(), from);
+	fprintf(stderr, "WorldModel::indexOfFirstSymbolByType: \"%s\", (%d)\n", value.c_str(), from);
 	printf("%d\n", __LINE__);
 	return -1;
 }
 
 
-std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName) const
+std::string WorldModel::generatePDDLProblem(const WorldModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName) const
 {
 	std::ostringstream stringStream;
 
@@ -245,25 +265,56 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	/// T A R G E T    W O R L D
 	stringStream << "	\n";
 	stringStream << "	(:goal\n";
-	stringStream << "		(exists (";
-	for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+	if (targetObjects.size()>0)
 	{
-		stringStream << " ?" << *it;
+		stringStream << "		(exists (";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			stringStream << " ?" << *it;
+		}
+		stringStream << " )\n";
 	}
-	stringStream << " )\n";
 	stringStream << "			(and\n";
 
 	// Known symbols type for the objects in the target world
 	for (uint32_t s=0; s<target->symbols.size(); ++s)
 	{
-		stringStream << "				(is" << target->symbols[s]->typeString() << " ?" << target->symbols[s]->toString() << ")\n";
+		std::string kStr = " ";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			if (target->symbols[s]->toString() == *it)
+				kStr = " ?";
+		}
+		stringStream << "				(is" << target->symbols[s]->typeString() << kStr << target->symbols[s]->toString() << ")\n";
 	}
 	for (uint32_t e=0; e<target->edges.size(); ++e)
 	{
-		stringStream << "				(" << target->edges[e].toString(target.get()) << ")\n";
+		std::string label, a, b, kStr;
+		target->edges[e].getStrings(target, label, a, b);
+		stringStream << "				(" << label;
+
+		kStr = " ";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			if (a == *it)
+				kStr = " ?";
+		}
+		stringStream << kStr << a;
+
+		kStr = " ";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			if (b == *it)
+				kStr = " ?";
+		}
+		stringStream << kStr << b;
+		
+		stringStream << ")\n";
 	}
+	
 	stringStream << "			)\n";
-	stringStream << "		)\n";
+	if (targetObjects.size()>0)
+		stringStream << "		)\n";
 	stringStream << "	)\n";
 	stringStream << "\n";
 	stringStream << "\n";
@@ -273,28 +324,28 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
   return stringStream.str();
 }
 
-std::vector<AGMModelSymbol::SPtr> AGMModel::getSymbols() const
+std::vector<WorldModelSymbol::SPtr> WorldModel::getSymbols() const
 {
 	return symbols;
 }
 
-std::vector<AGMModelEdge> AGMModel::getEdges() const
+std::vector<WorldModelEdge> WorldModel::getEdges() const
 {
 	return edges;
 }
 
-AGMModelSymbol::SPtr & AGMModel::symbol(uint32_t i)
+WorldModelSymbol::SPtr & WorldModel::symbol(uint32_t i)
 {
 	return symbols[i];
 }
 
 
-AGMModelEdge & AGMModel::edge(uint32_t i)
+WorldModelEdge & WorldModel::edge(uint32_t i)
 {
 	return edges[i];
 }
 
-int32_t AGMModel::getIdentifierByType(std::string type, int32_t times) const
+int32_t WorldModel::getIdentifierByType(std::string type, int32_t times) const
 {
 	printf("getIdentifierByType: %s, %d\n", type.c_str(), times);
 	int32_t ret = -1;
@@ -326,7 +377,7 @@ int32_t AGMModel::getIdentifierByType(std::string type, int32_t times) const
 }
 
 
-int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
+int32_t WorldModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 {
 	int64_t ret = -1;
 	uint32_t idx = 0;
@@ -343,7 +394,7 @@ int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 		if (idx>=symbols.size())
 		{
 			printf("Exception: %d, %s, %d\n", id, linkname.c_str(), i);
-			AGMMODELEXCEPTION("Trying to get the identifier of a node linked to a given one");
+			WORLDMODELEXCEPTION("Trying to get the identifier of a node linked to a given one");
 		}
 	}
 	if (ret != -1)
@@ -353,7 +404,7 @@ int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 }
 
 
-int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
+int32_t WorldModel::getIndexByIdentifier(int32_t targetId) const
 {
 	for (uint32_t idx=0; idx<symbols.size(); ++idx)
 	{
@@ -363,18 +414,10 @@ int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 		}
 	}
 	printf("Exception: %d\n", targetId);
-	AGMMODELEXCEPTION("Trying to get the index of a node given it's identifier");
+	WORLDMODELEXCEPTION("Trying to get the index of a node given it's identifier");
 }
 
 
 
 
-void AGMModel::setSymbols(std::vector<AGMModelSymbol::SPtr> s)
-{
-	symbols = s;
-}
 
-void AGMModel::setEdges(std::vector<AGMModelEdge> e)
-{
-	edges = e;
-}
