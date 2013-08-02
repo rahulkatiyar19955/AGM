@@ -56,7 +56,7 @@ std::string AGMModelEdge::toString(const AGMModel *world) const
 	catch (...)
 	{
 		printf("AGMModel error: it probably lacks of a node with %d as identifier!!!\n", symbolPair.first);
-		AGMModelPrinter::printAGM(world);
+		AGMModelPrinter::printWorld(world);
 		exit(-1);
 	}
 	try
@@ -66,7 +66,7 @@ std::string AGMModelEdge::toString(const AGMModel *world) const
 	catch (...)
 	{
 		printf("AGMModel error: it probably lacks of a node with %d as identifier!!!\n", symbolPair.second);
-		AGMModelPrinter::printAGM(world);
+		AGMModelPrinter::printWorld(world);
 		exit(-1);
 	}
 

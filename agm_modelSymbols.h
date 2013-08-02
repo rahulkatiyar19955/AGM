@@ -27,7 +27,7 @@ public:
 
 	std::string toString() const;
 	std::string typeString() const;
-	std::string symboltype() { return symbolType; };
+	std::string symboltype() const { return symbolType; }
 
 	void setType(std::string t);
 	void setIdentifier(int32_t t);

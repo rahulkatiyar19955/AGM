@@ -17,16 +17,17 @@ option (ROBOCOMP_SUPPORT "Build with support for RoboComp" ON)
 SET (AGM_CODE
   agm.cpp
   agm_behavior.cpp
+  agm_misc_functions.cpp
   agm_model.cpp
   agm_modelEdge.cpp
   agm_modelPrinter.cpp
   agm_modelSymbols.cpp
 
-  worldModel.cpp
-  worldModelSymbols.cpp
-  worldModelEdge.cpp
-  worldModelConverter.cpp
-  worldModelPrinter.cpp
+#   worldModel.cpp
+#   worldModelSymbols.cpp
+#   worldModelEdge.cpp
+#   worldModelConverter.cpp
+#   worldModelPrinter.cpp
 
   WorldModel.cpp
 )

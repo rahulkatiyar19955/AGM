@@ -1,4 +1,11 @@
+#pragma once
+
+#include <stdint.h>
+#include <stdio.h>
+
 #include <exception>
+#include <string>
+#include <sstream>
 
 class AGMModelException : public std::exception
 {

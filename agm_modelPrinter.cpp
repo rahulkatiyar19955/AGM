@@ -4,7 +4,7 @@
 #include "agm_modelPrinter.h"
 #include "agm_modelEdge.h"
 
-void AGMModelPrinter::printAGM(const AGMModel::SPtr &w)
+void AGMModelPrinter::printWorld(const AGMModel::SPtr &w)
 {
 	for (uint32_t i=0; i<w->symbols.size(); ++i)
 	{
@@ -22,7 +22,7 @@ void AGMModelPrinter::printAGM(const AGMModel::SPtr &w)
 	}
 }
 
-void AGMModelPrinter::printAGM(const AGMModel *w)
+void AGMModelPrinter::printWorld(const AGMModel *w)
 {
 	for (uint32_t i=0; i<w->symbols.size(); ++i)
 	{
@@ -40,12 +40,12 @@ void AGMModelPrinter::printAGM(const AGMModel *w)
 	}
 }
 
-// void AGMModelPrinter::printAGM(const RoboCompAGMModel::GualzruAGM &w)
+// void AGMModelPrinter::printWorld(const RoboCompAGMModel::GualzruAGM &w)
 // {
-// 	AGMModelPrinter::printAGM(stdout, w);
+// 	AGMModelPrinter::printWorld(stdout, w);
 // }
 
-// void AGMModelPrinter::printAGM(FILE *fd, const RoboCompAGMModel::GualzruAGM &w)
+// void AGMModelPrinter::printWorld(FILE *fd, const RoboCompAGMModel::GualzruAGM &w)
 // {
 // 	for (uint32_t i=0; i<w.nodes.size(); ++i)
 // 	{

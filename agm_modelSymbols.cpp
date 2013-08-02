@@ -12,10 +12,13 @@ AGMModelSymbol::AGMModelSymbol()
 	identifier = AGMModelSymbol::getNewId();
 }
 
-AGMModelSymbol::AGMModelSymbol(std::string typ)
+AGMModelSymbol::AGMModelSymbol(std::string typ, int32_t id)
 {
 	symbolType = typ;
-	identifier = AGMModelSymbol::getNewId();
+	if (id == -1)
+		identifier = AGMModelSymbol::getNewId();
+	else
+		identifier = id;
 }
 
 AGMModelSymbol::AGMModelSymbol(int32_t id, std::string typ)
@@ -75,13 +78,6 @@ int32_t AGMModelSymbol::getLastId()
 	ret = lastId;
 	mutex.unlock();
 	return ret;
-}
-
-
-
-std::string AGMModelSymbol::symboltype() const
-{
-	return symbolType;
 }
 
 
