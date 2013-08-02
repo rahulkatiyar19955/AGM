@@ -10,8 +10,10 @@
 class AGMModelPrinter
 {
 public:
-	static void printAGM(const AGMModel::SPtr &w);
-	static void printAGM(const AGMModel *w);
+	static void printWorld(const AGMModel::SPtr &w);
+	static void printWorld(const AGMModel *w);
+	static void printWorld(const RoboCompWorldModel::GualzruWorld &w);
+	static void printWorld(FILE *fd, const RoboCompWorldModel::GualzruWorld &w);
 };
 
 

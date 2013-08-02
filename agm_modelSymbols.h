@@ -18,7 +18,7 @@ class AGMModelSymbol
 	
 public:
 	AGMModelSymbol();
-	AGMModelSymbol(std::string typ);
+	AGMModelSymbol(std::string typ, int32_t id=-1);
 	AGMModelSymbol(int32_t identifier, std::string typ);
 	AGMModelSymbol(int32_t identifier, std::string typ, std::map<std::string, std::string> atr);
 	~AGMModelSymbol();
@@ -26,32 +26,20 @@ public:
 	typedef boost::shared_ptr<AGMModelSymbol> SPtr;
 
 	std::string toString() const;
-
 	std::string typeString() const;
-	std::string symboltype() const;
+	std::string symboltype() { return symbolType; };
+
 	void setType(std::string t);
-	
-	
 	void setIdentifier(int32_t t);
 	void setAttribute(std::string a, std::string v);
 	std::string getAttribute(std::string a);
 
 	bool operator==(const AGMModelSymbol &p) const;
 
-
-
-
-
-
 	std::string symbolType;
 	int32_t identifier;
 	std::map<std::string, std::string> attributes;
 
-
-	
-	
-	
-	
 private:
 	static int32_t lastId;
 	static boost::mutex mutex;

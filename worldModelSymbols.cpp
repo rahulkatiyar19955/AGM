@@ -12,6 +12,16 @@ WorldModelSymbol::WorldModelSymbol()
 	identifier = WorldModelSymbol::getNewId();
 }
 
+WorldModelSymbol::WorldModelSymbol(std::string ntype, int32_t id)
+{
+	symbolType = ntype;
+	if (id == -1)
+		identifier = WorldModelSymbol::getNewId();
+	else
+		identifier = id;
+}
+
+
 WorldModelSymbol::~WorldModelSymbol()
 {
 }

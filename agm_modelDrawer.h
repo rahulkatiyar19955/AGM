@@ -176,7 +176,10 @@ public:
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
 			for (int d=0; d<2; d++)
+			{
 				nodes[n].pos[d] += nodes[n].vel[d];
+				nodes[n].vel[d] *= 0.94;
+			}
 		}
 
 		if (nodes.size() > 0)

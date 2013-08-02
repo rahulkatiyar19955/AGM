@@ -1,18 +1,17 @@
-#ifndef WORLDMODEL_H
-#define WORLDMODEL_H
+#pragma once
 
-#include "worldModelSymbols.h"
+#include <stdio.h>
 
-#include <WorldModel.h>
-
+#include <worldModelSymbols.h>
 #include <worldModelException.h>
+#include <WorldModel.h>
 
 #include <algorithm>
 
+#include <agm_misc_functions.h>
+
 class WorldModelEdge;
 class WorldModelConverter;
-
-float str2float(const std::string &s);
 
 class WorldModel
 {
@@ -49,15 +48,19 @@ public:
 	int32_t getIndexByIdentifier(int32_t targetId) const;
 
 
+	float string2float(const std::string &s) const { return ::str2float(s); }
+
 
 	/// PLANNING RELATED !!
 	std::string generatePDDLProblem(const WorldModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName="problemName") const;
 
-// private:
+	void setSymbols(std::vector<AGMModelSymbol::SPtr> s);
+	void setEdges(std::vector<AGMModelEdge> e);
+
+	
 	std::vector<WorldModelSymbol::SPtr> symbols;
 	std::vector<WorldModelEdge> edges;
 private:
 	void setFrom(const WorldModel &src);
-};
 
-#endif
+};

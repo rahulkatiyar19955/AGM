@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <list>
 
-
 AGMModel::AGMModel()
 {
 }

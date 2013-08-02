@@ -1,22 +1,19 @@
 cmake_minimum_required( VERSION 2.8)
 
-#
-# General options
-#
+#  General options  #
+#####################
 set(CMAKE_CXX_FLAGS "-Wall -Wfatal-errors " )
 INCLUDE_DIRECTORIES ( . )
 
 
-#
-# Optional features
-#
+#  Optional features  #
+#######################
 option (PYTHON_BINDINGS "Build python bindings" ON)
 option (ROBOCOMP_SUPPORT "Build with support for RoboComp" ON)
 
 
-#
-# Set sources
-#
+#  Set sources  #
+#################
 SET (AGM_CODE
   agm.cpp
   agm_behavior.cpp
@@ -56,9 +53,8 @@ SET (HEADERS
 )
 
 
-#
-# Show enabled optional features
-# 
+#  Show enabled optional features  #
+####################################
 MESSAGE(STATUS "\n\nOptional features:")
 
 if (PYTHON_BINDINGS)
@@ -76,9 +72,8 @@ endif (ROBOCOMP_SUPPORT)
 MESSAGE(STATUS "\n\n")
 
 
-#
-# Handle optional features
-#
+#  Handle optional features  #
+##############################
 
 # Python bindings
 if (PYTHON_BINDINGS)
@@ -109,9 +104,8 @@ if (ROBOCOMP_SUPPORT)
 endif (ROBOCOMP_SUPPORT)
 
 
-#
-# Macro for compiling UI files and wrap command
-#
+#  Macro for compiling UI files and wrap command  #
+###################################################
 MACRO( WRAP_PYTHON_UI )
   FOREACH( input_file ${ARGN} )
     ADD_CUSTOM_COMMAND (
@@ -127,9 +121,8 @@ ENDMACRO( WRAP_PYTHON_UI )
 WRAP_PYTHON_UI( guiAGGLEditor guiAGMExecutiveClient appearance )
 
 
-#
-# Library building
-#
+#  Library building  #
+######################
 add_library(agm SHARED ${AGM_CODE} )
 target_link_libraries(agm ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
 
@@ -138,8 +131,8 @@ target_link_libraries ( testagm  -L. -lagm ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTH
 add_dependencies(testagm agm)
 
 
-#
-# Installation
-#
+
+#  Installation  #
+##################
 INSTALL(FILES libagm.so DESTINATION /opt/robocomp/lib/ )
 INSTALL(FILES ${HEADERS} DESTINATION /opt/robocomp/include/ )

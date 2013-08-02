@@ -4,10 +4,11 @@
 
 #include <agm_modelSymbols.h>
 #include <agm_modelException.h>
+#include <WorldModel.h>
 
 #include <algorithm>
 
-#include <worldModel.h>
+#include <agm_misc_functions.h>
 
 class AGMModelEdge;
 class AGMModelConverter;
@@ -49,6 +50,7 @@ public:
 
 	float string2float(const std::string &s) const { return ::str2float(s); }
 
+
 	/// PLANNING RELATED !!
 	std::string generatePDDLProblem(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName="problemName") const;
 
@@ -56,12 +58,9 @@ public:
 	void setEdges(std::vector<AGMModelEdge> e);
 
 	
-	
 	std::vector<AGMModelSymbol::SPtr> symbols;
 	std::vector<AGMModelEdge> edges;
 private:	
-		void setFrom(const AGMModel &src);
+	void setFrom(const AGMModel &src);
 
 };
-
-
