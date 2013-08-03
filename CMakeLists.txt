@@ -22,12 +22,7 @@ SET (AGM_CODE
   agm_modelEdge.cpp
   agm_modelPrinter.cpp
   agm_modelSymbols.cpp
-
-#   worldModel.cpp
-#   worldModelSymbols.cpp
-#   worldModelEdge.cpp
-#   worldModelConverter.cpp
-#   worldModelPrinter.cpp
+  agm_modelConverter.cpp
 
   WorldModel.cpp
 )
@@ -42,15 +37,8 @@ SET (HEADERS
   agm_model.h
   agm_modelPrinter.h
   agm_modelSymbols.h
-
-  worldModel.h
-  worldModelSymbols.h
-  worldModelEdge.h
-  worldModelException.h
-  worldModelConverter.h
-  worldModelPrinter.h
-  worldModelDrawer.h
-
+  agm_misc_functions.h
+  agm_modelConverter.h
 )
 
 

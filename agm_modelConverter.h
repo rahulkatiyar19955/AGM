@@ -1,8 +1,8 @@
 #pragma once
 
-#include "agm_model.h"
-#include "agm_modelEdge.h"
-#include "agm_modelSymbols.h"
+#include <agm_model.h>
+#include <agm_modelEdge.h>
+#include <agm_modelSymbols.h>
 
 class AGMModelConverter
 {
@@ -12,9 +12,7 @@ public:
 	static void fromInternalToIce(const AGMModelSymbol::SPtr &node, RoboCompWorldModel::GualzruWorldNode &dst);
 	static void fromIceToInternal(const RoboCompWorldModel::GualzruWorldNode &node, AGMModelSymbol::SPtr &dst);
 
-	static bool includeIceModificationInInternalModel(const RoboCompWorldModel::GualzruWorldNode &node, WorldModel::SPtr &world);
+	static bool includeIceModificationInInternalModel(const RoboCompWorldModel::GualzruWorldNode &node, AGMModel::SPtr &world);
 };
 
-
-#endif
 

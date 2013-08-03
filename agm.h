@@ -1,7 +1,7 @@
 #pragma once
 
-#include "agm_behavior.h"
-#include "agm_model.h"
+#include <agm_behavior.h>
+#include <agm_model.h>
 
 
 class AGM

@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "worldModelConverter.h"
-#include "worldModelEdge.h"
+#include <agm_modelConverter.h>
+#include <agm_modelEdge.h>
 
-void WorldModelConverter::fromInternalToIce(const WorldModel::SPtr &src, RoboCompWorldModel::GualzruWorld &dst)
+void AGMModelConverter::fromInternalToIce(const AGMModel::SPtr &src, RoboCompWorldModel::GualzruWorld &dst)
 {
 	dst.nodes.clear();
 	for (uint32_t i=0; i<src->symbols.size(); ++i)
@@ -28,14 +28,14 @@ void WorldModelConverter::fromInternalToIce(const WorldModel::SPtr &src, RoboCom
 }
 
 
-void WorldModelConverter::fromIceToInternal(const RoboCompWorldModel::GualzruWorld &src, WorldModel::SPtr &dst)
+void AGMModelConverter::fromIceToInternal(const RoboCompWorldModel::GualzruWorld &src, AGMModel::SPtr &dst)
 {
 	dst->symbols.clear();
 	for (uint32_t i=0; i<src.nodes.size(); ++i)
 	{
-		WorldModelSymbol::SPtr symbolPtr;
+		AGMModelSymbol::SPtr symbolPtr;
 
-		symbolPtr = WorldModelSymbol::SPtr(new WorldModelSymbol());
+		symbolPtr = AGMModelSymbol::SPtr(new AGMModelSymbol());
 		symbolPtr->symbolType = src.nodes[i].nodeIdentifier;
 		symbolPtr->attributes = src.nodes[i].attributes;
 		dst->symbols.push_back(symbolPtr);
@@ -44,19 +44,19 @@ void WorldModelConverter::fromIceToInternal(const RoboCompWorldModel::GualzruWor
 	dst->edges.clear();
 	for (uint32_t i=0; i<src.edges.size(); ++i)
 	{
-		WorldModelEdge edge(src.edges[i].a, src.edges[i].b, src.edges[i].edgeType);
+		AGMModelEdge edge(src.edges[i].a, src.edges[i].b, src.edges[i].edgeType);
 		dst->edges.push_back(edge);
 	}
 }
 
-void WorldModelConverter::fromInternalToIce(const WorldModelSymbol::SPtr &node, RoboCompWorldModel::GualzruWorldNode &dst)
+void AGMModelConverter::fromInternalToIce(const AGMModelSymbol::SPtr &node, RoboCompWorldModel::GualzruWorldNode &dst)
 {
 	dst.nodeType = node->symbolType;
 	dst.nodeIdentifier = node->identifier;
 	dst.attributes = node->attributes;
 }
 
-void WorldModelConverter::fromIceToInternal(const RoboCompWorldModel::GualzruWorldNode &node, WorldModelSymbol::SPtr &dst)
+void AGMModelConverter::fromIceToInternal(const RoboCompWorldModel::GualzruWorldNode &node, AGMModelSymbol::SPtr &dst)
 {
 	dst->symbolType = node.nodeType;
 	dst->attributes = node.attributes;
@@ -64,7 +64,7 @@ void WorldModelConverter::fromIceToInternal(const RoboCompWorldModel::GualzruWor
 }
 
 
-bool WorldModelConverter::includeIceModificationInInternalModel(const RoboCompWorldModel::GualzruWorldNode &node, WorldModel::SPtr &world)
+bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompWorldModel::GualzruWorldNode &node, AGMModel::SPtr &world)
 {
 	for (uint32_t i=0; i<world->symbols.size(); ++i)
 	{
