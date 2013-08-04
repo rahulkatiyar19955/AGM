@@ -8,16 +8,19 @@
 AGMModel::AGMModel()
 {
 	lastId = 0;
+	printf("new model: (%p)\n", this);
 }
 
 AGMModel::~AGMModel()
 {
+	printf("delete model: (%p)\n", this);
 	symbols.clear();
 	edges.clear();
 }
 
 AGMModel::AGMModel(const AGMModel::SPtr &src)
 {
+	printf("new model (sptr): (%p)\n", this);
 	//printf("AGMModel::AGMModel(const AGMModel::SPtr &src)\n");
 	setFrom(*src);
 }
@@ -25,6 +28,7 @@ AGMModel::AGMModel(const AGMModel::SPtr &src)
 AGMModel::AGMModel(const AGMModel &src)
 {
 	//printf("AGMModel::AGMModel(const AGMModel &src)\n");
+	printf("new model (&): (%p)\n", this);
 	setFrom(src);
 }
 
@@ -42,8 +46,7 @@ void AGMModel::setFrom(const AGMModel &src)
 	symbols.clear();
 	for (uint32_t i=0; i<src.symbols.size(); ++i)
 	{
-		AGMModelSymbol::SPtr symbolPtr;
-		symbolPtr = AGMModelSymbol::SPtr(new AGMModelSymbol(this, src.symbols[i]->identifier, src.symbols[i]->typeString(), src.symbols[i]->attributes));
+		newSymbol(src.symbols[i]->identifier, src.symbols[i]->typeString(), src.symbols[i]->attributes);
 	}
 
 	edges.clear();
@@ -56,7 +59,7 @@ void AGMModel::setFrom(const AGMModel &src)
 
 void AGMModel::resetLastId()
 {
-	int64_t maxId = -1;
+	int64_t maxId = 0;
 	for (uint32_t i=0; i<symbols.size(); ++i)
 	{
 		if (symbols[i]->identifier >= maxId)
@@ -245,27 +248,59 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	stringStream << "	)\n";
 
 	/// T A R G E T    W O R L D
+	/// T A R G E T    W O R L D
 	stringStream << "	\n";
 	stringStream << "	(:goal\n";
-	stringStream << "		(exists (";
-	for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+	if (targetObjects.size()>0)
 	{
-		stringStream << " ?" << *it;
+		stringStream << "		(exists (";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			stringStream << " ?" << *it;
+		}
+		stringStream << " )\n";
 	}
-	stringStream << " )\n";
 	stringStream << "			(and\n";
 
 	// Known symbols type for the objects in the target world
 	for (uint32_t s=0; s<target->symbols.size(); ++s)
 	{
-		stringStream << "				(is" << target->symbols[s]->typeString() << " ?" << target->symbols[s]->toString() << ")\n";
+		std::string kStr = " ";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			if (target->symbols[s]->toString() == *it)
+				kStr = " ?";
+		}
+		stringStream << "				(is" << target->symbols[s]->typeString() << kStr << target->symbols[s]->toString() << ")\n";
 	}
 	for (uint32_t e=0; e<target->edges.size(); ++e)
 	{
-		stringStream << "				(" << target->edges[e].toString(target.get()) << ")\n";
+		std::string label, a, b, kStr;
+		target->edges[e].getStrings(target, label, a, b);
+		stringStream << "				(" << label;
+
+		kStr = " ";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			if (a == *it)
+				kStr = " ?";
+		}
+		stringStream << kStr << a;
+
+		kStr = " ";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			if (b == *it)
+				kStr = " ?";
+		}
+		stringStream << kStr << b;
+
+		stringStream << ")\n";
 	}
+
 	stringStream << "			)\n";
-	stringStream << "		)\n";
+	if (targetObjects.size()>0)
+		stringStream << "		)\n";
 	stringStream << "	)\n";
 	stringStream << "\n";
 	stringStream << "\n";

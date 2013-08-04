@@ -33,10 +33,29 @@ public:
 	void clear();
 	bool removeSymbol(int32_t id);
 	int32_t replaceIdentifierInEdges(int32_t a, int32_t b);
+
+	AGMModelSymbol::SPtr newSymbol(std::string typ, int32_t id=-1)
+	{
+		AGMModelSymbol *s = new AGMModelSymbol(this, typ, id);
+		return symbols[getIndexByIdentifier(s->identifier)];
+	}
+	AGMModelSymbol::SPtr newSymbol(int32_t identifier, std::string typ)
+	{
+		AGMModelSymbol *s = new AGMModelSymbol(this, identifier, typ);
+		return symbols[getIndexByIdentifier(s->identifier)];
+	}
+	AGMModelSymbol::SPtr newSymbol(int32_t identifier, std::string typ, std::map<std::string, std::string> atr)
+	{
+		AGMModelSymbol *s = new AGMModelSymbol(this, identifier, typ, atr);
+		return symbols[getIndexByIdentifier(s->identifier)];
+	}
+
 private:
 	int32_t insertSymbol(AGMModelSymbol::SPtr s);
+	int32_t insertSymbol(AGMModelSymbol *s) { return insertSymbol(AGMModelSymbol::SPtr(s)); }
 	bool removeEdgesRelatedToSymbol(int32_t id);
 public:
+	std::string name;
 	/// GET's
 	AGMModelSymbol::SPtr getSymbol(int32_t identif) const;
 	int32_t numberOfEdges() const;

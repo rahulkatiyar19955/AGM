@@ -10,44 +10,67 @@ AGMModelSymbol::AGMModelSymbol(AGMModel::SPtr model, int32_t identifier, std::st
 
 void AGMModelSymbol::init(AGMModel *model, std::string typ, int32_t id)
 {
+	if (model == NULL)
+	{
+		fprintf(stdout, "AGMModelSymbol::init: error: MODEL NULL!!\n");
+		exit(-1);
+	}
+	modelPtr = model;
+
 	symbolType = typ;
 	if (id==-1)
 	{
-		if (model!=NULL)
-			identifier = model->getNewId();
-		else
-			identifier = -1;
+		identifier = model->getNewId();
 	}
 	else
 		identifier = id;
 
-	if (model != NULL)
-		model->insertSymbol(AGMModelSymbol::SPtr(this));
+	model->insertSymbol(this);
+
+	printf("new symbol: %s [%d] (%p)\n", symbolType.c_str(), identifier, this);
 }
 
 void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ)
 {
+	if (model == NULL)
+	{
+		fprintf(stdout, "AGMModelSymbol::init: error: MODEL NULL!!\n");
+		exit(-1);
+	}
+	modelPtr = model;
+
 	identifier = id;
 	symbolType = typ;
 
-	if (model != NULL)
-		model->insertSymbol(AGMModelSymbol::SPtr(this));
+	model->insertSymbol(this);
+
+	printf("new symbol: %s [%d] (%p)\n", symbolType.c_str(), identifier, this);
 }
 
 void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ, std::map<std::string, std::string> atr)
 {
+	if (model == NULL)
+	{
+		fprintf(stdout, "AGMModelSymbol::init: error: MODEL NULL!!\n");
+		exit(-1);
+	}
+	modelPtr = model;
+
 	identifier = id;
 	symbolType = typ;
 	attributes = atr;
 
 	if (model != NULL)
-		model->insertSymbol(AGMModelSymbol::SPtr(this));
+		model->insertSymbol(this);
+
+	printf("new symbol: %s [%d] (%p)\n", symbolType.c_str(), identifier, this);
 }
 
 
 
 AGMModelSymbol::~AGMModelSymbol()
 {
+	printf("delete symbol: %s [%d] (%p)   model(%s)\n", symbolType.c_str(), identifier, this, modelPtr->name.c_str());
 }
 
 bool AGMModelSymbol::operator==(const AGMModelSymbol &p) const

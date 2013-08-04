@@ -15,13 +15,15 @@ class AGMModelConverter;
 
 class AGMModelSymbol
 {
-public:
+friend class AGMModel;
+private:
 	AGMModelSymbol(AGMModel *model, std::string typ, int32_t id=-1);
 	AGMModelSymbol(AGMModel *model, int32_t identifier, std::string typ);
 	AGMModelSymbol(AGMModel *model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr);
 	AGMModelSymbol(boost::shared_ptr<AGMModel> model, std::string typ, int32_t id=-1);
 	AGMModelSymbol(boost::shared_ptr<AGMModel> model, int32_t identifier, std::string typ);
 	AGMModelSymbol(boost::shared_ptr<AGMModel> model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr);
+public:
 	~AGMModelSymbol();
 private:
 	void init(AGMModel *model, std::string typ, int32_t id=-1);
@@ -30,6 +32,7 @@ private:
 public:	
 	typedef boost::shared_ptr<AGMModelSymbol> SPtr;
 
+	AGMModel *modelPtr;
 	std::string toString() const;
 	std::string typeString() const;
 	std::string symboltype() const { return symbolType; }

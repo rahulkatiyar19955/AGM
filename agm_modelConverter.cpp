@@ -33,8 +33,7 @@ void AGMModelConverter::fromIceToInternal(const RoboCompWorldModel::GualzruWorld
 	dst->symbols.clear();
 	for (uint32_t i=0; i<src.nodes.size(); ++i)
 	{
-		AGMModelSymbol *symbolPtr = new AGMModelSymbol(dst.get(), src.nodes[i].nodeIdentifier, src.nodes[i].nodeType, src.nodes[i].attributes);
-		dst->symbols.push_back(AGMModelSymbol::SPtr(symbolPtr));
+		dst->newSymbol(src.nodes[i].nodeIdentifier, src.nodes[i].nodeType, src.nodes[i].attributes);
 	}
 
 	dst->edges.clear();
