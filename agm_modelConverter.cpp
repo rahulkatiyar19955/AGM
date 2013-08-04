@@ -33,12 +33,8 @@ void AGMModelConverter::fromIceToInternal(const RoboCompWorldModel::GualzruWorld
 	dst->symbols.clear();
 	for (uint32_t i=0; i<src.nodes.size(); ++i)
 	{
-		AGMModelSymbol::SPtr symbolPtr;
-
-		symbolPtr = AGMModelSymbol::SPtr(new AGMModelSymbol());
-		symbolPtr->symbolType = src.nodes[i].nodeIdentifier;
-		symbolPtr->attributes = src.nodes[i].attributes;
-		dst->symbols.push_back(symbolPtr);
+		AGMModelSymbol *symbolPtr = new AGMModelSymbol(dst.get(), src.nodes[i].nodeIdentifier, src.nodes[i].nodeType, src.nodes[i].attributes);
+		dst->symbols.push_back(AGMModelSymbol::SPtr(symbolPtr));
 	}
 
 	dst->edges.clear();
@@ -47,6 +43,8 @@ void AGMModelConverter::fromIceToInternal(const RoboCompWorldModel::GualzruWorld
 		AGMModelEdge edge(src.edges[i].a, src.edges[i].b, src.edges[i].edgeType);
 		dst->edges.push_back(edge);
 	}
+
+	dst->resetLastId();
 }
 
 void AGMModelConverter::fromInternalToIce(const AGMModelSymbol::SPtr &node, RoboCompWorldModel::GualzruWorldNode &dst)

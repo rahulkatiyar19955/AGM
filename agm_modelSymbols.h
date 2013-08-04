@@ -15,14 +15,19 @@ class AGMModelConverter;
 
 class AGMModelSymbol
 {
-	
 public:
-	AGMModelSymbol();
-	AGMModelSymbol(std::string typ, int32_t id=-1);
-	AGMModelSymbol(int32_t identifier, std::string typ);
-	AGMModelSymbol(int32_t identifier, std::string typ, std::map<std::string, std::string> atr);
+	AGMModelSymbol(AGMModel *model, std::string typ, int32_t id=-1);
+	AGMModelSymbol(AGMModel *model, int32_t identifier, std::string typ);
+	AGMModelSymbol(AGMModel *model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr);
+	AGMModelSymbol(boost::shared_ptr<AGMModel> model, std::string typ, int32_t id=-1);
+	AGMModelSymbol(boost::shared_ptr<AGMModel> model, int32_t identifier, std::string typ);
+	AGMModelSymbol(boost::shared_ptr<AGMModel> model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr);
 	~AGMModelSymbol();
-	
+private:
+	void init(AGMModel *model, std::string typ, int32_t id=-1);
+	void init(AGMModel *model, int32_t identifier, std::string typ);
+	void init(AGMModel *model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr);
+public:	
 	typedef boost::shared_ptr<AGMModelSymbol> SPtr;
 
 	std::string toString() const;
@@ -40,15 +45,6 @@ public:
 	int32_t identifier;
 	std::map<std::string, std::string> attributes;
 
-private:
-	static int32_t lastId;
-	static boost::mutex mutex;
-protected:
-	static int32_t getNewId();
-public:
-	static int32_t getLastId();
-	static void resetIDs() { AGMModelSymbol::lastId = 0; }
-	static void setLastID(int32_t last) { AGMModelSymbol::lastId = last; }
 };
 
 

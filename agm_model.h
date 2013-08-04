@@ -2,20 +2,24 @@
 
 #include <stdio.h>
 
-#include <agm_modelSymbols.h>
+#include <algorithm>
+#include <boost/shared_ptr.hpp>
+#include <boost/thread.hpp>
+
 #include <agm_modelException.h>
 #include <WorldModel.h>
 
-#include <algorithm>
-
 #include <agm_misc_functions.h>
+#include <agm_modelSymbols.h>
 
 class AGMModelEdge;
 class AGMModelConverter;
+class AGMModelSymbol;
 
 class AGMModel
 {
 friend class AGMModelConverter;
+friend class AGMModelSymbol;
 public:
 	typedef boost::shared_ptr<AGMModel> SPtr;
 
@@ -27,9 +31,12 @@ public:
 
 	/// SET's
 	void clear();
+	bool removeSymbol(int32_t id);
+	int32_t replaceIdentifierInEdges(int32_t a, int32_t b);
+private:
 	int32_t insertSymbol(AGMModelSymbol::SPtr s);
-	void resetLastId();
-
+	bool removeEdgesRelatedToSymbol(int32_t id);
+public:
 	/// GET's
 	AGMModelSymbol::SPtr getSymbol(int32_t identif) const;
 	int32_t numberOfEdges() const;
@@ -60,4 +67,13 @@ public:
 private:	
 	void setFrom(const AGMModel &src);
 
+
+/// ID
+public:
+	int32_t lastId;
+	void resetLastId();
+	int32_t getNewId();
+
 };
+
+

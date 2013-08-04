@@ -124,4 +124,4 @@ add_dependencies(testagm agm)
 #  Installation  #
 ##################
 INSTALL(FILES libagm.so DESTINATION /opt/robocomp/lib/ )
-INSTALL(FILES ${HEADERS} DESTINATION /opt/robocomp/include/ )
+INSTALL(FILES ${HEADERS} WorldModel.h DESTINATION /opt/robocomp/include/ )

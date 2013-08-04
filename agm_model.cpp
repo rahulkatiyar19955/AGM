@@ -7,6 +7,7 @@
 
 AGMModel::AGMModel()
 {
+	lastId = 0;
 }
 
 AGMModel::~AGMModel()
@@ -36,12 +37,13 @@ AGMModel &AGMModel::operator=(const AGMModel &src)
 
 void AGMModel::setFrom(const AGMModel &src)
 {
+	lastId = src.lastId;
+
 	symbols.clear();
 	for (uint32_t i=0; i<src.symbols.size(); ++i)
 	{
 		AGMModelSymbol::SPtr symbolPtr;
-		symbolPtr = AGMModelSymbol::SPtr(new AGMModelSymbol(src.symbols[i]->identifier, src.symbols[i]->typeString(), src.symbols[i]->attributes));
-		symbols.push_back(symbolPtr);
+		symbolPtr = AGMModelSymbol::SPtr(new AGMModelSymbol(this, src.symbols[i]->identifier, src.symbols[i]->typeString(), src.symbols[i]->attributes));
 	}
 
 	edges.clear();
@@ -62,13 +64,14 @@ void AGMModel::resetLastId()
 			maxId = symbols[i]->identifier + 1;
 		}
 	}
-	AGMModelSymbol::setLastID(maxId);
+	lastId = maxId;
 }
 
 void AGMModel::clear()
 {
-		symbols.clear();
-		edges.clear();
+	lastId = 0;
+	symbols.clear();
+	edges.clear();
 }
 
 
@@ -366,6 +369,49 @@ int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 }
 
 
+bool AGMModel::removeSymbol(int32_t id)
+{
+	int32_t index = getIndexByIdentifier(id);
+	if (index >= 0)
+	{
+		symbols.erase(symbols.begin() + index);
+		return true;
+	}
+	return false;
+}
+
+int32_t AGMModel::replaceIdentifierInEdges(int32_t a, int32_t b)
+{
+	int32_t ret = 0;
+	for (uint32_t edge=0; edge < edges.size(); ++edge)
+	{
+		if (edges[edge].symbolPair.first == a)
+		{
+			edges[edge].symbolPair.first = b;
+			ret++;
+		}
+		if (edges[edge].symbolPair.second == a)
+		{
+			edges[edge].symbolPair.second = b;
+			ret++;
+		}
+	}
+	return ret;
+}
+
+bool AGMModel::removeEdgesRelatedToSymbol(int32_t id)
+{
+	bool any = false;
+	for (int p=0; p<numberOfEdges(); p++)
+	{
+		if (edges[p].symbolPair.first == id or edges[p].symbolPair.second == id)
+		{
+			edges.erase(edges.begin() + p);
+			any = true;
+		}
+	}
+	return any;
+}
 
 
 void AGMModel::setSymbols(std::vector<AGMModelSymbol::SPtr> s)
@@ -377,3 +423,13 @@ void AGMModel::setEdges(std::vector<AGMModelEdge> e)
 {
 	edges = e;
 }
+
+
+int32_t AGMModel::getNewId()
+{
+	int32_t ret;
+	ret = lastId;
+	lastId++;
+	return ret;
+}
+

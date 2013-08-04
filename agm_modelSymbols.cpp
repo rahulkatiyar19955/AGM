@@ -1,37 +1,47 @@
 #include "agm_modelSymbols.h"
 #include "agm_model.h"
 
+AGMModelSymbol::AGMModelSymbol(AGMModel *model, std::string typ, int32_t id) { init(model, typ, id); }
+AGMModelSymbol::AGMModelSymbol(AGMModel *model, int32_t identifier, std::string typ) { init(model, identifier, typ); }
+AGMModelSymbol::AGMModelSymbol(AGMModel *model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr) { init(model, identifier, typ, atr); }
+AGMModelSymbol::AGMModelSymbol(AGMModel::SPtr model, std::string typ, int32_t id) { init(model.get(), typ, id); }
+AGMModelSymbol::AGMModelSymbol(AGMModel::SPtr model, int32_t identifier, std::string typ) { init(model.get(), identifier, typ); }
+AGMModelSymbol::AGMModelSymbol(AGMModel::SPtr model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr) { init(model.get(), identifier, typ, atr); }
 
-int32_t AGMModelSymbol::lastId = 0;
-
-boost::mutex AGMModelSymbol::mutex;
-
-AGMModelSymbol::AGMModelSymbol()
-{
-	symbolType = "";
-	identifier = AGMModelSymbol::getNewId();
-}
-
-AGMModelSymbol::AGMModelSymbol(std::string typ, int32_t id)
+void AGMModelSymbol::init(AGMModel *model, std::string typ, int32_t id)
 {
 	symbolType = typ;
-	if (id == -1)
-		identifier = AGMModelSymbol::getNewId();
+	if (id==-1)
+	{
+		if (model!=NULL)
+			identifier = model->getNewId();
+		else
+			identifier = -1;
+	}
 	else
 		identifier = id;
+
+	if (model != NULL)
+		model->insertSymbol(AGMModelSymbol::SPtr(this));
 }
 
-AGMModelSymbol::AGMModelSymbol(int32_t id, std::string typ)
+void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ)
 {
 	identifier = id;
 	symbolType = typ;
+
+	if (model != NULL)
+		model->insertSymbol(AGMModelSymbol::SPtr(this));
 }
 
-AGMModelSymbol::AGMModelSymbol(int32_t id, std::string typ, std::map<std::string, std::string> atr)
+void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ, std::map<std::string, std::string> atr)
 {
 	identifier = id;
 	symbolType = typ;
 	attributes = atr;
+
+	if (model != NULL)
+		model->insertSymbol(AGMModelSymbol::SPtr(this));
 }
 
 
@@ -61,24 +71,6 @@ std::string AGMModelSymbol::typeString() const
   return stringStream.str();
 }
 	
-int32_t AGMModelSymbol::getNewId()
-{
-	int32_t ret;
-	mutex.lock();
-	ret = lastId;
-	lastId++;
-	mutex.unlock();
-	return ret;
-}
-
-int32_t AGMModelSymbol::getLastId()
-{
-	int32_t ret;
-	mutex.lock();
-	ret = lastId;
-	mutex.unlock();
-	return ret;
-}
 
 
 void AGMModelSymbol::setType(std::string t)
