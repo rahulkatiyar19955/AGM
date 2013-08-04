@@ -24,9 +24,6 @@
 #include <agm_modelConverter.h>
 #include <agm_modelPrinter.h>
 
-#include "mission.h"
-
-
 /**
 * \brief Default constructor
 */
@@ -213,10 +210,10 @@ void Worker::setCurrentBehavioralConfiguration()
 void Worker::handleAcceptedModificationProposal()
 {
 	/// Get mission
-	Mission::getTarget(worldModel, targetModel);
+	// Mission::getTarget(worldModel, targetModel);
 
 	/// Get problem string based on the new mission and the current model
-	std::string problemPDDLString = worldModel->generatePDDLProblem(targetModel, 6, "gualzruGrammar", "works");
+	std::string problemPDDLString = worldModel->generatePDDLProblem(targetModel, 6, "grammar", "problem");
 
 	/// Get solution to the problem
 	try
@@ -271,7 +268,7 @@ bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompWorldModel::Mode
 		return false;
 	}
 
-	std::string modificationPDDLString = worldModel->generatePDDLProblem(tempTargetWorldModel, 5, "gualzruGrammar", "works");
+	std::string modificationPDDLString = worldModel->generatePDDLProblem(tempTargetWorldModel, 5, "grammar", "problem");
 
 	if (prms.planning->getSolution(grammarPDDLString, modificationPDDLString, tempSolution))
 	{
