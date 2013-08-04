@@ -1,28 +1,28 @@
 #ifndef ROBOCOMPAGMWORLDMODELICE_H
 #define ROBOCOMPAGMWORLDMODELICE_H
 
-module RoboCompWorldModel
+module RoboCompAGMWorldModel
 {
 	dictionary<string, string> StringDictionary;
 	enum BehaviorResultType { InitialWorld, BehaviorBasedModification, BehaviorBasedNumericUpdate, StatusFailTimeout, StatusFailOther, StatusActive, StatusIdle };
 
-	struct GualzruWorldNode
+	struct Node
 	{
 		string nodeType;
 		int nodeIdentifier;
 		StringDictionary attributes;
 	};
-	sequence<GualzruWorldNode> NodeSequence;
+	sequence<Node> NodeSequence;
 
-	struct GualzruWorldEdge
+	struct Edge
 	{
 		int a;
 		int b;
 		string edgeType;
 	};
-	sequence<GualzruWorldEdge> EdgeSequence;
+	sequence<Edge> EdgeSequence;
 
-	struct GualzruWorld
+	struct World
 	{
 		NodeSequence nodes;
 		EdgeSequence edges;
@@ -32,8 +32,8 @@ module RoboCompWorldModel
 	{
 		string sender;
 		BehaviorResultType why;
-		GualzruWorld backModel;
-		GualzruWorld newModel;
+		World backModel;
+		World newModel;
 	};
 
 };

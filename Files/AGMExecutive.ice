@@ -8,26 +8,31 @@ module RoboCompAGMExecutive
 {
 	interface AGMExecutive
 	{
+		// Activation and deactivation
 		void activate();
 		void deactivate();
 		void reset();
-		void broadcastModel();
 
-		bool modificationProposal(RoboCompWorldModel::ModelEvent modification);
+		// For agents
+		bool modificationProposal(RoboCompAGMWorldModel::ModelEvent modification);
+
+		// For setting the mission
+		void setMission();
 
 		/// For visualization purposes
-		void getData(out RoboCompWorldModel::GualzruWorld world, out RoboCompWorldModel::GualzruWorld target, out RoboCompPlanning::Plan plan);
+		void getData(out RoboCompAGMWorldModel::World world, out RoboCompAGMWorldModel::World target, out RoboCompPlanning::Plan plan);
+		void broadcastModel();
 	};
 
 	interface AGMExecutiveVisualizationTopic
 	{
-		void update(RoboCompWorldModel::GualzruWorld world, RoboCompWorldModel::GualzruWorld target, RoboCompPlanning::Plan plan);
+		void update(RoboCompAGMWorldModel::World world, RoboCompAGMWorldModel::World target, RoboCompPlanning::Plan plan);
 	};
 
 	interface AGMExecutiveTopic
 	{
-		void modelModified(RoboCompWorldModel::ModelEvent modification);
-		void modelUpdated(RoboCompWorldModel::GualzruWorldNode modification);
+		void modelModified(RoboCompAGMWorldModel::ModelEvent modification);
+		void modelUpdated(RoboCompAGMWorldModel::WorldNode modification);
 	};
 
 };

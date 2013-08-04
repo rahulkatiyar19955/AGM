@@ -1,41 +1,15 @@
-#ifndef ROBOCOMPAGMAGENT_ICE
-#define ROBOCOMPAGMAGENT_ICE
+#ifndef ROBOCOMPAGMAGENTS_ICE
+#define ROBOCOMPAGMAGENTS_ICE
 
-module RoboCompAGMAgent
+#include <AGMWorldModel.ice>
+
+module RoboCompAGMAgents
 {
-	enum StateEnum { Starting, Running, Stopped};
-	struct StateStruct
+	interface AgentsTopic
 	{
-		StateEnum state;
-		string info;
+		void modificationProposal(RoboCompWorldModel::ModelEvent modification);
+		void update(RoboCompWorldModel::GualzruWorldNode nodeModification);
 	};
-
-	struct Parameter
-	{
-		bool editable;
-		string value;
-		string type;
-	};
-
-	dictionary<string, Parameter> ParameterMap;
-
-	interface AGMAgent
-	{
-		// Activation and state
-		bool activate(ParameterMap params);
-		bool deactivate();
-		StateStruct getState();
-
-		// Parameter
-		ParameterMap getParameters();
-		bool setParameters(ParameterMap params);
-
-		// Misc
-		void kill();
-		int uptime();
-		bool reloadConfig();
-	};
-
 };
 
 #endif

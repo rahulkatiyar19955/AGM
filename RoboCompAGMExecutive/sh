@@ -1,0 +1,14 @@
+#!/bin/sh
+
+cd bin
+bin=`ls gualzru_*`
+cd ..
+
+echo $bin
+
+
+megadeath $bin
+
+make && bin/$bin
+
+
