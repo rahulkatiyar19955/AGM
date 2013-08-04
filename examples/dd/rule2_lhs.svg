@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="330.553mm" height="247.297mm"
+ viewBox="0 0 937 701"
+ xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  version="1.2" baseProfile="tiny">
+<title>PyQtSVNGenerator</title>
+<desc>SVG generated using Qt+Python</desc>
+<defs>
+</defs>
+<g fill="none" stroke="black" stroke-width="1" fill-rule="evenodd" stroke-linecap="square" stroke-linejoin="bevel" >
+
+<g fill="#ffffff" fill-opacity="1" stroke="none" transform="matrix(1,0,0,1,0,0)"
+font-family="Sans Serif" font-size="9" font-weight="400" font-style="normal" 
+>
+<path vector-effect="non-scaling-stroke" fill-rule="evenodd" d="M0,0 L4685,0 L4685,3505 L0,3505 L0,0"/>
+</g>
+
+<g fill="none" stroke="#000000" stroke-opacity="1" stroke-width="2" stroke-linecap="square" stroke-linejoin="bevel" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu" font-size="12" font-weight="700" font-style="normal" 
+>
+<path vector-effect="none" fill-rule="evenodd" d="M302,40 C302,57.6731 287.673,72 270,72 C252.327,72 238,57.6731 238,40 C238,22.3269 252.327,8 270,8 C287.673,8 302,22.3269 302,40 "/>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="266.5" y="37" font-family="Ubuntu" font-size="12" font-weight="700" font-style="normal" 
+ >g</text>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="251" y="52" font-family="Ubuntu" font-size="12" font-weight="700" font-style="normal" 
+ >gravity</text>
+<path vector-effect="none" fill-rule="evenodd" d="M72,40 C72,57.6731 57.6731,72 40,72 C22.3269,72 8,57.6731 8,40 C8,22.3269 22.3269,8 40,8 C57.6731,8 72,22.3269 72,40 "/>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="19" y="37" font-family="Ubuntu" font-size="12" font-weight="700" font-style="normal" 
+ >gualzru</text>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="24.5" y="52" font-family="Ubuntu" font-size="12" font-weight="700" font-style="normal" 
+ >robot</text>
+</g>
+
+<g fill="#000000" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="2" stroke-linecap="square" stroke-linejoin="bevel" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu" font-size="12" font-weight="700" font-style="normal" 
+>
+<polyline fill="none" vector-effect="none" points="73,40 238,40 " />
+</g>
+
+<g fill="#000000" fill-opacity="1" stroke="none" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu" font-size="12" font-weight="700" font-style="normal" 
+>
+<path vector-effect="non-scaling-stroke" fill-rule="evenodd" d="M108.5,30.0485 L186.5,30.0485 L186.5,51.0485 L108.5,51.0485 L108.5,30.0485"/>
+</g>
+
+<g fill="#ffffff" fill-opacity="1" stroke="none" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu" font-size="12" font-weight="700" font-style="normal" 
+>
+<path vector-effect="non-scaling-stroke" fill-rule="evenodd" d="M110.5,31.5485 L184.5,31.5485 L184.5,49.5485 L110.5,49.5485 L110.5,31.5485"/>
+</g>
+
+<g fill="#ffffff" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="2" stroke-linecap="square" stroke-linejoin="bevel" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu" font-size="12" font-weight="700" font-style="normal" 
+>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="112.5" y="45.0469" font-family="Ubuntu" font-size="12" font-weight="700" font-style="normal" 
+ >lookTowards</text>
+</g>
+
+<g fill="#000000" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="2" stroke-linecap="square" stroke-linejoin="bevel" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu" font-size="12" font-weight="700" font-style="normal" 
+>
+<path vector-effect="none" fill-rule="evenodd" d="M238,40 L222.956,34.5404 C222.337,36.2441 222,38.0827 222,40 C222,41.9307 222.342,43.7815 222.969,45.4952 L238,40"/>
+</g>
+</g>
+</svg>

@@ -1,0 +1,97 @@
+spacePattern=3
+lineThickness=2
+name=grammarSimple
+vertexDiameter=68
+shortPattern=1
+nodeThickness=2
+longPattern=3
+
+modelRoom
+{
+	{
+		gualzru:robot(210,170)
+	}
+	=>
+	{
+		room:room(320,170)
+		gualzru:robot(130,170)
+		gualzru->room(in)
+	}
+}
+
+detectObstacle
+{
+	{
+		room:room(130,280)
+		gualzru:robot(130,130)
+		gualzru->room(in)
+	}
+	=>
+	{
+		obstacle:obstacle(320,180)
+		room:room(110,270)
+		gualzru:robot(110,130)
+		gualzru->room(in)
+		obstacle->room(in)
+	}
+}
+
+detectHuman
+{
+	{
+		obstacle:obstacle(270,150)
+		room:room(110,270)
+		gualzru:robot(110,100)
+		gualzru->room(in)
+		obstacle->room(in)
+	}
+	=>
+	{
+		obstacle:human(280,150)
+		room:room(110,270)
+		gualzru:robot(110,100)
+		gualzru->room(in)
+		obstacle->room(in)
+	}
+}
+
+detectTable
+{
+	{
+		obstacle:obstacle(270,150)
+		room:room(110,270)
+		gualzru:robot(110,100)
+		gualzru->room(in)
+		obstacle->room(in)
+	}
+	=>
+	{
+		obstacle:table(270,140)
+		room:room(110,250)
+		gualzru:robot(110,100)
+		gualzru->room(in)
+		obstacle->room(in)
+	}
+}
+
+detectMug
+{
+	{
+		table:table(230,200)
+		room:room(110,260)
+		gualzru:robot(110,100)
+		gualzru->room(in)
+		table->room(in)
+	}
+	=>
+	{
+		table:table(230,200)
+		mug:mug(350,150)
+		room:room(110,260)
+		gualzru:robot(110,100)
+		gualzru->room(in)
+		table->room(in)
+		mug->table(in)
+	}
+}
+

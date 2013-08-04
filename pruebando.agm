@@ -1,0 +1,31 @@
+spacePattern=3
+lineThickness=2
+name=pruebando
+vertexDiameter=68
+shortPattern=1
+nodeThickness=2
+longPattern=3
+===
+agents
+{
+agent0 ( agent0State0 )
+}
+configurations{ configuration0 }
+table
+{
+ agent0State0
+}
+===
+newRule : configuration0
+{
+	{
+		a:type(140,120)
+	}
+	=>
+	{
+		a:type(100,90)
+		b:type(250,90)
+		a->b(link)
+	}
+}
+

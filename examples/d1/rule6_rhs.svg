@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="330.553mm" height="247.297mm"
+ viewBox="0 0 937 701"
+ xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"  version="1.2" baseProfile="tiny">
+<title>PyQtSVNGenerator</title>
+<desc>SVG generated using Qt+Python</desc>
+<defs>
+</defs>
+<g fill="none" stroke="black" stroke-width="1" fill-rule="evenodd" stroke-linecap="square" stroke-linejoin="bevel" >
+
+<g fill="#ffffff" fill-opacity="1" stroke="none" transform="matrix(1,0,0,1,0,0)"
+font-family="Sans Serif" font-size="9" font-weight="400" font-style="normal" 
+>
+<path vector-effect="non-scaling-stroke" fill-rule="evenodd" d="M0,0 L4685,0 L4685,3505 L0,3505 L0,0"/>
+</g>
+
+<g fill="none" stroke="#000000" stroke-opacity="1" stroke-width="2" stroke-linecap="square" stroke-linejoin="bevel" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+>
+<path vector-effect="none" fill-rule="evenodd" d="M261,40 C261,57.1208 247.121,71 230,71 C212.879,71 199,57.1208 199,40 C199,22.8792 212.879,9 230,9 C247.121,9 261,22.8792 261,40 "/>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="224" y="37" font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+ >w2</text>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="209" y="50" font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+ >notWall</text>
+<path vector-effect="none" fill-rule="evenodd" d="M151,120 C151,137.121 137.121,151 120,151 C102.879,151 89,137.121 89,120 C89,102.879 102.879,89 120,89 C137.121,89 151,102.879 151,120 "/>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="114" y="117" font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+ >w1</text>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="108" y="130" font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+ >wall</text>
+<path vector-effect="none" fill-rule="evenodd" d="M71,40 C71,57.1208 57.1208,71 40,71 C22.8792,71 9,57.1208 9,40 C9,22.8792 22.8792,9 40,9 C57.1208,9 71,22.8792 71,40 "/>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="19" y="37" font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+ >gualzru</text>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="25" y="50" font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+ >robot</text>
+</g>
+
+<g fill="#000000" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="2" stroke-linecap="square" stroke-linejoin="bevel" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+>
+<polyline fill="none" vector-effect="none" points="72,40 199,40 " />
+</g>
+
+<g fill="#000000" fill-opacity="1" stroke="none" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+>
+<path vector-effect="non-scaling-stroke" fill-rule="evenodd" d="M108.75,31.061 L146.75,31.061 L146.75,50.061 L108.75,50.061 L108.75,31.061"/>
+</g>
+
+<g fill="#ffffff" fill-opacity="1" stroke="none" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+>
+<path vector-effect="non-scaling-stroke" fill-rule="evenodd" d="M110.75,32.561 L144.75,32.561 L144.75,48.561 L110.75,48.561 L110.75,32.561"/>
+</g>
+
+<g fill="#ffffff" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="2" stroke-linecap="square" stroke-linejoin="bevel" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="112.75" y="44.0469" font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+ >looks</text>
+</g>
+
+<g fill="#000000" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="2" stroke-linecap="square" stroke-linejoin="bevel" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+>
+<path vector-effect="none" fill-rule="evenodd" d="M198.5,39.5 L183.926,34.211 C183.327,35.8615 183,37.6426 183,39.5 C183,41.3704 183.331,43.1634 183.938,44.8235 L198.5,39.5"/>
+</g>
+
+<g fill="#000000" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="2" stroke-linecap="square" stroke-linejoin="bevel" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+>
+<polyline fill="none" vector-effect="none" points="146,102 204,58 " />
+</g>
+
+<g fill="#000000" fill-opacity="1" stroke="none" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+>
+<path vector-effect="non-scaling-stroke" fill-rule="evenodd" d="M153.32,75.6761 L185.32,75.6761 L185.32,94.6761 L153.32,94.6761 L153.32,75.6761"/>
+</g>
+
+<g fill="#ffffff" fill-opacity="1" stroke="none" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+>
+<path vector-effect="non-scaling-stroke" fill-rule="evenodd" d="M155.32,77.1761 L183.32,77.1761 L183.32,93.1761 L155.32,93.1761 L155.32,77.1761"/>
+</g>
+
+<g fill="#ffffff" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="2" stroke-linecap="square" stroke-linejoin="bevel" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+>
+<text fill="#000000" fill-opacity="1" stroke="none" xml:space="preserve" x="157.312" y="88.6719" font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+ >link</text>
+</g>
+
+<g fill="#000000" fill-opacity="1" stroke="#000000" stroke-opacity="1" stroke-width="2" stroke-linecap="square" stroke-linejoin="bevel" transform="matrix(1,0,0,1,0,0)"
+font-family="Ubuntu Mono" font-size="12" font-weight="400" font-style="normal" 
+>
+<path vector-effect="none" fill-rule="evenodd" d="M204.5,57.5 L189.603,61.796 C190.621,65.3332 192.865,68.3512 195.845,70.3607 L204.5,57.5"/>
+</g>
+</g>
+</svg>
