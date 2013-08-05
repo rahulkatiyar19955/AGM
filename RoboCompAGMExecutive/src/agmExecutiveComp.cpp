@@ -191,13 +191,13 @@ int AGMExecutiveMain::run(int argc, char* argv[])
 		{
 			try
 			{
-				topic = topicManager->retrieve("ExecutiveVisualizationTopic");
+				topic = topicManager->retrieve("AGMExecutiveVisualizationTopic");
 			}
 			catch (const IceStorm::NoSuchTopic&)
 			{
 				try
 				{
-					topic = topicManager->create("ExecutiveVisualizationTopic");
+					topic = topicManager->create("AGMExecutiveVisualizationTopic");
 				}
 				catch (const IceStorm::TopicExists&)
 				{
