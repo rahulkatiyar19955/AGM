@@ -15,11 +15,11 @@ PDDLPath = /home/robocomp/robocomp-gualzru/Files/FilesGualzru/AGM/gualzruGrammar
 AGMBDPath = /home/robocomp/robocomp-gualzru/Files/FilesGualzru/AGM/behaviormap.agmbd
 
 # Behaviors
-yaw        = gualzrucommonbehavior:tcp -h localhost -p 10199
-pitchNRoll = gualzrucommonbehavior:tcp -h localhost -p 10200
-distance   = gualzrucommonbehavior:tcp -h localhost -p 10201
-saccade    = gualzrucommonbehavior:tcp -h localhost -p 10202
-unknown    = gualzrucommonbehavior:tcp -h localhost -p 10203
+yaw        = agmcommonbehavior:tcp -h localhost -p 10199
+pitchNRoll = agmcommonbehavior:tcp -h localhost -p 10200
+distance   = agmcommonbehavior:tcp -h localhost -p 10201
+saccade    = agmcommonbehavior:tcp -h localhost -p 10202
+unknown    = agmcommonbehavior:tcp -h localhost -p 10203
 
 
 

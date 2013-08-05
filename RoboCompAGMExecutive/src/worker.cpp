@@ -47,9 +47,7 @@ Worker::Worker(WorkerParameters &parameters)
 	std::locale::global(std::locale("C"));
 
 	worldModel = AGMModel::SPtr(new AGMModel());
-// printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	worldModel->newSymbol("startsymbol");
-// printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	AGMModelPrinter::printWorld(worldModel);
 
 	
@@ -61,11 +59,9 @@ Worker::Worker(WorkerParameters &parameters)
 	RoboCompAGMWorldModel::Event e;
 	e.why    = RoboCompAGMWorldModel::InitialWorld;
 	e.sender = "executive";
-// printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
 	AGMModelConverter::fromInternalToIce(worldModel, e.newModel);
 	prms.executiveTopic->modelModified(e);
-// printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	AGMModelPrinter::printWorld(worldModel);
 }
 
@@ -206,37 +202,45 @@ void Worker::handleAcceptedModificationProposal()
 	// Mission::getTarget(worldModel, targetModel);
 
 	/// Get problem string based on the new mission and the current model
-	std::string problemPDDLString = worldModel->generatePDDLProblem(targetModel, 6, "grammar", "problem");
+	std::string problemPDDLString = worldModel->generatePDDLProblem(targetModel, 6, "gualzruGrammar", "problemo");
 
 	/// Get solution to the problem
-	try
+	if (problemPDDLString.size()>0)
 	{
-		if (prms.planning->getSolution(grammarPDDLString, problemPDDLString, currentSolution))
+		try
 		{
-			if (currentSolution.actions.size() > 0)
+			if (prms.planning->getSolution(grammarPDDLString, problemPDDLString, currentSolution))
 			{
-				currentBehavioralConfiguration = prms.agm->action2behavior[currentSolution.actions[0].name];
+				if (currentSolution.actions.size() > 0)
+				{
+					currentBehavioralConfiguration = prms.agm->action2behavior[currentSolution.actions[0].name];
+				}
+				else
+				{
+					currentBehavioralConfiguration = "";
+				}
+				executeCurrentBehavioralConfiguration();
+				RoboCompAGMWorldModel::World targetModelICE;
+				RoboCompAGMWorldModel::World worldModelICE;
+				AGMModelConverter::fromInternalToIce(targetModel, targetModelICE);
+				AGMModelConverter::fromInternalToIce( worldModel,  worldModelICE);
+				prms.executiveVisualizationTopic->update(worldModelICE, targetModelICE, currentSolution);
 			}
 			else
 			{
-				currentBehavioralConfiguration = "";
+				printf("%s\n", problemPDDLString.c_str());
+				qFatal("No solution. :-(");
 			}
-			executeCurrentBehavioralConfiguration();
-			RoboCompAGMWorldModel::World targetModelICE;
-			RoboCompAGMWorldModel::World worldModelICE;
-			AGMModelConverter::fromInternalToIce(targetModel, targetModelICE);
-			AGMModelConverter::fromInternalToIce( worldModel,  worldModelICE);
-			prms.executiveVisualizationTopic->update(worldModelICE, targetModelICE, currentSolution);
 		}
-		else
+		catch(RoboCompPlanning::ServerException exc)
 		{
-			qFatal("No solution. :-(");
+			printf("Can't compute a plan for the proposed target!\n\t%s\n", exc.what.c_str());
+			fprintf(fd, "Can't compute a plan for the proposed target!\n\t%s\n", exc.what.c_str());
 		}
 	}
-	catch(RoboCompPlanning::ServerException exc)
+	else
 	{
-		printf("Can't compute a plan for the proposed target!\n\t%s\n", exc.what.c_str());
-		fprintf(fd, "Can't compute a plan for the proposed target!\n\t%s\n", exc.what.c_str());
+		printf("No plans... should I commit suicide?\n");
 	}
 }
 
@@ -261,7 +265,7 @@ bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::E
 		return false;
 	}
 
-	std::string modificationPDDLString = worldModel->generatePDDLProblem(tempTargetWorldModel, 5, "grammar", "problem");
+	std::string modificationPDDLString = worldModel->generatePDDLProblem(tempTargetWorldModel, 5, "gualzruGrammar", "problemo");
 
 	if (prms.planning->getSolution(grammarPDDLString, modificationPDDLString, tempSolution))
 	{
@@ -315,7 +319,11 @@ void Worker::executeCurrentBehavioralConfiguration()
 				}
 				pm["action"] = p;
 				// Activation
-				prms.agentProxies[agents[i].getName()]->activate(pm);
+				bool ok = prms.agentProxies[agents[i].getName()]->activate(pm);
+				if (not ok)
+				{
+					fprintf(stdout, "There was some problem activating agent %s\n", agents[i].getName().c_str());
+				}
 			}
 			catch(...)
 			{

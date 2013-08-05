@@ -98,7 +98,7 @@ AGMModelSymbol::SPtr AGMModel::getSymbol(int32_t identif) const
 			return symbols[i];
 		}
 	}
-	printf("%d\n", __LINE__);
+// 	printf("%d\n", __LINE__);
 	throw "No such symbol";
 }
 
@@ -111,7 +111,7 @@ int32_t AGMModel::getIdentifierByName(std::string name) const
 			return symbols[i]->identifier;
 		}
 	}
-	printf("%d\n", __LINE__);
+// 	printf("%d\n", __LINE__);
 	throw "No such symbol";
 }
 
@@ -132,8 +132,8 @@ int32_t AGMModel::indexOfSymbol(const AGMModelSymbol::SPtr &value, int32_t from)
 			return i;
 		}
 	}
-	fprintf(stderr, "AGMModel::indexOfSymbol: unknown symbol \"%s\"\n", value->symbolType.c_str());
-	printf("%d\n", __LINE__);
+// 	fprintf(stderr, "AGMModel::indexOfSymbol: unknown symbol \"%s\"\n", value->symbolType.c_str());
+// 	printf("%d\n", __LINE__);
 	return -1;
 }
 
@@ -148,8 +148,8 @@ int32_t AGMModel::indexOfFirstSymbolByValues(const AGMModelSymbol &value, int32_
 			return i;
 		}
 	}
-	fprintf(stderr, "AGMModel::indexOfFirstSymbolByValues: no equal \"%s\"   %d\n", value.symbolType.c_str(), __LINE__);
-	printf("%d\n", __LINE__);
+// 	fprintf(stderr, "AGMModel::indexOfFirstSymbolByValues: no equal \"%s\"   %d\n", value.symbolType.c_str(), __LINE__);
+// 	printf("%d\n", __LINE__);
 	return -1;
 }
 
@@ -163,8 +163,8 @@ int32_t AGMModel::indexOfFirstSymbolByType(const std::string &value, int32_t fro
 			return i;
 		}
 	}
-	fprintf(stderr, "AGMModel::indexOfFirstSymbolByType: \"%s\", (%d)\n", value.c_str(), from);
-	printf("%d\n", __LINE__);
+// 	fprintf(stderr, "AGMModel::indexOfFirstSymbolByType: \"%s\", (%d)\n", value.c_str(), from);
+// 	printf("%d\n", __LINE__);
 	return -1;
 }
 
@@ -172,6 +172,7 @@ int32_t AGMModel::indexOfFirstSymbolByType(const std::string &value, int32_t fro
 std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName) const
 {
 	std::ostringstream stringStream;
+	if (target->symbols.size() == 0) return "";
 
 	/// H E A D E R
 	stringStream << "(define (problem " << problemName << ")\n";
@@ -379,7 +380,7 @@ int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 		}
 		if (idx>=symbols.size())
 		{
-			printf("Exception: %d, %s, %d\n", id, linkname.c_str(), i);
+// 			printf("Exception: %d, %s, %d\n", id, linkname.c_str(), i);
 			AGMMODELEXCEPTION("Trying to get the identifier of a node linked to a given one");
 		}
 	}
@@ -399,7 +400,7 @@ int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 			return idx;
 		}
 	}
-	printf("Exception: %d\n", targetId);
+// 	printf("Exception: %d\n", targetId);
 	AGMMODELEXCEPTION("Trying to get the index of a node given it's identifier");
 }
 
