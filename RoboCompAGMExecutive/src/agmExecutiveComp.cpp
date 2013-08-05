@@ -271,15 +271,19 @@ int AGMExecutiveMain::run(int argc, char* argv[])
 	proxy = getProxyString("IceStormProxy");
 	Ice::ObjectPrx obj = communicator()->stringToProxy(proxy);
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(obj);
+printf("__ %d __\n", __LINE__);
 	Ice::ObjectAdapterPtr adapterT = communicator()->createObjectAdapter("AGMAgentTopic");
 	AGMAgentTopicPtr agentTopic = new AGMAgentTopicI(worker);
 	Ice::ObjectPrx proxyT = adapterT->addWithUUID(agentTopic)->ice_oneway();
 	IceStorm::TopicPrx topic;
 	try
 	{
+printf("__ %d __\n", __LINE__);
 		topic = topicManager->retrieve("AGMAgentTopic");
 		IceStorm::QoS qos;
+printf("__ %d __\n", __LINE__);
 		topic->subscribeAndGetPublisher(qos, proxyT);
+printf("__ %d __\n", __LINE__);
 	}
 	catch (const IceStorm::NoSuchTopic&)
 	{
@@ -289,10 +293,14 @@ int AGMExecutiveMain::run(int argc, char* argv[])
 
 	try
 	{
-		Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("agmexecutive");
+printf("__ %d __\n", __LINE__);
+		Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("AGMExecutive");
+printf("__ %d __\n", __LINE__);
 		AGMExecutiveI *executiveI = new AGMExecutiveI(worker);
+printf("__ %d __\n", __LINE__);
 		adapter->add(executiveI, communicator()->stringToIdentity("agmexecutive"));
 		adapter->activate();
+printf("__ %d __\n", __LINE__);
 
 #ifdef USE_QTGUI
 		a.setQuitOnLastWindowClosed(true);

@@ -100,7 +100,6 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 		std::cout << "Unable to open file" << std::cout;
 	}
 
-// 	print();
 }
 
 void AGM::print()

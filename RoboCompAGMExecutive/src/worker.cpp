@@ -47,9 +47,9 @@ Worker::Worker(WorkerParameters &parameters)
 	std::locale::global(std::locale("C"));
 
 	worldModel = AGMModel::SPtr(new AGMModel());
-printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+// printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	worldModel->newSymbol("startsymbol");
-printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+// printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	AGMModelPrinter::printWorld(worldModel);
 
 	
@@ -61,12 +61,11 @@ printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	RoboCompAGMWorldModel::Event e;
 	e.why    = RoboCompAGMWorldModel::InitialWorld;
 	e.sender = "executive";
-printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
-printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+// printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
 	AGMModelConverter::fromInternalToIce(worldModel, e.newModel);
 	prms.executiveTopic->modelModified(e);
-printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
+// printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	AGMModelPrinter::printWorld(worldModel);
 }
 

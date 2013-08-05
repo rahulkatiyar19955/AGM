@@ -1,7 +1,7 @@
 #!/bin/sh
 
 cd bin
-bin=`ls gualzru_*`
+bin=`ls agmexecutive`
 cd ..
 
 echo $bin
@@ -9,6 +9,6 @@ echo $bin
 
 megadeath $bin
 
-make && bin/$bin
+make && gdb bin/$bin
 
 

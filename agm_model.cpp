@@ -8,19 +8,19 @@
 AGMModel::AGMModel()
 {
 	lastId = 0;
-	printf("new model: (%p)\n", this);
+// 	printf("new model: (%p)\n", this);
 }
 
 AGMModel::~AGMModel()
 {
-	printf("delete model: (%p)\n", this);
+// 	printf("delete model: (%p)\n", this);
 	symbols.clear();
 	edges.clear();
 }
 
 AGMModel::AGMModel(const AGMModel::SPtr &src)
 {
-	printf("new model (sptr): (%p)\n", this);
+// 	printf("new model (sptr): (%p)\n", this);
 	//printf("AGMModel::AGMModel(const AGMModel::SPtr &src)\n");
 	setFrom(*src);
 }
@@ -28,7 +28,7 @@ AGMModel::AGMModel(const AGMModel::SPtr &src)
 AGMModel::AGMModel(const AGMModel &src)
 {
 	//printf("AGMModel::AGMModel(const AGMModel &src)\n");
-	printf("new model (&): (%p)\n", this);
+// 	printf("new model (&): (%p)\n", this);
 	setFrom(src);
 }
 
@@ -333,18 +333,18 @@ AGMModelEdge & AGMModel::edge(uint32_t i)
 
 int32_t AGMModel::getIdentifierByType(std::string type, int32_t times) const
 {
-	printf("getIdentifierByType: %s, %d\n", type.c_str(), times);
+// 	printf("getIdentifierByType: %s, %d\n", type.c_str(), times);
 	int32_t ret = -1;
 	uint32_t idx = 0;
 	for (int32_t time=0; time<=times; ++time)
 	{
-		printf("taaaim %d of %d\n", (int)time, (int)times);
+// 		printf("taaaim %d of %d\n", (int)time, (int)times);
 		for ( ; idx<symbols.size(); ++idx)
 		{
-			printf("idx:%d   veo(%s)\n", (int32_t)idx, symbols[idx]->symbolType.c_str());
+// 			printf("idx:%d   veo(%s)\n", (int32_t)idx, symbols[idx]->symbolType.c_str());
 			if (symbols[idx]->symbolType == type)
 			{
-				if (time==times) { printf("indice será %d\n", (int32_t)idx); ret = idx;  }
+				if (time==times) { /*printf("indice será %d\n", (int32_t)idx);*/ ret = idx;  }
 				break;
 			}
 		}
@@ -355,8 +355,8 @@ int32_t AGMModel::getIdentifierByType(std::string type, int32_t times) const
 	}
 	if (ret != -1)
 	{
-		printf("devolvemos [%d].id ---> _%d_\n", ret, symbols[ret]->identifier);
-		printf("%s %d\n", __FILE__, __LINE__);
+// 		printf("devolvemos [%d].id ---> _%d_\n", ret, symbols[ret]->identifier);
+// 		printf("%s %d\n", __FILE__, __LINE__);
 		return symbols[ret]->identifier;
 	}
 	return -1;
@@ -385,7 +385,7 @@ int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 	}
 	if (ret != -1)
 		return edges[ret].symbolPair.second;
-	printf("%d\n", __LINE__);
+// 	printf("%d\n", __LINE__);
 	return -1;
 }
 
