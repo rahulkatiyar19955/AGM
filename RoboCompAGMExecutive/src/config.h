@@ -1,10 +1,9 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#pragma once
 
 // Comment out this line if your application has a QtGui
-#define USE_QTGUI
+// #define USE_QTGUI
 #define generateTXT 1
-#define PROGRAM_NAME    "gualzru_executive"
-#define SERVER_FULL_NAME   "RoboCompgualzru_executive::gualzru_executive"
+#define PROGRAM_NAME    "agmexecutive"
+#define SERVER_FULL_NAME   "AGMExecutive"
 
-#endif
+

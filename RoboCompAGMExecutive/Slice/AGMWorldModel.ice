@@ -28,7 +28,7 @@ module RoboCompAGMWorldModel
 		EdgeSequence edges;
 	};
 
-	struct ModelEvent
+	struct Event
 	{
 		string sender;
 		BehaviorResultType why;

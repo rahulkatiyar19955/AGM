@@ -3,12 +3,12 @@
 
 #include <AGMWorldModel.ice>
 
-module RoboCompAGMAgents
+module RoboCompAGMAgent
 {
-	interface AgentsTopic
+	interface AGMAgentTopic
 	{
-		void modificationProposal(RoboCompWorldModel::ModelEvent modification);
-		void update(RoboCompWorldModel::GualzruWorldNode nodeModification);
+		void modificationProposal(RoboCompAGMWorldModel::Event modification);
+		void update(RoboCompAGMWorldModel::Node nodeModification);
 	};
 };
 

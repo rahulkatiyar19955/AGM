@@ -14,10 +14,10 @@ module RoboCompAGMExecutive
 		void reset();
 
 		// For agents
-		bool modificationProposal(RoboCompAGMWorldModel::ModelEvent modification);
+		bool modificationProposal(RoboCompAGMWorldModel::Event modification);
 
 		// For setting the mission
-		void setMission();
+		void setMission(RoboCompAGMWorldModel::World world);
 
 		/// For visualization purposes
 		void getData(out RoboCompAGMWorldModel::World world, out RoboCompAGMWorldModel::World target, out RoboCompPlanning::Plan plan);
@@ -31,8 +31,8 @@ module RoboCompAGMExecutive
 
 	interface AGMExecutiveTopic
 	{
-		void modelModified(RoboCompAGMWorldModel::ModelEvent modification);
-		void modelUpdated(RoboCompAGMWorldModel::WorldNode modification);
+		void modelModified(RoboCompAGMWorldModel::Event modification);
+		void modelUpdated(RoboCompAGMWorldModel::Node modification);
 	};
 
 };

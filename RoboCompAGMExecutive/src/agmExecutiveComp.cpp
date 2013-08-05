@@ -1,7 +1,7 @@
 /*
- *    Copyright (C) 2006-2011 by RoboLab - University of Extremadura
+ *    Copyright (C) 2013 by Luis J. Manso - University of Extremadura
  *
- *    This file is part of RoboComp
+ *    This file is part of AGM (Active Grammar-based Modeling)
  *
  *    RoboComp is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -16,23 +16,24 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-/** \mainpage RoboComp::gualzru_executiveComp
+
+/** \mainpage AGMExecutive
  *
  * \section intro_sec Introduction
  *
- * The gualzru_executiveComp component...
+ * The AGMExecutive
  *
  * \section interface_sec Interface
  *
- * gualzru_executiveComp interface...
+ * AGMExecutive interface...
  *
  * \section install_sec Installation
  *
  * \subsection install1_ssec Software depencences
- * gualzru_executiveComp ...
+ * AGMExecutive ...
  *
  * \subsection install2_ssec Compile and install
- * cd gualzru_executiveComp
+ * cd AGMExecutive
  * <br>
  * cmake . && make
  * <br>
@@ -45,12 +46,12 @@
  * \subsection config_ssec Configuration file
  *
  * <p>
- * The configuration file gualzru_executiveComp/etc/config ...
+ * The configuration file AGMExecutive/etc/config ...
  * </p>
  *
  * \subsection execution_ssec Execution
  *
- * Just: "${PATH_TO_BINARY}/gualzru_executiveComp --Ice.Config=${PATH_TO_CONFIG_FILE}"
+ * Just: "${PATH_TO_BINARY}/AGMExecutive --Ice.Config=${PATH_TO_CONFIG_FILE}"
  *
  * \subsection running_ssec Once running
  *
@@ -72,35 +73,28 @@
 #include "worker.h"
 #include <executiveI.h>
 
-
 #include <Planning.h>
-#include <GualzruCommonBehavior.h>
-#include <GualzruBehavior.h>
+#include <AGMCommonBehavior.h>
+#include <AGMAgent.h>
+#include <AGMExecutive.h>
+#include <AGMWorldModel.h>
 
 
 using namespace std;
-using namespace RoboCompExecutive;
+using namespace RoboCompAGMExecutive;
+using namespace RoboCompAGMCommonBehavior;
+using namespace RoboCompAGMAgent;
 
-using namespace RoboCompGualzruBehavior;
-using namespace RoboCompGualzruCommonBehavior;
 
-
-class gualzru_executiveComp : public RoboComp::Application
+class AGMExecutiveMain : public RoboComp::Application
 {
 private:
-	void initialize();
+	void initialize() {}
 public:
 	virtual int run(int, char*[]);
 };
 
-void gualzru_executiveComp::initialize()
-{
-	// Config file properties read example
-	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
-	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
-}
-
-int gualzru_executiveComp::run(int argc, char* argv[])
+int AGMExecutiveMain::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
 	QApplication a(argc, argv);  // GUI application
@@ -108,18 +102,13 @@ int gualzru_executiveComp::run(int argc, char* argv[])
 	QCoreApplication a(argc, argv);  // NON-GUI application
 #endif
 	int status=EXIT_SUCCESS;
-
-
 	
 	RoboCompPlanning::PlanningPrx planning_proxy;
 	RoboCompSpeech::SpeechPrx speech_proxy;
-	RoboCompInnerModelManager::InnerModelManagerPrx immanager_proxy;
 
 	string proxy;
 
 	initialize();
-
-
 
 	try
 	{
@@ -156,25 +145,8 @@ int gualzru_executiveComp::run(int argc, char* argv[])
 	}
 	rInfo("SpeechProxy initialized Ok!");
 
-	try
-	{
-		proxy = getProxyString("InnerModelManagerProxy");
-		immanager_proxy = RoboCompInnerModelManager::InnerModelManagerPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
-		if (!immanager_proxy)
-		{
-			rInfo(QString("Error loading proxy!"));
-			return EXIT_FAILURE;
-		}
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex << endl;
-		return EXIT_FAILURE;
-	}
-	rInfo("InnerModelManagerProxy initialized Ok!");
 
-
-	RoboCompExecutive::ExecutiveTopicPrx executiveTopic;
+	RoboCompAGMExecutive::AGMExecutiveTopicPrx executiveTopic;
 	try
 	{
 		proxy = getProxyString("IceStormProxy");
@@ -185,13 +157,13 @@ int gualzru_executiveComp::run(int argc, char* argv[])
 		{
 			try
 			{
-				topic = topicManager->retrieve("ExecutiveTopic");
+				topic = topicManager->retrieve("AGMExecutiveTopic");
 			}
 			catch (const IceStorm::NoSuchTopic&)
 			{
 				try
 				{
-					topic = topicManager->create("ExecutiveTopic");
+					topic = topicManager->create("AGMExecutiveTopic");
 				}
 				catch (const IceStorm::TopicExists&)
 				{
@@ -200,7 +172,7 @@ int gualzru_executiveComp::run(int argc, char* argv[])
 			}
 		}
 		Ice::ObjectPrx pub = topic->getPublisher()->ice_oneway();
-		executiveTopic = RoboCompExecutive::ExecutiveTopicPrx::uncheckedCast(pub);
+		executiveTopic = RoboCompAGMExecutive::AGMExecutiveTopicPrx::uncheckedCast(pub);
 	}
 	catch (const Ice::Exception& ex)
 	{
@@ -208,7 +180,7 @@ int gualzru_executiveComp::run(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	RoboCompExecutive::ExecutiveVisualizationTopicPrx executiveVisualizationTopic;
+	RoboCompAGMExecutive::AGMExecutiveVisualizationTopicPrx executiveVisualizationTopic;
 	try
 	{
 		proxy = getProxyString("IceStormProxy");
@@ -234,7 +206,7 @@ int gualzru_executiveComp::run(int argc, char* argv[])
 			}
 		}
 		Ice::ObjectPrx pub = topic->getPublisher()->ice_oneway();
-		executiveVisualizationTopic = RoboCompExecutive::ExecutiveVisualizationTopicPrx::uncheckedCast(pub);
+		executiveVisualizationTopic = RoboCompAGMExecutive::AGMExecutiveVisualizationTopicPrx::uncheckedCast(pub);
 	}
 	catch (const Ice::Exception& ex)
 	{
@@ -248,7 +220,6 @@ int gualzru_executiveComp::run(int argc, char* argv[])
 	/// Fixed proxies
 	parameters.planning                    = planning_proxy;
 	parameters.speech                      = speech_proxy;
-	parameters.immanager                   = immanager_proxy;
 	parameters.executiveTopic              = executiveTopic;
 	parameters.executiveVisualizationTopic = executiveVisualizationTopic;
 
@@ -273,11 +244,11 @@ int gualzru_executiveComp::run(int argc, char* argv[])
 	AGMAgentVector agents = parameters.agm->table.agents;
 	for (uint i=0; i<agents.size(); i++)
 	{
-		GualzruCommonBehaviorPrx behavior_proxy;
+		AGMCommonBehaviorPrx behavior_proxy;
 		try
 		{
 			proxy = getProxyString(agents[i].getName());
-			behavior_proxy = GualzruCommonBehaviorPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
+			behavior_proxy = AGMCommonBehaviorPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
 			if (!behavior_proxy)
 			{
 				rInfo(QString("Error loading proxy!"));
@@ -294,40 +265,19 @@ int gualzru_executiveComp::run(int argc, char* argv[])
 		printf("Agent %s initialized ok\n", agents[i].getName().c_str());
 	}
 
-
-/*
-
-	
-	parameters.planning                    = planning_proxy;
-	parameters.speech                      = speech_proxy;
-	parameters.immanager                   = immanager_proxy;
-	parameters.executiveTopic              = executiveTopic;
-	parameters.executiveVisualizationTopic = executiveVisualizationTopic;
-	parameters.behaviorPitchRoll           = behaviorPitchRoll_proxy;
-	parameters.behaviorSaccade             = behaviorSaccade_proxy;
-	parameters.behaviorUnknown             = behaviorUnknown_proxy;
-	parameters.behaviorDistance            = behaviorDistance_proxy;
-	parameters.behaviorYaw                 = behaviorYaw_proxy;
-
-*/
-
-
-
-printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	Worker *worker = new Worker(parameters);
-printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	/// First part
 	proxy = getProxyString("IceStormProxy");
 	Ice::ObjectPrx obj = communicator()->stringToProxy(proxy);
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(obj);
-	Ice::ObjectAdapterPtr adapterT = communicator()->createObjectAdapter("GualzruBehaviorTopic");
-	GualzruBehaviorTopicPtr behaviorTopic = new GualzruBehaviorTopicI(worker);
-	Ice::ObjectPrx proxyT = adapterT->addWithUUID(behaviorTopic)->ice_oneway();
+	Ice::ObjectAdapterPtr adapterT = communicator()->createObjectAdapter("AGMAgentTopic");
+	AGMAgentTopicPtr agentTopic = new AGMAgentTopicI(worker);
+	Ice::ObjectPrx proxyT = adapterT->addWithUUID(agentTopic)->ice_oneway();
 	IceStorm::TopicPrx topic;
 	try
 	{
-		topic = topicManager->retrieve("GualzruBehavior");
+		topic = topicManager->retrieve("AGMAgentTopic");
 		IceStorm::QoS qos;
 		topic->subscribeAndGetPublisher(qos, proxyT);
 	}
@@ -339,9 +289,9 @@ printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 
 	try
 	{
-		Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("gualzruexecutive");
-		ExecutiveI *executiveI = new ExecutiveI(worker);
-		adapter->add(executiveI, communicator()->stringToIdentity("gualzruexecutive"));
+		Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("agmexecutive");
+		AGMExecutiveI *executiveI = new AGMExecutiveI(worker);
+		adapter->add(executiveI, communicator()->stringToIdentity("agmexecutive"));
 		adapter->activate();
 
 #ifdef USE_QTGUI
@@ -373,7 +323,7 @@ int main(int argc, char* argv[])
 {
 	bool hasConfig = false;
 	string arg;
-	gualzru_executiveComp app;
+	AGMExecutiveMain app;
 
 	// Search in argument list for --Ice.Config= argument
 	for (int i = 1; i < argc; ++i)

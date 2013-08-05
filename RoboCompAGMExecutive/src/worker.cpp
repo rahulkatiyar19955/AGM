@@ -1,7 +1,7 @@
 /*
- *    Copyright (C) 2006-2011 by RoboLab - University of Extremadura
+ *    Copyright (C) 2013 by Luis J. Manso - University of Extremadura
  *
- *    This file is part of RoboComp
+ *    This file is part of AGM (Active Grammar-based Modeling)
  *
  *    RoboComp is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -58,8 +58,8 @@ printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	/// Read the grammar file and store it in a string
 	grammarPDDLString = prms.grammarPDDLString;
 
-	RoboCompWorldModel::ModelEvent e;
-	e.why    = RoboCompWorldModel::InitialWorld;
+	RoboCompAGMWorldModel::Event e;
+	e.why    = RoboCompAGMWorldModel::InitialWorld;
 	e.sender = "executive";
 printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
@@ -70,18 +70,18 @@ printf("%s: %s: %d\n", __FILE__, __PRETTY_FUNCTION__, __LINE__);
 	AGMModelPrinter::printWorld(worldModel);
 }
 
-void GualzruBehaviorTopicI::modificationProposal(const RoboCompWorldModel::ModelEvent &result, const Ice::Current&)
+void AGMAgentTopicI::modificationProposal(const RoboCompAGMWorldModel::Event &result, const Ice::Current&)
 {
 	qDebug() << "Event from: " << result.sender.c_str();
 	worker->enqueueEvent(result);
 }
 
-void GualzruBehaviorTopicI::update(const RoboCompWorldModel::GualzruWorldNode &result, const Ice::Current&)
+void AGMAgentTopicI::update(const RoboCompAGMWorldModel::Node &result, const Ice::Current&)
 {
 	worker->update(result);
 }
 
-void Worker::enqueueEvent(const RoboCompWorldModel::ModelEvent &r)
+void Worker::enqueueEvent(const RoboCompAGMWorldModel::Event &r)
 {
 // 	std::cout << "New event from " << r.sender << "!\n";
 // 	AGMModelPrinter::printWorld(r.newModel);
@@ -91,16 +91,14 @@ void Worker::enqueueEvent(const RoboCompWorldModel::ModelEvent &r)
 	mutex->unlock();
 }
 
-void Worker::update(const RoboCompWorldModel::GualzruWorldNode &r)
+void Worker::update(const RoboCompAGMWorldModel::Node &r)
 {
 	mutex->lock();
-// 	printf("Updating RCIS node %s_%d\n", r.nodeType.c_str(), r.nodeIdentifier);
 	prms.executiveTopic->modelUpdated(r);
-	updateRCISNode(r);
 	mutex->unlock();
 }
 
-void Worker::printSomeInfo(const RoboCompWorldModel::ModelEvent &event)
+void Worker::printSomeInfo(const RoboCompAGMWorldModel::Event &event)
 {
 	if (generateTXT) 
 	{
@@ -129,17 +127,15 @@ void Worker::printSomeInfo(const RoboCompWorldModel::ModelEvent &event)
 	}
 }
 
-bool Worker::handleModificationProposal(const RoboCompWorldModel::ModelEvent &event)
+bool Worker::handleModificationProposal(const RoboCompAGMWorldModel::Event &event)
 {
 	mutex->lock();
 	printSomeInfo(event);
 
 	if (eventIsCompatibleWithTheCurrentModel(event) )
 	{
-		buildModificationLists(event);
 		prms.executiveTopic->modelModified(event);
 		AGMModelConverter::fromIceToInternal(event.newModel, worldModel);
-		updateRCISModel();
 	}
 	else
 	{
@@ -184,7 +180,7 @@ void Worker::setCurrentBehavioralConfiguration()
 	mutex->lock();
 
 	/// Process new events
-	RoboCompWorldModel::ModelEvent event;
+	RoboCompAGMWorldModel::Event event;
 	while (not eventQueue.isEmpty())
 	{
 		event = eventQueue.dequeue();
@@ -193,10 +189,8 @@ void Worker::setCurrentBehavioralConfiguration()
 		if (eventIsCompatibleWithTheCurrentModel(event) )
 		{
 			eventQueue.clear();
-			buildModificationLists(event);
 			prms.executiveTopic->modelModified(event);
 			AGMModelConverter::fromIceToInternal(event.newModel, worldModel);
-			updateRCISModel();
 		}
 		if (generateTXT) 
 			fflush(fd);
@@ -229,8 +223,8 @@ void Worker::handleAcceptedModificationProposal()
 				currentBehavioralConfiguration = "";
 			}
 			executeCurrentBehavioralConfiguration();
-			RoboCompWorldModel::GualzruWorld targetModelICE;
-			RoboCompWorldModel::GualzruWorld worldModelICE;
+			RoboCompAGMWorldModel::World targetModelICE;
+			RoboCompAGMWorldModel::World worldModelICE;
 			AGMModelConverter::fromInternalToIce(targetModel, targetModelICE);
 			AGMModelConverter::fromInternalToIce( worldModel,  worldModelICE);
 			prms.executiveVisualizationTopic->update(worldModelICE, targetModelICE, currentSolution);
@@ -248,7 +242,7 @@ void Worker::handleAcceptedModificationProposal()
 }
 
 
-bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompWorldModel::ModelEvent &event) const
+bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::Event &event) const
 {
 	RoboCompPlanning::Plan tempSolution;
 	static AGMModel::SPtr tempTargetWorldModel = AGMModel::SPtr(new AGMModel());
@@ -341,8 +335,8 @@ void Worker::executeCurrentBehavioralConfiguration()
 void Worker::reset()
 {
 	// Create event
-	RoboCompWorldModel::ModelEvent e;
-	e.why    = RoboCompWorldModel::InitialWorld;
+	RoboCompAGMWorldModel::Event e;
+	e.why    = RoboCompAGMWorldModel::InitialWorld;
 	e.sender = "executive";
 
 	// New model
@@ -358,8 +352,8 @@ void Worker::reset()
 
 void Worker::broadcastModel()
 {
-	RoboCompWorldModel::ModelEvent e;
-	e.why    = RoboCompWorldModel::InitialWorld;
+	RoboCompAGMWorldModel::Event e;
+	e.why    = RoboCompAGMWorldModel::InitialWorld;
 	e.sender = "executive";
 	AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
 	AGMModelConverter::fromInternalToIce(worldModel, e.newModel);

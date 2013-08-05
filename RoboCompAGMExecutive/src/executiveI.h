@@ -1,7 +1,7 @@
 /*
- *    Copyright (C) 2006-2012 by RoboLab - University of Extremadura
+ *    Copyright (C) 2013 by Luis J. Manso - University of Extremadura
  *
- *    This file is part of RoboComp
+ *    This file is part of AGM (Active Grammar-based Modeling)
  *
  *    RoboComp is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -16,23 +16,22 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef EXECUTIVEI_H
-#define EXECUTIVEI_H
+#pragma once
 
 #include <Ice/Ice.h>
-#include <GualzruExecutive.h>
+#include <AGMExecutive.h>
 
 #include <config.h>
 #include "worker.h"
 
 #include <agm_modelConverter.h>
 
-using namespace RoboCompExecutive;
+using namespace RoboCompAGMExecutive;
 
-class ExecutiveI :  public virtual RoboCompExecutive::Executive
+class AGMExecutiveI :  public virtual RoboCompAGMExecutive::AGMExecutive
 {
 public:
-	ExecutiveI(Worker *_worker)
+	AGMExecutiveI(Worker *_worker)
 	{
 		worker = _worker;
 	}
@@ -53,7 +52,7 @@ public:
 		worker->mutex->unlock();
 	}
 
-	void getData(RoboCompWorldModel::GualzruWorld &world, RoboCompWorldModel::GualzruWorld &target, RoboCompPlanning::Plan &plan, const Ice::Current & = Ice::Current())
+	void getData(RoboCompAGMWorldModel::World &world, RoboCompAGMWorldModel::World &target, RoboCompPlanning::Plan &plan, const Ice::Current & = Ice::Current())
 	{
 		worker->mutex->lock();
 		AGMModelConverter::fromInternalToIce(worker->worldModel,  world);
@@ -73,19 +72,19 @@ public:
 	}
 	
 
-	bool modificationProposal(const RoboCompWorldModel::ModelEvent &proposal, const Ice::Current&)
+	bool modificationProposal(const RoboCompAGMWorldModel::Event &proposal, const Ice::Current&)
 	{
 		return worker->handleModificationProposal(proposal);
 	}
-/*
-	bool update(const RoboCompWorldModel::GualzruWorldNode &update, const Ice::Current&)
+
+
+	void setMission(const RoboCompAGMWorldModel::World &mission, const Ice::Current&)
 	{
-		return worker->handleUpdate(update);
+		AGMModelConverter::fromIceToInternal(mission, worker->targetModel);
 	}
-*/
 
 private:
 	Worker *worker;
 };
 
-#endif
+

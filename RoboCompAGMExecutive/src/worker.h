@@ -1,7 +1,7 @@
 /*
- *    Copyright (C) 2006-2011 by RoboLab - University of Extremadura
+ *    Copyright (C) 2013 by Luis J. Manso - University of Extremadura
  *
- *    This file is part of RoboComp
+ *    This file is part of AGM (Active Grammar-based Modeling)
  *
  *    RoboComp is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -16,8 +16,7 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef WORKER_H
-#define WORKER_H
+#pragma once
 
 #include <QtGui>
 #include <stdint.h>
@@ -25,10 +24,10 @@
 
 #include <Planning.h>
 #include <Speech.h>
-#include <InnerModelManager.h>
-#include <GualzruExecutive.h>
-#include <GualzruBehavior.h>
-#include <GualzruCommonBehavior.h>
+#include <AGMExecutive.h>
+#include <AGMCommonBehavior.h>
+#include <AGMAgent.h>
+#include <AGMWorldModel.h>
 
 #include <IceStorm/IceStorm.h>
 
@@ -40,85 +39,70 @@
 
 #define BASIC_PERIOD 100
 
-typedef RoboCompInnerModelManager::NodeInformationSequence RCISSeq;
 
-using namespace RoboCompGualzruCommonBehavior;
+using namespace RoboCompAGMCommonBehavior;
 
 class Worker;
 
-class GualzruBehaviorTopicI : virtual public RoboCompGualzruBehavior::GualzruBehaviorTopic
+class AGMAgentTopicI : virtual public RoboCompAGMAgent::AGMAgentTopic
 {
 public:
-	GualzruBehaviorTopicI(Worker *worker_)
+	AGMAgentTopicI(Worker *worker_)
 	{
 		worker = worker_;
 	}
-	virtual void modificationProposal(const RoboCompWorldModel::ModelEvent &result, const Ice::Current&);
-	virtual void update(const RoboCompWorldModel::GualzruWorldNode &node, const Ice::Current&);
+	virtual void modificationProposal(const RoboCompAGMWorldModel::Event &result, const Ice::Current&);
+	virtual void update(const RoboCompAGMWorldModel::Node &node, const Ice::Current&);
 private:
 	Worker *worker;
 };
 
 
-typedef std::map<std::string, RoboCompGualzruCommonBehavior::GualzruCommonBehaviorPrx> AgentMap;
+typedef std::map<std::string, RoboCompAGMCommonBehavior::AGMCommonBehaviorPrx> AgentMap;
 
 class WorkerParameters
 {
 public:
 	/// GualzruExecutive topic publishing proxy
-	RoboCompExecutive::ExecutiveTopicPrx executiveTopic;
+	RoboCompAGMExecutive::AGMExecutiveTopicPrx executiveTopic;
 	/// GualzruExecutive Visualization topic publishing proxy
-	RoboCompExecutive::ExecutiveVisualizationTopicPrx executiveVisualizationTopic;
+	RoboCompAGMExecutive::AGMExecutiveVisualizationTopicPrx executiveVisualizationTopic;
 	/// Proxy to the planner
 	RoboCompPlanning::PlanningPrx planning;
 	/// Proxy to speech
 	RoboCompSpeech::SpeechPrx speech;
-	/// Proxy to InnerModelManager
-	RoboCompInnerModelManager::InnerModelManagerPrx immanager;
 
-
+	/// Generic AGM Stuff
 	AGM *agm;
 	AgentMap agentProxies;
 
+	/// Remaining configuration
 	std::string pddlPath;
 	std::string agmbdPath;
 	std::string grammarPDDLString;
-
-
 };
 
-
-struct ModificationListsContainer
-{
-	// Nodes                        GualzruWorldNode
-	RoboCompWorldModel::NodeSequence newNodes;
-	RoboCompWorldModel::NodeSequence constantNodes;
-	RoboCompWorldModel::NodeSequence removedNodes;
-	// Edges
-	RoboCompWorldModel::EdgeSequence newEdges;
-	RoboCompWorldModel::EdgeSequence constantEdges;
-	RoboCompWorldModel::EdgeSequence removedEdges;
-};
 
 /**
        \brief
        @author authorname
 */
-class ExecutiveI;
+class AGMExecutiveI;
+
 class Worker  : public QThread
 {
 Q_OBJECT
-friend class ExecutiveI;
+friend class AGMExecutiveI;
 public:
 	Worker(WorkerParameters &config);
 	~Worker();
 
 	QMutex *mutex;
 	QMutex *processMutex;
-	QQueue <RoboCompWorldModel::ModelEvent> eventQueue;
+	QQueue <RoboCompAGMWorldModel::Event> eventQueue;
 
-	void enqueueEvent(const RoboCompWorldModel::ModelEvent &r);
-	void update(const RoboCompWorldModel::GualzruWorldNode &r);
+	void enqueueEvent(const RoboCompAGMWorldModel::Event &r);
+	void update(const RoboCompAGMWorldModel::Node &r);
 	void run();
 	void reset();
 	void broadcastModel();
@@ -135,9 +119,9 @@ private:
 	bool active;
 	int Period;
 	WorkerParameters prms;
-	void printSomeInfo(const RoboCompWorldModel::ModelEvent &e);
+	void printSomeInfo(const RoboCompAGMWorldModel::Event &e);
 
-	bool eventIsCompatibleWithTheCurrentModel(const RoboCompWorldModel::ModelEvent &event) const;
+	bool eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::Event &event) const;
 
 	string currentBehavioralConfiguration;
 	void setCurrentBehavioralConfiguration();
@@ -149,42 +133,11 @@ private:
 
 	void handleAcceptedModificationProposal();
 
-	bool handleModificationProposal(const RoboCompWorldModel::ModelEvent &proposal);
-// 	bool handleUpdate(const RoboCompWorldModel::GualzruWorldNode &update);
-	
-	
-	/** RCIS - Imagination **/
-	/** RCIS - Imagination **/
-	void updateRCISModel();
-	void updateRCISNode(const RoboCompWorldModel::GualzruWorldNode &r);
-	std::string node2String(const RoboCompWorldModel::GualzruWorldNode &node);
-	void buildModificationLists(const RoboCompWorldModel::ModelEvent &event);
-	ModificationListsContainer modificationList;
-	void buildNodeModificationLists(const RoboCompWorldModel::ModelEvent &event);
-	void buildEdgeModificationLists(const RoboCompWorldModel::ModelEvent &event);
+	bool handleModificationProposal(const RoboCompAGMWorldModel::Event &proposal);
 
-	void RCIS_addRobotNode         (RoboCompWorldModel::GualzruWorldNode &node);
-	void RCIS_addFloorNode         (RoboCompWorldModel::GualzruWorldNode &node);
-	void RCIS_addOrientedFloorNode (RoboCompWorldModel::GualzruWorldNode &node);
-	void RCIS_addWallNode          (RoboCompWorldModel::GualzruWorldNode &node);
-
-	void RCIS_updateOrientedFloorNode (RoboCompWorldModel::GualzruWorldNode &node);
-	void RCIS_updateRoomNode          (RoboCompWorldModel::GualzruWorldNode &node);
-	void RCIS_updateWallNode          (RoboCompWorldModel::GualzruWorldNode &node);
-
-
-	void RCIS_imaginateRobotMesh(float neckAngle, float yaw);
-	void RCIS_imaginateRoom(float robotYaw, float height, float robotPitch);
-
-	void RCIS_removeNode_nonexistingok(std::string nodeName);
-	void RCIS_addTransform_existingsetfromparent(std::string nodeName, std::string parentName, RoboCompInnerModelManager::Pose3D pose);
-	void RCIS_addPlane_existingsetfromparent(std::string nodeName, std::string parentName, RoboCompInnerModelManager::Plane3D plane);
-
-	/** RCIS - Imagination **/
-	/** RCIS - Imagination **/
 
 signals:
 	void kill();
 };
 
-#endif
+

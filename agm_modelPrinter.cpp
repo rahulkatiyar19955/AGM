@@ -27,17 +27,17 @@ void AGMModelPrinter::printWorld(const AGMModel *w)
 	}
 }
 
-void AGMModelPrinter::printWorld(const RoboCompWorldModel::GualzruWorld &w)
+void AGMModelPrinter::printWorld(const RoboCompAGMWorldModel::World &w)
 {
 	AGMModelPrinter::printWorld(stdout, w);
 }
 
-void AGMModelPrinter::printWorld(FILE *fd, const RoboCompWorldModel::GualzruWorld &w)
+void AGMModelPrinter::printWorld(FILE *fd, const RoboCompAGMWorldModel::World &w)
 {
 	for (uint32_t i=0; i<w.nodes.size(); ++i)
 	{
 		fprintf(fd, "(%d): %s\n", w.nodes[i].nodeIdentifier, w.nodes[i].nodeType.c_str());
-		RoboCompWorldModel::StringDictionary::const_iterator itr = w.nodes[i].attributes.begin();
+		RoboCompAGMWorldModel::StringDictionary::const_iterator itr = w.nodes[i].attributes.begin();
 		for(; itr!=w.nodes[i].attributes.end(); ++itr)
 		{
 			fprintf(fd, "\t<%s> --> <%s>\n", itr->first.c_str(), itr->second.c_str());

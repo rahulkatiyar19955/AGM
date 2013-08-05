@@ -24,7 +24,7 @@ SET (AGM_CODE
   agm_modelSymbols.cpp
   agm_modelConverter.cpp
 
-  WorldModel.cpp
+  AGMWorldModel.cpp
 )
 
 
@@ -88,7 +88,7 @@ if (ROBOCOMP_SUPPORT)
 	MESSAGE(STATUS "ROBOCOMP PATH:        $ENV{ROBOCOMP}")
 	INCLUDE( $ENV{ROBOCOMP}/CMake/robocomp.cmake )
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-	ROBOCOMP_WRAP_ICE( WorldModel )
+	ROBOCOMP_WRAP_ICE( AGMWorldModel )
 	SET(ICE_LIBS -lIce)
 endif (ROBOCOMP_SUPPORT)
 
@@ -124,4 +124,4 @@ add_dependencies(testagm agm)
 #  Installation  #
 ##################
 INSTALL(FILES libagm.so DESTINATION /opt/robocomp/lib/ )
-INSTALL(FILES ${HEADERS} WorldModel.h DESTINATION /opt/robocomp/include/ )
+INSTALL(FILES ${HEADERS} AGMWorldModel.h DESTINATION /opt/robocomp/include/ )

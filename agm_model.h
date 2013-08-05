@@ -7,7 +7,7 @@
 #include <boost/thread.hpp>
 
 #include <agm_modelException.h>
-#include <WorldModel.h>
+#include <AGMWorldModel.h>
 
 #include <agm_misc_functions.h>
 #include <agm_modelSymbols.h>
