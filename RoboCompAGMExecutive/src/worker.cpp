@@ -319,7 +319,7 @@ void Worker::executeCurrentBehavioralConfiguration()
 				}
 				pm["action"] = p;
 				// Activation
-				bool ok = prms.agentProxies[agents[i].getName()]->activate(pm);
+				bool ok = prms.agentProxies[agents[i].getName()]->activateAgent(pm);
 				if (not ok)
 				{
 					fprintf(stdout, "There was some problem activating agent %s\n", agents[i].getName().c_str());
