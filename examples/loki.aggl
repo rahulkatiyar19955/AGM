@@ -1,6 +1,6 @@
 spacePattern=3
 lineThickness=2.5
-name=loki
+name=lokito
 vertexDiameter=40
 shortPattern=1
 nodeThickness=2.5
@@ -8,18 +8,20 @@ longPattern=3
 ===
 agents
 {
-ballTracker   ( off track )
-handApproacher( off touch )
+ballTracker ( off track )
+handApproacher ( off touch restPosition)
 }
-configurations{ reposo aporlabola tocando }
+configurations{ resting beCool goTouchTheBall touchingTheBall goRest }
 table
 {
- off   off
+ off off
+ track off
  track touch
  track off
+ track restPosition
 }
 ===
-init : reposo
+init : resting
 {
 	{
 		S:startsymbol(100,100)
@@ -27,10 +29,12 @@ init : reposo
 	=>
 	{
 		loki:robot(100,100)
+		status:status(100,250)
+		loki->status(exists)
 	}
 }
 
-hayBola : aporlabola
+ballFound : beCool
 {
 	{
 		loki:robot(100,100)
@@ -43,7 +47,7 @@ hayBola : aporlabola
 	}
 }
 
-pierdoBola : aporlabola
+ballLost : beCool
 {
 	{
 		loki:robot(100,100)
@@ -56,7 +60,7 @@ pierdoBola : aporlabola
 	}
 }
 
-centroBola : aporlabola
+ballCentered : beCool
 {
 	{
 		loki:robot(100,100)
@@ -72,7 +76,7 @@ centroBola : aporlabola
 	}
 }
 
-bolaSeMueve : aporlabola
+ballNotCentered : beCool
 {
 	{
 		loki:robot(100,100)
@@ -88,7 +92,7 @@ bolaSeMueve : aporlabola
 	}
 }
 
-tocoBola : aporlabola
+ballTouched : goTouchTheBall
 {
 	{
 		loki:robot(100,100)
@@ -104,7 +108,7 @@ tocoBola : aporlabola
 	}
 }
 
-sueltoMueve : aporlabola
+ballNotTouched : goRest
 {
 	{
 		loki:robot(100,100)
@@ -117,6 +121,38 @@ sueltoMueve : aporlabola
 		loki:robot(100,100)
 		ball:ball(300,100)
 		loki->ball(sees)
+	}
+}
+
+setRest : goRest
+{
+	{
+		loki:robot(100,100)
+		status:status(100,250)
+		loki->status(exists)
+	}
+	=>
+	{
+		loki:robot(100,100)
+		status:status(100,250)
+		loki->status(exists)
+		loki->status(rest)
+	}
+}
+
+unsetRest : goTouchTheBall
+{
+	{
+		loki:robot(100,100)
+		status:status(100,250)
+		loki->status(exists)
+		loki->status(rest)
+	}
+	=>
+	{
+		loki:robot(100,100)
+		status:status(100,250)
+		loki->status(exists)
 	}
 }
 
