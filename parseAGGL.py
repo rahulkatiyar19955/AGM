@@ -44,19 +44,19 @@ class AGMFileDataParsing:
 		agmFD.agm.rules = []
 
 		# Define AGM's DSL meta-model
-		an = Word(alphanums)
+		an = Word(srange("[a-zA-Z0-9_.]"))
 		nu = Word(nums)
 		sep = Suppress("===")
 		eq = Suppress("=")
-		cn = Suppress(":") 
+		cn = Suppress(":")
 		lk = Suppress("->")
 		ar = Suppress("=>")
-		op = Suppress("{") 
-		cl = Suppress("}") 
+		op = Suppress("{")
+		cl = Suppress("}")
 		po = Suppress("(")
 		co = Suppress(",")
-		pc = Suppress(")") 
-		no = Suppress("!") 
+		pc = Suppress(")")
+		no = Suppress("!")
 		ag = Suppress("agents")
 		cf = Suppress("configurations")
 		tb = Suppress("table")
@@ -117,6 +117,6 @@ class AGMFileDataParsing:
 			if verbose: print '\nRule:('+str(number)+')'
 			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i,  verbose))
 			number += 1
-			
+
 		return agmFD
 		

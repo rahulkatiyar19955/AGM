@@ -303,6 +303,7 @@ class AGMEditor(QMainWindow):
 					break
 		if currConf!=None:
 			if found == -1 and self.ui.configurationListWidget.count() > 0 and currConf.name != '':
+				print 'Using inexistent configuration: invalid file. Ask the developing team how to fix this.'
 				sys.exit(1)
 		if found > -1:
 			self.ui.configurationListWidget.setCurrentRow(found)

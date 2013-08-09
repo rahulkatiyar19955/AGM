@@ -1,0 +1,122 @@
+spacePattern=3
+lineThickness=2.5
+name=loki
+vertexDiameter=40
+shortPattern=1
+nodeThickness=2.5
+longPattern=3
+===
+agents
+{
+ballTracker   ( off track )
+handApproacher( off touch )
+}
+configurations{ reposo aporlabola tocando }
+table
+{
+ off   off
+ track touch
+ track off
+}
+===
+init : reposo
+{
+	{
+		S:startsymbol(100,100)
+	}
+	=>
+	{
+		loki:robot(100,100)
+	}
+}
+
+hayBola : aporlabola
+{
+	{
+		loki:robot(100,100)
+	}
+	=>
+	{
+		loki:robot(100,100)
+		ball:ball(300,100)
+		loki->ball(sees)
+	}
+}
+
+pierdoBola : aporlabola
+{
+	{
+		loki:robot(100,100)
+		ball:ball(300,100)
+		loki->ball(sees)
+	}
+	=>
+	{
+		loki:robot(100,100)
+	}
+}
+
+centroBola : aporlabola
+{
+	{
+		loki:robot(100,100)
+		ball:ball(300,100)
+		loki->ball(sees)
+	}
+	=>
+	{
+		loki:robot(100,100)
+		ball:ball(300,100)
+		loki->ball(sees)
+		loki->ball(fixates)
+	}
+}
+
+bolaSeMueve : aporlabola
+{
+	{
+		loki:robot(100,100)
+		ball:ball(300,100)
+		loki->ball(sees)
+		loki->ball(fixates)
+	}
+	=>
+	{
+		loki:robot(100,100)
+		ball:ball(300,100)
+		loki->ball(sees)
+	}
+}
+
+tocoBola : aporlabola
+{
+	{
+		loki:robot(100,100)
+		ball:ball(300,100)
+		loki->ball(sees)
+	}
+	=>
+	{
+		loki:robot(100,100)
+		ball:ball(300,100)
+		loki->ball(sees)
+		loki->ball(touches)
+	}
+}
+
+sueltoMueve : aporlabola
+{
+	{
+		loki:robot(100,100)
+		ball:ball(300,100)
+		loki->ball(sees)
+		loki->ball(touches)
+	}
+	=>
+	{
+		loki:robot(100,100)
+		ball:ball(300,100)
+		loki->ball(sees)
+	}
+}
+

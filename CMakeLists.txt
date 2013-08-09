@@ -8,8 +8,8 @@ INCLUDE_DIRECTORIES ( . )
 
 #  Optional features  #
 #######################
-option (PYTHON_BINDINGS "Build python bindings" ON)
-option (ROBOCOMP_SUPPORT "Build with support for RoboComp" ON)
+option (PYTHON_BINDINGS "Build python bindings" OFF)
+option (ROBOCOMP_SUPPORT "Build with support for RoboComp" OFF)
 
 
 #  Set sources  #
@@ -23,8 +23,6 @@ SET (AGM_CODE
   agm_modelPrinter.cpp
   agm_modelSymbols.cpp
   agm_modelConverter.cpp
-
-  AGMWorldModel.cpp
 )
 
 
@@ -90,6 +88,7 @@ if (ROBOCOMP_SUPPORT)
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 	ROBOCOMP_WRAP_ICE( AGMWorldModel )
 	SET(ICE_LIBS -lIce)
+	SET(SOURCES ${SOURCES}   AGMWorldModel.cpp )
 endif (ROBOCOMP_SUPPORT)
 
 
