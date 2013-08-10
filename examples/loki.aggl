@@ -9,16 +9,17 @@ longPattern=3
 agents
 {
 ballTracker ( off track )
-handApproacher ( off touch restPosition)
+handApproacher ( off touch restPosition )
+dialogManager ( off on )
 }
 configurations{ resting beCool goTouchTheBall touchingTheBall goRest }
 table
 {
- off off
- track off
- track touch
- track off
- track restPosition
+ off       off            on
+ track     off            on
+ track     touch          on
+ track     off            on
+ track     restPosition   on
 }
 ===
 init : resting
@@ -30,7 +31,7 @@ init : resting
 	{
 		loki:robot(100,100)
 		status:status(100,250)
-		loki->status(exists)
+		loki->status(bored)
 	}
 }
 
@@ -47,16 +48,37 @@ ballFound : beCool
 	}
 }
 
-ballLost : beCool
+ballLostWhileHappy : beCool
 {
 	{
 		loki:robot(100,100)
+		status:status(100,250)
 		ball:ball(300,100)
 		loki->ball(sees)
+		loki->status(happy)
 	}
 	=>
 	{
 		loki:robot(100,100)
+		status:status(100,250)
+		loki->status(bored)
+	}
+}
+
+ballLostWhileBored : beCool
+{
+	{
+		loki:robot(100,100)
+		ball:ball(300,100)
+		status:status(100,250)
+		loki->ball(sees)
+		loki->status(bored)
+	}
+	=>
+	{
+		loki:robot(100,100)
+		status:status(100,250)
+		loki->status(bored)
 	}
 }
 
@@ -97,13 +119,17 @@ ballTouched : goTouchTheBall
 	{
 		loki:robot(100,100)
 		ball:ball(300,100)
-		loki->ball(sees)
+		status:status(100,250)
+		loki->ball(fixates)
+		loki->status(bored)
 	}
 	=>
 	{
 		loki:robot(100,100)
 		ball:ball(300,100)
-		loki->ball(sees)
+		status:status(100,250)
+		loki->status(happy)
+		loki->ball(fixates)
 		loki->ball(touches)
 	}
 }
@@ -129,13 +155,13 @@ setRest : goRest
 	{
 		loki:robot(100,100)
 		status:status(100,250)
-		loki->status(exists)
+		loki->status(bored)
 	}
 	=>
 	{
 		loki:robot(100,100)
 		status:status(100,250)
-		loki->status(exists)
+		loki->status(bored)
 		loki->status(rest)
 	}
 }
@@ -145,14 +171,28 @@ unsetRest : goTouchTheBall
 	{
 		loki:robot(100,100)
 		status:status(100,250)
-		loki->status(exists)
+		loki->status(bored)
 		loki->status(rest)
 	}
 	=>
 	{
 		loki:robot(100,100)
 		status:status(100,250)
-		loki->status(exists)
+		loki->status(bored)
+	}
+}
+
+gotBored : beCool
+{
+	{
+		loki:robot(100,100)
+		status:status(100,250)
+	}
+	=>
+	{
+		loki:robot(100,100)
+		status:status(100,250)
+		loki->status(bored)
 	}
 }
 
