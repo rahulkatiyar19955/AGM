@@ -17,7 +17,7 @@ SET ( HEADERS
 # RoboComp
 INCLUDE( $ENV{ROBOCOMP}/CMake/robocomp.cmake )
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( Planning AGMAgent Speech AGMCommonBehavior AGMExecutive  ) # AGMWorldModel
+ROBOCOMP_WRAP_ICE( Planning AGMAgent Speech AGMCommonBehavior AGMExecutive AGMWorldModel )
 
 # Qt4
 ADD_DEFINITIONS( -Wall -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB )
