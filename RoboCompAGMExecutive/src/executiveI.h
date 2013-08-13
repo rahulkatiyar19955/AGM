@@ -80,6 +80,7 @@ public:
 
 	void setMission(const RoboCompAGMWorldModel::World &mission, const Ice::Current&)
 	{
+		printf("setMission\n");
 		AGMModelConverter::fromIceToInternal(mission, worker->targetModel);
 	}
 

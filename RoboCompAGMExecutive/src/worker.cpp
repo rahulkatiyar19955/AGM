@@ -171,6 +171,7 @@ void Worker::run()
 
 void Worker::setCurrentBehavioralConfiguration()
 {
+	printf("setCurrentBehavioralConfiguration\n");
 	if (not active) return;
 	mutex->lock();
 
@@ -199,7 +200,7 @@ void Worker::setCurrentBehavioralConfiguration()
 void Worker::handleAcceptedModificationProposal()
 {
 	/// Get mission
-	// Mission::getTarget(worldModel, targetModel);
+	printf("handleAcceptedModificationProposal dd\n");
 
 	/// Get problem string based on the new mission and the current model
 	std::string problemPDDLString = worldModel->generatePDDLProblem(targetModel, 6, "gualzruGrammar", "problemo");
@@ -214,6 +215,8 @@ void Worker::handleAcceptedModificationProposal()
 				if (currentSolution.actions.size() > 0)
 				{
 					currentBehavioralConfiguration = prms.agm->action2behavior[currentSolution.actions[0].name];
+					if (currentBehavioralConfiguration == "")
+						qFatal("No behavior associated with rule %s: Take a look at the AGMBD file.\n", currentSolution.actions[0].name.c_str());
 				}
 				else
 				{

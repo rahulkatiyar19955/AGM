@@ -116,7 +116,7 @@ int AGMExecutiveMain::run(int argc, char* argv[])
 		planning_proxy = RoboCompPlanning::PlanningPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
 		if (!planning_proxy)
 		{
-			rInfo(QString("Error loading proxy!"));
+			rInfo(QString("Error loading planningproxy!"));
 			return EXIT_FAILURE;
 		}
 	}
@@ -134,7 +134,7 @@ int AGMExecutiveMain::run(int argc, char* argv[])
 		speech_proxy = RoboCompSpeech::SpeechPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
 		if (!speech_proxy)
 		{
-			rInfo(QString("Error loading proxy!"));
+			rInfo(QString("Error loading speech proxy!"));
 			return EXIT_FAILURE;
 		}
 	}
@@ -251,7 +251,9 @@ int AGMExecutiveMain::run(int argc, char* argv[])
 			behavior_proxy = AGMCommonBehaviorPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
 			if (!behavior_proxy)
 			{
-				rInfo(QString("Error loading proxy!"));
+				printf("%s\n", agents[i].getName().c_str());
+				printf("%s\n", agents[i].getName().c_str());
+				rInfo(QString("Error loading behavior proxy!"));
 				return EXIT_FAILURE;
 			}
 		}
@@ -271,19 +273,15 @@ int AGMExecutiveMain::run(int argc, char* argv[])
 	proxy = getProxyString("IceStormProxy");
 	Ice::ObjectPrx obj = communicator()->stringToProxy(proxy);
 	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(obj);
-printf("__ %d __\n", __LINE__);
 	Ice::ObjectAdapterPtr adapterT = communicator()->createObjectAdapter("AGMAgentTopic");
 	AGMAgentTopicPtr agentTopic = new AGMAgentTopicI(worker);
 	Ice::ObjectPrx proxyT = adapterT->addWithUUID(agentTopic)->ice_oneway();
 	IceStorm::TopicPrx topic;
 	try
 	{
-printf("__ %d __\n", __LINE__);
 		topic = topicManager->retrieve("AGMAgentTopic");
 		IceStorm::QoS qos;
-printf("__ %d __\n", __LINE__);
 		topic->subscribeAndGetPublisher(qos, proxyT);
-printf("__ %d __\n", __LINE__);
 	}
 	catch (const IceStorm::NoSuchTopic&)
 	{
@@ -293,14 +291,10 @@ printf("__ %d __\n", __LINE__);
 
 	try
 	{
-printf("__ %d __\n", __LINE__);
 		Ice::ObjectAdapterPtr adapter = communicator()->createObjectAdapter("AGMExecutive");
-printf("__ %d __\n", __LINE__);
 		AGMExecutiveI *executiveI = new AGMExecutiveI(worker);
-printf("__ %d __\n", __LINE__);
 		adapter->add(executiveI, communicator()->stringToIdentity("agmexecutive"));
 		adapter->activate();
-printf("__ %d __\n", __LINE__);
 
 #ifdef USE_QTGUI
 		a.setQuitOnLastWindowClosed(true);

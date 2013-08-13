@@ -183,6 +183,7 @@ class GraphDraw(QWidget):
 		linkindex = 0
 		for linkindex in range(len(self.graph.links)):
 			e = self.graph.links[linkindex]
+			#print e.a, e.b
 			v1 = self.graph.nodes[e.a]
 			v2 = self.graph.nodes[e.b]
 			pos = 0
