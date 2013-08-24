@@ -2,6 +2,9 @@
 
 #include <agm_behavior.h>
 #include <agm_model.h>
+#include <agm_modelSymbols.h>
+#include <agm_modelEdge.h>
+#include <agm_modelConverter.h>
 
 
 class AGM

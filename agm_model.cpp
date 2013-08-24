@@ -55,6 +55,8 @@ void AGMModel::setFrom(const AGMModel &src)
 		AGMModelEdge edge(src.edges[i].symbolPair.first, src.edges[i].symbolPair.second, src.edges[i].linking);
 		edges.push_back(edge);
 	}
+	
+	resetLastId();
 }
 
 void AGMModel::resetLastId()
@@ -239,7 +241,7 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	// Known symbols type for the objects in the initial world
 	for (uint32_t s=0; s<symbols.size(); ++s)
 	{
-		stringStream << "		(is" << symbols[s]->typeString() << " " << symbols[s]->toString() << ")\n";
+		stringStream << "		(IS" << symbols[s]->typeString() << " " << symbols[s]->toString() << ")\n";
 	}
 	// Introduce edges themselves
 	for (uint32_t e=0; e<edges.size(); ++e)
@@ -272,7 +274,7 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 			if (target->symbols[s]->toString() == *it)
 				kStr = " ?";
 		}
-		stringStream << "				(is" << target->symbols[s]->typeString() << kStr << target->symbols[s]->toString() << ")\n";
+		stringStream << "				(IS" << target->symbols[s]->typeString() << kStr << target->symbols[s]->toString() << ")\n";
 	}
 	for (uint32_t e=0; e<target->edges.size(); ++e)
 	{
