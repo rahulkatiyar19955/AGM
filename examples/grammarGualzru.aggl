@@ -10,7 +10,7 @@ agents
 {
 	pitchNRoll ( off enabled )
 	yaw ( off enabled )
-	saccade ( off downwards frontal firstWall nextWall specific)
+	saccade ( off downwards frontal firstWall nextWall smallRight specific)
 	distance ( off floor wall maintenance )
 	wander ( off enabled)
 	unknownFinder (off floor table)
@@ -30,20 +30,24 @@ configurations
 	maintainWallDistances
 	insertUnknownStuff
 	obstaclesSaccade
+	none
+	findSaccadic
 }
 table
 {
-	enabled off      off       off         off     off   off off
-	off     off      downwards off         off     off   off off
-	off     off      off       floor       off     off   off off
-	off     off      frontal   off         off     off   off off
-	off     enabled  off       off         off     off   off off
-	off     enabled  firstWall maintenance off     off   off off
-	off     off      off       wall        off     off   off off
-	off     enabled  nextWall  maintenance off     off   off off
-	off     enabled  off       maintenance enabled off   off off
-	off     enabled  off       maintenance enabled floor off off
-	off     enabled  specific  maintenance off     off   off off
+	enabled off      off         off         off     off   off off
+	off     off      downwards   off         off     off   off off
+	off     off      off         floor       off     off   off off
+	off     off      frontal     off         off     off   off off
+	off     enabled  off         off         off     off   off off
+	off     enabled  firstWall   maintenance off     off   off off
+	off     off      off         wall        off     off   off off
+	off     enabled  nextWall    maintenance off     off   off off
+	off     enabled  off         maintenance enabled off   off off
+	off     enabled  off         maintenance enabled floor off off
+	off     enabled  specific    maintenance off     off   off off
+	off     off      off         off         off     off   off off
+	off     enabled  smallRight  maintenance off     off   off off
 }
 ===
 modelGravity : pitchAndRoll
@@ -182,6 +186,65 @@ modelWall : pitchAndRoll
 }
 
 modelLastWall : pitchAndRoll
+{
+	{
+		floor:floor(40,160)
+		robot:robot(180,40)
+		w4:notWall(370,40)
+		w3:wall(270,150)
+		w2:wall(130,150)
+		w1:wall(40,40)
+		robot->w4(looks)
+		floor->w1(link)
+		w1->w2(link)
+		w2->w3(link)
+		w3->w4(link)
+	}
+	=>
+	{
+		floor:room(40,160)
+		robot:robot(160,40)
+		w4:wall(360,40)
+		w3:wall(270,150)
+		w2:wall(130,150)
+		w1:wall(40,40)
+		is:is(180,140)
+		unlocked:unlocked(250,140)
+		floor->w1(link)
+		w1->w2(link)
+		w2->w3(link)
+		w3->w4(link)
+		robot->is(link)
+		is->unlocked(link)
+	}
+}
+
+findStuffSaccadic : findSaccadic
+{
+	{
+		room:room(40,160)
+		robot:robot(180,40)
+		is:is(270,40)
+		unlocked:unlocked(370,40)
+		robot->room(in)
+		robot->is(linked)
+		is->unlocked(linked)
+	}
+	=>
+	{
+		room:room(40,160)
+		robot:robot(180,40)
+		is:is(270,40)
+		locked:locked(370,40)
+		looking:looking(370,40)
+		robot->room(in)
+		robot->is(linked)
+		is->locked(linked)
+		is->looking(linked)
+	}
+}
+
+findStuffSaccadicEnds : none
 {
 	{
 		floor:floor(40,160)
