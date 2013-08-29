@@ -78,6 +78,13 @@ void AGMModelConverter::fromInternalToIce(const AGMModelSymbol::SPtr &node, Robo
 	dst.attributes = node->attributes;
 }
 
+void AGMModelConverter::fromInternalToIce(const AGMModelSymbol *node, RoboCompAGMWorldModel::Node &dst)
+{
+	dst.nodeType = node->symbolType;
+	dst.nodeIdentifier = node->identifier;
+	dst.attributes = node->attributes;
+}
+
 void AGMModelConverter::fromIceToInternal(const RoboCompAGMWorldModel::Node &node, AGMModelSymbol::SPtr &dst)
 {
 	dst->symbolType = node.nodeType;

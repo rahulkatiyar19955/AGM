@@ -187,7 +187,7 @@ class AGMRulePDDL:
 				nextn = forgetList2.pop()
 				ret += ' (unknownorder ?' + last + ' ?' + nextn + ')'
 				last = nextn
-			ret += ' (unknownorder ?' + last + ' ?' + stack[-1] + ')'
+			ret += ' (unknownorder ?' + last + ' ?' + stack[-1] + '))'
 			ret += ' (not (firstunknown ?' + stack[-1] + '))'
 			
 		# Internal error :-D

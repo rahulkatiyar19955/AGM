@@ -28,9 +28,6 @@ class AGMBD:
 		for r in agm.agm.configurationList:
 			writeString += ' '+ r
 		writeString += '\n'
-		
-		for r in agm.agm.rules:
-			writeString += 'R' + ' ' + r.name + ' ' + r.configuration.toString() + '\n' 
 
 		table = agm.listToTable(agm.parsedTable, len(agm.parsedAgents))
 		for i in range(len(table)):

@@ -24,6 +24,7 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 	std::ifstream ifile(agmbdFile.c_str());
 	if (ifile.is_open())
 	{
+		std::cout << "File " << agmbdFile << " opened correclty.\n";
 		while (ifile.good())
 		{
 			getline(ifile, line);
@@ -98,6 +99,7 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 	else
 	{
 		std::cout << "Unable to open file" << std::cout;
+		exit(1);
 	}
 
 }

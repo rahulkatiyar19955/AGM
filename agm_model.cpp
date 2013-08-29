@@ -14,6 +14,7 @@ AGMModel::AGMModel()
 AGMModel::~AGMModel()
 {
 // 	printf("delete model: (%p)\n", this);
+	lastId = 0;
 	symbols.clear();
 	edges.clear();
 }
