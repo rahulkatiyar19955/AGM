@@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES ( . )
 #  Optional features  #
 #######################
 option (PYTHON_BINDINGS "Build python bindings" OFF)
-option (ROBOCOMP_SUPPORT "Build with support for RoboComp" OFF)
+option (ROBOCOMP_SUPPORT "Build with support for RoboComp" ON)
 
 
 #  Set sources  #
@@ -23,6 +23,7 @@ SET (AGM_CODE
   agm_modelPrinter.cpp
   agm_modelSymbols.cpp
   agm_modelConverter.cpp
+  AGMWorldModel.h
 )
 
 
@@ -88,7 +89,6 @@ if (ROBOCOMP_SUPPORT)
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 	ROBOCOMP_WRAP_ICE( AGMWorldModel )
 	SET(ICE_LIBS -lIce)
-	SET(SOURCES ${SOURCES}   AGMWorldModel.cpp )
 endif (ROBOCOMP_SUPPORT)
 
 
@@ -109,10 +109,15 @@ ENDMACRO( WRAP_PYTHON_UI )
 WRAP_PYTHON_UI( guiAGGLEditor guiAGMExecutiveClient appearance )
 
 
+
+# ADD_CUSTOM_TARGET(AGMWorldModel.h )
+
+
 #  Library building  #
 ######################
 add_library(agm SHARED ${AGM_CODE} )
 target_link_libraries(agm ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+add_dependencies(agm AGMWorldModel )
 
 add_executable ( testagm testagm.cpp  )
 target_link_libraries ( testagm  -L. -lagm ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )

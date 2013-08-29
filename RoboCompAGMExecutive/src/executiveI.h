@@ -40,7 +40,7 @@ public:
 	{
 		worker->mutex->lock();
 		worker->active = false;
-		fclose(worker->fd);
+// 		fclose(worker->fd);
 		worker->mutex->unlock();
 	}
 	

@@ -1,3 +1,4 @@
+#
 # P R O V I D E D    E N D P O I N T S
 AGMExecutive.Endpoints=tcp -p 10198
 AGMCommonBehavior.Endpoints=tcp -p 11198
@@ -6,33 +7,20 @@ AGMAgentTopic.Endpoints=tcp -p 12198
 # R E M O T E    P R O X I E S
 PlanningProxy          = planning:tcp              -h localhost -p 10195
 SpeechProxy            = speech:tcp                -h localhost -p 10021
-InnerModelManagerProxy = innermodelmanager:tcp     -h localhost -p 3030
 IceStormProxy          = IceStorm/TopicManager:tcp -p 9999
 
-
 # A G M   -   F i l e   p a t h s
-PDDLPath = /home/robocomp/robocomp-gualzru/Files/FilesGualzru/AGM/gualzruGrammar.pddl
-AGMBDPath = /home/robocomp/robocomp-gualzru/Files/FilesGualzru/AGM/behaviormap.agmbd
+PDDLPath =  /home/robocomp/robocomp/Components/LokiAGM/Files/grammarLoki.pddl
+AGMBDPath = /home/robocomp/robocomp/Components/LokiAGM/Files/behaviorLoki.agmbd
 
 # Behaviors
-yaw        = agmcommonbehavior:tcp -h localhost -p 10199
-pitchNRoll = agmcommonbehavior:tcp -h localhost -p 10200
-distance   = agmcommonbehavior:tcp -h localhost -p 10201
-saccade    = agmcommonbehavior:tcp -h localhost -p 10202
-unknown    = agmcommonbehavior:tcp -h localhost -p 10203
+ballTracker    = agmcommonbehavior:tcp -h localhost -p 10240
+handApproacher = agmcommonbehavior:tcp -h localhost -p 10120 
 
-
-
-#############################
-### Ice-related properties ##
-#############################
-# Warn about connection exceptions
 Ice.Warn.Connections=0
-# Network Tracing: (0: no network tracing; 1: trace connection establishment and closure; 2: like 1, but more detailed; 3: like 2, but also trace data transfer).
 Ice.Trace.Network=0
-# Protocol Tracing: (0: no protocol tracing; 1: trace protocol messages)
 Ice.Trace.Protocol=0
-
-# Faster ACM
 Ice.ACM.Client=10
 Ice.ACM.Server=10
+
+# END

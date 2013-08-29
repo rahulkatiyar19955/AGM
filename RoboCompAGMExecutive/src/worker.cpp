@@ -29,6 +29,7 @@
 */
 Worker::Worker(WorkerParameters &parameters)
 {
+	std::locale::global(std::locale("C"));
 	prms = parameters;
 
 	mutex = new QMutex();
@@ -43,14 +44,13 @@ Worker::Worker(WorkerParameters &parameters)
 		exit(-1);
 	}
 
-
-	std::locale::global(std::locale("C"));
-
+	// Initial world
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->newSymbol("startsymbol");
+	printf("--------------\n");
 	AGMModelPrinter::printWorld(worldModel);
-
-	
+	printf("--------------\n");
+	// Initial target (empty)
 	targetModel = AGMModel::SPtr(new AGMModel());
 
 	/// Read the grammar file and store it in a string
@@ -59,6 +59,8 @@ Worker::Worker(WorkerParameters &parameters)
 	RoboCompAGMWorldModel::Event e;
 	e.why    = RoboCompAGMWorldModel::InitialWorld;
 	e.sender = "executive";
+	e.backModel.nodes.clear();
+	e.backModel.edges.clear();
 	AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
 	AGMModelConverter::fromInternalToIce(worldModel, e.newModel);
 	prms.executiveTopic->modelModified(e);
@@ -172,7 +174,7 @@ void Worker::run()
 void Worker::setCurrentBehavioralConfiguration()
 {
 	printf("setCurrentBehavioralConfiguration\n");
-	if (not active) return;
+// 	if (not active) return;
 	mutex->lock();
 
 	/// Process new events
@@ -231,8 +233,11 @@ void Worker::handleAcceptedModificationProposal()
 			}
 			else
 			{
+				printf("PROBLEM STRING\n");
 				printf("%s\n", problemPDDLString.c_str());
-				qFatal("No solution. :-(");
+				printf("WORLD STRING\n");
+				printf("%s\n", grammarPDDLString.c_str());
+				printf("No solution. :-(\n");
 			}
 		}
 		catch(RoboCompPlanning::ServerException exc)
@@ -288,7 +293,7 @@ void Worker::executeCurrentBehavioralConfiguration()
 	if (currentBehavioralConfiguration.size() == 0)
 		return;
 
-	prms.speech->say(currentBehavioralConfiguration, true);
+// 	prms.speech->say(currentBehavioralConfiguration, true);
 	std::cout << currentBehavioralConfiguration << std::endl;
 	std::cout << currentBehavioralConfiguration << std::endl;
 	std::cout << currentBehavioralConfiguration << std::endl;
@@ -344,6 +349,7 @@ void Worker::executeCurrentBehavioralConfiguration()
 
 void Worker::reset()
 {
+	printf("reset...\n");
 	// Create event
 	RoboCompAGMWorldModel::Event e;
 	e.why    = RoboCompAGMWorldModel::InitialWorld;
@@ -351,13 +357,16 @@ void Worker::reset()
 
 	// New model
 	worldModel->clear();
+	worldModel->resetLastId();
 	worldModel->name = "worldModelReseted";
 	worldModel->newSymbol("startsymbol");
 	AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
 	AGMModelConverter::fromInternalToIce(worldModel, e.newModel);
 
 	prms.executiveTopic->modelModified(e);
+	printf("reset done...\n");
 	handleAcceptedModificationProposal();
+	printf("reset done 2...\n");
 }
 
 void Worker::broadcastModel()
