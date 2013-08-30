@@ -17,7 +17,7 @@ unknownFinder ( off floor table )
 obstacleModeler ( off enabled )
 objectModeler ( off enabled )
 }
-configurations{ pitchAndRoll lookUnknownFloor heightBehavior lookPerpendicularFloor yaw lookFirstWall modelWall lookNextWall maintainWallDistances insertUnknownStuff obstaclesSaccade none findSaccadic }
+configurations{ pitchAndRoll lookUnknownFloor heightBehavior lookPerpendicularFloor yaw lookFirstWall modelWall lookNextWall maintainWallDistances insertUnknownStuff obstaclesSaccade none findObstacles }
 table
 {
  enabled off off off off off off off
@@ -82,14 +82,14 @@ modelHeight : pitchAndRoll
 lookPerpendicularFloor : pitchAndRoll
 {
 	{
-		floor:plane(220,40)
 		gualzru:robot(40,40)
+		floor:plane(220,40)
 		gualzru->floor(lookTowards)
 	}
 	=>
 	{
-		floor:plane(260,40)
 		gualzru:robot(40,40)
+		floor:plane(260,40)
 		gualzru->floor(lookPerpendicular)
 	}
 }
@@ -97,14 +97,14 @@ lookPerpendicularFloor : pitchAndRoll
 modelYaw : pitchAndRoll
 {
 	{
-		floor:plane(260,40)
 		gualzru:robot(40,40)
+		floor:plane(260,40)
 		gualzru->floor(lookPerpendicular)
 	}
 	=>
 	{
-		floor:floor(260,40)
 		gualzru:robot(40,40)
+		floor:floor(260,40)
 		gualzru->floor(lookPerpendicular)
 	}
 }
@@ -112,8 +112,8 @@ modelYaw : pitchAndRoll
 lookFirstWall : pitchAndRoll
 {
 	{
-		floor:floor(160,160)
 		gualzru:robot(40,40)
+		floor:floor(160,160)
 		gualzru->floor(lookPerpendicular)
 	}
 	=>
@@ -187,9 +187,8 @@ modelLastWall : pitchAndRoll
 	}
 	=>
 	{
-		floor:room(40,160)
-		is:is(390,160)
 		unlocked:unlocked(550,160)
+		floor:room(40,160)
 		robot:robot(390,40)
 		w4:wall(280,40)
 		w3:wall(270,150)
@@ -199,8 +198,7 @@ modelLastWall : pitchAndRoll
 		w1->w2(link)
 		w2->w3(link)
 		w3->w4(link)
-		robot->is(link)
-		is->unlocked(link)
+		robot->unlocked(is)
 	}
 }
 
@@ -213,8 +211,8 @@ lockRobot : none
 	}
 	=>
 	{
+		locked:locked(410,160)
 		robot:robot(250,160)
-		unlocked:unlocked(410,160)
 		robot->locked(is)
 	}
 }
@@ -222,29 +220,35 @@ lockRobot : none
 saccadeFinishesInspectionMovement : none
 {
 	{
-		robot:robot(250,160)
-		room:room(250,160)
-		view:view(250,160)
-		locked:locked(410,160)
-		robot->locked(is)
+		lock:locked(470,100)
+		view:view(390,230)
+		robot:robot(290,100)
+		room:room(170,230)
+		robot->lock(is)
+		robot->room(in)
+		robot->view(linked)
+		view->room(covered)
 	}
 	=>
 	{
-		robot:robot(250,160)
-		room:room(250,160)
-		view:view(250,160)
-		locked:locked(410,160)
-		robot->locked(is)
+		lock:unlocked(500,90)
+		view:view(410,220)
+		robot:robot(300,90)
+		room:room(200,220)
+		robot->lock(is)
+		robot->room(in)
+		robot->view(linked)
+		view->room(uncovered)
 	}
 }
 
 addObstacle : findObstacles
 {
 	{
-		robot:robot(250,160)
-		locked:locked(410,160)
-		room:room(250,160)
-		view:view(410,160)
+		view:view(210,180)
+		locked:locked(540,50)
+		robot:robot(330,50)
+		room:room(440,180)
 		robot->locked(is)
 		robot->view(has)
 		robot->room(in)
@@ -252,11 +256,11 @@ addObstacle : findObstacles
 	}
 	=>
 	{
-		robot:robot(250,160)
-		locked:locked(410,160)
-		room:room(250,160)
-		view:view(410,160)
-		obstacle:obstacle(410,160)
+		obstacle:obstacle(560,180)
+		view:view(160,180)
+		locked:locked(440,60)
+		robot:robot(270,60)
+		room:room(380,180)
 		robot->locked(is)
 		robot->view(has)
 		robot->room(in)
@@ -268,16 +272,26 @@ addObstacle : findObstacles
 boringRoom : none
 {
 	{
-		robot:robot(250,160)
-		room:room(250,160)
+		lock:locked(470,100)
+		view:view(390,230)
+		robot:robot(290,100)
+		room:room(170,230)
+		robot->lock(is)
 		robot->room(in)
+		robot->view(linked)
+		view->room(covered)
 	}
 	=>
 	{
-		robot:robot(250,160)
-		room:room(250,160)
+		lock:unlocked(500,90)
+		view:view(410,220)
+		robot:robot(300,90)
+		room:room(200,220)
+		robot->lock(is)
 		robot->room(in)
 		robot->room(observed)
+		robot->view(linked)
+		view->room(uncovered)
 	}
 }
 
