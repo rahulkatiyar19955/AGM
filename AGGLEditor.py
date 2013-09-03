@@ -312,9 +312,11 @@ class AGMEditor(QMainWindow):
 		currConf = self.ui.configurationListWidget.currentItem().text()
 		self.agmData.agm.setConfigRule(currRule, currConf)
 	def generateCode(self):
-		path_pddl = QFileDialog.getSaveFileName(self, "Save as", "", "*.pddl")[0]
+		path_pddl = QFileDialog.getSaveFileName(self, "Save PDDL file as", "", "*.pddl")[0]
+		if not path_pddl.endswith(".pddl"): path_pddl += ".pddl"
 		self.agmData.generatePDDL(path_pddl)
-		path_agmbd = QFileDialog.getSaveFileName(self, "Save as", "", "*.agmbd")[0]
+		path_agmbd = QFileDialog.getSaveFileName(self, "Save AGMBD file as", "", "*.agmbd")[0]
+		if not path_agmbd.endswith(".agmbd"): path_agmbd += ".agmbd"
 		self.agmData.generateAGMBehaviorDescription(path_agmbd)
 	def exportRule(self):
 		path = str(QFileDialog.getSaveFileName(self, "Export rule", "", "*"))

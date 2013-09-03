@@ -1,7 +1,5 @@
 from pyparsing import Word, alphas, alphanums, nums, OneOrMore, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
-import math
-import traceback
-import itertools
+import math, traceback, itertools, copy
 
 from pddlAGGL import *
 from agmbdAGGL import *
@@ -335,7 +333,8 @@ class AGMFileData(object):
 
 	def generatePDDL(self, filename):
 		w = open(filename, 'w')
-		w.write(AGMPDDL.toPDDL(self.agm, self.properties["name"]))
+		a = copy.deepcopy(self.agm)
+		w.write(AGMPDDL.toPDDL(a, self.properties["name"]))
 		w.close()
 		
 	def generateAGMBehaviorDescription(self, filename):

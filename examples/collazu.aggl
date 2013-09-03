@@ -187,18 +187,21 @@ modelLastWall : pitchAndRoll
 	}
 	=>
 	{
-		unlocked:unlocked(550,160)
+		lock:unlocked(520,260)
 		floor:room(40,160)
-		robot:robot(390,40)
+		robot:robot(430,40)
 		w4:wall(280,40)
 		w3:wall(270,150)
 		w2:wall(130,150)
 		w1:wall(40,40)
+		view:view(300,260)
 		floor->w1(link)
 		w1->w2(link)
 		w2->w3(link)
 		w3->w4(link)
-		robot->unlocked(is)
+		robot->lock(is)
+		view->floor(uncovered)
+		robot->view(has)
 	}
 }
 
@@ -206,14 +209,66 @@ lockRobot : none
 {
 	{
 		robot:robot(250,160)
-		unlocked:unlocked(410,160)
-		robot->unlocked(is)
+		lock:unlocked(410,160)
+		robot->lock(is)
 	}
 	=>
 	{
-		locked:locked(410,160)
+		lock:locked(410,160)
 		robot:robot(250,160)
-		robot->locked(is)
+		robot->lock(is)
+	}
+}
+
+addObstacle : findObstacles
+{
+	{
+		view:view(210,180)
+		lock:locked(540,50)
+		room:room(440,180)
+		robot:robot(330,50)
+		robot->lock(is)
+		robot->view(has)
+		robot->room(in)
+		view->room(uncovered)
+	}
+	=>
+	{
+		view:view(160,180)
+		obstacle:obstacle(560,180)
+		lock:locked(440,60)
+		room:room(380,180)
+		robot:robot(270,60)
+		robot->lock(is)
+		robot->view(has)
+		robot->room(in)
+		obstacle->room(in)
+		view->room(uncovered)
+	}
+}
+
+markViewCovered : findObstacles
+{
+	{
+		view:view(210,180)
+		lock:locked(540,50)
+		room:room(440,180)
+		robot:robot(330,50)
+		robot->lock(is)
+		robot->view(has)
+		robot->room(in)
+		view->room(uncovered)
+	}
+	=>
+	{
+		view:view(160,180)
+		lock:unlocked(440,60)
+		room:room(380,180)
+		robot:robot(270,60)
+		robot->lock(is)
+		robot->view(has)
+		robot->room(in)
+		view->room(covered)
 	}
 }
 
@@ -222,50 +277,48 @@ saccadeFinishesInspectionMovement : none
 	{
 		lock:locked(470,100)
 		view:view(390,230)
-		robot:robot(290,100)
 		room:room(170,230)
+		robot:robot(290,100)
 		robot->lock(is)
 		robot->room(in)
-		robot->view(linked)
+		robot->view(has)
 		view->room(covered)
 	}
 	=>
 	{
 		lock:unlocked(500,90)
 		view:view(410,220)
-		robot:robot(300,90)
 		room:room(200,220)
+		robot:robot(300,90)
 		robot->lock(is)
 		robot->room(in)
-		robot->view(linked)
+		robot->view(has)
 		view->room(uncovered)
 	}
 }
 
-addObstacle : findObstacles
+markRoomObserved : findObstacles
 {
 	{
 		view:view(210,180)
-		locked:locked(540,50)
-		robot:robot(330,50)
+		lock:locked(540,50)
 		room:room(440,180)
-		robot->locked(is)
+		robot:robot(330,50)
+		robot->lock(is)
 		robot->view(has)
 		robot->room(in)
 		view->room(uncovered)
 	}
 	=>
 	{
-		obstacle:obstacle(560,180)
 		view:view(160,180)
-		locked:locked(440,60)
-		robot:robot(270,60)
+		lock:locked(440,60)
 		room:room(380,180)
-		robot->locked(is)
+		robot:robot(270,60)
+		robot->lock(is)
 		robot->view(has)
 		robot->room(in)
-		obstacle->room(in)
-		view->room(uncovered)
+		view->room(covered)
 	}
 }
 
@@ -274,23 +327,23 @@ boringRoom : none
 	{
 		lock:locked(470,100)
 		view:view(390,230)
-		robot:robot(290,100)
 		room:room(170,230)
+		robot:robot(290,100)
 		robot->lock(is)
 		robot->room(in)
-		robot->view(linked)
+		robot->view(has)
 		view->room(covered)
 	}
 	=>
 	{
 		lock:unlocked(500,90)
 		view:view(410,220)
-		robot:robot(300,90)
 		room:room(200,220)
+		robot:robot(300,90)
 		robot->lock(is)
 		robot->room(in)
 		robot->room(observed)
-		robot->view(linked)
+		robot->view(has)
 		view->room(uncovered)
 	}
 }
