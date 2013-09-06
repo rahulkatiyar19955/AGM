@@ -88,9 +88,21 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 					case '#':
 						break;
 					default:
-						std::cout << "AGM::loadFromFile(): Error in the input agmbd file (4)" << std::endl;
-						std::cout << line << std::endl;
-						exit(-1);
+						bool blank = true;
+						for (int strIdx = 0; strIdx<line.size(); strIdx++)
+						{
+							if (line[strIdx] != ' ' and line[strIdx] != '\t' and line[strIdx] != '\n' and line[strIdx] != '\v' and line[strIdx] != '\f' and line[strIdx] != '\r')
+							{
+								blank = false;
+								break;
+							}
+						}
+						if (not blank)
+						{
+							std::cout << "AGM::loadFromFile(): Error in the input agmbd file (4)" << std::endl;
+							std::cout << line << std::endl;
+							exit(-1);
+						}
 				}
 			}
 		}
