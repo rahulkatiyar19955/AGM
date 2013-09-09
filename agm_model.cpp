@@ -410,6 +410,7 @@ int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 
 bool AGMModel::removeSymbol(int32_t id)
 {
+	removeEdgesRelatedToSymbol(id);
 	int32_t index = getIndexByIdentifier(id);
 	if (index >= 0)
 	{

@@ -166,7 +166,9 @@ void Worker::run()
 	for(;;)
 	{
 		processMutex->lock();
+		printf("<<setCurrentBehavioralConfiguration<<\n");
 		setCurrentBehavioralConfiguration();
+		printf(">>setCurrentBehavioralConfiguration>>\n");
 	}
 }
 
@@ -183,18 +185,25 @@ void Worker::setCurrentBehavioralConfiguration()
 	{
 		event = eventQueue.dequeue();
 		printSomeInfo(event);
-
+printf("%d (%s)\n", __LINE__, event.sender.c_str());
 		if (eventIsCompatibleWithTheCurrentModel(event) )
 		{
+printf("%d\n", __LINE__);
 			eventQueue.clear();
+printf("%d\n", __LINE__);
 			prms.executiveTopic->modelModified(event);
+printf("%d\n", __LINE__);
 			AGMModelConverter::fromIceToInternal(event.newModel, worldModel);
+printf("%d\n", __LINE__);
 		}
 		if (generateTXT) 
 			fflush(fd);
+printf("%d\n", __LINE__);
 	}
 
+printf("%d\n", __LINE__);
 	handleAcceptedModificationProposal();
+printf("%d\n", __LINE__);
 	mutex->unlock();
 }
 
@@ -258,6 +267,13 @@ bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::E
 	RoboCompPlanning::Plan tempSolution;
 	static AGMModel::SPtr tempTargetWorldModel = AGMModel::SPtr(new AGMModel());
 
+	printf("\nBACK\n");
+	AGMModelPrinter::printWorld(event.backModel);
+	printf("\n\nNEW\n");
+	AGMModelPrinter::printWorld(event.newModel);
+
+	
+printf("%d\n", __LINE__);
 	try
 	{
 		AGMModelConverter::fromIceToInternal(event.newModel, tempTargetWorldModel);
@@ -273,7 +289,9 @@ bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::E
 		return false;
 	}
 
+printf("%d\n", __LINE__);
 	std::string modificationPDDLString = worldModel->generatePDDLProblem(tempTargetWorldModel, 5, "gualzruGrammar", "problemo");
+printf("%d\n", __LINE__);
 
 	if (prms.planning->getSolution(grammarPDDLString, modificationPDDLString, tempSolution))
 	{
