@@ -185,25 +185,17 @@ void Worker::setCurrentBehavioralConfiguration()
 	{
 		event = eventQueue.dequeue();
 		printSomeInfo(event);
-printf("%d (%s)\n", __LINE__, event.sender.c_str());
 		if (eventIsCompatibleWithTheCurrentModel(event) )
 		{
-printf("%d\n", __LINE__);
 			eventQueue.clear();
-printf("%d\n", __LINE__);
 			prms.executiveTopic->modelModified(event);
-printf("%d\n", __LINE__);
 			AGMModelConverter::fromIceToInternal(event.newModel, worldModel);
-printf("%d\n", __LINE__);
 		}
 		if (generateTXT) 
 			fflush(fd);
-printf("%d\n", __LINE__);
 	}
 
-printf("%d\n", __LINE__);
 	handleAcceptedModificationProposal();
-printf("%d\n", __LINE__);
 	mutex->unlock();
 }
 
@@ -223,6 +215,7 @@ void Worker::handleAcceptedModificationProposal()
 		{
 			if (prms.planning->getSolution(grammarPDDLString, problemPDDLString, currentSolution))
 			{
+				prms.executiveVisualizationTopic->aimedChange(currentSolution.actions[0]);
 				if (currentSolution.actions.size() > 0)
 				{
 					currentBehavioralConfiguration = prms.agm->action2behavior[currentSolution.actions[0].name];
@@ -264,7 +257,6 @@ void Worker::handleAcceptedModificationProposal()
 
 bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::Event &event) const
 {
-	RoboCompPlanning::Plan tempSolution;
 	static AGMModel::SPtr tempTargetWorldModel = AGMModel::SPtr(new AGMModel());
 
 	printf("\nBACK\n");
@@ -273,7 +265,6 @@ bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::E
 	AGMModelPrinter::printWorld(event.newModel);
 
 	
-printf("%d\n", __LINE__);
 	try
 	{
 		AGMModelConverter::fromIceToInternal(event.newModel, tempTargetWorldModel);
@@ -289,17 +280,18 @@ printf("%d\n", __LINE__);
 		return false;
 	}
 
-printf("%d\n", __LINE__);
 	std::string modificationPDDLString = worldModel->generatePDDLProblem(tempTargetWorldModel, 5, "gualzruGrammar", "problemo");
-printf("%d\n", __LINE__);
 
+	RoboCompPlanning::Plan tempSolution;
 	if (prms.planning->getSolution(grammarPDDLString, modificationPDDLString, tempSolution))
 	{
+		prms.executiveVisualizationTopic->successFulChange(tempSolution.actions);
 		printf("Everythin nice\n");
 		return true;
 	}
 	else
 	{
+		prms.executiveVisualizationTopic->invalidChange(event.sender);
 		printf("Error NOT COMPATIBLE\n\n%s\n\n", modificationPDDLString.c_str());
 		return false;
 	}

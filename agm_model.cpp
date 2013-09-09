@@ -223,11 +223,6 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	stringStream << "	)\n";
 	stringStream << "\n";
 
-	/// M E T R I C   D E F I N I T I O N
-	stringStream << "	(:metric minimize (total-cost))\n";
-	stringStream << "\n";
-
-
 	/// I N I T I A L   W O R L D
 	stringStream << "	(:init\n";
 	// Initial cost
@@ -306,6 +301,9 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	if (targetObjects.size()>0)
 		stringStream << "		)\n";
 	stringStream << "	)\n";
+	stringStream << "\n";
+	/// M E T R I C   D E F I N I T I O N
+	stringStream << "	(:metric minimize (total-cost))\n";
 	stringStream << "\n";
 	stringStream << "\n";
 	stringStream << ")\n";
