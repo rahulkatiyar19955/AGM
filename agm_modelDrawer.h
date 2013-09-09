@@ -14,7 +14,7 @@
 
 
 #define SPRING_LENGTH 50.
-#define HOOKES_CONSTANT 0.2
+#define HOOKES_CONSTANT 0.14
 #define FRICTION 0.92
 #define FIELD_FORCE_MULTIPLIER 60000.
 
@@ -61,6 +61,7 @@ public:
 				GraphicalNodeInfo node;
 				node.name = model->symbols[e1]->toString();
 				node.type = model->symbols[e1]->symbolType;
+				node.identifier = model->symbols[e1]->identifier;
 				for (int d=0; d<2; d++)
 				{
 					node.pos[d] = (100.*rand())/RAND_MAX - 50.;
@@ -204,22 +205,62 @@ public:
 
 	void draw()
 	{
-		const float radius = 20.;
+		const float radius = 25.;
 // 		if (modified) printf("DRAWING\n");
 
 		QPointF c = drawer->getWindow().center();
 		int wW2 = c.x();
 		int wH2 = c.y();
 
+/*
+
+			vw2 = 0.125*vertexDiameter
+			lpos1 = [(xinit + xend)/2, (yinit + yend) / 2]
+			langle = math.atan2(yend-yinit, xend-xinit)
+			lpos  = [lpos1[0]-vw2*math.cos(langle), lpos1[1]-vw2*math.sin(langle)]
+			align = Qt.AlignLeft
+			rect = painter.boundingRect(QRectF(float(lpos[0]), float(lpos[1]), 1, 1), align, str(e.linkType))
+			rect.translate(-rect.width()/2, -rect.height()/2) # Right now it will be centered on the link's center
+			linkHeight = rect.height()+6
+			linkGroupBase = (-linkGroupCount+1)*linkHeight/2
+			rect.translate(0, linkHeight*pos + linkGroupBase) # Right now it will be centered on the link's center
+
+			painter.setBrush(QColor(255, 255, 255))
+			d = 2
+			painter.fillRect(QRectF(rect.x()-4+d, rect.y()-3, rect.width()+8, rect.height()+6), Qt.black)
+			painter.fillRect(QRectF(rect.x()-2+d, rect.y()-1.5, rect.width()+4, rect.height()+3), Qt.white)
+			painter.drawText(rect, align, str(e.linkType))
+			painter.setBrush(QColor(0, 0, 0))
+			vw = 0.5*vertexDiameter
+			painter.drawPie(xend-vw/2, yend-vw/2, vw, vw, (-angleD-20)*16, 40*16)
+*/
 		// Draw links
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
-			if (modified)
-			{
-// 				printf("IDENTIFIER %s  index:%d (LINKS:%d,%d)\n", nodes[n].name.c_str(), n, (int)nodes[n].edgesOriented.size(), (int)nodes[n].edgesNames.size());
-			}
+			if (modified) { /*printf("IDENTIFIER %s  index:%d (LINKS:%d,%d)\n", nodes[n].name.c_str(), n, (int)nodes[n].edgesOriented.size(), (int)nodes[n].edgesNames.size());*/ }
 			for (uint32_t e=0; e<nodes[n].edgesOriented.size(); e++)
 			{
+				int32_t o1 = n;
+				int32_t d1 = nodes[n].edgesOriented[e];
+				int pos = 0;
+				int linkGroupCount = 0;
+				for (uint32_t n2=0; n2<nodes.size(); n2++)
+				{
+					for (uint32_t e2=0; e2<nodes[n2].edgesOriented.size(); e2++)
+					{
+						if (n==n2 and e==e2)
+						{
+							pos = linkGroupCount;
+						}
+						int32_t o2 = n2;
+						int32_t d2 = nodes[n2].edgesOriented[e2];
+						if ((o1==o2 and d1==d2) or (o1==d2 and d1==o2))
+						{
+							linkGroupCount += 1;
+						}
+					}
+				}
+				
 				QPointF p1 = QPointF(nodes[            n            ].pos[0]+wW2, wH2-nodes[            n            ].pos[1]);
 				QPointF p2 = QPointF(nodes[nodes[n].edgesOriented[e]].pos[0]+wW2, wH2-nodes[nodes[n].edgesOriented[e]].pos[1]);
 				QPointF inc = (p2 - p1);
@@ -236,7 +277,13 @@ public:
 					drawer->drawLine(QLineF(p2,  pr), QColor(0, 0, 0));
 				}
 				// Text
-				drawer->drawText((p1+p2)*0.5, QString::fromStdString(nodes[n].edgesNames[e]), 10, QColor(255));
+				int32_t linkHeight = 16;
+				int32_t linkGroupBase = (-linkGroupCount+1)*linkHeight/2;
+				printf("%s %d %d %d %d\n", nodes[n].edgesNames[e].c_str(),
+						 linkGroupBase, pos, linkGroupCount, linkHeight*pos + linkGroupBase);
+
+				QPointF reLl(0, linkHeight*pos + linkGroupBase);
+				drawer->drawText(p1*0.6+p2*0.4-reLl, QString::fromStdString(nodes[n].edgesNames[e]), 10, QColor(255), true, QColor(127,127,127,127));
 // 				if (modified) printf("  link[%s] id(%s-->%s) idx(%d-->%d)\n", nodes[n].edgesNames[e].c_str(), nodes[n].name.c_str() , nodes[nodes[n].edgesOriented[e]].name.c_str(), n, nodes[n].edgesOriented[e]);
 			}
 		}
@@ -246,7 +293,8 @@ public:
 		{
 			const QPointF p = QPointF(nodes[n].pos[0]+wW2, wH2-nodes[n].pos[1]);
 			drawer->drawEllipse(p, radius, radius, QColor(255, 0, 0), true);
-			drawer->drawText(p.toPoint(), QString::fromStdString(nodes[n].name), 10, QColor(255));
+			drawer->drawText(p+QPointF(0,-7), QString::fromStdString(nodes[n].type), 10, QColor(255), true);
+			drawer->drawText(p+QPointF(0,+10), QString::number(nodes[n].identifier), 10, QColor(255), true);
 		}
 		modified = false;
 // 		printf("\n\n");
@@ -259,6 +307,7 @@ private:
 	{
 		std::string name;
 		std::string type;
+		int32_t identifier;
 		int32_t pos[2];
 		float vel[2];
 		std::vector<uint32_t> edges;
