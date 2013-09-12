@@ -23,7 +23,6 @@ SET (AGM_CODE
   agm_modelPrinter.cpp
   agm_modelSymbols.cpp
   agm_modelConverter.cpp
-  AGMWorldModel.h
 )
 
 
@@ -87,7 +86,6 @@ if (ROBOCOMP_SUPPORT)
 	MESSAGE(STATUS "ROBOCOMP PATH:        $ENV{ROBOCOMP}")
 	INCLUDE( $ENV{ROBOCOMP}/CMake/robocomp.cmake )
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-	ROBOCOMP_WRAP_ICE( AGMWorldModel )
 	SET(ICE_LIBS -lIce)
 endif (ROBOCOMP_SUPPORT)
 
@@ -107,6 +105,7 @@ MACRO( WRAP_PYTHON_UI )
 ENDMACRO( WRAP_PYTHON_UI )
 
 WRAP_PYTHON_UI( guiAGGLEditor guiAGMExecutiveClient appearance )
+ROBOCOMP_WRAP_ICE( AGMWorldModel )
 
 
 
@@ -115,9 +114,12 @@ WRAP_PYTHON_UI( guiAGGLEditor guiAGMExecutiveClient appearance )
 
 #  Library building  #
 ######################
+add_library(agmdummy SHARED AGMWorldModel.cpp )
+
+
 add_library(agm SHARED ${AGM_CODE} )
 target_link_libraries(agm ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
-add_dependencies(agm AGMWorldModel )
+add_dependencies(agm agmdummy)
 
 add_executable ( testagm testagm.cpp  )
 target_link_libraries ( testagm  -L. -lagm ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
