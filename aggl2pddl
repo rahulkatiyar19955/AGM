@@ -4,7 +4,7 @@
 from AGGL import *
 from parseAGGL import *
 from pddlAGGL import *
-import sys
+import sys, traceback
 
 ret = 0
 try:
@@ -18,6 +18,7 @@ try:
 		ret = 1
 except:
 	print 'Error'
+	traceback.print_exc(file=sys.stdout)
 	ret = -1
 	
 sys.exit(ret)
