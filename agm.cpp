@@ -89,7 +89,7 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 						break;
 					default:
 						bool blank = true;
-						for (int strIdx = 0; strIdx<line.size(); strIdx++)
+						for (uint32_t strIdx = 0; strIdx<line.size(); strIdx++)
 						{
 							if (line[strIdx] != ' ' and line[strIdx] != '\t' and line[strIdx] != '\n' and line[strIdx] != '\v' and line[strIdx] != '\f' and line[strIdx] != '\r')
 							{
