@@ -1,6 +1,7 @@
 #include "agm_model.h"
 
 #include "agm_modelEdge.h"
+#include <sstream>
 
 #include <algorithm>
 #include <list>
@@ -392,6 +393,7 @@ int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 }
 
 
+
 int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 {
 	for (uint32_t idx=0; idx<symbols.size(); ++idx)
@@ -401,8 +403,10 @@ int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 			return idx;
 		}
 	}
-// 	printf("Exception: %d\n", targetId);
-	AGMMODELEXCEPTION("Trying to get the index of a node given it's identifier");
+	
+	std::ostringstream s;
+	s << "Exception: " << targetId;
+	AGMMODELEXCEPTION(s.str()+std::string(" Trying to get the index of a node given it's identifier"));
 }
 
 

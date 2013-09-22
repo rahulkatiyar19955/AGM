@@ -132,6 +132,8 @@ public:
 		float time = double(timer.elapsed())/1000.;
 		timer = QTime::currentTime();
 
+		// Compute forces and integrate velocities, storing updated velocities
+		// in nodes[n].vel[0-1]
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
 			int32_t i[2];
@@ -174,12 +176,14 @@ public:
 			nodes[n].vel[0] = (nodes[n].vel[0] + (forceX*time))*FRICTION;
 			nodes[n].vel[1] = (nodes[n].vel[1] + (forceY*time))*FRICTION;
 		}
+		// Integrate velocities, storing the result in nodes[n].pos
+		// Also, implement friction by multipling velocities by 0.95
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
 			for (int d=0; d<2; d++)
 			{
 				nodes[n].pos[d] += nodes[n].vel[d];
-				nodes[n].vel[d] *= 0.94;
+				nodes[n].vel[d] *= 0.95;
 			}
 		}
 
@@ -279,8 +283,6 @@ public:
 				// Text
 				int32_t linkHeight = 16;
 				int32_t linkGroupBase = (-linkGroupCount+1)*linkHeight/2;
-				printf("%s %d %d %d %d\n", nodes[n].edgesNames[e].c_str(),
-						 linkGroupBase, pos, linkGroupCount, linkHeight*pos + linkGroupBase);
 
 				QPointF reLl(0, linkHeight*pos + linkGroupBase);
 				drawer->drawText(p1*0.6+p2*0.4-reLl, QString::fromStdString(nodes[n].edgesNames[e]), 10, QColor(255), true, QColor(127,127,127,127));
