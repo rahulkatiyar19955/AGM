@@ -15,7 +15,7 @@
 
 #define SPRING_LENGTH 50.
 #define HOOKES_CONSTANT 0.14
-#define FRICTION 0.92
+#define FRICTION 0.97
 #define FIELD_FORCE_MULTIPLIER 60000.
 
 
@@ -26,6 +26,7 @@ public:
 	AGMModelDrawer(RCDraw *drawer_, QTableWidget *tableWidget_=NULL)
 	{
 		drawer = drawer_;
+		drawer->setZoomMultiplier(0.91);
 		tableWidget = tableWidget_;
 		modified = false;
 		connect(drawer, SIGNAL(newCoor(QPointF)), this, SLOT(clickedNode(QPointF)));
@@ -34,6 +35,7 @@ public:
 
 	void update(const AGMModel::SPtr &w)
 	{
+		drawer->autoResize();
 		model = w;
 		updateStructure();
 		recalculatePositions();
@@ -131,6 +133,7 @@ public:
 		static QTime timer = QTime::currentTime();
 		float time = double(timer.elapsed())/1000.;
 		timer = QTime::currentTime();
+		if (time > 500) time = 500;
 
 		// Compute forces and integrate velocities, storing updated velocities
 		// in nodes[n].vel[0-1]
@@ -151,9 +154,10 @@ public:
 						i[d] = nodes[n].pos[d] - nodes[n2].pos[d];
 				}
 				float angle = atan2(i[1], i[0]);
-				float dist2 = pow(pow((abs((i[1]*i[1]) + (i[0]*i[0]))), 0.5), 2.);
-				if (dist2 < SPRING_LENGTH)
-					dist2 = SPRING_LENGTH;
+				float dist1 = pow((abs((i[1]*i[1]) + (i[0]*i[0]))), 0.5);
+				if (dist1 < SPRING_LENGTH)
+					dist1 = SPRING_LENGTH;
+				float dist2 = pow(dist1, 2.);
 				float force = FIELD_FORCE_MULTIPLIER / dist2;
 				forceX += force * cos(angle);
 				forceY += force * sin(angle);
@@ -177,13 +181,13 @@ public:
 			nodes[n].vel[1] = (nodes[n].vel[1] + (forceY*time))*FRICTION;
 		}
 		// Integrate velocities, storing the result in nodes[n].pos
-		// Also, implement friction by multipling velocities by 0.95
+		// Also, implement friction by multipling velocities by FRICTION
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
 			for (int d=0; d<2; d++)
 			{
 				nodes[n].pos[d] += nodes[n].vel[d];
-				nodes[n].vel[d] *= 0.95;
+				nodes[n].vel[d] *= FRICTION;
 			}
 		}
 
@@ -210,34 +214,11 @@ public:
 	void draw()
 	{
 		const float radius = 25.;
-// 		if (modified) printf("DRAWING\n");
 
 		QPointF c = drawer->getWindow().center();
 		int wW2 = c.x();
 		int wH2 = c.y();
 
-/*
-
-			vw2 = 0.125*vertexDiameter
-			lpos1 = [(xinit + xend)/2, (yinit + yend) / 2]
-			langle = math.atan2(yend-yinit, xend-xinit)
-			lpos  = [lpos1[0]-vw2*math.cos(langle), lpos1[1]-vw2*math.sin(langle)]
-			align = Qt.AlignLeft
-			rect = painter.boundingRect(QRectF(float(lpos[0]), float(lpos[1]), 1, 1), align, str(e.linkType))
-			rect.translate(-rect.width()/2, -rect.height()/2) # Right now it will be centered on the link's center
-			linkHeight = rect.height()+6
-			linkGroupBase = (-linkGroupCount+1)*linkHeight/2
-			rect.translate(0, linkHeight*pos + linkGroupBase) # Right now it will be centered on the link's center
-
-			painter.setBrush(QColor(255, 255, 255))
-			d = 2
-			painter.fillRect(QRectF(rect.x()-4+d, rect.y()-3, rect.width()+8, rect.height()+6), Qt.black)
-			painter.fillRect(QRectF(rect.x()-2+d, rect.y()-1.5, rect.width()+4, rect.height()+3), Qt.white)
-			painter.drawText(rect, align, str(e.linkType))
-			painter.setBrush(QColor(0, 0, 0))
-			vw = 0.5*vertexDiameter
-			painter.drawPie(xend-vw/2, yend-vw/2, vw, vw, (-angleD-20)*16, 40*16)
-*/
 		// Draw links
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
@@ -264,7 +245,7 @@ public:
 						}
 					}
 				}
-				
+
 				QPointF p1 = QPointF(nodes[            n            ].pos[0]+wW2, wH2-nodes[            n            ].pos[1]);
 				QPointF p2 = QPointF(nodes[nodes[n].edgesOriented[e]].pos[0]+wW2, wH2-nodes[nodes[n].edgesOriented[e]].pos[1]);
 				QPointF inc = (p2 - p1);
