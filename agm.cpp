@@ -10,12 +10,21 @@
  *   A G M
  * 
  */
+void AGM_toupper(std::string &action)
+{
+	std::transform(action.begin(), action.end(), action.begin(), ::toupper);
+}
+void AGM_tolower(std::string &action)
+{
+	std::transform(action.begin(), action.end(), action.begin(), ::tolower);
+}
 
 AGM::AGM(std::string pddlFile_, std::string agmbdFile_)
 {
 	pddlFile = pddlFile_;
 	loadFromFile(pddlFile_, agmbdFile_);
 }
+
 
 void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 {
@@ -27,9 +36,11 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 		std::cout << "File " << agmbdFile << " opened correclty.\n";
 		while (ifile.good())
 		{
+			printf("d\n");
 			getline(ifile, line);
 			if (line.size()>0)
 			{
+				printf("----> %s\n", line.c_str());
 				std::string word;
 				std::istringstream iss(line);
 				std::vector<std::string> words;
@@ -68,13 +79,27 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 						}
 						break;
 					case 'R':
-						if (words.size() != 3)
 						{
-							std::cout << "AGM::loadFromFile(): Error in the input agmbd file (5)" << std::endl;
-							std::cout << line << std::endl;
-							exit(-1);
+							printf("RRRRRRR ---> %s\n", line.c_str());
+							if (words.size() != 3)
+							{
+								std::cout << "AGM::loadFromFile(): Error in the input agmbd file (5)" << std::endl;
+								std::cout << line << std::endl;
+								exit(-1);
+							}
+							printf("RRR %s %s %s\n", words[0].c_str(), words[1].c_str(), words[2].c_str());
+							std::string action = words[1];
+							printf("%s ---> %s\n", action.c_str(), words[2].c_str());
+							action2behavior[action] = words[2];
+
+							AGM_tolower(action);
+							printf("%s ---> %s\n", action.c_str(), words[2].c_str());
+							action2behavior[action] = words[2];
+
+							AGM_toupper(action);
+							printf("%s ---> %s\n", action.c_str(), words[2].c_str());
+							action2behavior[action] = words[2];
 						}
-						action2behavior[words[1]] = words[2];
 						break;
 					case 'S':
 						r = table.setConfigForAgent(words[1], words[2], words[3]);
@@ -106,6 +131,7 @@ void AGM::loadFromFile(std::string pddlFile, std::string agmbdFile)
 				}
 			}
 		}
+		printf("enddd\n\n");
 		ifile.close();
 	}
 	else

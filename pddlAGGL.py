@@ -1,6 +1,6 @@
 import itertools
 
-AGMStackLastUsedName = 'stackAGMInternal'
+AGMListLastUsedName = 'ListAGMInternal'
 
 def translateList(alist, dictionary):
 	return [dictionary[x] for x in alist]
@@ -11,7 +11,7 @@ def translateList(alist, dictionary):
 class AGMPDDL:
 	@staticmethod
 	def toPDDL(agm, name):
-		writeString  = '(define (domain '+name+')\n\n'
+		writeString  = '(define (domain gualzruGrammar)\n\n'
 		writeString += '\t(:predicates\n'
 		writeString += '\t\t(firstunknown ?u)\n'
 		writeString += '\t\t(unknownorder ?ua ?ub)\n\n'
@@ -57,50 +57,50 @@ class AGMPDDL:
 #
 class AGMRulePDDL:
 	@staticmethod
-	def computePDDLMemoryStackAndDictionary(rule, newList, forgetList):
-		stack = [AGMStackLastUsedName]
-		stackSize = len(newList)
-		if stackSize==0: stack = []
-		#stackSize = max(len(forgetList), len(newList))
-		for n in range(stackSize):
-			stack.append('stack'+str(n))
-		#print 'Stack', stackSize, stack
+	def computePDDLMemoryListAndDictionary(rule, newList, forgetList):
+		agmlist = [AGMListLastUsedName]
+		listSize = len(newList)
+		if listSize==0: agmlist = []
+		#listSize = max(len(forgetList), len(newList))
+		for n in range(listSize):
+			agmlist.append('list'+str(n))
+		#print 'list', listSize, agmlist
 		nodeDict = dict()
 		for i in range(len(forgetList)):
 			nodeDict[forgetList[i]] = forgetList[i]
 		for i in range(len(newList)):
-			nodeDict[newList[i]] = stack[-1-i]
+			nodeDict[newList[i]] = agmlist[-1-i]
 		for n in rule.stayingNodeList():
 			nodeDict[n] = n
 
-		return stack, nodeDict
+		return agmlist, nodeDict
 	@staticmethod
 	def toPDDL(rule, pddlVerbose=False):
-		print '\n-----------------------------'
+		print '\n----------------------------- ----------------------------------------   ', rule.name
 		print rule.name
 		print 'Staying: ', rule.stayingNodeList()
 		newList = rule.newNodesList()
 		print 'New:   ', newList
 		forgetList = rule.forgetNodesList()
 		print 'Forget:', forgetList
-		stack, nodeDict = AGMRulePDDL.computePDDLMemoryStackAndDictionary(rule, newList, forgetList)
-		print 'Stack:    ', stack
+		agmlist, nodeDict = AGMRulePDDL.computePDDLMemoryListAndDictionary(rule, newList, forgetList)
+		print 'List:    ', agmlist
 		print 'Node dict:', nodeDict
 		string  = '\t(:action ' + rule.name + '\n'
 		string += '\t\t:parameters ('
-		for n in rule.stayingNodeList()+stack+forgetList:
+		for n in rule.stayingNodeList()+agmlist+forgetList:
 			string += ' ?' + n
 		string += ' )\n'
 		string += '\t\t:precondition (and'
 		string += AGMRulePDDL.existingNodesPDDLTypes(rule, nodeDict) # TYPE preconditions
-		string += AGMRulePDDL.stackPDDLPreconditions(rule, stack, forgetList, newList, nodeDict) # Include precondition for nodes to be created
-		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule.stayingNodeList()) # Avoid using the same node more than once "!=". NOT INCLUDING THOSE IN THE STACK
+		string += AGMRulePDDL.listPDDLPreconditions(rule, agmlist, forgetList, newList, nodeDict) # Include precondition for nodes to be created
+		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule.stayingNodeList()+agmlist+forgetList) # Avoid using the same node more than once "!=". NOT INCLUDING THOSE IN THE LIST
 		string += AGMRulePDDL.linkPatternsPDDLPreconditions(rule, nodeDict)
 		string += ' )\n'
 
 		string += '\t\t:effect (and'
 		string += AGMRulePDDL.typeChangesPDDLEffects(rule, nodeDict) # TYPE changes for staying nodes
-		string += AGMRulePDDL.stackHandlingPDDLEffects(rule, forgetList, newList, stack, nodeDict) # Stack handling
+		string += AGMRulePDDL.listHandlingPDDLEffects(rule, forgetList, newList, agmlist, nodeDict) # List handling
 		string += AGMRulePDDL.newAndForgetNodesTypesPDDLEffects(rule, newList, forgetList, nodeDict) # TYPE assignment for created nod
 		string += AGMRulePDDL.linkPatternsPDDLEffects(rule, nodeDict)
 		string += ' (increase (total-cost) 1) )\n'
@@ -118,17 +118,17 @@ class AGMRulePDDL:
 			ret += ' (IS'+node.sType+' ?'+nodeDict[name]+')'
 		return ret
 	@staticmethod
-	def stackPDDLPreconditions(rule, stack, forgetList, newList, nodeDict, pddlVerbose=False):
+	def listPDDLPreconditions(rule, agmlist, forgetList, newList, nodeDict, pddlVerbose=False):
 		ret = ''
-		stackCopy = stack[:]
-		if len(stackCopy) > 0:
-			first = stackCopy.pop()
+		listCopy = agmlist[:]
+		if len(listCopy) > 0:
+			first = listCopy.pop()
 			#print 'Prime', first
 			#if pddlVerbose: print 'PRECONDITIONS firstunknown in newList', first
 			ret += ' (firstunknown' + ' ?' + first + ')'
 			last = first
-			while len(stackCopy)>0:
-				top = stackCopy.pop()
+			while len(listCopy)>0:
+				top = listCopy.pop()
 				#if pddlVerbose: print 'PRECONDITIONS unknownorder', last, top
 				ret += ' (unknownorder ?' + last + ' ?' + top + ')'
 				last = top
@@ -145,43 +145,45 @@ class AGMRulePDDL:
 	# E  F  F  E  C  T  S
 	#
 	@staticmethod
-	def stackHandlingPDDLEffects(rule, forgetList_, newList_, stack_, nodeDict, pddlVerbose=False):
+	def listHandlingPDDLEffects(rule, forgetList_, newList_, agmlist_, nodeDict, pddlVerbose=False):
 		ret = ''
-		if len(stack_) == 0: return ret
-		stack = stack_[:]
+		if len(agmlist_) == 0: return ret
+		agmlist = agmlist_[:]
 		forgetList = translateList(forgetList_, nodeDict)
 		newList = translateList(newList_, nodeDict)
 		last = ''
-		print '- stackHandlingPDDLEffects ----------------------------------------------'
+		print '- listHandlingPDDLEffects ----------------------------------------------'
 		print 'Forget list', forgetList
 		print 'New list   ', newList
-		print 'Stack      ', stack
+		print 'List      ', agmlist
 		print '------------------------------------------------------------------------'
 		# Same old, same old
 		if len(forgetList)==0 and len(newList)==0:
 			print 'aa10 a'
-			pass
-		# NEW NODES: we must pop some symbols from the stack
-		elif len(forgetList)==0 and len(newList)>0:
+			return ret
+
+		# NEW NODES: we must pop some symbols from the list
+		if len(newList)>0:
 			print 'aa10 b'
-			if len(stack)>1:
-				last = stack.pop()
+			if len(agmlist)>1:
+				last = agmlist.pop()
 				ret += ' (not (firstunknown ?' + last + '))'
 			else:
 				raise Exception(":->")
-			while len(stack)>0:
-				nextn = stack.pop()
+			while len(agmlist)>0:
+				nextn = agmlist.pop()
 				ret += ' (not (unknownorder ?' + last + ' ?' + nextn + '))'
 				last = nextn
 			ret += ' (firstunknown ?' + last + ')'
-		# FORGET NODES: we must push some symbols from the stack
+
+		# FORGET NODES: we must push some symbols from the list
 		elif len(forgetList)>0:
 			typeSet = set().union(rule.nodeTypes())
 			print 'aa10 c'
-			#while len(forgetList)>0:
-				#nextn = forgetList.pop()
-				#for tip in typeSet:
-					#ret += ' (not (IS' + tip + ' ' + nextn + '))'
+			while len(forgetList)>0:
+				nextn = forgetList.pop()
+				for tip in typeSet:
+					ret += ' (not (IS' + tip + ' ' + nextn + '))'
 		# Internal error :-D
 		else:
 			print 'aa 10 d'

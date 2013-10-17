@@ -116,7 +116,8 @@ int32_t AGMModel::getIdentifierByName(std::string name) const
 		}
 	}
 // 	printf("%d\n", __LINE__);
-	throw "No such symbol";
+// 	throw "No such symbol";
+	return -1;
 }
 
 
@@ -323,6 +324,7 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 		stringStream << "		)\n";
 	stringStream << "	)\n";
 	stringStream << "\n";
+
 	/// M E T R I C   D E F I N I T I O N
 	stringStream << "	(:metric minimize (total-cost))\n";
 	stringStream << "\n";
@@ -356,15 +358,13 @@ AGMModelEdge & AGMModel::edge(uint32_t i)
 
 int32_t AGMModel::getIdentifierByType(std::string type, int32_t times) const
 {
-// 	printf("getIdentifierByType: %s, %d\n", type.c_str(), times);
+	printf("getIdentifierByType: %s, %d\n", type.c_str(), times);
 	int32_t ret = -1;
 	uint32_t idx = 0;
 	for (int32_t time=0; time<=times; ++time)
 	{
-// 		printf("taaaim %d of %d\n", (int)time, (int)times);
 		for ( ; idx<symbols.size(); ++idx)
 		{
-// 			printf("idx:%d   veo(%s)\n", (int32_t)idx, symbols[idx]->symbolType.c_str());
 			if (symbols[idx]->symbolType == type)
 			{
 				if (time==times) { /*printf("indice será %d\n", (int32_t)idx);*/ ret = idx;  }
@@ -402,8 +402,9 @@ int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 		}
 		if (idx>=symbols.size())
 		{
-// 			printf("Exception: %d, %s, %d\n", id, linkname.c_str(), i);
-			AGMMODELEXCEPTION("Trying to get the identifier of a node linked to a given one");
+			printf("Exception: %d, %s, %d\n", id, linkname.c_str(), i);
+			return -1;
+// 			AGMMODELEXCEPTION("Trying to get the identifier of a node linked to a given one");
 		}
 	}
 	if (ret != -1)
@@ -426,7 +427,8 @@ int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 	
 	std::ostringstream s;
 	s << "Exception: " << targetId;
-	AGMMODELEXCEPTION(s.str()+std::string(" Trying to get the index of a node given it's identifier"));
+	return -1;
+// 	AGMMODELEXCEPTION(s.str()+std::string(" Trying to get the index of a node given it's identifier"));
 }
 
 
@@ -493,5 +495,60 @@ int32_t AGMModel::getNewId()
 	ret = lastId;
 	lastId++;
 	return ret;
+}
+
+
+bool AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName)
+{
+	// Nodes must exist.
+	if (a < 0 or b < 0)
+	{
+		AGMMODELEXCEPTION("Trying to link invalid identifiers");;
+	}
+
+	// Check the edge doesn't already exists
+	for (uint32_t i=0; i<edges.size(); i++)
+	{
+		if (edges[i].symbolPair.first == a)
+		{
+			if (edges[i].symbolPair.second == b)
+			{
+				if (edges[i].getLabel() == edgeName)
+				{
+					return false;
+				}
+			}
+		}
+	}
+	AGMModelEdge edge(a, b, edgeName);
+	edges.push_back(edge);
+	return true;
+}
+
+
+bool AGMModel::removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName)
+{
+	// Nodes must exist.
+	if (a < 0 or b < 0)
+	{
+		AGMMODELEXCEPTION("Trying to un-link using invalid identifiers");;
+	}
+
+	// Check the edge doesn't already exists
+	for (uint32_t i=0; i<edges.size(); i++)
+	{
+		if (edges[i].symbolPair.first == a)
+		{
+			if (edges[i].symbolPair.second == b)
+			{
+				if (edges[i].getLabel() == edgeName)
+				{
+					edges.erase(edges.begin() + i);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
 }
 
