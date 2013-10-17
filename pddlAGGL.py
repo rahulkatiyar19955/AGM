@@ -138,7 +138,7 @@ class AGMRulePDDL:
 		ret = ''
 		for i in itertools.combinations(nodesToUse, 2):
 			if i[0] != i[1]:
-				ret += ' (not(= ?' + i[0] + ' ?' + i[1] + '))'
+				ret += ' (diff ?' + i[0] + ' ?' + i[1] + ')'
 		return ret
 
 	#
