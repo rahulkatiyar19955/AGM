@@ -23,6 +23,7 @@ SET (AGM_CODE
   agm_modelPrinter.cpp
   agm_modelSymbols.cpp
   agm_modelConverter.cpp
+  agm_search.cpp
 )
 
 
@@ -37,6 +38,7 @@ SET (HEADERS
   agm_modelSymbols.h
   agm_misc_functions.h
   agm_modelConverter.h
+  agm_search.h
 )
 
 
