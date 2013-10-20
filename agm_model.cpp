@@ -218,9 +218,13 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	}
 
 	// Unknown symbols that allow us to include new stuff in the model
+	std::list <std::string> unknownObjectsVec;
 	for (int32_t u=0; u<unknowns; ++u)
 	{
 		stringStream << "		unknown_" << u << "\n";
+		std::ostringstream sstr;
+		sstr << "unknown_" << u;
+		unknownObjectsVec.push_back(sstr.str());
 	}
 	stringStream << "	)\n";
 	stringStream << "\n";
@@ -236,6 +240,22 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	{
 		stringStream << "		(unknownorder unknown_" << u-1 << " unknown_" << u << ")\n";
 	}
+	// Set not='s
+	std::vector<std::string> allObjects;
+	allObjects.insert(allObjects.end(),   originalObjects.begin(),   originalObjects.end());
+	allObjects.insert(allObjects.end(),     targetObjects.begin(),     targetObjects.end());
+	allObjects.insert(allObjects.end(), unknownObjectsVec.begin(), unknownObjectsVec.end());
+	for (uint32_t ind1=0; ind1<allObjects.size(); ind1++)
+	{
+		for (uint32_t ind2=0; ind2<allObjects.size(); ind2++)
+		{
+			if (ind1 != ind2)
+			{
+				stringStream << "		(diff " << allObjects[ind1] << " " << allObjects[ind2] << ")\n";
+			}
+		}
+	}
+
 	// Known symbols type for the objects in the initial world
 	for (uint32_t s=0; s<symbols.size(); ++s)
 	{
