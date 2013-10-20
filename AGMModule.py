@@ -222,7 +222,6 @@ class GraphDraw(QWidget):
 				if a:
 					painter.drawLine(xinit, yinit, xend, yend)
 
-
 				vw2 = 0.125*vertexDiameter
 				lpos1 = [(xinit + xend)/2, (yinit + yend) / 2]
 				langle = math.atan2(yend-yinit, xend-xinit)
@@ -236,9 +235,11 @@ class GraphDraw(QWidget):
 
 				painter.setBrush(QColor(255, 255, 255))
 				d = 2
-				painter.fillRect(QRectF(rect.x()-4+d, rect.y()-3, rect.width()+8, rect.height()+6), Qt.black)
-				painter.fillRect(QRectF(rect.x()-2+d, rect.y()-1.5, rect.width()+4, rect.height()+3), Qt.white)
+				painter.fillRect(QRectF(rect.x()-5+d, rect.y()-3, rect.width()+10, rect.height()+6), Qt.black)
+				painter.fillRect(QRectF(rect.x()-3+d, rect.y()-1.5, rect.width()+6, rect.height()+3), Qt.white)
+				rect.translate(2, 0)
 				painter.drawText(rect, align, str(e.linkType))
+				rect.translate(-2, 0)
 				painter.setBrush(QColor(0, 0, 0))
 				vw = 0.5*vertexDiameter
 				if a:

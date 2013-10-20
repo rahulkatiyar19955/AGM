@@ -338,7 +338,6 @@ AGMModelEdge & AGMModel::edge(uint32_t i)
 
 int32_t AGMModel::getIdentifierByType(std::string type, int32_t times) const
 {
-	printf("getIdentifierByType: %s, %d\n", type.c_str(), times);
 	int32_t ret = -1;
 	uint32_t idx = 0;
 	for (int32_t time=0; time<=times; ++time)
