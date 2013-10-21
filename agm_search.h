@@ -24,6 +24,10 @@ public:
 	struct AGMSearchPath
 	{
 	public:
+		AGMSearchPath()
+		{
+			result = AGMModel::SPtr(new AGMModel());
+		}
 		AGMSearchPath(const AGMModel::SPtr &init)
 		{
 			result = AGMModel::SPtr(new AGMModel(init));
@@ -48,6 +52,9 @@ public:
 
 public:
 	AGMSearch(const AGMModel::SPtr &current_, const AGMModel::SPtr &goal_);
+
+private:
+// 	AGMSearchPathList expandBestNode();
 
 private:
 	AGMModel::SPtr current, goal;

@@ -13,6 +13,7 @@ class AGMPDDL:
 	def toPDDL(agm, name):
 		writeString  = '(define (domain gualzruGrammar)\n\n'
 		writeString += '\t(:predicates\n'
+		writeString += '\t\t(diff ?a ?b)\n'
 		writeString += '\t\t(firstunknown ?u)\n'
 		writeString += '\t\t(unknownorder ?ua ?ub)\n\n'
 		writeString += AGMPDDL.typePredicatesPDDL(agm)
@@ -89,7 +90,7 @@ class AGMRulePDDL:
 		string  = '\t(:action ' + rule.name + '\n'
 		string += '\t\t:parameters ('
 		for n in rule.stayingNodeList()+agmlist+forgetList:
-			string += ' ?' + n
+			string += ' ?v' + n
 		string += ' )\n'
 		string += '\t\t:precondition (and'
 		string += AGMRulePDDL.existingNodesPDDLTypes(rule, nodeDict) # TYPE preconditions
@@ -115,7 +116,7 @@ class AGMRulePDDL:
 	def existingNodesPDDLTypes(rule, nodeDict, pddlVerbose=False):
 		ret  = ''
 		for name,node in rule.lhs.nodes.items():
-			ret += ' (IS'+node.sType+' ?'+nodeDict[name]+')'
+			ret += ' (IS'+node.sType+' ?v'+nodeDict[name]+')'
 		return ret
 	@staticmethod
 	def listPDDLPreconditions(rule, agmlist, forgetList, newList, nodeDict, pddlVerbose=False):
@@ -125,12 +126,12 @@ class AGMRulePDDL:
 			first = listCopy.pop()
 			#print 'Prime', first
 			#if pddlVerbose: print 'PRECONDITIONS firstunknown in newList', first
-			ret += ' (firstunknown' + ' ?' + first + ')'
+			ret += ' (firstunknown' + ' ?v' + first + ')'
 			last = first
 			while len(listCopy)>0:
 				top = listCopy.pop()
 				#if pddlVerbose: print 'PRECONDITIONS unknownorder', last, top
-				ret += ' (unknownorder ?' + last + ' ?' + top + ')'
+				ret += ' (unknownorder ?v' + last + ' ?v' + top + ')'
 				last = top
 		return ret
 	@staticmethod
@@ -138,7 +139,7 @@ class AGMRulePDDL:
 		ret = ''
 		for i in itertools.combinations(nodesToUse, 2):
 			if i[0] != i[1]:
-				ret += ' (diff ?' + i[0] + ' ?' + i[1] + ')'
+				ret += ' (diff ?v' + i[0] + ' ?v' + i[1] + ')'
 		return ret
 
 	#
@@ -167,14 +168,14 @@ class AGMRulePDDL:
 			print 'aa10 b'
 			if len(agmlist)>1:
 				last = agmlist.pop()
-				ret += ' (not (firstunknown ?' + last + '))'
+				ret += ' (not (firstunknown ?v' + last + '))'
 			else:
 				raise Exception(":->")
 			while len(agmlist)>0:
 				nextn = agmlist.pop()
-				ret += ' (not (unknownorder ?' + last + ' ?' + nextn + '))'
+				ret += ' (not (unknownorder ?v' + last + ' ?v' + nextn + '))'
 				last = nextn
-			ret += ' (firstunknown ?' + last + ')'
+			ret += ' (firstunknown ?v' + last + ')'
 
 		# FORGET NODES: we must push some symbols from the list
 		elif len(forgetList)>0:
@@ -194,10 +195,10 @@ class AGMRulePDDL:
 		ret = ''
 		# Handle new nodes
 		for node in newList:
-			ret += ' (IS' + rule.rhs.nodes[node].sType + ' ?' + nodeDict[node] + ')'
+			ret += ' (IS' + rule.rhs.nodes[node].sType + ' ?v' + nodeDict[node] + ')'
 		# Handle forget nodes
 		for node in forgetList:
-			ret += ' (not (IS' + rule.lhs.nodes[node].sType + ' ?' + nodeDict[node] + '))'
+			ret += ' (not (IS' + rule.lhs.nodes[node].sType + ' ?v' + nodeDict[node] + '))'
 		return ret
 	@staticmethod
 	def linkPatternsPDDLEffects(rule, nodeDict, pddlVerbose=False):
@@ -221,19 +222,19 @@ class AGMRulePDDL:
 		#print 'create', createLinks
 		for link in createLinks:
 			#print 'NEWLINK', str(link)
-			ret += ' ('+link.linkType + ' ?'+ link.a +' ?'+ link.b + ')'
+			ret += ' ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + ')'
 		deleteLinks = initialLinkSet.difference(posteriorLinkSet)
 		#print 'delete', deleteLinks
 		for link in deleteLinks:
 			#print 'REMOVELINK', str(link)
-			ret += ' (not ('+link.linkType + ' ?'+ link.a +' ?'+ link.b + '))'
+			ret += ' (not ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + '))'
 		return ret
 	@staticmethod
 	def linkPatternsPDDLPreconditions(rule, nodeDict, pddlVerbose=False):
 		ret = ''
 		for link in rule.lhs.links:
 			#if pddlVerbose: print 'LINK', str(link)
-			ret += ' ('+link.linkType + ' ?'+ nodeDict[link.a] +' ?'+ nodeDict[link.b] + ')'
+			ret += ' ('+link.linkType + ' ?v'+ nodeDict[link.a] +' ?v'+ nodeDict[link.b] + ')'
 		return ret
 	@staticmethod
 	def typeChangesPDDLEffects(rule, nodeDict, pddlVerbose=False):
@@ -244,6 +245,6 @@ class AGMRulePDDL:
 			typeR = rule.rhs.nodes[n].sType
 			if typeL != typeR:
 				#if pddlVerbose: print 'EFFECTS modify', n
-				ret += ' (not(IS'+typeL + ' ?' + nodeDict[n] +')) (IS'+typeR + ' ?' + nodeDict[n] +')'
+				ret += ' (not(IS'+typeL + ' ?v' + nodeDict[n] +')) (IS'+typeR + ' ?v' + nodeDict[n] +')'
 		return ret
 
