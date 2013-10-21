@@ -423,10 +423,17 @@ int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 			return idx;
 		}
 	}
-	
+
 	std::ostringstream s;
 	s << "Exception: " << targetId;
 	return -1;
+// 	AGMMODELEXCEPTION(s.str()+std::string(" Trying to get the index of a node given it's identifier"));
+}
+
+AGMModelSymbol::SPtr AGMModel::getSymbolByIdentifier(int32_t targetId) const
+{
+	const int32_t index = getIndexByIdentifier(targetId);
+	return symbols[index];
 // 	AGMMODELEXCEPTION(s.str()+std::string(" Trying to get the index of a node given it's identifier"));
 }
 
