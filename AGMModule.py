@@ -142,12 +142,21 @@ class GraphDraw(QWidget):
 		w2 = w/2
 		h2 = h/2
 		# Clear the canvas and draw its borders
-		painter.fillRect(QRectF(0, 0, w, h), Qt.white)
+		painter.fillRect(QRectF(0., 0., float(w), float(h)), Qt.white)
 		if drawlines:
 			painter.drawLine(QLine(0,   0, w-1,   0))
 			painter.drawLine(QLine(0, h-1, w-1, h-1))
 			painter.drawLine(QLine(0,   0, 0,   h-1))
 			painter.drawLine(QLine(w-1, 0, w-1, h-1))
+		# Compute offset
+		sumaX = 0
+		sumaY = 0
+		for ww in self.graph.nodes:
+			sumaX += self.graph.nodes[ww].pos[0]
+			sumaY += self.graph.nodes[ww].pos[1]
+		sumaX = w2 - sumaX/len(self.graph.nodes)
+		sumaY = h2 - sumaY/len(self.graph.nodes)
+		painter.translate(sumaX, sumaY)
 		# Draw nodes
 		pen = QPen()
 		pen.setWidth(nodeThickness)

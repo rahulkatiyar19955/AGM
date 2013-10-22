@@ -10,7 +10,7 @@ def translateList(alist, dictionary):
 #
 class AGMPDDL:
 	@staticmethod
-	def toPDDL(agm, name):
+	def toPDDL(agm, name, skipPassive):
 		writeString  = '(define (domain gualzruGrammar)\n\n'
 		writeString += '\t(:predicates\n'
 		writeString += '\t\t(diff ?a ?b)\n'
@@ -21,7 +21,7 @@ class AGMPDDL:
 		writeString += '\t)\n\n'
 		writeString += '\t(:functions\n\t\t(total-cost)\n\t)\n\n'
 		for r in agm.rules:
-			writeString += AGMRulePDDL.toPDDL(r) + '\n'
+			writeString += AGMRulePDDL.toPDDL(r, skipPassive=skipPassive) + '\n'
 		writeString += ')\n'
 		return writeString
 	@staticmethod
@@ -76,17 +76,23 @@ class AGMRulePDDL:
 
 		return agmlist, nodeDict
 	@staticmethod
-	def toPDDL(rule, pddlVerbose=False):
-		print '\n----------------------------- ----------------------------------------   ', rule.name
-		print rule.name
-		print 'Staying: ', rule.stayingNodeList()
+	def toPDDL(rule, pddlVerbose=False, skipPassive=False):
+		if skipPassive==True and rule.passive == True:
+			return ''
+		if pddlVerbose:
+			print '\n----------------------------- ----------------------------------------   ', rule.name
+			print rule.name
+			print 'Staying: ', rule.stayingNodeList()
 		newList = rule.newNodesList()
-		print 'New:   ', newList
+		if pddlVerbose:
+			print 'New:   ', newList
 		forgetList = rule.forgetNodesList()
-		print 'Forget:', forgetList
+		if pddlVerbose:
+			print 'Forget:', forgetList
 		agmlist, nodeDict = AGMRulePDDL.computePDDLMemoryListAndDictionary(rule, newList, forgetList)
-		print 'List:    ', agmlist
-		print 'Node dict:', nodeDict
+		if pddlVerbose:
+			print 'List:    ', agmlist
+			print 'Node dict:', nodeDict
 		string  = '\t(:action ' + rule.name + '\n'
 		string += '\t\t:parameters ('
 		for n in rule.stayingNodeList()+agmlist+forgetList:

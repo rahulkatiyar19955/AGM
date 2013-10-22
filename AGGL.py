@@ -148,21 +148,18 @@ class AGMGraph(object):
 		return ret
 
 class AGMRule(object):
-	def __init__(self, name='', config=None, lhs=None, rhs=None):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False):
 		object.__init__(self)
 		self.name = name
 		self.lhs = lhs
 		self.rhs = rhs
-		self.configuration = config
+		self.passive = passive
 		if lhs == None:
 			self.lhs = AGMGraph()
 		if rhs == None:
 			self.rhs = AGMGraph()
 	def toString(self):
-		if type(self.configuration) == type(AGMConfiguration('')):
-			ret = self.name + ' : ' + self.configuration.toString() + '\n{\n'
-		else:
-			ret = self.name + ' : #\n{\n'
+		ret = self.name + ' : ' + self.passive + '\n{\n'
 		ret += self.lhs.toString() + '\n'
 		ret += '\t=>\n'
 		ret += self.rhs.toString() + '\n'
@@ -188,112 +185,13 @@ class AGMRule(object):
 	def linkTypes(self):
 		return self.lhs.linkTypes().union(self.rhs.linkTypes())
 
-class AGMAgent(object):
-	def __init__(self, name):
-		self.name = name
-		self.states = dict()
-		self.statesList = []
-	def addState(self, statename):
-		if type(statename) == type(''):
-			self.states[statename] = AGMAgentState(statename, self.name)
-		else:
-			self.states[statename] = statename
-		if not statename in self.statesList:
-			self.statesList.append(statename)
-	def addUnnamedState(self):
-		initialName = self.name + 'State'
-		possibleNumber = len(self.states)
-		name = initialName + str(possibleNumber)
-		while name in self.states.keys():
-			possibleNumber = possibleNumber + 1
-			name = initialName + str(possibleNumber)
-		self.addState(AGMAgentState(name,self.name))
-		return name
-	def validStateNames(self):
-		r = []
-		for x in self.states:
-			r.append(self.states[x].name)
-		return r
-	def toString(self):
-		s = self.name + ' ('
-		for n in self.statesList:
-			s += ' ' + n.name
-		s += ' )'
-		return s
-
-class AGMConfiguration(object):
-	def __init__(self, name):
-		self.name = name
-	def toString(self):
-		return self.name
-
-class AGMAgentState(object):
-	def __init__(self, name, parentName):
-		self.name = name
-		self.parentName = parentName
 
 class AGM(object):
 	def __init__(self):
 		object.__init__(self)
 		self.rules = []
-		self.agents = dict()
-		self.configurations = dict()
-		self.agentList = []
-		self.configurationList = []
 	def addRule(self, rule):
 		self.rules.append(rule)
-	def addConfiguration(self, conf):
-		if type(conf) != type(AGMConfiguration('')):
-			raise BaseException
-		if not conf.name in self.configurationList:
-			self.configurationList.append(conf.name)
-		self.configurations[conf.name] = conf
-	def addAgent(self, agent):
-		if not agent in self.agentList: self.agentList.append(agent)
-		a = AGMAgent(agent)
-		self.agents[agent] = a
-	def addUnnamedAgent(self):
-		initialName = 'agent'
-		possibleNumber = len(self.agents)
-		name = initialName + str(possibleNumber)
-		while name in self.agents.keys():
-			possibleNumber = possibleNumber + 1
-			name = initialName + str(possibleNumber)
-		self.addAgent(name)
-		return name
-	def addUnnamedConfiguration(self):
-		initialName = 'configuration'
-		possibleNumber = len(self.configurations)
-		name = initialName + str(possibleNumber)
-		while name in self.configurations.keys():
-			possibleNumber = possibleNumber + 1
-			name = initialName + str(possibleNumber)
-		c = AGMConfiguration(name)
-		self.addConfiguration(c)
-		return c
-	def addUnnamedAgentState(self, agent):
-		return self.agents[agent].addUnnamedState()
-	def addAgentState(self, agent, statename):
-		return self.agents[agent].addState(statename)
-	def getConfigRule(self, rule):
-		if type(rule) == type(AGMRule('s')):
-			rule = rule.name
-		ret = None
-		for r in self.rules:
-			if r.name == rule:
-				ret = r.configuration
-				break
-		return ret
-	def setConfigRule(self, rule, conf):
-		if type(conf) != type(AGMConfiguration('')):
-			conf = AGMConfiguration(conf)
-		found = False
-		for r in self.rules:
-			if r.name == rule:
-				r.configuration = conf
-				found = True
-		if found == False:
-			raise BaseException
 
 
 class AGMFileData(object):
@@ -310,44 +208,17 @@ class AGMFileData(object):
 		for k,v in self.properties.items():
 			writeString += str(k) + '=' + str(v) + '\n'
 		writeString += '===\n'
-		# Agents
-		writeString += 'agents\n'
-		writeString += '{\n'
-		for r in self.agm.agentList:
-			writeString = writeString + self.agm.agents[r].toString() + '\n'
-		writeString += '}\n'
-		# Configs
-		writeString += 'configurations'
-		writeString += '{ '
-		for r in self.agm.configurationList:
-			writeString = writeString + r + ' '
-		writeString += '}\n'
-		# Table
-		writeString += self.tableString
-		writeString += '===\n'
+		# Rules
 		for r in self.agm.rules:
 			writeString = writeString + r.toString() + '\n\n'
 		w = open(filename, 'w')
 		w.write(writeString)
 		w.close()
 
-	def generatePDDL(self, filename):
+	def generatePDDL(self, filename, skipPassiveRules=False):
+		print 'Generating (partial =', str(skipPassiveRules)+') PDDL file'
 		w = open(filename, 'w')
 		a = copy.deepcopy(self.agm)
-		w.write(AGMPDDL.toPDDL(a, self.properties["name"]))
+		w.write(AGMPDDL.toPDDL(a, self.properties["name"], skipPassiveRules))
 		w.close()
 		
-	def generateAGMBehaviorDescription(self, filename):
-		w = open(filename, 'w')
-		w.write(AGMBD.toAGMBehaviorDescription(self, self.properties["name"]))
-		w.close()
-				
-	def listToTable(self, l, n):
-		t =  [l[i:i+n] for i in range(0, len(l), n)]
-		length = None
-		for i in t:
-			if length == None:
-				length = len(t)
-			else:
-				assert len(t) == length, "not squared table"
-		return t

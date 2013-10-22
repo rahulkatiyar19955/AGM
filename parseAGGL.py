@@ -30,7 +30,14 @@ class AGMRuleParsing:
 		LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 		if verbose: print '\t===>'
 		RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-		return AGMRule(i.name, AGMConfiguration(i.config), LHS, RHS)
+		passive = False
+		if i.passive == 'passive':
+			passive = True
+		elif i.passive == 'active':
+			passive = False
+		else:
+			print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
+		return AGMRule(i.name, LHS, RHS, passive)
 
 
 class AGMFileDataParsing:
@@ -58,19 +65,14 @@ class AGMFileDataParsing:
 		pc = Suppress(")")
 		no = Suppress("!")
 		ag = Suppress("agents")
-		cf = Suppress("configurations")
 		tb = Suppress("table")
 
 		link  = Group(an.setResultsName("lhs") + lk + an.setResultsName("rhs") + po + Optional(no).setResultsName("no") + an.setResultsName("linkType") + pc)
 		node  = Group(an.setResultsName("symbol") + cn + an.setResultsName("symbolType") + Optional(po + nu.setResultsName("x") + co + nu.setResultsName("y") + pc))
 		graph = Group(op + ZeroOrMore(node).setResultsName("nodes") + ZeroOrMore(link).setResultsName("links") + cl)
-		rule  = Group(an.setResultsName("name") + cn + an.setResultsName("config")  + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
+		rule  = Group(an.setResultsName("name") + cn + an.setResultsName("passive")  + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
 		prop  = Group(an.setResultsName("prop") + eq + an.setResultsName("value"))
-		agent = Group(an.setResultsName("agentName") + po + OneOrMore(an).setResultsName("stateList") + pc )
-		agents =    ag + op + OneOrMore(agent).setResultsName("agents")      + cl
-		behaviors = cf + op + OneOrMore(an).setResultsName("configurations") + cl
-		confTable = tb + op + OneOrMore(an).setResultsName("table")          + cl
-		agm   = OneOrMore(prop).setResultsName("props") + sep + agents + behaviors + confTable + sep + OneOrMore(rule).setResultsName("rules") + StringEnd()
+		agm   = OneOrMore(prop).setResultsName("props") + sep + OneOrMore(rule).setResultsName("rules") + StringEnd()
 
 
 		# Parse input file
@@ -97,25 +99,12 @@ class AGMFileDataParsing:
 			print 'drats! no name'
 
 		verbose=True
-		agmFD.parsedAgents = dict()
-		for agent in result.agents:
-			print 'AGENT', agent
-			agmFD.agm.addAgent(agent.agentName)
-			agmFD.parsedAgents[agent.agentName] = agent.stateList
 		verbose=False
-		agmFD.parsedConfigurations = result.configurations
-		for c in result.configurations:
-			agmFD.agm.configurationList.append(c)
-			agmFD.agm.configurations[c] = AGMConfiguration(c)
-			
-		agmFD.parsedTable = result.table
-		print '\n\nTABLE', agmFD.parsedTable
-
 		if verbose: print '\nRules:', len(result.rules)
 		number = 0
 		for i in result.rules:
 			if verbose: print '\nRule:('+str(number)+')'
-			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i,  verbose))
+			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, verbose))
 			number += 1
 
 		return agmFD

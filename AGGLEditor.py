@@ -85,7 +85,6 @@ class AGMEditor(QMainWindow):
 		self.connect(self.timer,                               SIGNAL('timeout()'),                                            self.draw)
 		self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),                               self.selectTool)
 		self.connect(self.ui.rulesList,                        SIGNAL('currentRowChanged(int)'),                               self.changeRule)
-		self.connect(self.ui.configurationListWidget,          SIGNAL('currentRowChanged(int)'),                               self.changeConfig)
 		self.connect(self.ui.actionChangeFont,                 SIGNAL("triggered(bool)"),                                      self.changeFont)
 		self.connect(self.ui.actionChangeAppearance,           SIGNAL("triggered(bool)"),                                      self.changeAppearance)
 		self.connect(self.ui.actionAddRule,                    SIGNAL("triggered(bool)"),                                      self.addRule)
@@ -99,167 +98,34 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionOpen,                       SIGNAL("triggered(bool)"),                                      self.open)
 		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),                                      self.close)
 		self.connect(self.ui.actionGraphmar,                   SIGNAL("triggered(bool)"),                                      self.about)
-		self.connect(self.ui.tabWidget,                        SIGNAL("currentChanged(int)"),                                  self.tabChanged)
-		self.connect(self.ui.actionNew_agent,                  SIGNAL("triggered(bool)"),                                      self.newAgent)
-		self.connect(self.ui.actionRemove_current_agent,       SIGNAL("triggered(bool)"),                                      self.removeCurrentAgent)
-		self.connect(self.ui.actionNew_configuration,          SIGNAL("triggered(bool)"),                                      self.newConfig)
-		self.connect(self.ui.actionRemove_current_config,      SIGNAL("triggered(bool)"),                                      self.removeCurrentConfig)
-		self.connect(self.ui.actionNew_agent_state,            SIGNAL("triggered(bool)"),                                      self.newAgentState)
-		self.connect(self.ui.actionRemove_current_agent_state, SIGNAL("triggered(bool)"),                                      self.removeCurrentAgentState)
+		self.connect(self.ui.passiveCheckBox,                  SIGNAL("stateChanged(int)"),                                    self.changePassive)
+
+		# Get settings
+		settings = QSettings("AGM", "mainWindowGeometry")
+		value = settings.value("geometry")
+		if value != None:
+			self.restoreGeometry(value)
 
 		self.timer.start(100)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
-		self.tabChanged(self.ui.tabWidget.currentIndex())
 		
 		if len(filePath)>0:
 			self.openFromFile(filePath)
 		else:
 			self.addRule()
 			frameinfo = getframeinfo(currentframe())
-			self.newConfig(val=True)
 			frameinfo = getframeinfo(currentframe())
-			self.newAgent(True)
 		self.ui.rulesList.setCurrentRow(0)
-	def redrawConfigurationTable(self, b=None, re=True):
-		self.ui.tableWidget.setRowCount(len(self.agmData.agm.configurations))
-		self.ui.tableWidget.setColumnCount(len(self.agmData.agm.agents))
-		count = 0
-		for config in self.agmData.agm.configurationList:
-			self.ui.tableWidget.setVerticalHeaderItem(count, QTableWidgetItem(config))
-			count+=1
-		count = 0
-		for agent in self.agmData.agm.agentList:
-			self.ui.tableWidget.setHorizontalHeaderItem(count, QTableWidgetItem(agent))
-			count+=1
-		self.ui.tableWidget.resizeColumnsToContents()
 
-	def newConfig(self, val=True, config=''):
-		#self.ui.configurationListWidget.setAlternatingRowColors(True)
-		if config == '':
-			config = self.agmData.agm.addUnnamedConfiguration()
-		elif type(config) == type(''):
-			config = AGMConfiguration(config)
-			self.agmData.agm.addConfiguration(config)
-		else:
-			self.agmData.agm.addConfiguration(config)
-		item1 = QListWidgetItem(self.ui.configurationListWidget)
-		item1.setText(config.name)
-		self.redrawConfigurationTable()
-		for r in range(self.ui.tableWidget.rowCount()):
-			if self.ui.tableWidget.verticalHeaderItem(r).text() == config.name:
-				for c in range(self.ui.tableWidget.columnCount()):
-					combo = QComboBox()
-					agent = self.agmData.agm.agents[self.agmData.agm.agentList[c]]
-					for s in agent.states:
-						combo.addItem(s.name)
-					self.ui.tableWidget.setCellWidget(r,c,combo)
+	# Manages close events
+	def closeEvent(self, closeevent):
+		settings = QSettings("AGM", "mainWindowGeometry");
+		g = self.saveGeometry()
+		settings.setValue("geometry", g)
 
-	def newAgent(self, val=True, name='', createAgent=True):
-		self.ui.agentListWidget.setAlternatingRowColors(True)
-		if name == '': name = self.agmData.agm.addUnnamedAgent()
-		item1 = QListWidgetItem(self.ui.agentListWidget)
-		item1.setText(name)
-		self.agmData.agm.addAgent(name)
-		self.redrawConfigurationTable()
-		if createAgent:
-			self.newAgentState(agentName=name)
-
-	def newAgentState(self, val=True, agentName='', stateName=''):
-		if agentName == '':
-			try:
-				agentName = str(self.ui.agentListWidget.currentItem().text())
-			except:
-				return
-		agent = self.agmData.agm.agents[agentName]
-		if stateName == '':
-			stateName = self.agmData.agm.addUnnamedAgentState(agentName)
-		else:
-			self.agmData.agm.addAgentState(agentName, AGMAgentState(stateName, agentName))
-		for c in range(self.ui.tableWidget.columnCount()):
-			if self.ui.tableWidget.horizontalHeaderItem(c).text() == agentName:
-				for r in range(self.ui.tableWidget.rowCount()):
-					combo = QComboBox()
-					for s in agent.states:
-						combo.addItem(s.name)
-					self.ui.tableWidget.setCellWidget(r,c,combo)
-		self.ui.tableWidget.resizeColumnsToContents()
-		#return
-		self.redrawConfigurationTable()
-	def generateTableFromUI(self):
-		self.agmData.agm.table = []
-		for r in range(self.ui.tableWidget.rowCount()):
-			rowList = []
-			for c in range(self.ui.tableWidget.columnCount()):
-				combo = self.ui.tableWidget.cellWidget(r,c)
-				rowList.append(combo.currentText())
-			self.agmData.agm.table.append(rowList)
-
-	def processTableAndDrawCombos(self):
-		self.agmData.agm.table = self.agmData.listToTable(self.agmData.parsedTable, len(self.agmData.parsedAgents))
-		rows = len(self.agmData.agm.table)
-		cols = len(self.agmData.agm.table[0])
-		assert rows == len(self.agmData.agm.configurations), "the size of the table ("+str(rows)+") does not match with the number of configurations ("+str(len(self.agmData.agm.configurations))+")"
-		assert cols == len(self.agmData.agm.agents), "the size of the table does not match with the number of agents"
-
-		conf=0
-		for c in self.agmData.agm.configurationList:
-			conf += 1
-		for agentName in self.agmData.agm.agentList:
-			cols = self.ui.tableWidget.columnCount()
-			for i in range(cols):
-				if self.ui.tableWidget.horizontalHeaderItem(i).text() == agentName:
-					rows = self.ui.tableWidget.rowCount()
-					for r in range(rows):
-						combo = QComboBox()
-						for s in self.agmData.agm.agents[agentName].states:
-							combo.addItem(s.name)
-						self.ui.tableWidget.setCellWidget(r,i,combo)
-			self.ui.tableWidget.resizeColumnsToContents()
-
-		for agent in self.agmData.agm.agentList:
-			# Find which column corresponds to the current agent: c
-			c = -1
-			for ag in range(len(self.agmData.agm.agentList)):
-				if self.ui.tableWidget.horizontalHeaderItem(ag).text() == agent:
-					c = ag
-			assert c != -1, "wrooooooong"
-			# Valid state nanmes for agent
-			validStateNames = self.agmData.agm.agents[agent].validStateNames()
-			for i in range(len(self.agmData.agm.configurations)):
-				assert self.agmData.agm.table[i][c] in validStateNames, "invalid state name ("+self.agmData.agm.table[i][c]+") for row "+str(i)+" column "+str(c)+" for agent "+agent
-				item = self.ui.tableWidget.cellWidget(i,c)
-				idx = item.findText(self.agmData.agm.table[i][c])
-				self.ui.tableWidget.cellWidget(i,c).setCurrentIndex(idx)
-
-
-	def removeCurrentAgentState(self, val):
-		self.redrawConfigurationTable()
-	def removeCurrentAgent(self, val):
-		self.redrawConfigurationTable()
-	def removeCurrentConfig(self, val):
-		self.redrawConfigurationTable()
-
-
-	def tabChanged(self, index):
-		if index == 0:
-			self.ui.productionsWidget.show()
-			self.ui.toolsWidget.show()
-			self.ui.behaviorsWidget.show()
-			self.ui.agentsDock.hide()
-			self.ui.menuRules.setEnabled(True)
-			self.ui.menuBehaviors.setEnabled(False)
-		elif index == 1:
-			self.ui.productionsWidget.hide()
-			self.ui.toolsWidget.hide()
-			self.ui.behaviorsWidget.hide()
-			self.ui.agentsDock.show()
-			self.ui.menuRules.setEnabled(False)
-			self.ui.menuBehaviors.setEnabled(True)
-		else:
-			print 'Internal error: AGGLEditor::tabChanged: Unknown tab index'
 	def about(self):
 		QMessageBox.information(self, "About", "Active Grammar-based Modeling:\nhttps://github.com/ljmanso/AGM/wiki")
 	def draw(self):
@@ -268,6 +134,11 @@ class AGMEditor(QMainWindow):
 		for r in range(len(self.agmData.agm.rules)):
 			item = self.ui.rulesList.item(r)
 			item.setText(self.agmData.agm.rules[r].name)
+	def changePassive(self, passive):
+		p = True
+		if passive == Qt.Unchecked:
+			p = False
+		self.agmData.agm.rules[self.ui.rulesList.currentRow()].passive = p
 	def selectTool(self, tool):
 		self.tool = str(self.ui.toolsList.item(tool).text())
 	def changeFont(self):
@@ -279,7 +150,7 @@ class AGMEditor(QMainWindow):
 		self.ui.rulesList.addItem(ddd)
 		l = AGMGraph(side='L')
 		r = AGMGraph(side='R')
-		self.agmData.agm.addRule(AGMRule(ddd, AGMConfiguration(''), l, r))
+		self.agmData.agm.addRule(AGMRule(ddd, l, r, False))
 	def removeCurrentRule(self):
 		pos = self.ui.rulesList.currentRow()
 		self.agmData.agm.rules = self.agmData.agm.rules[:pos] + self.agmData.agm.rules[pos+1:]
@@ -291,33 +162,21 @@ class AGMEditor(QMainWindow):
 	def changeRule(self, ruleN):
 		self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
 		self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
+		self.disconnect(self.ui.passiveCheckBox, SIGNAL("stateChanged(int)"), self.changePassive)
+		if self.agmData.agm.rules[ruleN].passive:
+			self.ui.passiveCheckBox.setChecked(True)
+		else:
+			self.ui.passiveCheckBox.setChecked(False)
+		self.connect(self.ui.passiveCheckBox,    SIGNAL("stateChanged(int)"), self.changePassive)
+
 		currRule = self.ui.rulesList.currentItem().text()
-		currConf = self.agmData.agm.getConfigRule(currRule)
-		found = -1
-		if currConf != None:
-			for l in range(self.ui.configurationListWidget.count()):
-				itemText = self.ui.configurationListWidget.item(l).text()
-				confName = currConf.name
-				if itemText == confName:
-					found = l
-					break
-		if currConf!=None:
-			if found == -1 and self.ui.configurationListWidget.count() > 0 and currConf.name != '':
-				print 'Using inexistent configuration: invalid file. Ask the developing team how to fix this.'
-				sys.exit(1)
-		if found > -1:
-			self.ui.configurationListWidget.setCurrentRow(found)
-	def changeConfig(self, configN):
-		currRule = self.ui.rulesList.currentItem().text()
-		currConf = self.ui.configurationListWidget.currentItem().text()
-		self.agmData.agm.setConfigRule(currRule, currConf)
 	def generateCode(self):
-		path_pddl = QFileDialog.getSaveFileName(self, "Save PDDL file as", "", "*.pddl")[0]
+		path_pddl = QFileDialog.getSaveFileName(self, "Save FULL grammar (model verification) file as", "", "*.pddl")[0]
 		if not path_pddl.endswith(".pddl"): path_pddl += ".pddl"
-		self.agmData.generatePDDL(path_pddl)
-		path_agmbd = QFileDialog.getSaveFileName(self, "Save AGMBD file as", "", "*.agmbd")[0]
-		if not path_agmbd.endswith(".agmbd"): path_agmbd += ".agmbd"
-		self.agmData.generateAGMBehaviorDescription(path_agmbd)
+		self.agmData.generatePDDL(path_pddl, False)
+		path_pddl = QFileDialog.getSaveFileName(self, "Save partial grammar (active rules) file as", "", "*.pddl")[0]
+		if not path_pddl.endswith(".pddl"): path_pddl += ".pddl"
+		self.agmData.generatePDDL(path_pddl, True)
 	def exportRule(self):
 		path = str(QFileDialog.getSaveFileName(self, "Export rule", "", "*"))
 		if path[-4:] == '.svg': path = path[:-4]
@@ -355,24 +214,12 @@ class AGMEditor(QMainWindow):
 	def openFromFile(self, path):
 		if path[-5:] != '.aggl': path = path + '.aggl'
 		self.agmData = AGMFileDataParsing.fromFile(path, verbose=True)
-		# Include parsed agents
-		for agent in self.agmData.parsedAgents:
-			self.newAgent(name=agent, createAgent=False)
-			for state in self.agmData.parsedAgents[agent]:
-				self.newAgentState(agentName=agent, stateName=state)
-		# Include pared configurations
-		for config in self.agmData.parsedConfigurations:
-			self.newConfig(config=config)
-
-		self.processTableAndDrawCombos()
 
 		self.ui.rulesList.clear()
 		for rule in self.agmData.agm.rules:
 			q = QListWidgetItem()
 			q.setText(rule.name)
 			self.ui.rulesList.addItem(q)
-		#self.changeRule(0)
-		self.redrawConfigurationTable()
 	def save(self):
 		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
 		self.agmData.properties['name'] = path.split('/')[-1].split('.')[0]
@@ -406,13 +253,18 @@ class AGMEditor(QMainWindow):
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
 	if len(sys.argv)>1:
-		if len(sys.argv)>3:
+		if len(sys.argv)>5:
 			inputFile   = sys.argv[1]
-			compileFlag = sys.argv[2]
-			outputFile  = sys.argv[3]
-			if compileFlag == '-c':
+			compileFlag1 = sys.argv[2]
+			outputFile1  = sys.argv[3]
+			compileFlag2 = sys.argv[4]
+			outputFile2  = sys.argv[5]
+			if compileFlag1 == '-f':
 				agmData = AGMFileData.fromFile(inputFile, verbose=False)
-				agmData.generatePDDL(outputFile)
+				agmData.generatePDDL(outputFile, ski)
+			if compileFlag1 == '-p':
+				agmData = AGMFileData.fromFile(inputFile, verbose=False)
+				agmData.generatePDDL(outputFile, )
 		else:
 			clase = AGMEditor(sys.argv[1])
 			clase.show()
