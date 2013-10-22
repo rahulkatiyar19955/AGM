@@ -18,7 +18,7 @@
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="title">
@@ -65,15 +65,22 @@
           </layout>
          </widget>
         </item>
+        <item>
+         <widget class="QCheckBox" name="passiveCheckBox">
+          <property name="text">
+           <string>passive rule</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tab_2">
        <attribute name="title">
-        <string>Behavior view</string>
+        <string>Agents</string>
        </attribute>
        <layout class="QVBoxLayout" name="verticalLayout_7">
         <item>
-         <widget class="QTableWidget" name="tableWidget"/>
+         <widget class="QListWidget" name="listWidget"/>
         </item>
        </layout>
       </widget>
@@ -132,12 +139,8 @@
     <property name="title">
      <string>Behaviors</string>
     </property>
-    <addaction name="actionNew_configuration"/>
-    <addaction name="actionRemove_current_config"/>
     <addaction name="actionNew_agent"/>
-    <addaction name="actionRemove_current_agent"/>
-    <addaction name="actionNew_agent_state"/>
-    <addaction name="actionRemove_current_agent_state"/>
+    <addaction name="actionRemove_selected_agent"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -187,42 +190,6 @@
         </sizepolicy>
        </property>
       </widget>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="behaviorsWidget">
-   <property name="floating">
-    <bool>false</bool>
-   </property>
-   <property name="allowedAreas">
-    <set>Qt::BottomDockWidgetArea</set>
-   </property>
-   <property name="windowTitle">
-    <string>      Configuration name</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>8</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents_2">
-    <layout class="QVBoxLayout" name="verticalLayout_5">
-     <item>
-      <widget class="QListWidget" name="configurationListWidget"/>
-     </item>
-    </layout>
-   </widget>
-  </widget>
-  <widget class="QDockWidget" name="agentsDock">
-   <property name="windowTitle">
-    <string>      Agents</string>
-   </property>
-   <attribute name="dockWidgetArea">
-    <number>8</number>
-   </attribute>
-   <widget class="QWidget" name="dockWidgetContents">
-    <layout class="QVBoxLayout" name="verticalLayout_6">
-     <item>
-      <widget class="QListWidget" name="agentListWidget"/>
      </item>
     </layout>
    </widget>
@@ -297,7 +264,7 @@
     <string>New agent</string>
    </property>
   </action>
-  <action name="actionRemove_current_agent">
+  <action name="actionRemove_selected_agent">
    <property name="text">
     <string>Remove current agent</string>
    </property>
