@@ -10,7 +10,7 @@
 class AGM
 {
 public:
-	AGM(std::string pddlFile_, std::string agmbdFile_);
+	AGM(std::string pddlFileFull_, std::string pddlFilePartial_);
 	void print();
 
 	bool checkModel(AGMModel::SPtr model);
@@ -19,13 +19,15 @@ public:
 
 	std::string pddlProblemForTarget(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName);
 
-
 // private:
-	std::string pddlFile;
-	AGMBehaviorDescription table;
-	AGMActionToBehaviorMap action2behavior;
+	std::string pddlFileFull, pddlFilePartial;
+	std::string fullPDDLContent, partialPDDLContent;
 	AGMModel currentModel;
-	void loadFromFile(std::string pddlFile, std::string agmbdFile);
+	void loadFromFile(std::string pddlFileFull_, std::string pddlFilePartial_);
+
+private:
+	void readFileToString(std::string &file, std::string &content);
+
 };
 
 

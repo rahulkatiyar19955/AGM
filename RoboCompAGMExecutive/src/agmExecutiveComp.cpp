@@ -243,44 +243,39 @@ int AGMExecutiveMain::run(int argc, char* argv[])
 	parameters.pelea                       = pelea_proxy;
 	
 	/// Read PDDLPath variable
-	configGetString("PDDLPath", parameters.pddlPath);
+	std::string fullPDDL, partialPDDL;
+	configGetString("PDDLPathFull", fullPDDL);
 	/// Read PDDLCompletePath variable
-	configGetString("PDDLCompletePath", parameters.pddlCompletePath);
-	/// Read AGMBDPath variable
-	configGetString("AGMBDPath", parameters.agmbdPath);
-
-	/// Read the PDDL file and store it in a string
-	{
-		std::ifstream t(parameters.pddlPath.c_str());
-		std::stringstream buffer;
-		buffer << t.rdbuf();
-		parameters.grammarPDDLString = buffer.str();
-	}
-	/// Read the Complete PDDL file and store it in a string
-	{
-		std::ifstream t(parameters.pddlCompletePath.c_str());
-		std::stringstream buffer;
-		buffer << t.rdbuf();
-		parameters.grammarCompletePDDLString = buffer.str();
-	}
+	configGetString("PDDLPathPartial", partialPDDL);
 
 	/// Create AGM object
-	parameters.agm = new AGM(parameters.pddlPath, parameters.agmbdPath);
+	parameters.agm = new AGM(fullPDDL, partialPDDL);
+
+
+	/// Read list of agents
+	std::string aString;
+	configGetString("AGENTS", aString);
+	QString agentsString = QString::fromStdString(aString);
+	QStringList agentList = agentsString.split(",", QString::SkipEmptyParts);
+	parameters.agents.clear();
+	for (int i=0; i<agentList.size(); i++)
+	{
+		parameters.agents.push_back(agentList[i].toStdString());
+	}
 
 
 	/// Get proxies for agents
-	AGMAgentVector agents = parameters.agm->table.agents;
-	for (uint i=0; i<agents.size(); i++)
+	for (uint i=0; i<parameters.agents.size(); i++)
 	{
 		AGMCommonBehaviorPrx behavior_proxy;
 		try
 		{
-			proxy = getProxyString(agents[i].getName());
+			proxy = getProxyString(parameters.agents[i]);
 			behavior_proxy = AGMCommonBehaviorPrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
 			if (!behavior_proxy)
 			{
-				printf("%s\n", agents[i].getName().c_str());
-				printf("%s\n", agents[i].getName().c_str());
+				printf("%s\n", parameters.agents[i].c_str());
+				printf("%s\n", parameters.agents[i].c_str());
 				rInfo(QString("Error loading behavior proxy!"));
 				return EXIT_FAILURE;
 			}
@@ -291,8 +286,8 @@ int AGMExecutiveMain::run(int argc, char* argv[])
 			return EXIT_FAILURE;
 		}
 
-		parameters.agentProxies[agents[i].getName()] = behavior_proxy;
-		printf("Agent %s initialized ok\n", agents[i].getName().c_str());
+		parameters.agentProxies[parameters.agents[i]] = behavior_proxy;
+		printf("Agent %s initialized ok\n", parameters.agents[i].c_str());
 	}
 
 	Worker *worker = new Worker(parameters);

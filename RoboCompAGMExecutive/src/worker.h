@@ -77,14 +77,9 @@ public:
 
 	/// Generic AGM Stuff
 	AGM *agm;
-	AgentMap agentProxies;
 
-	/// Remaining configuration
-	std::string pddlPath;
-	std::string pddlCompletePath;
-	std::string agmbdPath;
-	std::string grammarCompletePDDLString;
-	std::string grammarPDDLString;
+	std::vector <std::string> agents;
+	AgentMap agentProxies;
 };
 
 
@@ -129,14 +124,11 @@ private:
 
 	bool eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::Event &event) const;
 
-	string currentBehavioralConfiguration;
-	void setCurrentBehavioralConfiguration();
-	void executeCurrentBehavioralConfiguration();
+	void loopMethod();
+	void reactivateAgents();
 
-	bool behaviorActivated;
+// 	bool behaviorActivated;
 
-	std::string grammarPDDLString;
-	std::string grammarCompletePDDLString;
 	std::string planString;
 
 	void handleAcceptedModificationProposal();

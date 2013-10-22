@@ -54,9 +54,6 @@ Worker::Worker(WorkerParameters &parameters)
 	// Initial target (empty)
 	targetModel = AGMModel::SPtr(new AGMModel());
 
-	/// Read the grammar file and store it in a string
-	grammarPDDLString = prms.grammarPDDLString;
-	grammarCompletePDDLString = prms.grammarCompletePDDLString;
 
 	RoboCompAGMWorldModel::Event e;
 	e.why    = RoboCompAGMWorldModel::InitialWorld;
@@ -167,21 +164,24 @@ void Worker::run()
 
 	for(;;)
 	{
+		printf("waiting..\n");
 		processMutex->lock();
-		setCurrentBehavioralConfiguration();
+		loopMethod();
 	}
 }
 
 
-void Worker::setCurrentBehavioralConfiguration()
+void Worker::loopMethod()
 {
-	if (not active) return;
+// 	if (not active) return;
 	mutex->lock();
 
+	printf("fff\n");
 	/// Process new events
 	RoboCompAGMWorldModel::Event event;
 	while (not eventQueue.isEmpty())
 	{
+		printf("eee\n");
 		event = eventQueue.dequeue();
 		printSomeInfo(event);
 		if (eventIsCompatibleWithTheCurrentModel(event) )
@@ -189,6 +189,15 @@ void Worker::setCurrentBehavioralConfiguration()
 			eventQueue.clear();
 			prms.executiveTopic->modelModified(event);
 			AGMModelConverter::fromIceToInternal(event.newModel, worldModel);
+			printf("Agent %s sent a COMPATIBLE event.\n", event.sender.c_str());
+		}
+		else
+		{
+			printf("Agent %s sent an INcompatible event.\n", event.sender.c_str());
+			printf("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n");
+			AGMModelPrinter::printWorld(event.backModel);
+			printf("BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n");
+			AGMModelPrinter::printWorld(event.newModel);
 		}
 		if (generateTXT) 
 			fflush(fd);
@@ -216,10 +225,9 @@ void Worker::handleAcceptedModificationProposal()
 			planString = "";
 			currentSolution.cost = 0;
 			currentSolution.actions.clear();
-			currentBehavioralConfiguration = "";
 			int32_t ret;
 			if (missionChanged)
-				ret = prms.pelea->getSolution(grammarPDDLString, problemPDDLString, currentSolution);
+				ret = prms.pelea->getSolution(prms.agm->partialPDDLContent, problemPDDLString, currentSolution);
 			else
 				ret = prms.pelea->getNextAction(problemPDDLString, currentSolution);
 			if (ret)
@@ -240,20 +248,12 @@ void Worker::handleAcceptedModificationProposal()
 						}
 						planString += ")\n";
 					}
-					/// Get mode
-					prms.executiveVisualizationTopic->aimedChange(currentSolution.actions[0]);
-					currentBehavioralConfiguration = prms.agm->action2behavior[currentSolution.actions[0].name];
-					if (currentBehavioralConfiguration == "")
-					{
-						printf("No behavior associated with rule %s: Take a look at the AGMBD file.\n\n", currentSolution.actions[0].name.c_str());
-						qFatal("No behavior associated with rule %s: Take a look at the AGMBD file.\n", currentSolution.actions[0].name.c_str());
-					}
 				}
 			}
 
-			if (currentBehavioralConfiguration != "")
+			if (gotPlan && currentSolution.actions.size()>0)
 			{
-				executeCurrentBehavioralConfiguration();
+				reactivateAgents();
 				RoboCompAGMWorldModel::World targetModelICE;
 				RoboCompAGMWorldModel::World worldModelICE;
 				AGMModelConverter::fromInternalToIce(targetModel, targetModelICE);
@@ -270,8 +270,8 @@ void Worker::handleAcceptedModificationProposal()
 				{
 					printf("PROBLEM STRING\n");
 					printf("%s\n", problemPDDLString.c_str());
-					printf("WORLD STRING\n");
-					printf("%s\n", grammarPDDLString.c_str());
+					printf("GRAMMAR STRING\n");
+					printf("%s\n", prms.agm->partialPDDLContent.c_str());
 					printf("No solution. :-(\n");
 				}
 			}
@@ -317,7 +317,7 @@ bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::E
 	RoboCompPlanning::Plan tempSolution;
 #ifndef AVOID_MODEL_CHECKING
 	std::string modificationPDDLString = worldModel->generatePDDLProblem(tempTargetWorldModel, 5, "gualzruGrammar", "problemo");
-	if (prms.planning->getSolution(grammarCompletePDDLString, modificationPDDLString, tempSolution))
+	if (prms.planning->getSolution(prms.agm->fullPDDLContent, modificationPDDLString, tempSolution))
 	{
 #endif
 		prms.executiveVisualizationTopic->successFulChange(tempSolution.actions);
@@ -335,69 +335,45 @@ bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::E
 }
 
 
-void Worker::executeCurrentBehavioralConfiguration()
+void Worker::reactivateAgents()
 {
-	if (currentBehavioralConfiguration.size() == 0)
-		return;
-
-// 	prms.speech->say(currentBehavioralConfiguration, true);
-	std::cout << "\n\n---------------------------------------------------------" << std::endl;
-	std::cout <<      currentBehavioralConfiguration << std::endl;
-	std::cout <<     "---------------------------------------------------------" << std::endl;
-
-// 	std::map<AGMAgentConigNamePair, AGMState>
-	AGMConfigTable &table = prms.agm->table.table;
-	AGMAgentVector &agents = prms.agm->table.agents;
-
-	for (uint i=0; i<agents.size(); i++)
+	printf("prms.agents.size() %d\n", prms.agents.size());
+	for (uint i=0; i<prms.agents.size(); i++)
 	{
-		printf("\tAGENT: %s\n", agents[i].getName().c_str());
+		printf("\tAGENT: %s\n", prms.agents[i].c_str());
 		try
 		{
-			AGMState state = table[AGMAgentConigNamePair(agents[i].getName(), currentBehavioralConfiguration)];
-			printf("\t\tstate: %s\n", state.c_str());
-			try
+			// Print info
+			if (generateTXT) fprintf(fd, "activating agent %s\n", prms.agents[i].c_str());
+			// Build parameters' map
+			ParameterMap pm;
+			Parameter p;
+			p.editable = true;
+			// Action parameter
+			p.editable = true;
+			p.type = "string";
+			p.value = currentSolution.actions[0].name;
+			for (uint uu=0; uu<currentSolution.actions[0].symbols.size(); ++uu)
 			{
-				// Print info
-				if (generateTXT) fprintf(fd, "activating %s behavior of agent %s\n", state.c_str(), agents[i].getName().c_str());
-				// Build parameters' map
-				ParameterMap pm;
-				Parameter p;
-				p.editable = true;
-				// Mode parameter
-				p.type = "string";
-				p.value = state;
-				pm["mode"] = p;
-				// Action parameter
-				p.editable = true;
-				p.type = "string";
-				p.value = currentSolution.actions[0].name;
-				for (uint uu=0; uu<currentSolution.actions[0].symbols.size(); ++uu)
-				{
-					p.value += std::string(" ") + currentSolution.actions[0].symbols[uu];
-				}
-				pm["action"] = p;
-				// Plan parameter
-				p.editable = true;
-				p.type = "string";
-				p.value = planString;
-				pm["plan"] = p;
-				// Activation
-				bool ok = prms.agentProxies[agents[i].getName()]->activateAgent(pm);
-				if (not ok)
-				{
-					fprintf(stdout, "There was some problem activating agent %s\n", agents[i].getName().c_str());
-				}
+				p.value += std::string(" ") + currentSolution.actions[0].symbols[uu];
 			}
-			catch(...)
+			pm["action"] = p;
+			// Plan parameter
+			p.editable = true;
+			p.type = "string";
+			p.value = planString;
+			pm["plan"] = p;
+
+			// Activation
+			bool ok = prms.agentProxies[prms.agents[i]]->activateAgent(pm);
+			if (not ok)
 			{
-				qDebug() << "Couldn't reach agent" << agents[i].getName().c_str();
+				fprintf(stdout, "There was some problem activating agent %s\n", prms.agents[i].c_str());
 			}
 		}
 		catch(...)
 		{
-			printf("No configuration for %s --> %s seems to exist\n\n", currentBehavioralConfiguration.c_str(), agents[i].getName().c_str());
-			qFatal("No configuration for %s --> %s seems to exist", currentBehavioralConfiguration.c_str(), agents[i].getName().c_str());
+			qDebug() << "Couldn't reach agent" << prms.agents[i].c_str();
 		}
 	}
 
