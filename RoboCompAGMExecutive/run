@@ -1,0 +1,8 @@
+#!/bin/sh
+
+megadeath agmexecutive
+
+make && bin/agmexecutive --Ice.Config=/home/robocomp/robocomp/Components/LokiAGM/etc/lokiexecutive.conf
+
+
+

@@ -1,0 +1,14 @@
+#!/bin/sh
+
+cd bin
+bin=`ls agmexecutive`
+cd ..
+
+echo $bin
+
+
+megadeath $bin
+
+make && gdb bin/$bin
+
+
