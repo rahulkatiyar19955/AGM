@@ -12,6 +12,8 @@ class AGMPDDL:
 	@staticmethod
 	def toPDDL(agm, name, skipPassive):
 		writeString  = '(define (domain gualzruGrammar)\n\n'
+		writeString += '\t(:requirements :strips :typing :fluents)\n'
+		writeString += '\t(:types unknown)\n'
 		writeString += '\t(:predicates\n'
 		writeString += '\t\t(diff ?a ?b)\n'
 		writeString += '\t\t(firstunknown ?u)\n'
