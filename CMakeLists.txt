@@ -91,6 +91,11 @@ if (ROBOCOMP_SUPPORT)
 	SET(ICE_LIBS -lIce)
 endif (ROBOCOMP_SUPPORT)
 
+# LibXML
+FIND_PACKAGE(LibXml2 REQUIRED)
+include_directories(${LIBXML2_INCLUDE_DIR})
+set(LIBS ${LIBS} ${LIBXML2_LIBRARIES} )
+message(STATUS "XXXXXXXXXX ${LIBXML2_INCLUDE_DIR} ${LIBXML2_LIBRARIES}")
 
 #  Macro for compiling UI files and wrap command  #
 ###################################################
@@ -120,11 +125,11 @@ add_library(agmdummy SHARED AGMWorldModel.cpp )
 
 
 add_library(agm SHARED ${AGM_CODE} )
-target_link_libraries(agm ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES})
 add_dependencies(agm agmdummy)
 
 add_executable ( testagm testagm.cpp  )
-target_link_libraries ( testagm  -L. -lagm ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+target_link_libraries ( testagm  -L. -lagm ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
 

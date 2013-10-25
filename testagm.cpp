@@ -2,6 +2,8 @@
 
 int main(int argc, char **argv)
 {
-	AGM acho("a", "example.agmbd");
+	AGMModel::SPtr xml(new AGMModel());
+
+	AGMModelConverter::fromXMLToInternal("example.xagm", xml);
 }
 

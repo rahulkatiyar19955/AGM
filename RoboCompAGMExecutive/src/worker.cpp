@@ -46,8 +46,27 @@ Worker::Worker(WorkerParameters &parameters)
 	}
 
 	// Initial world
-	worldModel = AGMModel::SPtr(new AGMModel());
-	worldModel->newSymbol("startsymbol");
+	bool initializeFromXML = false;
+	std::string im = parameters.initialModelXML;
+	if (im.size() > 0)
+	{
+		if (im[0]!=' ' and im[0]!='\t' and im!="" and im!="none" and im!="off")
+		{
+			initializeFromXML = true;
+		}
+	}
+	if (initializeFromXML)
+	{
+		printf("Initializing from file (\"%s\").\n", parameters.initialModelXML.c_str());
+		worldModel = AGMModel::SPtr(new AGMModel());
+		AGMModelConverter::fromXMLToInternal(parameters.initialModelXML, worldModel);
+	}
+	else
+	{
+		printf("Initializing from empty world (with an start symbol).\n");
+		worldModel = AGMModel::SPtr(new AGMModel());
+		worldModel->newSymbol("startsymbol");
+	}
 	printf("--------------\n");
 	AGMModelPrinter::printWorld(worldModel);
 	printf("--------------\n");
@@ -337,7 +356,7 @@ bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::E
 
 void Worker::reactivateAgents()
 {
-	printf("prms.agents.size() %d\n", prms.agents.size());
+	printf("prms.agents.size() %ld\n", prms.agents.size());
 	for (uint i=0; i<prms.agents.size(); i++)
 	{
 		printf("\tAGENT: %s\n", prms.agents[i].c_str());

@@ -247,6 +247,8 @@ int AGMExecutiveMain::run(int argc, char* argv[])
 	configGetString("PDDLPathFull", fullPDDL);
 	/// Read PDDLCompletePath variable
 	configGetString("PDDLPathPartial", partialPDDL);
+	/// Read initial model
+	configGetString("InitalModelPath", parameters.initialModelXML);
 
 	/// Create AGM object
 	parameters.agm = new AGM(fullPDDL, partialPDDL);

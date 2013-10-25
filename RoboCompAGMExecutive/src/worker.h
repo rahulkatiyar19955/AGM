@@ -77,6 +77,7 @@ public:
 
 	/// Generic AGM Stuff
 	AGM *agm;
+	std::string initialModelXML;
 
 	std::vector <std::string> agents;
 	AgentMap agentProxies;

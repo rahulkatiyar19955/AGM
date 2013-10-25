@@ -4,6 +4,9 @@
 #include <agm_modelConverter.h>
 #include <agm_modelEdge.h>
 
+#include <libxml2/libxml/parser.h>
+#include <libxml2/libxml/tree.h>
+
 void AGMModelConverter::fromInternalToIce(const AGMModel::SPtr &src, RoboCompAGMWorldModel::World &dst)
 {
 	dst.nodes.clear();
@@ -111,3 +114,108 @@ bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMW
 }
 
 
+void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr &dst)
+{
+	// Empty the model
+	dst->symbols.clear();
+	dst->edges.clear();
+
+	xmlDocPtr doc;
+	if ((doc = xmlParseFile(path.c_str())) == NULL)
+	{
+		fprintf(stderr,"Document not parsed successfully. \n");
+		return;
+	}
+	printf("Parsed ok\n");
+	xmlNodePtr cur;
+	if ((cur = xmlDocGetRootElement(doc)) == NULL)
+	{
+		fprintf(stderr,"empty document\n");
+		xmlFreeDoc(doc);
+		return;
+	}
+	if (xmlStrcmp(cur->name, (const xmlChar *) "AGMModel"))
+	{
+		fprintf(stderr,"document of the wrong type, root node != AGMModel");
+		xmlFreeDoc(doc);
+		return;
+	}
+	printf("AGMModel is root node (%p)\n", cur);
+
+
+
+	for(cur=cur->xmlChildrenNode; cur!=NULL; cur=cur->next)
+	{
+		if ((xmlStrcmp(cur->name, (const xmlChar *)"text")))
+		{
+			if ((!xmlStrcmp(cur->name, (const xmlChar *)"symbol")))
+			{
+				// Read ID and type
+				xmlChar *stype = xmlGetProp(cur, (const xmlChar *)"type");
+				xmlChar *sid = xmlGetProp(cur, (const xmlChar *)"id");
+				int32_t id = atoi((char *)sid);
+				if (id<0)
+				{
+					fprintf(stderr, "AGMModels can't have negative identifiers (type: %s).\n", (char *)stype);
+					exit(-1);
+				}
+				printf("%s: %d %s\n", cur->name, id, stype);
+
+				// Read attributes
+				std::map<std::string, std::string> attrMap;
+				for (xmlNodePtr cur2=cur->xmlChildrenNode; cur2!=NULL; cur2=cur2->next)
+				{
+					if ((!xmlStrcmp(cur2->name, (const xmlChar *)"attribute")))
+					{
+						xmlChar *skey = xmlGetProp(cur2, (const xmlChar *)"key");
+						xmlChar *svalue = xmlGetProp(cur2, (const xmlChar *)"value");
+						attrMap[std::string((char *)skey)] = std::string((char *)svalue);
+						printf("    %s: %s -> %s\n", cur2->name, skey, svalue);
+						xmlFree(skey);
+						xmlFree(svalue);
+					}
+					else if ((!xmlStrcmp(cur->name, (const xmlChar *)"text")))
+					{
+						printf("%s has invalid child %s\n", cur->name, cur2->name);
+						exit(-1);
+					}
+				}
+
+				dst->newSymbol(id, std::string((char*)stype), attrMap);
+
+				xmlFree(sid);
+				xmlFree(stype);
+			}
+			else if ((!xmlStrcmp(cur->name, (const xmlChar *)"link")))
+			{
+				xmlChar *src = xmlGetProp(cur, (const xmlChar *)"src");
+				xmlChar *dst = xmlGetProp(cur, (const xmlChar *)"dst");
+				printf("%s: %s -> %s\n", cur->name, src, dst);
+				xmlFree(src);
+				xmlFree(dst);
+// AGMModelEdge edge(src.edges[i].a, src.edges[i].b, src.edges[i].edgeType);
+// dst->edges.push_back(edge);
+// if (src.edges[i].a == -1 or src.edges[i].b == -1)
+// {
+// 	fprintf(stderr, "Can't transform models containing nodes with invalid identifiers (type: %s).\n", src.edges[i].edgeType.c_str());
+// 	exit(-1);
+// }
+			}
+			else
+			{
+				printf("??? %s\n", cur->name);
+			}
+		}
+	}
+
+
+	dst->resetLastId();
+	//checks
+	
+}
+
+
+
+
+
+	
