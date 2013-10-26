@@ -1,0 +1,17 @@
+<AGMModel>
+
+	<symbol id="1" type="robot">
+		<attribute key="x"     value="1293" />
+		<attribute key="z"     value="2267" />
+		<attribute key="alpha" value="8.92" />
+	</symbol>
+
+	<symbol id="2" type="ball">
+		<attribute key="x" value="293" />
+		<attribute key="y" value="312" />
+		<attribute key="z" value="2447" />
+	</symbol>
+
+	<link src="1" dst="2" label="sees" />
+
+</AGMModel>
