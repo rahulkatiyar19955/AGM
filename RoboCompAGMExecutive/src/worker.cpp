@@ -195,12 +195,10 @@ void Worker::loopMethod()
 // 	if (not active) return;
 	mutex->lock();
 
-	printf("fff\n");
 	/// Process new events
 	RoboCompAGMWorldModel::Event event;
 	while (not eventQueue.isEmpty())
 	{
-		printf("eee\n");
 		event = eventQueue.dequeue();
 		printSomeInfo(event);
 		if (eventIsCompatibleWithTheCurrentModel(event) )

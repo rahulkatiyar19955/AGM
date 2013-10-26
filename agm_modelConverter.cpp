@@ -168,7 +168,9 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 					if ((!xmlStrcmp(cur2->name, (const xmlChar *)"attribute")))
 					{
 						xmlChar *skey = xmlGetProp(cur2, (const xmlChar *)"key");
+						if (skey == NULL) { printf("An atribute of %s lacks of attribute 'key'.\n", (char *)cur->name); exit(-1); }
 						xmlChar *svalue = xmlGetProp(cur2, (const xmlChar *)"value");
+						if (svalue == NULL) { printf("An atribute of %s lacks of attribute 'value'.\n", (char *)cur->name); exit(-1); }
 						attrMap[std::string((char *)skey)] = std::string((char *)svalue);
 						printf("    %s: %s -> %s\n", cur2->name, skey, svalue);
 						xmlFree(skey);
@@ -188,18 +190,23 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 			}
 			else if ((!xmlStrcmp(cur->name, (const xmlChar *)"link")))
 			{
-				xmlChar *src = xmlGetProp(cur, (const xmlChar *)"src");
-				xmlChar *dst = xmlGetProp(cur, (const xmlChar *)"dst");
-				printf("%s: %s -> %s\n", cur->name, src, dst);
-				xmlFree(src);
-				xmlFree(dst);
-// AGMModelEdge edge(src.edges[i].a, src.edges[i].b, src.edges[i].edgeType);
-// dst->edges.push_back(edge);
-// if (src.edges[i].a == -1 or src.edges[i].b == -1)
-// {
-// 	fprintf(stderr, "Can't transform models containing nodes with invalid identifiers (type: %s).\n", src.edges[i].edgeType.c_str());
-// 	exit(-1);
-// }
+				xmlChar *srcn = xmlGetProp(cur, (const xmlChar *)"src");
+				if (srcn == NULL) { printf("Link %s lacks of attribute 'src'.\n", (char *)cur->name); exit(-1); }
+				xmlChar *dstn = xmlGetProp(cur, (const xmlChar *)"dst");
+				if (dstn == NULL) { printf("Link %s lacks of attribute 'dst'.\n", (char *)cur->name); exit(-1); }
+				xmlChar *label = xmlGetProp(cur, (const xmlChar *)"label");
+				if (label == NULL) { printf("Link %s lacks of attribute 'label'.\n", (char *)cur->name); exit(-1); }
+				
+				printf("%s: %s -> %s  (%s)\n", cur->name, srcn, dstn, label);
+				AGMModelEdge edge(atoi((char *)srcn), atoi((char *)dstn), (char *)label);
+				if (edge.symbolPair.first == -1 or edge.symbolPair.second == -1)
+				{
+					fprintf(stderr, "Can't create models with invalid identifiers (type: %s).\n", edge.linking.c_str());
+					exit(-1);
+				}
+				dst->edges.push_back(edge);
+				xmlFree(srcn);
+				xmlFree(dstn);
 			}
 			else
 			{

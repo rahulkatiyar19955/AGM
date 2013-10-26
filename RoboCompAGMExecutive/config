@@ -12,6 +12,7 @@ IceStormProxy          = IceStorm/TopicManager:tcp -p 9999
 # A G M   -   F i l e   p a t h s
 PDDLPath =  /home/robocomp/robocomp/Components/LokiAGM/Files/grammarLoki.pddl
 AGMBDPath = /home/robocomp/robocomp/Components/LokiAGM/Files/behaviorLoki.agmbd
+InitalModelPath = 
 
 # A G E N T S
 AGENTS = ballTracker,handApproacher
