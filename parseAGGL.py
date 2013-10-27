@@ -9,7 +9,8 @@ class AGMGraphParsing:
 			if verbose: print '\tT: \'' + str(t.symbol) + '\' is a \'' + t.symbolType + '\' (' + t.x, ',', t.y + ')'
 			pos = [0,0]
 			try:
-				pos = [int(t.x), int(t.y)]
+				multiply = 1.
+				pos = [multiply*int(t.x), multiply*int(t.y)]
 			except:
 				pass
 			nodes[t.symbol] = AGMSymbol(t.symbol, t.symbolType, pos)
@@ -43,7 +44,7 @@ class AGMRuleParsing:
 class AGMFileDataParsing:
 	@staticmethod
 	def fromFile(filename, verbose=False):
-		print 'Verbose:', verbose
+		if verbose: print 'Verbose:', verbose
 		# Clear previous data
 		agmFD = AGMFileData()
 		agmFD.properties = dict()
@@ -52,7 +53,9 @@ class AGMFileDataParsing:
 
 		# Define AGM's DSL meta-model
 		an = Word(srange("[a-zA-Z0-9_.]"))
-		nu = Word(nums)
+		plusorminus = Literal('+') | Literal('-')
+		number = Word(nums)
+		nu = Combine( Optional(plusorminus) + number )
 		sep = Suppress("===")
 		eq = Suppress("=")
 		cn = Suppress(":")
@@ -83,7 +86,7 @@ class AGMFileDataParsing:
 		if verbose: print '\nProperties:', len(result.props)
 		number = 0
 		gotName = False
-		strings = ['name']
+		strings = ['name', 'fontName']
 		for i in result.props:
 			if verbose: print '\t('+str(number)+') \''+str(i.prop)+'\' = \''+i.value+'\''
 			if i.prop in strings:

@@ -52,6 +52,10 @@ global spacePattern
 spacePattern = 3
 global dashPattern
 dashPattern = []
+global fontName
+fontName = "Arial"
+global fontSize
+fontSize = 14
 
 
 from AGMModule import *
@@ -74,18 +78,15 @@ class AGMEditor(QMainWindow):
 		self.ui.toolsList.addItem('Edge - Rename')
 		self.ui.toolsList.addItem('Edge - (Dis/En)able')
 		self.ui.toolsList.addItem('Edge - Change type')
-		self.fontDialog = QFontDialog(self)
-		self.font = self.fontDialog.selectedFont()
-		self.agmData = AGMFileData()
+		# Graph painters
 		self.lhsPainter = GraphDraw(self.ui.lhsParentWidget, self, "LHS")
 		self.rhsPainter = GraphDraw(self.ui.rhsParentWidget, self, "RHS")
 		self.timer = QTimer()
 		self.tool = ''
-		self.appearance = Appearance()
+		self.statusBar().hide()
 		self.connect(self.timer,                               SIGNAL('timeout()'),                                            self.draw)
 		self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),                               self.selectTool)
 		self.connect(self.ui.rulesList,                        SIGNAL('currentRowChanged(int)'),                               self.changeRule)
-		self.connect(self.ui.actionChangeFont,                 SIGNAL("triggered(bool)"),                                      self.changeFont)
 		self.connect(self.ui.actionChangeAppearance,           SIGNAL("triggered(bool)"),                                      self.changeAppearance)
 		self.connect(self.ui.actionAddRule,                    SIGNAL("triggered(bool)"),                                      self.addRule)
 		self.connect(self.ui.actionRemoveCurrentRule,          SIGNAL("triggered(bool)"),                                      self.removeCurrentRule)
@@ -112,13 +113,57 @@ class AGMEditor(QMainWindow):
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
 		
+		global vertexDiameter
+		global fontName
+		global fontSize
+		self.agmData = AGMFileData()
 		if len(filePath)>0:
 			self.openFromFile(filePath)
+			try:
+				vertexDiameter = self.agmData.properties['vertexDiameter']
+			except:
+				pass
+			try:
+				global nodeThickness
+				nodeThickness = self.agmData.properties['nodeThickness']
+			except:
+				pass
+			try:
+				global lineThickness
+				lineThickness = self.agmData.properties['lineThickness']
+			except:
+				pass
+			try:
+				global dashPattern
+				dashPattern = []
+			except:
+				pass
+			try:
+				fontName = self.agmData.properties['fontName']
+			except:
+				pass
+			try:
+				fontSize = self.agmData.properties['fontSize']
+			except:
+				pass
 		else:
 			self.addRule()
 			frameinfo = getframeinfo(currentframe())
 			frameinfo = getframeinfo(currentframe())
 		self.ui.rulesList.setCurrentRow(0)
+
+		# Node appearance
+		self.appearance = Appearance()
+		self.appearance.ui.radius.setValue(vertexDiameter)
+
+		# Font
+		font = QFont(fontName, fontSize)
+		font.setItalic(False)
+		font.setItalic(False)
+		self.fontDialog = QFontDialog(font, self)
+		self.fontDialog.setCurrentFont(font)
+		self.font = self.fontDialog.currentFont()
+		self.connect(self.ui.actionChangeFont,                 SIGNAL("triggered(bool)"),                                      self.changeFont)
 
 	# Manages close events
 	def closeEvent(self, closeevent):
@@ -129,6 +174,7 @@ class AGMEditor(QMainWindow):
 	def about(self):
 		QMessageBox.information(self, "About", "Active Grammar-based Modeling:\nhttps://github.com/ljmanso/AGM/wiki")
 	def draw(self):
+		self.ui.spacee.setFixedSize(self.ui.passiveCheckBox.size())
 		self.lhsPainter.update()
 		self.rhsPainter.update()
 		for r in range(len(self.agmData.agm.rules)):
@@ -202,6 +248,7 @@ class AGMEditor(QMainWindow):
 		rhs = self.rhsPainter.graph
 		for i in range(len(self.agmData.agm.rules)):
 			rule = self.agmData.agm.rules[i]
+			print i
 			self.lhsPainter.graph = rule.lhs
 			self.lhsPainter.exportPNG(str(path)+'/rule'+str(i)+'_lhs.png')
 			self.rhsPainter.graph = rule.rhs
@@ -213,7 +260,7 @@ class AGMEditor(QMainWindow):
 		self.openFromFile(path)
 	def openFromFile(self, path):
 		if path[-5:] != '.aggl': path = path + '.aggl'
-		self.agmData = AGMFileDataParsing.fromFile(path, verbose=True)
+		self.agmData = AGMFileDataParsing.fromFile(path) # , verbose=True
 
 		self.ui.rulesList.clear()
 		for rule in self.agmData.agm.rules:
@@ -235,20 +282,12 @@ class AGMEditor(QMainWindow):
 		self.agmData.properties['shortPattern'] = shortPattern
 		global spacePattern
 		self.agmData.properties['spacePattern'] = spacePattern
+		global fontName
+		self.agmData.properties['fontName'] = fontName
+		global fontSize
+		self.agmData.properties['fontSize'] = fontSize
 	
-		self.agmData.tableString = self.setTableStringForAGMData()
-
 		self.agmData.toFile(path)
-
-	def setTableStringForAGMData(self):
-		writeString = 'table\n'
-		writeString += '{\n'
-		for r in range(self.ui.tableWidget.rowCount()):
-			for c in range(self.ui.tableWidget.columnCount()):
-				writeString += ' ' + self.ui.tableWidget.cellWidget(r, c).currentText()
-			writeString += '\n'
-		writeString += '}\n'
-		return writeString
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)

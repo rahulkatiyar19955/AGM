@@ -1,5 +1,6 @@
 # Python distribution imports
 import sys, traceback, os, re, threading, time, string, math
+import numpy as np
 # Qt interface
 from PySide.QtCore import *
 from PySide.QtGui import *
@@ -11,11 +12,11 @@ from ui_appearance import Ui_Appearance
 from parseAGGL import *
 
 global vertexDiameter
-vertexDiameter = 40
+vertexDiameter = 40.
 global nodeThickness
-nodeThickness = 2.5
+nodeThickness = 2.
 global lineThickness
-lineThickness = 2.5
+lineThickness = 2.
 global longPattern
 longPattern = 3
 global shortPattern
@@ -105,6 +106,7 @@ class GraphDraw(QWidget):
 		self.releaseName = -1
 		self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 		self.move(0,0)
+		self.pressed = False
 		self.show()
 	def paintEvent(self, event=None):
 		if self.size() != self.parentW.size():
@@ -124,16 +126,14 @@ class GraphDraw(QWidget):
 		svgPainter.begin(generator)
 		self.paintOnPainter(svgPainter, self.size().width()*5, self.size().height()*5, drawlines=False)
 		svgPainter.end()
-
 	def exportPNG(self, path):
-		pixmap = QPixmap(self.size())
+		pixmap = QPixmap(self.parentW.size())
 		painter = QPainter(pixmap)
-		#painter.begin()
+		painter.setRenderHint(QPainter.Antialiasing, True)
 		self.paintOnPainter(painter, self.size().width()*5, self.size().height()*5, drawlines=False)
-		painter.end()
 		pixmap.save(path, "png")
-		
-
+		painter.end()
+		painter = None
 	def paintOnPainter(self, painter, w, h, drawlines=True):
 		global vertexDiameter
 		global nodeThickness
@@ -149,24 +149,33 @@ class GraphDraw(QWidget):
 			painter.drawLine(QLine(0,   0, 0,   h-1))
 			painter.drawLine(QLine(w-1, 0, w-1, h-1))
 		# Compute offset
-		sumaX = 0
-		sumaY = 0
+		minX = 0
+		minY = 0
+		maxX = 0
+		maxY = 0
+		first = True
 		for ww in self.graph.nodes:
-			sumaX += self.graph.nodes[ww].pos[0]
-			sumaY += self.graph.nodes[ww].pos[1]
-		sumaX = w2 - sumaX/len(self.graph.nodes)
-		sumaY = h2 - sumaY/len(self.graph.nodes)
-		painter.translate(sumaX, sumaY)
+			x = self.graph.nodes[ww].pos[0]
+			y = self.graph.nodes[ww].pos[1]
+			if minX > x or first: minX = x
+			if maxX < x or first: maxX = x
+			if minY > y or first: minY = y
+			if maxY < y or first: maxY = y
+			first = False
+		#if not self.pressed:
+		self.sumaX = sumaX = w2 - (maxX+minX)/2.
+		self.sumaY = sumaY = h2 - (maxY+minY)/2.
+		painter.translate(self.sumaX, self.sumaY)
 		# Draw nodes
 		pen = QPen()
 		pen.setWidth(nodeThickness)
 		painter.setPen(pen)
 		brush = QBrush(QLinearGradient())
 		painter.setBrush(brush)
-		painter.setFont(self.main.fontDialog.selectedFont())
+		painter.setFont(self.main.fontDialog.currentFont())
 		for w in self.graph.nodes:
 			v = self.graph.nodes[w]
-			grid = 10
+			grid = 5
 			if v.pos[0] % grid > grid/2:
 				v.pos[0] = v.pos[0] + grid - (v.pos[0] % grid)
 			else:
@@ -180,7 +189,7 @@ class GraphDraw(QWidget):
 			else:
 				painter.setBrush(QColor(120, 120, 120, 255))
 			# Draw node
-			painter.drawEllipse(v.pos[0]-(vertexDiameter/2), v.pos[1]-(vertexDiameter/2), vertexDiameter, vertexDiameter)
+			painter.drawEllipse(v.pos[0]-(vertexDiameter/2), v.pos[1]-0.7001*(vertexDiameter/2), vertexDiameter, vertexDiameter*0.7001)
 			# Temp
 			align = Qt.AlignLeft
 			# Draw identifier
@@ -191,6 +200,8 @@ class GraphDraw(QWidget):
 			rect = painter.boundingRect(QRectF(float(v.pos[0]), float(v.pos[1]), 1, 1), align, str(v.sType))
 			rect.translate(-rect.width()/2, 0)
 			painter.drawText(rect, align, str(v.sType))
+		lengthPointer = 0.5*0.35*vertexDiameter
+		anglePointer = 38.
 		linkindex = 0
 		for a in [True, False]:
 			for linkindex in range(len(self.graph.links)):
@@ -206,12 +217,20 @@ class GraphDraw(QWidget):
 						linkGroupCount = linkGroupCount + 1
 				angleR = math.atan2(v1.pos[1]-v2.pos[1], v1.pos[0]-v2.pos[0])
 				angleD = angleR*(57.2957795)
-				xinc = v2.pos[0] - v1.pos[0]
-				yinc = v2.pos[1] - v1.pos[1]
-				xinit = v1.pos[0]-math.cos(angleR)*(vertexDiameter/2)+1
-				yinit = v1.pos[1]-math.sin(angleR)*(vertexDiameter/2)+1
-				xend = v2.pos[0]+math.cos(angleR)*(vertexDiameter/2)
-				yend = v2.pos[1]+math.sin(angleR)*(vertexDiameter/2)
+				offsetSrc = 1.
+				offsetDst = 1.
+				offsetDstL = 5.
+				xinit = float(v1.pos[0])-math.cos(angleR)*      (float(vertexDiameter)/2.+offsetSrc)
+				xend  = float(v2.pos[0])+math.cos(angleR)*      (float(vertexDiameter)/2.+offsetDst)
+				yinit = float(v1.pos[1])-math.sin(angleR)*0.700*(float(vertexDiameter)/2.+offsetSrc)
+				yend  = float(v2.pos[1])+math.sin(angleR)*0.700*(float(vertexDiameter)/2.+offsetDst)
+				aa = np.array([v2.pos[0]-xinit, v2.pos[1]-yinit])
+				bb = aa*(lengthPointer/np.linalg.norm(aa))
+				xendLine = xend-bb[0]
+				yendLine = yend-bb[1]
+
+				angleR = math.atan2(yinit-yendLine, xinit-xendLine)
+				angleD = angleR*(57.2957795)
 
 				global lineThickness
 				if e.enabled:
@@ -229,16 +248,17 @@ class GraphDraw(QWidget):
 					painter.setBrush(QColor(255, 0, 0))
 				
 				if a:
-					painter.drawLine(xinit, yinit, xend, yend)
+					painter.drawLine(xinit, yinit, xendLine, yendLine)
+					pen.setWidth(0.5)
+					painter.drawLine(xinit, yinit, xendLine, yendLine)
+					pen.setWidth(lineThickness)
 
-				vw2 = 0.125*vertexDiameter
-				lpos1 = [(xinit + xend)/2, (yinit + yend) / 2]
+				lpos = [(xinit + xendLine)/2, (yinit + yendLine) / 2]
 				langle = math.atan2(yend-yinit, xend-xinit)
-				lpos  = [lpos1[0]-vw2*math.cos(langle), lpos1[1]-vw2*math.sin(langle)]
 				align = Qt.AlignLeft
 				rect = painter.boundingRect(QRectF(float(lpos[0]), float(lpos[1]), 1, 1), align, str(e.linkType))
 				rect.translate(-rect.width()/2, -rect.height()/2) # Right now it will be centered on the link's center
-				linkHeight = rect.height()+6
+				linkHeight = rect.height()+5
 				linkGroupBase = (-linkGroupCount+1)*linkHeight/2
 				rect.translate(0, linkHeight*pos + linkGroupBase) # Right now it will be centered on the link's center
 
@@ -250,54 +270,70 @@ class GraphDraw(QWidget):
 				painter.drawText(rect, align, str(e.linkType))
 				rect.translate(-2, 0)
 				painter.setBrush(QColor(0, 0, 0))
-				vw = 0.5*vertexDiameter
+				angleD = float(angleD)
 				if a:
-					painter.drawPie(xend-vw/2, yend-vw/2, vw, vw, (-angleD-20)*16, 40*16)
+					an = angleD
+					painter.translate(xendLine, yendLine)
+					painter.rotate(an)
+					points = []
+					pointW = 0.25*lengthPointer
+					points.append(QPointF(0, pointW))
+					points.append(QPointF(0, -pointW))
+					points.append(QPointF(-lengthPointer, 0))
+					painter.drawPolygon(points)
+					painter.rotate(-an)
+					painter.translate(-xendLine, -yendLine)
+					pass
 	def mousePressEvent(self, e):
 		tool = self.main.tool
+		self.pressed = True
 		if self.readOnly == True:
 			tool = 'Node - Move'
-
+		eX = e.x()-self.sumaX
+		eY = e.y()-self.sumaY
 		global vertexDiameter
 		if tool == 'Node - Add':
 			try:
 				self.lastNumber
 			except:
 				self.lastNumber = 1
-			self.graph.addNode(e.x(), e.y(), 'newid'+str(self.lastNumber)+self.name, 'type')
+			self.graph.addNode(eX, eY, 'newid'+str(self.lastNumber)+self.name, 'type')
 			self.lastNumber +=1
 
 		elif tool == 'Node - Remove':
-			x, y = self.graph.getName(e.x(), e.y(), vertexDiameter)
+			x, y = self.graph.getName(eX, eY, vertexDiameter)
 			if x>=0:
-				self.graph.removeNode(e.x(), e.y(), vertexDiameter)
+				self.graph.removeNode(eX, eY, vertexDiameter)
 
 		elif tool == 'Node - Rename':
-			x, y = self.graph.getCenter(e.x(), e.y(), vertexDiameter)
+			x, y = self.graph.getCenter(eX, eY, vertexDiameter)
 			if x>=0:
 				r = NodeNameReader(x, y, self)
 				r.setFocus(Qt.OtherFocusReason)
 		elif tool == 'Node - Change type':
-			x, y = self.graph.getCenter(e.x(), e.y(), vertexDiameter)
+			x, y = self.graph.getCenter(eX, eY, vertexDiameter)
 			if x>=0:
 				r = NodeTypeReader(x, y, self)
 				r.setFocus(Qt.OtherFocusReason)
 		elif tool == 'Node - Move':
-			self.pressName, found = self.graph.getName(e.x(), e.y(), 100)
+			self.pressName, found = self.graph.getName(eX, eY, 100)
 			if not found: self.pressName = ''
 		elif tool == 'Node - (Dis/En)able':
-			self.graph.switchNode(e.x(), e.y())
+			self.graph.switchNode(eX, eY)
 		elif tool == 'Edge - Add':
-			self.pressName, found = self.graph.getName(e.x(), e.y(), vertexDiameter)
+			self.pressName, found = self.graph.getName(eX, eY, vertexDiameter)
 			if not found: self.pressName = ''
 		elif tool == 'Edge - Remove':
-			self.graph.removeEdge(e.x(), e.y())
+			self.graph.removeEdge(eX, eY)
 		elif tool == 'Edge - Rename':
-			self.graph.renameEdge(e.x(), e.y(), newName)
+			self.graph.renameEdge(eX, eY, newName)
 		elif tool == 'Edge - (Dis/En)able':
-			self.edgeSwitchA = self.graph.getName(e.x(), e.y(), vertexDiameter)
+			self.edgeSwitchA = self.graph.getName(eX, eY, vertexDiameter)
 	def mouseReleaseEvent(self, e):
 		tool = self.main.tool
+		self.pressed = False
+		eX = e.x()-self.sumaX
+		eY = e.y()-self.sumaY
 		if self.readOnly == True:
 			tool = 'Node - Move'
 
@@ -311,11 +347,11 @@ class GraphDraw(QWidget):
 			pass
 		elif tool == 'Node - Move':
 			global vertexDiameter
-			self.graph.moveNode(self.pressName, e.x(), e.y(), vertexDiameter)
+			self.graph.moveNode(self.pressName, eX, eY, vertexDiameter)
 		elif tool == 'Node - (Dis/En)able':
 			pass
 		elif tool == 'Edge - Add':
-			self.releaseName, found = self.graph.getName(e.x(), e.y(), vertexDiameter)
+			self.releaseName, found = self.graph.getName(eX, eY, vertexDiameter)
 			if not found: self.releaseName = ''
 			if self.pressName != '' and self.releaseName != '':
 				self.graph.addEdge(self.pressName, self.releaseName)
@@ -324,18 +360,20 @@ class GraphDraw(QWidget):
 		elif tool == 'Edge - Rename':
 			pass
 		elif tool == 'Edge - (Dis/En)able':
-			self.edgeSwitchB = self.graph.getName(e.x(), e.y(), vertexDiameter)
+			self.edgeSwitchB = self.graph.getName(eX, eY, vertexDiameter)
 			for e in self.graph.edges:
 				if (e.a==self.edgeSwitchA and e.b==self.edgeSwitchB) or (e.a==self.edgeSwitchB and e.b==self.edgeSwitchA):
 					e.enabled = not e.enabled
 	def mouseMoveEvent(self, e):
 		tool = self.main.tool
+		eX = e.x()-self.sumaX
+		eY = e.y()-self.sumaY
 		if self.readOnly == True:
 			tool = 'Node - Move'
 
 		global vertexDiameter
 		if tool == 'Node - Move':
-			self.graph.moveNode(self.pressName, e.x(), e.y(), vertexDiameter)
+			self.graph.moveNode(self.pressName, eX, eY, vertexDiameter)
 
 
 

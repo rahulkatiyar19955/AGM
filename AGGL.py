@@ -1,4 +1,4 @@
-from pyparsing import Word, alphas, alphanums, nums, OneOrMore, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
+from pyparsing import Word, alphas, alphanums, nums, OneOrMore, Literal, Combine, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
 import math, traceback, itertools, copy
 
 from pddlAGGL import *
@@ -106,10 +106,12 @@ class AGMGraph(object):
 		else:
 			pass
 	def moveNode(self, name, x, y, diameter):
-		name, found = self.getNameRelaxed(x, y, diameter)
-		if found:
+		if name in self.nodes:
 			self.nodes[name].pos = [x, y]
+		elif name == '':
+			pass
 		else:
+			print 'No such node', name+'. Internal editor error.'
 			pass
 	def addEdge(self, a, b, linkname='link'):
 		self.links.append(AGMLink(a, b, linkname, True))
@@ -124,7 +126,7 @@ class AGMGraph(object):
 	def toString(self):
 		ret = '\t{\n'
 		for v in self.nodes.keys():
-			ret += '\t\t' +str(self.nodes[v].name) + ':'+self.nodes[v].sType + '(' + str(self.nodes[v].pos[0]) + ','+ str(self.nodes[v].pos[1]) + ')\n'
+			ret += '\t\t' +str(self.nodes[v].name) + ':'+self.nodes[v].sType + '(' + str(int(self.nodes[v].pos[0])) + ','+ str(int(self.nodes[v].pos[1])) + ')\n'
 		for l in self.links:
 			ret += l.toString() + '\n'
 		return ret+'\t}'
@@ -159,7 +161,9 @@ class AGMRule(object):
 		if rhs == None:
 			self.rhs = AGMGraph()
 	def toString(self):
-		ret = self.name + ' : ' + self.passive + '\n{\n'
+		passiveStr = "active"
+		if self.passive: passiveStr = "passive"
+		ret = self.name + ' : ' + passiveStr + '\n{\n'
 		ret += self.lhs.toString() + '\n'
 		ret += '\t=>\n'
 		ret += self.rhs.toString() + '\n'
