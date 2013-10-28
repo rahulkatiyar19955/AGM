@@ -7,6 +7,7 @@
 #include <libxml2/libxml/parser.h>
 #include <libxml2/libxml/tree.h>
 
+#ifdef ROBOCOMP_SUPPORT
 void AGMModelConverter::fromInternalToIce(const AGMModel::SPtr &src, RoboCompAGMWorldModel::World &dst)
 {
 	dst.nodes.clear();
@@ -113,6 +114,7 @@ bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMW
 	return false;
 }
 
+#endif
 
 void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr &dst)
 {
@@ -126,7 +128,6 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 		fprintf(stderr,"Document not parsed successfully. \n");
 		return;
 	}
-	printf("Parsed ok\n");
 	xmlNodePtr cur;
 	if ((cur = xmlDocGetRootElement(doc)) == NULL)
 	{
@@ -140,7 +141,6 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 		xmlFreeDoc(doc);
 		return;
 	}
-	printf("AGMModel is root node (%p)\n", cur);
 
 
 
@@ -159,7 +159,6 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 					fprintf(stderr, "AGMModels can't have negative identifiers (type: %s).\n", (char *)stype);
 					exit(-1);
 				}
-				printf("%s: %d %s\n", cur->name, id, stype);
 
 				// Read attributes
 				std::map<std::string, std::string> attrMap;
@@ -172,7 +171,6 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 						xmlChar *svalue = xmlGetProp(cur2, (const xmlChar *)"value");
 						if (svalue == NULL) { printf("An atribute of %s lacks of attribute 'value'.\n", (char *)cur->name); exit(-1); }
 						attrMap[std::string((char *)skey)] = std::string((char *)svalue);
-						printf("    %s: %s -> %s\n", cur2->name, skey, svalue);
 						xmlFree(skey);
 						xmlFree(svalue);
 					}
@@ -197,7 +195,6 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 				xmlChar *label = xmlGetProp(cur, (const xmlChar *)"label");
 				if (label == NULL) { printf("Link %s lacks of attribute 'label'.\n", (char *)cur->name); exit(-1); }
 				
-				printf("%s: %s -> %s  (%s)\n", cur->name, srcn, dstn, label);
 				AGMModelEdge edge(atoi((char *)srcn), atoi((char *)dstn), (char *)label);
 				if (edge.symbolPair.first == -1 or edge.symbolPair.second == -1)
 				{
@@ -223,6 +220,3 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 
 
 
-
-
-	

@@ -19,6 +19,16 @@ void AGM_tolower(std::string &action)
 	std::transform(action.begin(), action.end(), action.begin(), ::tolower);
 }
 
+
+AGM::AGM(const AGM::SPtr &src)
+{
+	pddlFileFull       = src->pddlFileFull;
+	pddlFilePartial    = src->pddlFilePartial;
+	fullPDDLContent    = src->fullPDDLContent;
+	partialPDDLContent = src->partialPDDLContent;
+	currentModel = AGMModel::SPtr(new AGMModel(src->currentModel));
+}
+
 AGM::AGM(std::string pddlFileFull_, std::string pddlFilePartial_)
 {
 	pddlFileFull = pddlFileFull_;
@@ -50,7 +60,7 @@ void AGM::readFileToString(std::string &file, std::string &content)
 	}
 	else
 	{
-		std::cout << "Unable to open file" << std::cout;
+		std::cout << "Unable to open file:" << file << std::cout;
 		exit(1);
 	}
 }

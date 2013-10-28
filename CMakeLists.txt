@@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES ( . )
 #  Optional features  #
 #######################
 option (PYTHON_BINDINGS "Build python bindings" OFF)
-option (ROBOCOMP_SUPPORT "Build with support for RoboComp" ON)
+	option (ROBOCOMP_SUPPORT "Build with support for RoboComp" OFF)
 
 
 #  Set sources  #
@@ -89,13 +89,13 @@ if (ROBOCOMP_SUPPORT)
 	INCLUDE( $ENV{ROBOCOMP}/CMake/robocomp.cmake )
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 	SET(ICE_LIBS -lIce)
+	ROBOCOMP_WRAP_ICE( AGMWorldModel )
 endif (ROBOCOMP_SUPPORT)
 
 # LibXML
 FIND_PACKAGE(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 set(LIBS ${LIBS} ${LIBXML2_LIBRARIES} )
-message(STATUS "XXXXXXXXXX ${LIBXML2_INCLUDE_DIR} ${LIBXML2_LIBRARIES}")
 
 #  Macro for compiling UI files and wrap command  #
 ###################################################
@@ -112,7 +112,7 @@ MACRO( WRAP_PYTHON_UI )
 ENDMACRO( WRAP_PYTHON_UI )
 
 WRAP_PYTHON_UI( guiAGGLEditor guiAGMExecutiveClient appearance )
-ROBOCOMP_WRAP_ICE( AGMWorldModel )
+
 
 
 
@@ -121,16 +121,21 @@ ROBOCOMP_WRAP_ICE( AGMWorldModel )
 
 #  Library building  #
 ######################
+if (ROBOCOMP_SUPPORT)
 add_library(agmdummy SHARED AGMWorldModel.cpp )
-
+endif (ROBOCOMP_SUPPORT)
 
 add_library(agm SHARED ${AGM_CODE} )
 target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES})
 add_dependencies(agm agmdummy)
 
-add_executable ( testagm testagm.cpp  )
+add_executable ( testagm testagm.cpp )
 target_link_libraries ( testagm  -L. -lagm ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
+
+add_executable ( agglplanner agglplanner.cpp ${AGM_CODE} )
+target_link_libraries ( agglplanner  -L. ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+add_dependencies(agglplanner agm)
 
 
 
@@ -138,3 +143,6 @@ add_dependencies(testagm agm)
 ##################
 INSTALL(FILES libagm.so DESTINATION /opt/robocomp/lib/ )
 INSTALL(FILES ${HEADERS} AGMWorldModel.h DESTINATION /opt/robocomp/include/ )
+
+
+

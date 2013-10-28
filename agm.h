@@ -5,11 +5,14 @@
 #include <agm_modelSymbols.h>
 #include <agm_modelEdge.h>
 #include <agm_modelConverter.h>
+#include <agm_search.h>
 
 
 class AGM
 {
 public:
+	typedef boost::shared_ptr<AGM> SPtr;
+	AGM(const AGM::SPtr &src);
 	AGM(std::string pddlFileFull_, std::string pddlFilePartial_);
 	void print();
 

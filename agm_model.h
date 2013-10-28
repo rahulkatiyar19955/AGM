@@ -7,8 +7,9 @@
 #include <boost/thread.hpp>
 
 #include <agm_modelException.h>
+#ifdef ROBOCOMP_SUPPORT
 #include <AGMWorldModel.h>
-
+#endif
 #include <agm_misc_functions.h>
 #include <agm_modelSymbols.h>
 
@@ -54,6 +55,7 @@ private:
 	int32_t insertSymbol(AGMModelSymbol::SPtr s);
 	int32_t insertSymbol(AGMModelSymbol *s) { return insertSymbol(AGMModelSymbol::SPtr(s)); }
 	bool removeEdgesRelatedToSymbol(int32_t id);
+	bool removeDanglingEdges();
 public:
 	std::string name;
 	/// GET's

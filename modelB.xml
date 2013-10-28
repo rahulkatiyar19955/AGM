@@ -1,0 +1,15 @@
+<AGMModel>
+
+	<symbol id="1" type="robot">
+	</symbol>
+
+	<symbol id="2" type="cacho">
+	</symbol>
+
+	<symbol id="3" type="cacho">
+	</symbol>
+
+	<link src="2" dst="1" label="en" />
+	<link src="3" dst="1" label="en" />
+
+</AGMModel>
