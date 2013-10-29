@@ -15,7 +15,6 @@ void AGMModelSymbol::init(AGMModel *model, std::string typ, int32_t id)
 		fprintf(stdout, "AGMModelSymbol::init: error: MODEL NULL!!\n");
 		exit(-1);
 	}
-	modelPtr = model;
 
 	symbolType = typ;
 	if (id==-1)
@@ -37,7 +36,6 @@ void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ)
 		fprintf(stdout, "AGMModelSymbol::init: error: MODEL NULL!!\n");
 		exit(-1);
 	}
-	modelPtr = model;
 
 	identifier = id;
 	symbolType = typ;
@@ -54,7 +52,6 @@ void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ, std::map
 		fprintf(stdout, "AGMModelSymbol::init: error: MODEL NULL!!\n");
 		exit(-1);
 	}
-	modelPtr = model;
 
 	identifier = id;
 	symbolType = typ;
@@ -70,7 +67,7 @@ void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ, std::map
 
 AGMModelSymbol::~AGMModelSymbol()
 {
-// 	printf("delete symbol: %s [%d] (%p)   model(%s)\n", symbolType.c_str(), identifier, this, modelPtr->name.c_str());
+// 	printf("delete symbol: %s [%d] (%p)\n", symbolType.c_str(), identifier, this);
 }
 
 bool AGMModelSymbol::operator==(const AGMModelSymbol &p) const

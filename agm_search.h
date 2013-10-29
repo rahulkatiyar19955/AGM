@@ -26,6 +26,7 @@ public:
 // Structure used to store the result of the search process
 struct AGMSearchPath
 {
+friend class AGMSearch;
 public:
 	AGMSearchPath();
 	AGMSearchPath(const AGMModel::SPtr &init);

@@ -10,11 +10,20 @@
 
 class AGGLRule
 {
-
+public:
+	// LHS
+	std::vector<AGMModelSymbol::SPtr> lhsSymbols;
+	std::vector<AGMModelEdge> lhsLinks;
+	// Effect
+	std::vector<AGMModelSymbol::SPtr> symbolsToCreate;
+	std::vector<AGMModelSymbol::SPtr> symbolsToRemove;
+	std::vector<AGMModelEdge> linksToAdd;
+	std::vector<AGMModelEdge> linksToRemove;
 };
 
 class AGM
 {
+friend class AGMSearch;
 public:
 	typedef boost::shared_ptr<AGM> SPtr;
 	AGM(const AGM::SPtr &src);

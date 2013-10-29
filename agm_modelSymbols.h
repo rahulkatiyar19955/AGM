@@ -32,7 +32,6 @@ private:
 public:	
 	typedef boost::shared_ptr<AGMModelSymbol> SPtr;
 
-	AGMModel *modelPtr;
 	std::string toString() const;
 	std::string typeString() const;
 	std::string symboltype() const { return symbolType; }
