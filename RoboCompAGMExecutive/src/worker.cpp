@@ -244,9 +244,14 @@ void Worker::handleAcceptedModificationProposal()
 			currentSolution.actions.clear();
 			int32_t ret;
 			if (missionChanged)
+			{
 				ret = prms.pelea->getSolution(prms.agm->partialPDDLContent, problemPDDLString, currentSolution);
+				missionChanged = false;
+			}
 			else
+			{
 				ret = prms.pelea->getNextAction(problemPDDLString, currentSolution);
+			}
 			if (ret)
 			{
 				printf("got plan\n");
