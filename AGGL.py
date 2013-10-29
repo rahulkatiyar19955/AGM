@@ -220,7 +220,7 @@ class AGMFileData(object):
 		w.close()
 
 	def generatePDDL(self, filename, skipPassiveRules=False):
-		print 'Generating (partial =', str(skipPassiveRules)+') PDDL file'
+		#print 'Generating (partial =', str(skipPassiveRules)+') PDDL file'
 		w = open(filename, 'w')
 		a = copy.deepcopy(self.agm)
 		w.write(AGMPDDL.toPDDL(a, self.properties["name"], skipPassiveRules))

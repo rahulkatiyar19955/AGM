@@ -10,10 +10,16 @@
 class AGM;
 
 // Structure AGMRuleExecution
-struct AGMRuleExecution
+class AGMRuleExecution
 {
+public:
 	std::string ruleName;
 	std::map< std::string, int32_t> symbolMapping;
+
+	void print()
+	{
+		printf("[%s ]\n", ruleName.c_str());
+	}
 };
 
 
@@ -21,18 +27,12 @@ struct AGMRuleExecution
 struct AGMSearchPath
 {
 public:
-	AGMSearchPath()
-	{
-		result = AGMModel::SPtr(new AGMModel());
-	}
-	AGMSearchPath(const AGMModel::SPtr &init)
-	{
-		result = AGMModel::SPtr(new AGMModel(init));
-	}
-	void includeExecution(const AGMRuleExecution &exec)
-	{
-		path.push_back(exec);
-	}
+	AGMSearchPath();
+	AGMSearchPath(const AGMModel::SPtr &init);
+	void includeExecution(const AGMRuleExecution &exec);
+	void print();
+	bool goalIsMet(const AGMModel::SPtr &goal);
+	void clear();
 private:
 	std::list< AGMRuleExecution > path;
 	AGMModel::SPtr result;
@@ -57,10 +57,11 @@ public:
 
 
 public:
-	AGMSearch(const AGMModel::SPtr &current_, const AGMModel::SPtr &goal_, const boost::shared_ptr<AGM> &agm_);
+	AGMSearch(const boost::shared_ptr<AGM> &agm_);
+	bool go(const AGMModel::SPtr &current_, const AGMModel::SPtr &goal_, AGMSearchPath &result);
 
 private:
- 	AGMSearchPathList expandBestNode();
+ 	AGMSearchPathList expandBestNodeAndRemoveItFromTheNodesToExplore();
 private:
 	boost::shared_ptr<AGM> agm;
 	AGMModel::SPtr current, goal;

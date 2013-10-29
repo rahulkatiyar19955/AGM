@@ -8,13 +8,26 @@ import sys, traceback
 
 ret = 0
 try:
-	if len(sys.argv)==3:
-		inputFile   = sys.argv[1]
-		outputFile  = sys.argv[2]
-		agmData = AGMFileDataParsing.fromFile(inputFile, verbose=False)
-		agmData.generatePDDL(outputFile)
+	ok = True
+	if len(sys.argv)==7:
+		if sys.argv[1] != '-i':
+			ok = False
+		if sys.argv[3] != '-p':
+			ok = False
+		if sys.argv[5] != '-f':
+			ok = False
+		if ok:
+			inputFile         = sys.argv[2]
+			outputFileFull    = sys.argv[4]
+			outputFilePartial = sys.argv[6]
+			agmData = AGMFileDataParsing.fromFile(inputFile)
+			agmData.generatePDDL(outputFileFull, skipPassiveRules=False)
+			agmData.generatePDDL(outputFilePartial, skipPassiveRules=True)
 	else:
-		print '\n'+sys.argv[0], ' <inputFile.aggl>  <outputFile.pddl>\n'
+		ok = False
+
+	if not ok:
+		print '\n'+sys.argv[0], ' -i <inputFile.aggl> -p <activeRules.pddl> -f <activeAndPassiveRules.pddl>\n'
 		ret = 1
 except:
 	print 'Error'

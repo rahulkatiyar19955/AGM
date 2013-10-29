@@ -160,20 +160,18 @@ class AGMRulePDDL:
 		agmlist = agmlist_[:]
 		forgetList = translateList(forgetList_, nodeDict)
 		newList = translateList(newList_, nodeDict)
-		last = ''
-		print '- listHandlingPDDLEffects ----------------------------------------------'
-		print 'Forget list', forgetList
-		print 'New list   ', newList
-		print 'List      ', agmlist
-		print '------------------------------------------------------------------------'
+		if pddlVerbose:
+			print '- listHandlingPDDLEffects ----------------------------------------------'
+			print 'Forget list', forgetList
+			print 'New list   ', newList
+			print 'List      ', agmlist
+			print '------------------------------------------------------------------------'
 		# Same old, same old
 		if len(forgetList)==0 and len(newList)==0:
-			print 'aa10 a'
 			return ret
 
 		# NEW NODES: we must pop some symbols from the list
 		if len(newList)>0:
-			print 'aa10 b'
 			if len(agmlist)>1:
 				last = agmlist.pop()
 				ret += ' (not (firstunknown ?v' + last + '))'
@@ -188,15 +186,13 @@ class AGMRulePDDL:
 		# FORGET NODES: we must push some symbols from the list
 		elif len(forgetList)>0:
 			typeSet = set().union(rule.nodeTypes())
-			print 'aa10 c'
 			while len(forgetList)>0:
 				nextn = forgetList.pop()
 				for tip in typeSet:
 					ret += ' (not (IS' + tip + ' ' + nextn + '))'
 		# Internal error :-D
 		else:
-			print 'aa 10 d'
-			#raise Exception(":-)")
+			raise Exception(":-)")
 		return ret
 	@staticmethod
 	def newAndForgetNodesTypesPDDLEffects(rule, newList, forgetList, nodeDict, pddlVerbose=False):

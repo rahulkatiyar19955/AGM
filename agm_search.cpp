@@ -1,10 +1,15 @@
 #include "agm.h"
 #include "agm_search.h"
 
-AGMSearch::AGMSearch(const AGMModel::SPtr &current_, const AGMModel::SPtr &goal_, const boost::shared_ptr<AGM> &agm_)
+AGMSearch::AGMSearch(const boost::shared_ptr<AGM> &agm_)
 {
 	//Initialization
 	agm = AGM::SPtr(new AGM(agm_));
+}
+
+bool AGMSearch::go(const AGMModel::SPtr &current_, const AGMModel::SPtr &goal_, AGMSearchPath &result)
+{
+	// Initialize result
 	current = AGMModel::SPtr(new AGMModel(current_));
 	goal = AGMModel::SPtr(new AGMModel(goal_));
 	nodesToExplore.push_back(AGMSearchPath(current));
@@ -12,56 +17,59 @@ AGMSearch::AGMSearch(const AGMModel::SPtr &current_, const AGMModel::SPtr &goal_
 	//Check goal
 	if (goalIsMet(goal, current))
 	{
-		printf("0\n");
-		throw "We are already there!";
+		result = AGMSearchPath(current);
+		return true;
 	}
-	
+
 	//Main loop
 	while (not nodesToExplore.empty())
 	{
-		AGMSearchPathList l;
 		//Expand best node
-		try
-		{
-			l = expandBestNode();
-		}
-		catch (...)
-		{
-			printf("We should print here the target model\n");
-			exit(1);
-		}
-
+		AGMSearchPathList l;
+		l = expandBestNodeAndRemoveItFromTheNodesToExplore();
+		//Check if anyone of the expanded nodes meet goal's conditions and (if not)
+		//include them in the "nodes to explore" list.
 		for (AGMSearchPathList::iterator iter=l.begin(); iter!=l.end(); iter++)
 		{
+			if (iter->goalIsMet(goal))
+			{
+				printf("GOAL MET:\n");
+				iter->print();
+			}
+			else
+			{
+				nodesToExplore.push_back(*iter);
+			}
 		}
 	}
 	
 	AGMSearchPathList nodesToExplore;
 	AGMModelExploredMemory exploredNodes;
-	AGMSearchPath result;
-
+	return false;
 }
 
 
-AGMSearchPathList AGMSearch::expandBestNode()
+AGMSearchPathList AGMSearch::expandBestNodeAndRemoveItFromTheNodesToExplore()
 {
 	AGMSearchPathList ret;
 
 	if (nodesToExplore.size() > 0)
 	{
+		// This should be an ordered list (in the meantime... it's ok)
 		AGMSearchPath head = nodesToExplore.front();
 		nodesToExplore.pop_front();
-/*
-		for (int32_t r=0; r<reglas; ++r)
+
+		for (uint32_t r=0; r<agm->size(); ++r)
 		{
+/*
 			for (int32_t rL=0; rL<ruleL; ++rL)
 			{
 				for (int32_t rR=0; rR<ruleR; ++rR)
 				{
 				}
 			}
-		}
 */
+		}
 	}
 	return ret;
 }
@@ -116,7 +124,8 @@ bool AGMSearch::goalIsMet(const AGMModel::SPtr &world, const AGMModel::SPtr &goa
 				if (goodMatch)
 				{
 					std::map<int, int> goalId2Index;
-					for (int32_t  e=0; e< goalSize; e++)  goalId2Index[ goal->symbols[e]->identifier] = e;
+					for (int32_t  e=0; e< goalSize; e++)
+						goalId2Index[ goal->symbols[e]->identifier] = e;
 					for (uint32_t l1=0; l1<goal->edges.size(); l1++)
 					{
 						const int32_t id1G = goal->edges[l1].symbolPair.first;
@@ -176,7 +185,8 @@ bool AGMSearch::goalIsMet(const AGMModel::SPtr &world, const AGMModel::SPtr &goa
 	}
 	catch (std::string e)
 	{
-		std::cout << e << std::endl;
+		if (e != "end")
+			std::cout << e << std::endl;
 		// Goal wasn't met
 		return false;
 	}

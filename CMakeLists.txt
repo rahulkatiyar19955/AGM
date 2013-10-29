@@ -24,6 +24,7 @@ SET (AGM_CODE
   agm_modelSymbols.cpp
   agm_modelConverter.cpp
   agm_search.cpp
+  agm_searchPath.cpp
 )
 
 

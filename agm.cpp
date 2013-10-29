@@ -94,6 +94,10 @@ bool AGM::updateModel(AGMModelSymbol)
 }
 
 
+const AGGLRule &AGM::rule(int r)
+{
+	return rules[r];
+}
 
 
 

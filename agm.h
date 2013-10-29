@@ -8,6 +8,11 @@
 #include <agm_search.h>
 
 
+class AGGLRule
+{
+
+};
+
 class AGM
 {
 public:
@@ -28,9 +33,11 @@ public:
 	AGMModel currentModel;
 	void loadFromFile(std::string pddlFileFull_, std::string pddlFilePartial_);
 
+	const AGGLRule &rule(int);
+	uint32_t size() { return rules.size(); }
 private:
 	void readFileToString(std::string &file, std::string &content);
-
+	std::vector <AGGLRule> rules;
 };
 
 
