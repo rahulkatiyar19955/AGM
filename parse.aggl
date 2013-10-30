@@ -1,0 +1,41 @@
+spacePattern=3
+lineThickness=2
+fontName=Arial
+name=AGGLArticuloCOPIA
+vertexDiameter=46
+shortPattern=1
+nodeThickness=2
+fontSize=14
+longPattern=3
+===
+lookPerpendicularFloor : active
+{
+	{
+		r:robot(55,55)
+		f:plane(365,55)
+		r->f(in)
+	}
+	=>
+	{
+		r:robot(55,55)
+		f:plane(365,55)
+		r->f(in)
+		r->f(lookPerpendicular)
+	}
+}
+
+modelYaw : active
+{
+	{
+		r:robot(55,55)
+		f:plane(365,55)
+		r->f(lookPerpendicular)
+	}
+	=>
+	{
+		r:robot(55,55)
+		f:floor(365,55)
+		r->f(lookPerpendicular)
+	}
+}
+
