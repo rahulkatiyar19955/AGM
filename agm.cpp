@@ -29,8 +29,13 @@ AGM::AGM(const AGM::SPtr &src)
 	currentModel = AGMModel::SPtr(new AGMModel(src->currentModel));
 }
 
-AGM::AGM(std::string pddlFileFull_, std::string pddlFilePartial_)
+AGM::AGM(std::string agglfile, std::string pddlFileFull_, std::string pddlFilePartial_)
 {
+	if (not parseAGGL(agglfile.c_str(), this, &rules))
+	{
+		throw "Error reading AGGL file";
+	}
+
 	pddlFileFull = pddlFileFull_;
 	pddlFilePartial = pddlFilePartial_;
 
@@ -58,7 +63,7 @@ void AGM::readFileToString(std::string &file, std::string &content)
 		}
 		ifile.close();
 	}
-	else
+	else if (file != "")
 	{
 		std::cout << "Unable to open file:" << file << std::cout;
 		exit(1);
@@ -94,10 +99,35 @@ bool AGM::updateModel(AGMModelSymbol)
 }
 
 
-const AGGLRule &AGM::rule(int r)
+AGGLRule &AGM::rule(int r)
 {
 	return rules[r];
 }
 
 
 
+void AGM::addAttribute(std::string key, std::string value)
+{
+	attributes[key] = value;
+}
+
+void AGM::addAttribute(const char *key, const char *value)
+{
+	attributes[std::string(key)] = std::string(value);
+}
+
+void AGM::addAttribute(std::string key, int value)
+{
+	char text[512];
+	snprintf(text, 511, "%d", value);
+	attributes[key] = std::string(text);
+}
+
+void AGM::addAttribute(const char *key, int value)
+{
+	char text[512];
+	snprintf(text, 511, "%d", value);
+	attributes[std::string(key)] = std::string(text);
+}
+
+	

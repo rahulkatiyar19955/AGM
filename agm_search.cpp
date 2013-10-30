@@ -65,7 +65,7 @@ AGMSearchPathList AGMSearch::expandBestNodeAndRemoveItFromTheNodesToExplore()
 		for (uint32_t ruleNumber=0; ruleNumber<agm->size(); ++ruleNumber)
 		{
 			std::vector<int32_t> match;
-			const int32_t lhsSize = agm->rules[ruleNumber].lhsSymbols.size();
+			const int32_t lhsSize = agm->rules[ruleNumber].lhsSymbolsNames.size();
 			match.resize(lhsSize);
 			for (int32_t p=0; p<lhsSize; p++)
 			{
@@ -83,7 +83,7 @@ AGMSearchPathList AGMSearch::expandBestNodeAndRemoveItFromTheNodesToExplore()
 						match[lhsSize-sum] += 1;
 						if (match[lhsSize-sum] >= headSize) // If we to the last element of the first number, break
 							break;
-						if (agm->rules[ruleNumber].lhsSymbols[lhsSize-sum]->symbolType == head.result->symbols[match[lhsSize-sum]]->symbolType) // If the type is valid, break
+						if (agm->rules[ruleNumber].lhsSymbolsTypes[lhsSize-sum] == head.result->symbols[match[lhsSize-sum]]->symbolType) // If the type is valid, break
 							break;
 					}
 					while (match[lhsSize-sum] == headSize) // If we got to the last element of the first number continue with the ones on the left
@@ -95,7 +95,7 @@ AGMSearchPathList AGMSearch::expandBestNodeAndRemoveItFromTheNodesToExplore()
 					}
 					bool goodMatch = true;
 					for (int32_t e=0; e<lhsSize; e++) {
-						if (agm->rules[ruleNumber].lhsSymbols[e]->symbolType != head.result->symbols[match[e]]->symbolType) {
+						if (agm->rules[ruleNumber].lhsSymbolsTypes[e] != head.result->symbols[match[e]]->symbolType) {
 							goodMatch = false;
 							break;
 						}

@@ -115,9 +115,27 @@ ENDMACRO( WRAP_PYTHON_UI )
 WRAP_PYTHON_UI( guiAGGLEditor guiAGMExecutiveClient appearance )
 
 
-
-
-# ADD_CUSTOM_TARGET(AGMWorldModel.h )
+# COMPILE FLEX AND BISON FILE FOR THE AGGL PARSER #
+###################################################
+# Create target for the parser
+ADD_CUSTOM_TARGET(AGGLParser echo "Creating agglparser.cpp")
+ADD_CUSTOM_COMMAND(
+  SOURCE aggllexer.l
+  COMMAND flex
+  ARGS --outfile=aggllexer.cpp aggllexer.l
+  OUTPUT aggllexer.cpp
+)
+ ADD_CUSTOM_COMMAND(
+   SOURCE agglparser.y
+   COMMAND bison
+   ARGS -d -y agglparser.y -o agglparser.cpp
+   DEPENDS aggllexer.cpp
+   OUTPUT agglparser.cpp agglparser.hpp
+)
+SET_SOURCE_FILES_PROPERTIES(agglparser.cpp GENERATED) 
+SET_SOURCE_FILES_PROPERTIES(aggllexer.cpp GENERATED) 
+SET(AGM_CODE ${AGM_CODE} aggllexer.cpp agglparser.cpp)
+SET(LIBS ${LIBS} -lfl )
 
 
 #  Library building  #
