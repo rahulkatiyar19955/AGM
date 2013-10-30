@@ -64,13 +64,15 @@ AGMSearchPathList AGMSearch::expandBestNodeAndRemoveItFromTheNodesToExplore()
 		/// Generate each possible matching for every possible rule
 		for (uint32_t ruleNumber=0; ruleNumber<agm->size(); ++ruleNumber)
 		{
-			std::vector<int32_t> match;
+			std::vector<int32_t> world2rule;
+			std::vector<int32_t> rule2world;
 			const int32_t lhsSize = agm->rules[ruleNumber].lhsSymbolsNames.size();
-			match.resize(lhsSize);
+			world2rule.resize(lhsSize);
+			rule2world.resize(lhsSize);
 			for (int32_t p=0; p<lhsSize; p++)
 			{
-				if (p<lhsSize-1) match[p] = 0;
-				else match[p] = -1;
+				if (p<lhsSize-1) world2rule[p] = 0;
+				else world2rule[p] = -1;
 			}
 			try
 			{
@@ -80,27 +82,31 @@ AGMSearchPathList AGMSearch::expandBestNodeAndRemoveItFromTheNodesToExplore()
 					int32_t sum = 1;
 					while (1)
 					{
-						match[lhsSize-sum] += 1;
-						if (match[lhsSize-sum] >= headSize) // If we to the last element of the first number, break
+						world2rule[lhsSize-sum] += 1;
+						if (world2rule[lhsSize-sum] >= headSize) // If we to the last element of the first number, break
 							break;
-						if (agm->rules[ruleNumber].lhsSymbolsTypes[lhsSize-sum] == head.result->symbols[match[lhsSize-sum]]->symbolType) // If the type is valid, break
+						if (agm->rules[ruleNumber].lhsSymbolsTypes[lhsSize-sum] == head.result->symbols[world2rule[lhsSize-sum]]->symbolType) // If the type is valid, break
 							break;
 					}
-					while (match[lhsSize-sum] == headSize) // If we got to the last element of the first number continue with the ones on the left
+					while (world2rule[lhsSize-sum] == headSize) // If we got to the last element of the first number continue with the ones on the left
 					{
-						match[lhsSize-sum] = 0; // Aquí nos podríamos asegurar de que el 0 es un buen matching, pero ya demasiado complicado es el código...
+						world2rule[lhsSize-sum] = 0; // Aquí nos podríamos asegurar de que el 0 es un buen matching, pero ya demasiado complicado es el código...
 						sum += 1;
 						if (sum > lhsSize) { throw std::string("end"); }
-						match[lhsSize-sum]+=1;
+						world2rule[lhsSize-sum]+=1;
 					}
 					bool goodMatch = true;
 					for (int32_t e=0; e<lhsSize; e++) {
-						if (agm->rules[ruleNumber].lhsSymbolsTypes[e] != head.result->symbols[match[e]]->symbolType) {
+						if (agm->rules[ruleNumber].lhsSymbolsTypes[e] != head.result->symbols[world2rule[e]]->symbolType) {
 							goodMatch = false;
 							break;
 						}
 					}
 					if (not goodMatch) continue;
+					for (int32_t i=0; i<lhsSize; i++)
+					{
+						rule2world[world2rule[i]] = i;
+					}
 					/// RULE TRIGGERING CODE BEGINS
 					// 0 Here we have a symbol->symbol match (of the symbols in the LHS)
 					// 1 Verify that we have all the links specified in the LHS
@@ -111,6 +117,8 @@ AGMSearchPathList AGMSearch::expandBestNodeAndRemoveItFromTheNodesToExplore()
 					// 6 Create a new path by appending the new rule triggering to the current path
 					// 7 Append the created path to the list
 					// There we go...
+					// for (int32_t e=0; e<lhsSize; e++)
+					// 	agm->rules[ruleNumber].lhsSymbolsTypes[e] == head.result->symbols[match[e]]->symbolType
 
 					// 1 Verify that we have all the links specified in the LHS
 

@@ -1,39 +1,45 @@
-void AGMRule::print()
+#include "agm_rule.h"
+
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+void AGGLRule::print()
 {
 	printf(" Name: %s (%s)\n", name.c_str(), active?"active":"passive");
 	if (symbolsToCreateName.size()>0) printf("   Create symbols:\n");
-	for (uint i=0; i<symbolsToCreateName.size(); ++i)
+	for (uint32_t i=0; i<symbolsToCreateName.size(); ++i)
 	{
 		printf("      %s (%s)\n", symbolsToCreateName[i].c_str(), symbolsToCreateType[i].c_str());
 	}
 	if (symbolsToRemove.size()>0) printf("   Remove symbols:\n");
-	for (uint i=0; i<symbolsToRemove.size(); ++i)
+	for (uint32_t i=0; i<symbolsToRemove.size(); ++i)
 	{
 		printf("      %s\n", symbolsToRemove[i].c_str());
 	}
 	if (symbolsToRetypeName.size()>0) printf("   Retype symbols:\n");
-	for (uint i=0; i<symbolsToRetypeName.size(); ++i)
+	for (uint32_t i=0; i<symbolsToRetypeName.size(); ++i)
 	{
 		printf("      %s (%s)\n", symbolsToRetypeName[i].c_str(), symbolsToRetypeType[i].c_str());
 	}
 	if (addLinksA.size()>0) printf("   Create links:\n");
-	for (uint i=0; i<addLinksA.size(); ++i)
+	for (uint32_t i=0; i<addLinksA.size(); ++i)
 	{
 		printf("      %s---[%s]--->%s\n", addLinksA[i].c_str(), addLinksLabel[i].c_str(), addLinksB[i].c_str());
 	}
 	if (remLinksA.size()>0) printf("   Remove links:\n");
-	for (uint i=0; i<remLinksA.size(); ++i)
+	for (uint32_t i=0; i<remLinksA.size(); ++i)
 	{
 		printf("      %s---[%s]--->%s\n", remLinksA[i].c_str(), remLinksLabel[i].c_str(), remLinksB[i].c_str());
 	}
 }
 
-void AGMRule::setName(const char *nam)
+void AGGLRule::setName(const char *nam)
 {
 	name = std::string(nam);
 }
 
-void AGMRule::setActive(const char *act)
+void AGGLRule::setActive(const char *act)
 {
 	std::string acti(act);
 	if (acti == "active")
@@ -46,7 +52,7 @@ void AGMRule::setActive(const char *act)
 		exit(-1);
 	}
 }
-void AGMRule::addSymbol(bool left, std::string name, std::string type)
+void AGGLRule::addSymbol(bool left, std::string name, std::string type)
 {
 	if (left)
 	{
@@ -59,7 +65,7 @@ void AGMRule::addSymbol(bool left, std::string name, std::string type)
 		rhsSymbolsTypes.push_back(type);
 	}
 }
-void AGMRule::addLink(bool left, std::string a, std::string b, std::string label)
+void AGGLRule::addLink(bool left, std::string a, std::string b, std::string label)
 {
 	if (left)
 	{
@@ -74,24 +80,44 @@ void AGMRule::addLink(bool left, std::string a, std::string b, std::string label
 		rhsLinksLabel.push_back(label);
 	}
 }
-void AGMRule::computeEffects()
+
+void printV(std::string name, strVector v)
 {
-	//printf("symbol creation\n");
+	printf("%s: ", name.c_str());
+	for (uint32_t s=0; s<v.size(); s++)
+	{
+		printf("%s ", v[s].c_str());
+	}
+	printf("\n");
+}
+
+void AGGLRule::computeEffects()
+{
+// 	printf("symbol creation\n");
 	/// Symbol deletion
 	for (uint32_t i=0; i<rhsSymbolsNames.size(); i++)
 	{
+		//printf("%s\n", rhsSymbolsNames[i].c_str());
 		bool found = false;
 		for (uint32_t j=0; j<lhsSymbolsNames.size() and not found; j++)
 		{
 			if (rhsSymbolsNames[i] == lhsSymbolsNames[j])
 				found = true;
 		}
-		if (found)
+		if (not found)
 		{
-			symbolsToRemove.push_back(rhsSymbolsNames[i]);
+			//printf("not found (append)\n");
+			symbolsToCreateName.push_back(rhsSymbolsNames[i]);
+			symbolsToCreateType.push_back(rhsSymbolsTypes[i]);
+		}
+		else
+		{
+			//printf("found\n");
 		}
 	}
 	//printf("symbol deletion\n");
+	//printV("lhs", lhsSymbolsNames);
+	//printV("rhs", rhsSymbolsNames);
 	/// Symbol deletion
 	for (uint32_t i=0; i<lhsSymbolsNames.size(); i++)
 	{
@@ -107,8 +133,7 @@ void AGMRule::computeEffects()
 		}
 		if (not found)
 		{
-			symbolsToCreateName.push_back(lhsSymbolsNames[i]);
-			symbolsToCreateType.push_back(lhsSymbolsTypes[i]);
+			symbolsToRemove.push_back(lhsSymbolsNames[i]);
 		}
 	}
 	//printf("typing\n");
@@ -140,7 +165,7 @@ void AGMRule::computeEffects()
 			}
 		}
 	}
-	//printf("link creation\n");
+	printf("link creation\n");
 	/// Link creation
 	for (uint32_t j=0; j<rhsLinksLabel.size(); j++)
 	{
@@ -158,14 +183,14 @@ void AGMRule::computeEffects()
 				}
 			}
 		}
-		if (found)
+		if (not found)
 		{
-			addLinksA.push_back(lhsLinksA[j]);
-			addLinksB.push_back(lhsLinksB[j]);
-			addLinksLabel.push_back(lhsLinksLabel[j]);
+			addLinksA.push_back(rhsLinksA[j]);
+			addLinksB.push_back(rhsLinksB[j]);
+			addLinksLabel.push_back(rhsLinksLabel[j]);
 		}
 	}
-	//printf("link deletion\n");
+	printf("link deletion\n");
 	/// Link deletion
 	for (uint32_t i=0; i<lhsLinksLabel.size(); i++)
 	{
@@ -183,17 +208,17 @@ void AGMRule::computeEffects()
 				}
 			}
 		}
-		if (found)
+		if (not found)
 		{
 			remLinksA.push_back(lhsLinksA[i]);
 			remLinksB.push_back(lhsLinksB[i]);
 			remLinksLabel.push_back(lhsLinksLabel[i]);
 		}
 	}
-	//printf("gocha!\n");
+//printf("gocha!\n");
 }
 
-void AGMRule::clear() 
+void AGGLRule::clear() 
 {
 	name = "";
 	active = true;
