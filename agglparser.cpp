@@ -1480,7 +1480,7 @@ yyreduce:
 
 /* Line 1806 of yacc.c  */
 #line 67 "agglparser.y"
-    {rule.computeEffects(); rule.setName((yyvsp[(1) - (12)].sval)); rule.setActive((yyvsp[(3) - (12)].sval));agmRules->push_back(rule); rule.clear(); }
+    {rule.computeEffects(); rule.setName((yyvsp[(1) - (12)].sval)); rule.setActive((yyvsp[(3) - (12)].sval));agmRules->push_back(rule); rule.clear(); printf("R %d\n", agmRules->size());}
     break;
 
   case 10:
