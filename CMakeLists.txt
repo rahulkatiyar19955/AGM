@@ -25,6 +25,7 @@ SET (AGM_CODE
   agm_modelConverter.cpp
   agm_search.cpp
   agm_searchPath.cpp
+  agm_rule.cpp
 )
 
 
@@ -40,6 +41,7 @@ SET (HEADERS
   agm_misc_functions.h
   agm_modelConverter.h
   agm_search.h
+  agm_rule.h
 )
 
 
