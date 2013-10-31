@@ -77,6 +77,22 @@ class NodeTypeReader(QLineEdit):
 		self.hide()
 		self.close()
 
+class EdgeReader(QLineEdit):
+	def __init__(self, x, y, index, parent):
+		QLineEdit.__init__(self, parent)
+		self.resize(100, 32)
+		self.move(x-50, y-16)
+		self.show()
+		self.x = x
+		self.y = y
+		self.ind = index
+		self.parentW = parent
+		self.connect(self, SIGNAL('returnPressed()'), self.got)
+	def got(self):
+		self.parentW.graph.links[self.ind].linkType = str(self.text())
+		self.hide()
+		self.close()
+
 class RuleRenamer(QLineEdit):
 	def __init__(self, x, y, rule, widget):
 		QLineEdit.__init__(self, widget)
@@ -108,6 +124,7 @@ class GraphDraw(QWidget):
 		self.move(0,0)
 		self.pressed = False
 		self.show()
+		self.linkPositionMap = dict()
 	def paintEvent(self, event=None):
 		if self.size() != self.parentW.size():
 			self.resize(self.parentW.size())
@@ -137,6 +154,7 @@ class GraphDraw(QWidget):
 	def paintOnPainter(self, painter, w, h, drawlines=True):
 		global vertexDiameter
 		global nodeThickness
+		self.linkPositionMap.clear()
 		w = float(w)
 		h = float(h)
 		w2 = w/2
@@ -264,8 +282,11 @@ class GraphDraw(QWidget):
 
 				painter.setBrush(QColor(255, 255, 255))
 				d = 2
-				painter.fillRect(QRectF(rect.x()-5+d, rect.y()-3, rect.width()+10, rect.height()+6), Qt.black)
-				painter.fillRect(QRectF(rect.x()-3+d, rect.y()-1.5, rect.width()+6, rect.height()+3), Qt.white)
+				outterLinkRect = QRectF(rect.x()-5+d, rect.y()-3, rect.width()+10, rect.height()+6)
+				innerLinkRect = QRectF(rect.x()-3+d, rect.y()-1.5, rect.width()+6, rect.height()+3)
+				self.linkPositionMap[linkindex] = outterLinkRect
+				painter.fillRect(outterLinkRect, Qt.black)
+				painter.fillRect(innerLinkRect, Qt.white)
 				rect.translate(2, 0)
 				painter.drawText(rect, align, str(e.linkType))
 				rect.translate(-2, 0)
@@ -306,14 +327,16 @@ class GraphDraw(QWidget):
 				self.graph.removeNode(eX, eY, vertexDiameter)
 
 		elif tool == 'Node - Rename':
-			x, y = self.graph.getCenter(eX, eY, vertexDiameter)
+			x, y = self.graph.getCenter(self.sumaX+eX, self.sumaY+eY, vertexDiameter)
 			if x>=0:
 				r = NodeNameReader(x, y, self)
+				r.show()
 				r.setFocus(Qt.OtherFocusReason)
 		elif tool == 'Node - Change type':
-			x, y = self.graph.getCenter(eX, eY, vertexDiameter)
+			x, y = self.graph.getCenter(self.sumaX+eX, self.sumaY+eY, vertexDiameter)
 			if x>=0:
 				r = NodeTypeReader(x, y, self)
+				r.show()
 				r.setFocus(Qt.OtherFocusReason)
 		elif tool == 'Node - Move':
 			self.pressName, found = self.graph.getName(eX, eY, 100)
@@ -326,7 +349,12 @@ class GraphDraw(QWidget):
 		elif tool == 'Edge - Remove':
 			self.graph.removeEdge(eX, eY)
 		elif tool == 'Edge - Rename':
-			self.graph.renameEdge(eX, eY, newName)
+			for linkindex in range(len(self.graph.links)):
+				if self.linkPositionMap[linkindex].contains(eX, eY):
+					print self.graph.links[linkindex].linkType
+					r = EdgeReader(self.sumaX+eX, self.sumaY+eY, linkindex, self)
+					r.show()
+					r.setFocus(Qt.OtherFocusReason)
 		elif tool == 'Edge - (Dis/En)able':
 			self.edgeSwitchA = self.graph.getName(eX, eY, vertexDiameter)
 	def mouseReleaseEvent(self, e):
