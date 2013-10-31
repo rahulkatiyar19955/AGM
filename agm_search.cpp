@@ -157,6 +157,10 @@ bool AGMSearch::goalIsMet(const AGMModel::SPtr &world, const AGMModel::SPtr &goa
 	if (goal->symbols.size()>world->symbols.size() or goal->symbols.size()>world->symbols.size() )
 		return false;
 
+	/// If we have constants in our goal we won't have to match ALL nodes
+	/// If we have constants in our goal we won't have to match ALL nodes
+	/// If we have constants in our goal we won't have to match ALL nodes
+	/// If we have constants in our goal we won't have to match ALL nodes
 	// In this part we generate possible matchings
 	std::vector<int32_t> match;
 	const int32_t goalSize  =  goal->symbols.size();
