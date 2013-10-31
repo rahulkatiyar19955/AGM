@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <vector>
+#include <stdint.h>
 
 typedef std::vector<std::string> strVector;
 
@@ -21,15 +22,24 @@ public:
 	strVector symbolsToCreateName;
 	strVector symbolsToCreateType;
 	strVector symbolsToRemove;
+	std::vector<int32_t> symbolsToRemoveID;
 	strVector symbolsToRetypeName;
 	strVector symbolsToRetypeType;
+	std::vector<int32_t> symbolsToRetypeID;
 	// Effect Links
 	strVector addLinksA;
+	std::vector<int32_t> addLinksAID;
 	strVector addLinksB;
+	std::vector<int32_t> addLinksBID;
 	strVector addLinksLabel;
 	strVector remLinksA;
 	strVector remLinksB;
+	std::vector<int32_t> remLinksAID;
+	std::vector<int32_t> remLinksBID;
 	strVector remLinksLabel;
+	// Unaffected links
+	
+	
 	
 	void print();
 	void setName(const char *nam);
@@ -44,6 +54,8 @@ public:
 	strVector rhsSymbolsTypes;
 	strVector rhsLinksA;
 	strVector rhsLinksB;
+	std::vector<int32_t> rhsLinksAID;
+	std::vector<int32_t> rhsLinksBID;
 	strVector rhsLinksLabel;
 
 };

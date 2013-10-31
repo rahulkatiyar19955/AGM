@@ -1,3 +1,4 @@
-rm agglparser.cpp agglparser.hpp; make agglplanner && ./agglplanner parse.aggl modelA.xml modelB.xml 
+#rm agglparser.cpp agglparser.hpp;
+make agglplanner && ./agglplanner cajasVacias1.aggl modelA.xml modelB.xml 
 
 

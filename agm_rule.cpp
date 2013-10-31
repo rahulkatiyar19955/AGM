@@ -75,6 +75,8 @@ void AGGLRule::addLink(bool left, std::string a, std::string b, std::string labe
 	}
 	else
 	{
+		rhsLinksAID.push_back(rhsLinksA.size());
+		rhsLinksBID.push_back(rhsLinksB.size());
 		rhsLinksA.push_back(a);
 		rhsLinksB.push_back(b);
 		rhsLinksLabel.push_back(label);
@@ -134,6 +136,7 @@ void AGGLRule::computeEffects()
 		if (not found)
 		{
 			symbolsToRemove.push_back(lhsSymbolsNames[i]);
+			symbolsToRemoveID.push_back(i);
 		}
 	}
 	//printf("typing\n");
@@ -159,13 +162,14 @@ void AGGLRule::computeEffects()
 					if (lhsSymbolsTypes[i] != rhsSymbolsTypes[k])
 					{
 						symbolsToRetypeName.push_back(lhsSymbolsNames[i]);
+						symbolsToRetypeID.push_back(i);
 						symbolsToRetypeType.push_back(rhsSymbolsTypes[k]);
 					}
 				}
 			}
 		}
 	}
-	printf("link creation\n");
+	//printf("link creation\n");
 	/// Link creation
 	for (uint32_t j=0; j<rhsLinksLabel.size(); j++)
 	{
@@ -187,10 +191,12 @@ void AGGLRule::computeEffects()
 		{
 			addLinksA.push_back(rhsLinksA[j]);
 			addLinksB.push_back(rhsLinksB[j]);
+			addLinksAID.push_back(rhsLinksAID[j]);
+			addLinksBID.push_back(rhsLinksBID[j]);
 			addLinksLabel.push_back(rhsLinksLabel[j]);
 		}
 	}
-	printf("link deletion\n");
+	//printf("link deletion\n");
 	/// Link deletion
 	for (uint32_t i=0; i<lhsLinksLabel.size(); i++)
 	{
@@ -210,6 +216,8 @@ void AGGLRule::computeEffects()
 		}
 		if (not found)
 		{
+			remLinksAID.push_back(remLinksA.size());
+			remLinksBID.push_back(remLinksB.size());
 			remLinksA.push_back(lhsLinksA[i]);
 			remLinksB.push_back(lhsLinksB[i]);
 			remLinksLabel.push_back(lhsLinksLabel[i]);
@@ -227,21 +235,30 @@ void AGGLRule::clear()
 	lhsLinksA.clear();
 	lhsLinksB.clear();
 	lhsLinksLabel.clear();
+
 	rhsSymbolsNames.clear();
 	rhsSymbolsTypes.clear();
 	rhsLinksA.clear();
 	rhsLinksB.clear();
+	rhsLinksAID.clear();
+	rhsLinksBID.clear();
 	rhsLinksLabel.clear();
 
 	symbolsToCreateName.clear();
 	symbolsToCreateType.clear();
 	symbolsToRemove.clear();
+	symbolsToRemoveID.clear();
 	addLinksA.clear();
 	addLinksB.clear();
+	addLinksAID.clear();
+	addLinksBID.clear();
 	addLinksLabel.clear();
 	remLinksA.clear();
 	remLinksB.clear();
+	remLinksAID.clear();
+	remLinksBID.clear();
 	remLinksLabel.clear();
 	symbolsToRetypeName.clear();
+	symbolsToRetypeID.clear();
 	symbolsToRetypeType.clear();
 }
