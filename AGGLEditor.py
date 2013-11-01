@@ -72,12 +72,9 @@ class AGMEditor(QMainWindow):
 		self.ui.toolsList.addItem('Node - Rename')
 		self.ui.toolsList.addItem('Node - Change type')
 		self.ui.toolsList.addItem('Node - Move')
-		self.ui.toolsList.addItem('Node - (Dis/En)able')
 		self.ui.toolsList.addItem('Edge - Add')
 		self.ui.toolsList.addItem('Edge - Remove')
-		self.ui.toolsList.addItem('Edge - Rename')
-		self.ui.toolsList.addItem('Edge - (Dis/En)able')
-		self.ui.toolsList.addItem('Edge - Change type')
+		self.ui.toolsList.addItem('Edge - Change label')
 		# Graph painters
 		self.lhsPainter = GraphDraw(self.ui.lhsParentWidget, self, "LHS")
 		self.rhsPainter = GraphDraw(self.ui.rhsParentWidget, self, "RHS")

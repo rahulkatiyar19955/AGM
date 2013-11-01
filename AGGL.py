@@ -75,7 +75,7 @@ class AGMGraph(object):
 		if minDist > -1:
 			return minName, True
 		else:
-			return '', False
+			raise BasicException("")
 	def getNameRelaxed(self, xa, ya, diameter):
 		minDist = -1
 		minName = None
@@ -93,7 +93,7 @@ class AGMGraph(object):
 		if found:
 			return self.nodes[name].pos[0], self.nodes[name].pos[1]
 		else:
-			return -1, -1
+			raise BasicException("")
 
 
 	def addNode(self, x, y, name, stype):

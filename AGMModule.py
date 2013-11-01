@@ -31,36 +31,29 @@ def distance(x, y, x2, y2):
 	return math.sqrt(pow(float(x)-float(x2), 2) + pow(float(y)-float(y2), 2))
 
 class NodeNameReader(QLineEdit):
-	def __init__(self, x, y, parent):
+	def __init__(self, x, y, widx, widy, parent):
 		QLineEdit.__init__(self, parent)
 		self.resize(100, 32)
-		self.move(x-50, y-16)
+		self.move(widx-50, widy-16)
 		self.show()
 		self.x = x
 		self.y = y
 		self.parentW = parent
 		self.connect(self, SIGNAL('returnPressed()'), self.got)
 	def got(self):
-		ty = ''
 		newName = str(self.text())
-		bacName = ''
-		pos = []
 		for v in self.parentW.graph.nodes.keys():
 			if self.parentW.graph.nodes[v].pos[0] == self.x:
 				if self.parentW.graph.nodes[v].pos[1] == self.y:
-					ty = self.parentW.graph.nodes[v].sType
-					bacName = self.parentW.graph.nodes[v].name
-					pos = self.parentW.graph.nodes[bacName].pos
-					del self.parentW.graph.nodes[bacName]
-					self.parentW.graph.nodes[newName] = AGMSymbol(newName, ty, pos)
+					self.parentW.graph.nodes[v].name = newName
 		self.hide()
 		self.close()
 
 class NodeTypeReader(QLineEdit):
-	def __init__(self, x, y, parent):
+	def __init__(self, x, y, widx, widy, parent):
 		QLineEdit.__init__(self, parent)
 		self.resize(100, 32)
-		self.move(x-50, y-16)
+		self.move(widx-50, widy-16)
 		self.show()
 		self.x = x
 		self.y = y
@@ -220,12 +213,17 @@ class GraphDraw(QWidget):
 			painter.drawText(rect, align, str(v.sType))
 		lengthPointer = 0.5*0.35*vertexDiameter
 		anglePointer = 38.
-		linkindex = 0
 		for a in [True, False]:
-			for linkindex in range(len(self.graph.links)):
+			linkindex = 0
+			while linkindex < len(self.graph.links):
 				e = self.graph.links[linkindex]
-				v1 = self.graph.nodes[e.a]
-				v2 = self.graph.nodes[e.b]
+				try:
+					v1 = self.graph.nodes[e.a]
+					v2 = self.graph.nodes[e.b]
+				except:
+					del self.graph.links[linkindex]
+					print 'removing dangling edge'
+					continue
 				pos = 0
 				linkGroupCount = 0
 				for linkindex2 in range(len(self.graph.links)):
@@ -305,6 +303,7 @@ class GraphDraw(QWidget):
 					painter.rotate(-an)
 					painter.translate(-xendLine, -yendLine)
 					pass
+				linkindex += 1
 	def mousePressEvent(self, e):
 		tool = self.main.tool
 		self.pressed = True
@@ -322,41 +321,44 @@ class GraphDraw(QWidget):
 			self.lastNumber +=1
 
 		elif tool == 'Node - Remove':
-			x, y = self.graph.getName(eX, eY, vertexDiameter)
-			if x>=0:
+			try:
+				x, y = self.graph.getName(eX, eY, vertexDiameter)
 				self.graph.removeNode(eX, eY, vertexDiameter)
-
+			except:
+				pass
 		elif tool == 'Node - Rename':
-			x, y = self.graph.getCenter(self.sumaX+eX, self.sumaY+eY, vertexDiameter)
-			if x>=0:
-				r = NodeNameReader(x, y, self)
+			try:
+				x, y = self.graph.getCenter(eX, eY, vertexDiameter)
+				r = NodeNameReader(x, y, self.sumaX+x, self.sumaY+y, self)
 				r.show()
 				r.setFocus(Qt.OtherFocusReason)
+			except:
+				print 'no node to rename in these coordinates'
 		elif tool == 'Node - Change type':
-			x, y = self.graph.getCenter(self.sumaX+eX, self.sumaY+eY, vertexDiameter)
-			if x>=0:
-				r = NodeTypeReader(x, y, self)
+			try:
+				x, y = self.graph.getCenter(eX, eY, vertexDiameter)
+				r = NodeTypeReader(x, y, self.sumaX+x, self.sumaY+y, self)
 				r.show()
 				r.setFocus(Qt.OtherFocusReason)
+			except:
+				pass
 		elif tool == 'Node - Move':
 			self.pressName, found = self.graph.getName(eX, eY, 100)
 			if not found: self.pressName = ''
-		elif tool == 'Node - (Dis/En)able':
-			self.graph.switchNode(eX, eY)
 		elif tool == 'Edge - Add':
 			self.pressName, found = self.graph.getName(eX, eY, vertexDiameter)
 			if not found: self.pressName = ''
 		elif tool == 'Edge - Remove':
-			self.graph.removeEdge(eX, eY)
-		elif tool == 'Edge - Rename':
+			for linkindex in range(len(self.graph.links)):
+				if self.linkPositionMap[linkindex].contains(eX, eY):
+					del self.graph.links[linkindex]
+		elif tool == 'Edge - Change label':
 			for linkindex in range(len(self.graph.links)):
 				if self.linkPositionMap[linkindex].contains(eX, eY):
 					print self.graph.links[linkindex].linkType
 					r = EdgeReader(self.sumaX+eX, self.sumaY+eY, linkindex, self)
 					r.show()
 					r.setFocus(Qt.OtherFocusReason)
-		elif tool == 'Edge - (Dis/En)able':
-			self.edgeSwitchA = self.graph.getName(eX, eY, vertexDiameter)
 	def mouseReleaseEvent(self, e):
 		tool = self.main.tool
 		self.pressed = False
@@ -376,8 +378,6 @@ class GraphDraw(QWidget):
 		elif tool == 'Node - Move':
 			global vertexDiameter
 			self.graph.moveNode(self.pressName, eX, eY, vertexDiameter)
-		elif tool == 'Node - (Dis/En)able':
-			pass
 		elif tool == 'Edge - Add':
 			self.releaseName, found = self.graph.getName(eX, eY, vertexDiameter)
 			if not found: self.releaseName = ''
@@ -385,13 +385,8 @@ class GraphDraw(QWidget):
 				self.graph.addEdge(self.pressName, self.releaseName)
 		elif tool == 'Edge - Remove':
 			pass
-		elif tool == 'Edge - Rename':
+		elif tool == 'Edge - Change label':
 			pass
-		elif tool == 'Edge - (Dis/En)able':
-			self.edgeSwitchB = self.graph.getName(eX, eY, vertexDiameter)
-			for e in self.graph.edges:
-				if (e.a==self.edgeSwitchA and e.b==self.edgeSwitchB) or (e.a==self.edgeSwitchB and e.b==self.edgeSwitchA):
-					e.enabled = not e.enabled
 	def mouseMoveEvent(self, e):
 		tool = self.main.tool
 		eX = e.x()-self.sumaX
