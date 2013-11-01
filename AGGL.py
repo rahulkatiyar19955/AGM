@@ -111,7 +111,7 @@ class AGMGraph(object):
 		elif name == '':
 			pass
 		else:
-			print 'No such node', name+'. Internal editor error.'
+			print 'No such node', str(name)+'. Internal editor error.'
 			pass
 	def addEdge(self, a, b, linkname='link'):
 		self.links.append(AGMLink(a, b, linkname, True))

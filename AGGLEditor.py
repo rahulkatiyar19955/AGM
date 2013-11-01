@@ -34,6 +34,8 @@ from ui_appearance import Ui_Appearance
 
 from parseAGGL import *
 
+import Image, ImageOps
+import numpy as np
 
 from inspect import currentframe, getframeinfo
 
@@ -229,6 +231,8 @@ class AGMEditor(QMainWindow):
 		self.rhsPainter.export(pathRHS)
 	def exportAll(self):
 		path = str(QFileDialog.getExistingDirectory(self, "Export all rules", ""))
+		self.exportAllPath(path)
+	def exportAllPath(self, path):
 		lhs = self.lhsPainter.graph
 		rhs = self.rhsPainter.graph
 		for i in range(len(self.agmData.agm.rules)):
@@ -239,19 +243,62 @@ class AGMEditor(QMainWindow):
 			self.rhsPainter.export(str(path)+'/rule'+str(i)+'_rhs.svg')
 		self.lhsPainter.graph = lhs
 		self.rhsPainter.graph = rhs
-	def exportAllPNG (self):
+	def exportAllPNG(self):
 		path = str(QFileDialog.getExistingDirectory(self, "Export all rules", ""))
+		self.exportAllPathPNG(path)
+	def exportAllPathPNG(self, path):
 		lhs = self.lhsPainter.graph
 		rhs = self.rhsPainter.graph
 		for i in range(len(self.agmData.agm.rules)):
 			rule = self.agmData.agm.rules[i]
 			print i
+			# Export LHS
 			self.lhsPainter.graph = rule.lhs
-			self.lhsPainter.exportPNG(str(path)+'/rule'+str(i)+'_lhs.png')
+			lhsPathPNG = str(path)+'/rule'+str(i)+'_lhs.png'
+			self.lhsPainter.exportPNG(lhsPathPNG)
+			# Export RHS
 			self.rhsPainter.graph = rule.rhs
-			self.rhsPainter.exportPNG(str(path)+'/rule'+str(i)+'_rhs.png')
+			rhsPathPNG = str(path)+'/rule'+str(i)+'_rhs.png'
+			self.rhsPainter.exportPNG(rhsPathPNG)
+			# Crop images similarly
+			#crop = False
+			crop = True
+			if crop:
+				#L
+				lImage=Image.open(lhsPathPNG)
+				lImage.load()
+				lImageBox = self.getBoxImage(lImage)
+				w,h = lImage.size
+				#R
+				rImage=Image.open(rhsPathPNG)
+				rImage.load()
+				rImageBox = self.getBoxImage(rImage)
+				print lImageBox, rImageBox
+				w,h = rImage.size
+				print 'Size ', w, h
+				imageBox = self.getProperBox(lImageBox, rImageBox, w, h)
+				lCropped=lImage.crop(imageBox)
+				lCropped.save(lhsPathPNG)
+				rCropped=rImage.crop(imageBox)
+				rCropped.save(rhsPathPNG)
 		self.lhsPainter.graph = lhs
 		self.rhsPainter.graph = rhs
+
+	def getBoxImage(self, image):
+		invert_im = ImageOps.invert(image)
+		return invert_im.getbbox()
+
+	def getProperBox(self, a, b, w, h):
+		c = h/2
+		print 'A', a
+		print 'B', b
+		print 'Size', w, h
+		y1 = min(a[1], b[1])
+		y2 = max(a[3], b[3])
+		ret = (0, y1, w, y2)
+		print ret
+		return ret
+		
 	def open(self):
 		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.aggl")[0])
 		self.openFromFile(path)

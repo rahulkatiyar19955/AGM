@@ -42,10 +42,20 @@ class NodeNameReader(QLineEdit):
 		self.connect(self, SIGNAL('returnPressed()'), self.got)
 	def got(self):
 		newName = str(self.text())
+		oldName = ''
 		for v in self.parentW.graph.nodes.keys():
 			if self.parentW.graph.nodes[v].pos[0] == self.x:
 				if self.parentW.graph.nodes[v].pos[1] == self.y:
+					oldName = self.parentW.graph.nodes[v].name
 					self.parentW.graph.nodes[v].name = newName
+		if oldName != '' and oldName != newName: 
+			self.parentW.graph.nodes[newName] = self.parentW.graph.nodes[oldName]
+			del self.parentW.graph.nodes[oldName]
+			for l in self.parentW.graph.links:
+				if l.a == oldName:
+					l.a = newName
+				if l.b == oldName:
+					l.b = newName
 		self.hide()
 		self.close()
 
@@ -137,10 +147,10 @@ class GraphDraw(QWidget):
 		self.paintOnPainter(svgPainter, self.size().width()*5, self.size().height()*5, drawlines=False)
 		svgPainter.end()
 	def exportPNG(self, path):
-		pixmap = QPixmap(self.parentW.size())
+		pixmap = QPixmap(self.size())
 		painter = QPainter(pixmap)
 		painter.setRenderHint(QPainter.Antialiasing, True)
-		self.paintOnPainter(painter, self.size().width()*5, self.size().height()*5, drawlines=False)
+		self.paintOnPainter(painter, self.size().width(), self.size().height(), drawlines=False)
 		pixmap.save(path, "png")
 		painter.end()
 		painter = None
@@ -203,13 +213,15 @@ class GraphDraw(QWidget):
 			painter.drawEllipse(v.pos[0]-(vertexDiameter/2), v.pos[1]-0.7001*(vertexDiameter/2), vertexDiameter, vertexDiameter*0.7001)
 			# Temp
 			align = Qt.AlignLeft
+			fixedVerticalOffsetName = -3
+			fixedVerticalOffsetType = -5
 			# Draw identifier
 			rect = painter.boundingRect(QRectF(float(v.pos[0]), float(v.pos[1]), 1, 1), align, str(v.name))
-			rect.translate(-rect.width()/2, -rect.height())
+			rect.translate(-rect.width()/2, -rect.height()+fixedVerticalOffsetName)
 			painter.drawText(rect, align, str(v.name))
 			# Draw type
 			rect = painter.boundingRect(QRectF(float(v.pos[0]), float(v.pos[1]), 1, 1), align, str(v.sType))
-			rect.translate(-rect.width()/2, 0)
+			rect.translate(-rect.width()/2, fixedVerticalOffsetType)
 			painter.drawText(rect, align, str(v.sType))
 		lengthPointer = 0.5*0.35*vertexDiameter
 		anglePointer = 38.
@@ -221,8 +233,8 @@ class GraphDraw(QWidget):
 					v1 = self.graph.nodes[e.a]
 					v2 = self.graph.nodes[e.b]
 				except:
+					print 'dangling edge: ', self.graph.links[linkindex].a+'---['+self.graph.links[linkindex].linkType+']--->'+self.graph.links[linkindex].b
 					del self.graph.links[linkindex]
-					print 'removing dangling edge'
 					continue
 				pos = 0
 				linkGroupCount = 0
@@ -329,7 +341,7 @@ class GraphDraw(QWidget):
 		elif tool == 'Node - Rename':
 			try:
 				x, y = self.graph.getCenter(eX, eY, vertexDiameter)
-				r = NodeNameReader(x, y, self.sumaX+x, self.sumaY+y, self)
+				r = NodeNameReader(x, y, self.sumaX+x, self.sumaY+y-4, self)
 				r.show()
 				r.setFocus(Qt.OtherFocusReason)
 			except:
@@ -337,7 +349,7 @@ class GraphDraw(QWidget):
 		elif tool == 'Node - Change type':
 			try:
 				x, y = self.graph.getCenter(eX, eY, vertexDiameter)
-				r = NodeTypeReader(x, y, self.sumaX+x, self.sumaY+y, self)
+				r = NodeTypeReader(x, y, self.sumaX+x, self.sumaY+y-4, self)
 				r.show()
 				r.setFocus(Qt.OtherFocusReason)
 			except:
