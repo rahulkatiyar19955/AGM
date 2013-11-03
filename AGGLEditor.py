@@ -268,14 +268,23 @@ class AGMEditor(QMainWindow):
 				lImage=Image.open(lhsPathPNG)
 				lImage.load()
 				lImageBox = self.getBoxImage(lImage)
-				w,h = lImage.size
+				wL,hL = lImage.size
 				#R
 				rImage=Image.open(rhsPathPNG)
 				rImage.load()
 				rImageBox = self.getBoxImage(rImage)
+				wR,hR = rImage.size
+				# ----
+				if lImageBox == None:
+					lImageBox = rImageBox
+				if rImageBox == None:
+					rImageBox = lImageBox
 				print lImageBox, rImageBox
-				w,h = rImage.size
-				print 'Size ', w, h
+				print 'Size ', wR, hR
+				w = wL
+				if w == None: w = wR
+				h = hL
+				if h == None: h = hR
 				imageBox = self.getProperBox(lImageBox, rImageBox, w, h)
 				lCropped=lImage.crop(imageBox)
 				lCropped.save(lhsPathPNG)
