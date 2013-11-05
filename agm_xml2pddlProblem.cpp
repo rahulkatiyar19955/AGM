@@ -1,0 +1,28 @@
+#include "agm.h"
+#include <fstream>
+#include <ostream>
+#include <string>
+#include <iostream>
+
+int main(int argc, char **argv)
+{
+	if (argc < 4)
+	{
+		std::cout << "Usage:\n\t" << argv[0] << " initialModel.xml targetPattern.xml outputPDDLProblem.pddl" << std::endl;
+		return -1;
+	}
+
+	AGMModel::SPtr xml1(new AGMModel());
+	AGMModelConverter::fromXMLToInternal(argv[1], xml1);
+	AGMModel::SPtr xml2(new AGMModel());
+	AGMModelConverter::fromXMLToInternal(argv[2], xml2);
+
+	std::string ret = xml1->generatePDDLProblem(xml2, 10, "active.pddl", argv[3]);
+
+	std::ofstream out(argv[3]);
+	out << ret;
+	out.close();
+
+	return 0;
+}
+

@@ -67,6 +67,8 @@ from AGMModule import *
 class AGMEditor(QMainWindow):
 	def __init__(self, filePath=''):
 		QMainWindow.__init__(self)
+		self.filePath = filePath
+		self.modified = False
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
 		self.ui.toolsList.addItem('Node - Add')
@@ -94,11 +96,18 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionGenerateCode,               SIGNAL("triggered(bool)"),                                      self.generateCode)
 		self.connect(self.ui.actionExportAllRules,             SIGNAL("triggered(bool)"),                                      self.exportAll)
 		self.connect(self.ui.actionExportAllRulesPNG,          SIGNAL("triggered(bool)"),                                      self.exportAllPNG)
+		self.connect(self.ui.actionSaveAs,                     SIGNAL("triggered(bool)"),                                      self.saveAs)
 		self.connect(self.ui.actionSave,                       SIGNAL("triggered(bool)"),                                      self.save)
 		self.connect(self.ui.actionOpen,                       SIGNAL("triggered(bool)"),                                      self.open)
-		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),                                      self.close)
+		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),                                      self.appClose)
 		self.connect(self.ui.actionGraphmar,                   SIGNAL("triggered(bool)"),                                      self.about)
 		self.connect(self.ui.passiveCheckBox,                  SIGNAL("stateChanged(int)"),                                    self.changePassive)
+		self.ui.actionSaveAs.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_S + Qt.Key_Shift))
+		self.ui.actionSave.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_S))
+		self.ui.actionOpen.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_O))
+		self.ui.actionQuit.setShortcut(QKeySequence(Qt.CTRL + Qt.Key_Q))
+		#self.ui.actionNextRule.setShortcut(QKeySequence(Qt.Key_PageDown))
+		#self.ui.actionPrevRule.setShortcut(QKeySequence(Qt.Key_PageUp))
 
 		# Get settings
 		settings = QSettings("AGM", "mainWindowGeometry")
@@ -164,6 +173,12 @@ class AGMEditor(QMainWindow):
 		self.font = self.fontDialog.currentFont()
 		self.connect(self.ui.actionChangeFont,                 SIGNAL("triggered(bool)"),                                      self.changeFont)
 
+	def appClose(self):
+		#if self.modified:
+			#self.close()
+		#else:
+			#self.close()
+		self.close()
 	# Manages close events
 	def closeEvent(self, closeevent):
 		settings = QSettings("AGM", "mainWindowGeometry");
@@ -320,8 +335,16 @@ class AGMEditor(QMainWindow):
 			q = QListWidgetItem()
 			q.setText(rule.name)
 			self.ui.rulesList.addItem(q)
-	def save(self):
+	def saveAs(self):
 		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
+		self.save(path)
+	def save(self, path=''):
+		if path == '':
+			if self.filePath != '':
+				path = self.filePath
+			else:
+				path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
+		self.filePath = path
 		self.agmData.properties['name'] = path.split('/')[-1].split('.')[0]
 		global vertexDiameter
 		self.agmData.properties['vertexDiameter'] = vertexDiameter
@@ -341,6 +364,7 @@ class AGMEditor(QMainWindow):
 		self.agmData.properties['fontSize'] = fontSize
 	
 		self.agmData.toFile(path)
+		self.modified = False
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)

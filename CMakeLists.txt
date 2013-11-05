@@ -115,7 +115,7 @@ MACRO( WRAP_PYTHON_UI )
   ENDFOREACH( input_file )
 ENDMACRO( WRAP_PYTHON_UI )
 
-WRAP_PYTHON_UI( guiAGGLEditor guiAGMExecutiveClient appearance )
+WRAP_PYTHON_UI( guiAGGLEditor appearance )
 
 
 # COMPILE FLEX AND BISON FILE FOR THE AGGL PARSER #
