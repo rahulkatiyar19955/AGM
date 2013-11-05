@@ -81,7 +81,14 @@ Worker::Worker(WorkerParameters &parameters)
 	e.backModel.edges.clear();
 	AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
 	AGMModelConverter::fromInternalToIce(worldModel, e.newModel);
-	prms.executiveTopic->modelModified(e);
+	try
+	{
+		prms.executiveTopic->modelModified(e);
+	}
+	catch (...)
+	{
+		printf("Error publishing modelModified event\n");
+	}
 	AGMModelPrinter::printWorld(worldModel);
 }
 
@@ -109,7 +116,15 @@ void Worker::enqueueEvent(const RoboCompAGMWorldModel::Event &r)
 void Worker::update(const RoboCompAGMWorldModel::Node &r)
 {
 	mutex->lock();
-	prms.executiveTopic->modelUpdated(r);
+	
+	try
+	{
+		prms.executiveTopic->modelUpdated(r);
+	}
+	catch (...)
+	{
+		printf("Error publishing modelUpdated event\n");
+	}
 	mutex->unlock();
 }
 
@@ -149,7 +164,14 @@ bool Worker::handleModificationProposal(const RoboCompAGMWorldModel::Event &even
 
 	if (eventIsCompatibleWithTheCurrentModel(event) )
 	{
-		prms.executiveTopic->modelModified(event);
+		try
+		{
+			prms.executiveTopic->modelModified(event);
+		}
+		catch (...)
+		{
+			printf("Error publishing modelModified event\n");
+		}
 		AGMModelConverter::fromIceToInternal(event.newModel, worldModel);
 	}
 	else
@@ -204,7 +226,14 @@ void Worker::loopMethod()
 		if (eventIsCompatibleWithTheCurrentModel(event) )
 		{
 			eventQueue.clear();
-			prms.executiveTopic->modelModified(event);
+			try
+			{
+				prms.executiveTopic->modelModified(event);
+			}
+			catch (...)
+			{
+				printf("Error publishing modelModified event\n");
+			}
 			AGMModelConverter::fromIceToInternal(event.newModel, worldModel);
 			printf("Agent %s sent a COMPATIBLE event.\n", event.sender.c_str());
 		}
@@ -231,7 +260,8 @@ void Worker::handleAcceptedModificationProposal()
 	printf("handleAcceptedModificationProposal dd\n");
 
 	/// Get problem string based on the new mission and the current model
-	std::string problemPDDLString = worldModel->generatePDDLProblem(targetModel, 7, "gualzruGrammar", "problemo");
+	std::string domainName = prms.agm->attributes["name"];
+	std::string problemPDDLString = worldModel->generatePDDLProblem(targetModel, 7, domainName, "problemo");
 
 	/// Get solution to the problem
 	if (problemPDDLString.size()>0)
@@ -245,12 +275,28 @@ void Worker::handleAcceptedModificationProposal()
 			int32_t ret;
 			if (missionChanged)
 			{
-				ret = prms.pelea->getSolution(prms.agm->partialPDDLContent, problemPDDLString, currentSolution);
+				try
+				{
+					ret = prms.pelea->getSolution(prms.agm->partialPDDLContent, problemPDDLString, currentSolution);
+				}
+				catch(const Ice::Exception &e)
+				{
+					cout << "Can't connect to planner!!!!" << endl;
+					cout << e << endl;
+					throw e;
+				}
 				missionChanged = false;
 			}
 			else
 			{
-				ret = prms.pelea->getNextAction(problemPDDLString, currentSolution);
+				try
+				{
+					ret = prms.pelea->getNextAction(problemPDDLString, currentSolution);
+				}
+				catch (...)
+				{
+					printf("can't get plan from planner\n");
+				}
 			}
 			if (ret)
 			{
@@ -280,7 +326,15 @@ void Worker::handleAcceptedModificationProposal()
 				RoboCompAGMWorldModel::World worldModelICE;
 				AGMModelConverter::fromInternalToIce(targetModel, targetModelICE);
 				AGMModelConverter::fromInternalToIce( worldModel,  worldModelICE);
-				prms.executiveVisualizationTopic->update(worldModelICE, targetModelICE, currentSolution);
+				try
+				{
+					prms.executiveVisualizationTopic->update(worldModelICE, targetModelICE, currentSolution);
+				}
+				catch (...)
+				{
+					printf("can't publish executiveVisualizationTopic->update\n");
+				}
+
 			}
 			else
 			{
@@ -339,19 +393,33 @@ bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::E
 	RoboCompPlanning::Plan tempSolution;
 #ifndef AVOID_MODEL_CHECKING
 	std::string modificationPDDLString = worldModel->generatePDDLProblem(tempTargetWorldModel, 5, "gualzruGrammar", "problemo");
-	if (prms.planning->getSolution(prms.agm->fullPDDLContent, modificationPDDLString, tempSolution))
+	try
 	{
+		if (prms.planning->getSolution(prms.agm->fullPDDLContent, modificationPDDLString, tempSolution))
+		{
 #endif
-		prms.executiveVisualizationTopic->successFulChange(tempSolution.actions);
-		printf("Everythin nice\n");
-		return true;
+			try
+			{
+				prms.executiveVisualizationTopic->successFulChange(tempSolution.actions);
+			}
+			catch (...)
+			{
+				printf("can't publish executiveVisualizationTopic->update\n");
+			}
+			printf("Everythin nice\n");
+			return true;
 #ifndef AVOID_MODEL_CHECKING
+		}
+		else
+		{
+			prms.executiveVisualizationTopic->invalidChange(event.sender);
+			printf("Error NOT COMPATIBLE\n\n%s\n\n", modificationPDDLString.c_str());
+			return false;
+		}
 	}
-	else
+	catch (...)
 	{
-		prms.executiveVisualizationTopic->invalidChange(event.sender);
-		printf("Error NOT COMPATIBLE\n\n%s\n\n", modificationPDDLString.c_str());
-		return false;
+		printf("Can't connect to model-checking planner\n");
 	}
 #endif
 }
@@ -418,7 +486,14 @@ void Worker::reset()
 	AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
 	AGMModelConverter::fromInternalToIce(worldModel, e.newModel);
 
-	prms.executiveTopic->modelModified(e);
+	try
+	{
+		prms.executiveTopic->modelModified(e);
+	}
+	catch (...)
+	{
+		printf("can't publish executiveVisualizationTopic->update\n");
+	}
 	printf("reset done...\n");
 	handleAcceptedModificationProposal();
 	printf("reset done 2...\n");
@@ -431,7 +506,14 @@ void Worker::broadcastModel()
 	e.sender = "executive";
 	AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
 	AGMModelConverter::fromInternalToIce(worldModel, e.newModel);
-	prms.executiveTopic->modelModified(e);
+	try
+	{
+		prms.executiveTopic->modelModified(e);
+	}
+	catch (...)
+	{
+		printf("can't publish executiveTopic->modelModified\n");
+	}
 }
 
 

@@ -137,8 +137,6 @@ private:
 	bool handleModificationProposal(const RoboCompAGMWorldModel::Event &proposal);
 
 
-signals:
-	void kill();
 };
 
 

@@ -93,6 +93,7 @@ if (ROBOCOMP_SUPPORT)
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 	SET(ICE_LIBS -lIce)
 	ROBOCOMP_WRAP_ICE( AGMWorldModel )
+	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
 endif (ROBOCOMP_SUPPORT)
 
 # LibXML
@@ -154,6 +155,10 @@ add_executable ( testagm testagm.cpp )
 target_link_libraries ( testagm  -L. -lagm ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
+add_executable ( agm_xml2pddlProblem agm_xml2pddlProblem.cpp )
+target_link_libraries ( agm_xml2pddlProblem  -L. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+add_dependencies(testagm agm)
+
 add_executable ( agglplanner agglplanner.cpp ${AGM_CODE} )
 target_link_libraries ( agglplanner  -L. ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(agglplanner agm)
@@ -163,7 +168,11 @@ add_dependencies(agglplanner agm)
 #  Installation  #
 ##################
 INSTALL(FILES libagm.so DESTINATION /opt/robocomp/lib/ )
-INSTALL(FILES ${HEADERS} AGMWorldModel.h DESTINATION /opt/robocomp/include/ )
+INSTALL(FILES ${HEADERS} DESTINATION /opt/robocomp/include/ )
+INSTALL(PROGRAMS agm_xml2pddlProblem DESTINATION /opt/robocomp/bin/ )
 
+if (ROBOCOMP_SUPPORT)
+INSTALL(FILES AGMWorldModel.h DESTINATION /opt/robocomp/include/ )
+endif (ROBOCOMP_SUPPORT)
 
 

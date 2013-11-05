@@ -174,8 +174,26 @@ int32_t AGMModel::indexOfFirstSymbolByType(const std::string &value, int32_t fro
 }
 
 
-std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName) const
+std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t unknowns, std::string domainName, std::string problemName) const
 {
+	for (uint32_t i=0; i<domainName.size(); ++i)
+	{
+		if (domainName[i] == '.')
+		{
+			domainName.resize(i);
+			break;
+		}
+	}
+
+	for (uint32_t i=0; i<problemName.size(); ++i)
+	{
+		if (problemName[i] == '.')
+		{
+			problemName.resize(i);
+			break;
+		}
+	}
+
 	std::ostringstream stringStream;
 	if (target->symbols.size() == 0) return "";
 
@@ -245,7 +263,8 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	allObjects.insert(allObjects.end(),   originalObjects.begin(),   originalObjects.end());
 // 	allObjects.insert(allObjects.end(),     targetObjects.begin(),     targetObjects.end());
 	allObjects.insert(allObjects.end(), unknownObjectsVec.begin(), unknownObjectsVec.end());
-	for (uint32_t ind1=0; ind1<allObjects.size(); ind1++)
+	bool useDiff = false;
+	for (uint32_t ind1=0; ind1<allObjects.size() and useDiff; ind1++)
 	{
 		for (uint32_t ind2=0; ind2<allObjects.size(); ind2++)
 		{

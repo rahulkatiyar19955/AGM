@@ -27,7 +27,7 @@ void AGMModelPrinter::printWorld(const AGMModel *w)
 	}
 }
 
-#ifdef ROBOCOMP_SUPPORT
+// #ifdef ROBOCOMP_SUPPORT
 void AGMModelPrinter::printWorld(const RoboCompAGMWorldModel::World &w)
 {
 	AGMModelPrinter::printWorld(stdout, w);
@@ -51,6 +51,6 @@ void AGMModelPrinter::printWorld(FILE *fd, const RoboCompAGMWorldModel::World &w
 	}
 }
 
-#endif
+// #endif
 
 

@@ -12,10 +12,10 @@ class AGMModelPrinter
 public:
 	static void printWorld(const AGMModel::SPtr &w);
 	static void printWorld(const AGMModel *w);
-#ifdef ROBOCOMP_SUPPORT
+// #ifdef ROBOCOMP_SUPPORT
 	static void printWorld(const RoboCompAGMWorldModel::World &w);
 	static void printWorld(FILE *fd, const RoboCompAGMWorldModel::World &w);
-#endif
+// #endif
 };
 
 

@@ -31,9 +31,10 @@ AGM::AGM(const AGM::SPtr &src)
 
 AGM::AGM(std::string agglfile, std::string pddlFileFull_, std::string pddlFilePartial_)
 {
+	printf("Reading from %s\n", agglfile.c_str());
 	if (not parseAGGL(agglfile.c_str(), this, &rules))
 	{
-		throw "Error reading AGGL file";
+		throw std::string("Error reading AGGL file <")+agglfile+std::string(">");
 	}
 
 	pddlFileFull = pddlFileFull_;
@@ -77,6 +78,7 @@ void AGM::print()
 
 std::string AGM::pddlProblemForTarget(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName)
 {
+	printf("generatePDDLProblem %s %s\n", domainName.c_str(), problemName.c_str());
 	return currentModel.generatePDDLProblem(target, unknowns, domainName, problemName);
 }
 

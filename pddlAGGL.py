@@ -1,5 +1,7 @@
 import itertools
 
+global useDiff
+useDiff = False
 AGMListLastUsedName = 'ListAGMInternal'
 
 def translateList(alist, dictionary):
@@ -15,7 +17,9 @@ class AGMPDDL:
 		writeString += '\t(:requirements :strips :typing :fluents)\n'
 		writeString += '\t(:types unknown)\n'
 		writeString += '\t(:predicates\n'
-		writeString += '\t\t(diff ?a ?b)\n'
+		global useDiff
+		if useDiff:
+			writeString += '\t\t(diff ?a ?b)\n'
 		writeString += '\t\t(firstunknown ?u)\n'
 		writeString += '\t\t(unknownorder ?ua ?ub)\n\n'
 		writeString += AGMPDDL.typePredicatesPDDL(agm)
@@ -145,9 +149,13 @@ class AGMRulePDDL:
 	@staticmethod
 	def differentNodesPDDLPreconditions(nodesToUse):
 		ret = ''
+		global useDiff
 		for i in itertools.combinations(nodesToUse, 2):
 			if i[0] != i[1]:
-				ret += ' (diff ?v' + i[0] + ' ?v' + i[1] + ')'
+				if useDiff:
+					ret += ' (diff ?v' + i[0] + ' ?v' + i[1] + ')'
+				else:
+					ret += ' (not(= ?v' + i[0] + ' ?v' + i[1] + '))'
 		return ret
 
 	#

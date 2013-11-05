@@ -241,18 +241,19 @@ int AGMExecutiveMain::run(int argc, char* argv[])
 	parameters.executiveTopic              = executiveTopic;
 	parameters.executiveVisualizationTopic = executiveVisualizationTopic;
 	parameters.pelea                       = pelea_proxy;
-	
+
 	/// Read PDDLPath variable
-	std::string fullPDDL, partialPDDL;
+	std::string fullPDDL, partialPDDL, agglpath;
+	configGetString("AGGLPath", agglpath);
 	configGetString("PDDLPathFull", fullPDDL);
 	/// Read PDDLCompletePath variable
 	configGetString("PDDLPathPartial", partialPDDL);
 	/// Read initial model
 	configGetString("InitalModelPath", parameters.initialModelXML);
-
+printf("1 %s\n", agglpath.c_str());
 	/// Create AGM object
-	parameters.agm = new AGM(fullPDDL, partialPDDL);
-
+	parameters.agm = new AGM(agglpath, fullPDDL, partialPDDL);
+printf("2\n");
 
 	/// Read list of agents
 	std::string aString;
