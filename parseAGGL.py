@@ -38,7 +38,7 @@ class AGMRuleParsing:
 			passive = False
 		else:
 			print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
-		return AGMRule(i.name, LHS, RHS, passive)
+		return AGMRule(i.name, LHS, RHS, passive, i.cost)
 
 
 class AGMFileDataParsing:
@@ -70,11 +70,17 @@ class AGMFileDataParsing:
 		ag = Suppress("agents")
 		tb = Suppress("table")
 
+		# LINK
 		link  = Group(an.setResultsName("lhs") + lk + an.setResultsName("rhs") + po + Optional(no).setResultsName("no") + an.setResultsName("linkType") + pc)
+		# NODE
 		node  = Group(an.setResultsName("symbol") + cn + an.setResultsName("symbolType") + Optional(po + nu.setResultsName("x") + co + nu.setResultsName("y") + pc))
+		# GRAPH
 		graph = Group(op + ZeroOrMore(node).setResultsName("nodes") + ZeroOrMore(link).setResultsName("links") + cl)
-		rule  = Group(an.setResultsName("name") + cn + an.setResultsName("passive")  + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
+		# RULE
+		rule  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
+		# PROPERTY
 		prop  = Group(an.setResultsName("prop") + eq + an.setResultsName("value"))
+		# WHOLE FILE
 		agm   = OneOrMore(prop).setResultsName("props") + sep + OneOrMore(rule).setResultsName("rules") + StringEnd()
 
 

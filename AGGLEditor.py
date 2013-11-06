@@ -28,17 +28,16 @@ import sys, traceback, os, re, threading, time, string, math
 from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtSvg import *
-#from PySide.Qt import *
-from ui_guiAGGLEditor import Ui_MainWindow
-from ui_appearance import Ui_Appearance
-
-from parseAGGL import *
 
 import Image, ImageOps
 import numpy as np
 
 from inspect import currentframe, getframeinfo
 
+sys.path.append('/opt/robocomp/share')
+from ui_guiAGGLEditor import Ui_MainWindow
+from ui_appearance import Ui_Appearance
+from parseAGGL import *
 
 global vertexDiameter
 vertexDiameter = 40
@@ -61,7 +60,6 @@ fontSize = 14
 
 
 from AGMModule import *
-
 
 
 class AGMEditor(QMainWindow):
@@ -188,7 +186,6 @@ class AGMEditor(QMainWindow):
 	def about(self):
 		QMessageBox.information(self, "About", "Active Grammar-based Modeling:\nhttps://github.com/ljmanso/AGM/wiki")
 	def draw(self):
-		self.ui.spacee.setFixedSize(self.ui.passiveCheckBox.size())
 		self.lhsPainter.update()
 		self.rhsPainter.update()
 		for r in range(len(self.agmData.agm.rules)):
@@ -337,8 +334,8 @@ class AGMEditor(QMainWindow):
 			self.ui.rulesList.addItem(q)
 	def saveAs(self):
 		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
-		self.save(path)
-	def save(self, path=''):
+		self.save(False, path)
+	def save(self, triggered=False, path=''):
 		if path == '':
 			if self.filePath != '':
 				path = self.filePath
@@ -376,11 +373,11 @@ if __name__ == '__main__':
 			compileFlag2 = sys.argv[4]
 			outputFile2  = sys.argv[5]
 			if compileFlag1 == '-f':
-				agmData = AGMFileData.fromFile(inputFile, verbose=False)
-				agmData.generatePDDL(outputFile, ski)
-			if compileFlag1 == '-p':
-				agmData = AGMFileData.fromFile(inputFile, verbose=False)
-				agmData.generatePDDL(outputFile, )
+				agmData = AGMFileDataParsing.fromFile(inputFile, verbose=False)
+				agmData.generatePDDL(outputFile1, False)
+			if compileFlag2 == '-p':
+				agmData = AGMFileDataParsing.fromFile(inputFile, verbose=False)
+				agmData.generatePDDL(outputFile2, True)
 		else:
 			clase = AGMEditor(sys.argv[1])
 			clase.show()

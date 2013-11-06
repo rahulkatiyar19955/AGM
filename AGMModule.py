@@ -176,8 +176,8 @@ class GraphDraw(QWidget):
 		maxY = 0
 		first = True
 		for ww in self.graph.nodes:
-			x = self.graph.nodes[ww].pos[0]
-			y = self.graph.nodes[ww].pos[1]
+			x = int(self.graph.nodes[ww].pos[0])
+			y = int(self.graph.nodes[ww].pos[1])
 			if minX > x or first: minX = x
 			if maxX < x or first: maxX = x
 			if minY > y or first: minY = y
@@ -197,6 +197,8 @@ class GraphDraw(QWidget):
 		for w in self.graph.nodes:
 			v = self.graph.nodes[w]
 			grid = 5
+			v.pos[0] = int(v.pos[0])
+			v.pos[1] = int(v.pos[1])
 			if v.pos[0] % grid > grid/2:
 				v.pos[0] = v.pos[0] + grid - (v.pos[0] % grid)
 			else:

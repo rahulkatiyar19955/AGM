@@ -2,8 +2,6 @@ from pyparsing import Word, alphas, alphanums, nums, OneOrMore, Literal, Combine
 import math, traceback, itertools, copy
 
 from pddlAGGL import *
-from agmbdAGGL import *
-
 
 def distance(x1, y1, x2, y2):
 	return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
@@ -75,7 +73,7 @@ class AGMGraph(object):
 		if minDist > -1:
 			return minName, True
 		else:
-			raise BasicException("")
+			raise Exception("")
 	def getNameRelaxed(self, xa, ya, diameter):
 		minDist = -1
 		minName = None
@@ -150,11 +148,12 @@ class AGMGraph(object):
 		return ret
 
 class AGMRule(object):
-	def __init__(self, name='', lhs=None, rhs=None, passive=False):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1):
 		object.__init__(self)
 		self.name = name
 		self.lhs = lhs
 		self.rhs = rhs
+		self.cost = cost
 		self.passive = passive
 		if lhs == None:
 			self.lhs = AGMGraph()
@@ -223,6 +222,7 @@ class AGMFileData(object):
 		#print 'Generating (partial =', str(skipPassiveRules)+') PDDL file'
 		w = open(filename, 'w')
 		a = copy.deepcopy(self.agm)
-		w.write(AGMPDDL.toPDDL(a, self.properties["name"], skipPassiveRules))
+		text = AGMPDDL.toPDDL(a, self.properties["name"], skipPassiveRules)
+		w.write(text)
 		w.close()
 		

@@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES ( . )
 #  Optional features  #
 #######################
 option (PYTHON_BINDINGS "Build python bindings" OFF)
-	option (ROBOCOMP_SUPPORT "Build with support for RoboComp" OFF)
+option (ROBOCOMP_SUPPORT "Build with support for RoboComp" ON)
 
 
 #  Set sources  #
@@ -87,14 +87,14 @@ if (PYTHON_BINDINGS)
 endif (PYTHON_BINDINGS)
 
 # RoboComp support
-if (ROBOCOMP_SUPPORT)
+# if (ROBOCOMP_SUPPORT)
 	MESSAGE(STATUS "ROBOCOMP PATH:        $ENV{ROBOCOMP}")
 	INCLUDE( $ENV{ROBOCOMP}/CMake/robocomp.cmake )
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 	SET(ICE_LIBS -lIce)
 	ROBOCOMP_WRAP_ICE( AGMWorldModel )
 	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
-endif (ROBOCOMP_SUPPORT)
+# endif (ROBOCOMP_SUPPORT)
 
 # LibXML
 FIND_PACKAGE(LibXml2 REQUIRED)
@@ -115,7 +115,7 @@ MACRO( WRAP_PYTHON_UI )
   ENDFOREACH( input_file )
 ENDMACRO( WRAP_PYTHON_UI )
 
-WRAP_PYTHON_UI( guiAGGLEditor appearance )
+WRAP_PYTHON_UI( guiAGGLEditor guiGraphViewer appearance )
 
 
 # COMPILE FLEX AND BISON FILE FOR THE AGGL PARSER #
@@ -170,9 +170,19 @@ add_dependencies(agglplanner agm)
 INSTALL(FILES libagm.so DESTINATION /opt/robocomp/lib/ )
 INSTALL(FILES ${HEADERS} DESTINATION /opt/robocomp/include/ )
 INSTALL(PROGRAMS agm_xml2pddlProblem DESTINATION /opt/robocomp/bin/ )
+INSTALL(PROGRAMS agm_xmlViewer.py DESTINATION /opt/robocomp/bin/ RENAME agm_xmlViewer )
+INSTALL(PROGRAMS AGGLEditor.py DESTINATION /opt/robocomp/bin/ RENAME AGGLEditor)
 
 if (ROBOCOMP_SUPPORT)
 INSTALL(FILES AGMWorldModel.h DESTINATION /opt/robocomp/include/ )
 endif (ROBOCOMP_SUPPORT)
+
+INSTALL(PROGRAMS ui_guiAGGLEditor.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS ui_guiGraphViewer.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS ui_appearance.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS parseAGGL.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS pddlAGGL.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS AGMModule.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS AGGL.py DESTINATION /opt/robocomp/share)
 
 

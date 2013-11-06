@@ -7,9 +7,9 @@
 #include <boost/thread.hpp>
 
 #include <agm_modelException.h>
-#ifdef ROBOCOMP_SUPPORT
+// #ifdef ROBOCOMP_SUPPORT
 #include <AGMWorldModel.h>
-#endif
+// #endif
 #include <agm_misc_functions.h>
 #include <agm_modelSymbols.h>
 
