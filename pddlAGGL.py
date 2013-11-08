@@ -13,9 +13,9 @@ def translateList(alist, dictionary):
 class AGMPDDL:
 	@staticmethod
 	def toPDDL(agm, name, skipPassive):
-		writeString  = '(define (domain gualzruGrammar)\n\n'
-		writeString += '\t(:requirements :strips :typing :fluents)\n'
-		writeString += '\t(:types unknown)\n'
+		writeString  = '(define (domain AGGL)\n\n'
+		#writeString += '\t(:requirements :strips :typing :fluents)\n'
+		#writeString += '\t(:types unknown)\n'
 		writeString += '\t(:predicates\n'
 		global useDiff
 		if useDiff:

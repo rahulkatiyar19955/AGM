@@ -102,7 +102,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QSpinBox" name="spinBox">
+       <widget class="QSpinBox" name="cost">
         <property name="maximum">
          <number>99999</number>
         </property>
@@ -180,6 +180,9 @@
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
       <widget class="QListWidget" name="rulesList">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>1</horstretch>

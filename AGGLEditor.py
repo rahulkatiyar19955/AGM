@@ -100,6 +100,7 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),                                      self.appClose)
 		self.connect(self.ui.actionGraphmar,                   SIGNAL("triggered(bool)"),                                      self.about)
 		self.connect(self.ui.passiveCheckBox,                  SIGNAL("stateChanged(int)"),                                    self.changePassive)
+		self.connect(self.ui.cost,                             SIGNAL("valueChanged(int)"),                                    self.changeCost)
 		self.ui.actionSaveAs.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_S + Qt.Key_Shift))
 		self.ui.actionSave.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_S))
 		self.ui.actionOpen.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_O))
@@ -196,6 +197,8 @@ class AGMEditor(QMainWindow):
 		if passive == Qt.Unchecked:
 			p = False
 		self.agmData.agm.rules[self.ui.rulesList.currentRow()].passive = p
+	def changeCost(self, v):
+		self.agmData.agm.rules[self.ui.rulesList.currentRow()].cost = v
 	def selectTool(self, tool):
 		self.tool = str(self.ui.toolsList.item(tool).text())
 	def changeFont(self):

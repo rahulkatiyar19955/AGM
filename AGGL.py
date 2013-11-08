@@ -162,7 +162,8 @@ class AGMRule(object):
 	def toString(self):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
-		ret = self.name + ' : ' + passiveStr + '\n{\n'
+		costStr = str(self.cost)
+		ret = self.name + ' : ' + passiveStr + '(' + costStr + ')' + '\n{\n'
 		ret += self.lhs.toString() + '\n'
 		ret += '\t=>\n'
 		ret += self.rhs.toString() + '\n'

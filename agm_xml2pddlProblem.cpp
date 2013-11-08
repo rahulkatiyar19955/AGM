@@ -12,12 +12,18 @@ int main(int argc, char **argv)
 		return -1;
 	}
 
+	int unknownSymbols = 5;
+	if (argv>4)
+	{
+		unknownSymbols = atoi(argv[4])
+	}
+
 	AGMModel::SPtr xml1(new AGMModel());
 	AGMModelConverter::fromXMLToInternal(argv[1], xml1);
 	AGMModel::SPtr xml2(new AGMModel());
 	AGMModelConverter::fromXMLToInternal(argv[2], xml2);
 
-	std::string ret = xml1->generatePDDLProblem(xml2, 10, "active.pddl", argv[3]);
+	std::string ret = xml1->generatePDDLProblem(xml2, unknownSymbols, "active.pddl", argv[3]);
 
 	std::ofstream out(argv[3]);
 	out << ret;

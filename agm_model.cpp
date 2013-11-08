@@ -202,7 +202,7 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	stringStream << "\n";
 
 	/// D O M A I N
-	stringStream << "	(:domain " << domainName << ")\n";
+	stringStream << "	(:domain AGGL )\n";
 
 	/// D E C L A R E   O B J E C T S
 	stringStream << "	(:objects\n";
