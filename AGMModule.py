@@ -213,6 +213,8 @@ class GraphDraw(QWidget):
 				painter.setBrush(QColor(155, 255, 155, 255))
 			elif v.color == 'white':
 				painter.setBrush(QColor(255, 255, 255, 255))
+			elif v.color == 'gray':
+				painter.setBrush(QColor(220, 220, 220, 255))
 			else:
 				painter.setBrush(QColor(155, 155, 155, 255))
 			# Draw node

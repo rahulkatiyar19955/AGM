@@ -83,7 +83,10 @@ class AGMGraph(object):
 				else:
 					self.nodes[name].color = "green"
 			else:
-				self.nodes[name].color = "white"
+				if self.nodes[name].sType != other.nodes[name].sType:
+					self.nodes[name].color = "gray"
+				else:
+					self.nodes[name].color = "white"
 		for l in range(len(self.links)):
 			if not self.links[l] in other.links:
 				if left:
