@@ -13,9 +13,9 @@ int main(int argc, char **argv)
 	}
 
 	int unknownSymbols = 5;
-	if (argv>4)
+	if (argc>4)
 	{
-		unknownSymbols = atoi(argv[4])
+		unknownSymbols = atoi(argv[4]);
 	}
 
 	AGMModel::SPtr xml1(new AGMModel());

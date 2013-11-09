@@ -207,10 +207,14 @@ class GraphDraw(QWidget):
 				v.pos[0] = v.pos[1] + grid - (v.pos[1] % grid)
 			else:
 				v.pos[1] = v.pos[1] - (v.pos[1] % grid)
-			if True:#v.enabled:
-				painter.setBrush(QBrush())
+			if v.color == 'red':
+				painter.setBrush(QColor(255, 155, 155, 255))
+			elif v.color == 'green':
+				painter.setBrush(QColor(155, 255, 155, 255))
+			elif v.color == 'white':
+				painter.setBrush(QColor(255, 255, 255, 255))
 			else:
-				painter.setBrush(QColor(120, 120, 120, 255))
+				painter.setBrush(QColor(155, 155, 155, 255))
 			# Draw node
 			painter.drawEllipse(v.pos[0]-(vertexDiameter/2), v.pos[1]-0.7001*(vertexDiameter/2), vertexDiameter, vertexDiameter*0.7001)
 			# Temp
@@ -263,19 +267,11 @@ class GraphDraw(QWidget):
 				angleD = angleR*(57.2957795)
 
 				global lineThickness
-				if e.enabled:
-					pen = QPen(QColor(0, 0, 0))
-					pen.setStyle(Qt.SolidLine)
-					pen.setWidth(lineThickness)
-					painter.setPen(pen)
-					painter.setBrush(QColor(0, 0, 0))
-				else:
-					pen = QPen(QColor(255, 0, 0))
-					global dashPattern
-					pen.setDashPattern(dashPattern)
-					pen.setWidth(lineThickness)
-					painter.setPen(pen)
-					painter.setBrush(QColor(255, 0, 0))
+				pen = QPen(QColor(0, 0, 0))
+				pen.setStyle(Qt.SolidLine)
+				pen.setWidth(lineThickness)
+				painter.setPen(pen)
+				painter.setBrush(QColor(0, 0, 0))
 				
 				if a:
 					painter.drawLine(xinit, yinit, xendLine, yendLine)
@@ -292,13 +288,19 @@ class GraphDraw(QWidget):
 				linkGroupBase = (-linkGroupCount+1)*linkHeight/2
 				rect.translate(0, linkHeight*pos + linkGroupBase) # Right now it will be centered on the link's center
 
-				painter.setBrush(QColor(255, 255, 255))
+				fill = QColor(155, 155, 155)
+				if e.color == 'red':
+					fill = QColor(255, 155, 155)
+				elif e.color == 'green':
+					fill = QColor(155, 255, 155)
+				elif e.color == 'white':
+					fill = QColor(255, 255, 255)
 				d = 2
 				outterLinkRect = QRectF(rect.x()-5+d, rect.y()-3, rect.width()+10, rect.height()+6)
 				innerLinkRect = QRectF(rect.x()-3+d, rect.y()-1.5, rect.width()+6, rect.height()+3)
 				self.linkPositionMap[linkindex] = outterLinkRect
 				painter.fillRect(outterLinkRect, Qt.black)
-				painter.fillRect(innerLinkRect, Qt.white)
+				painter.fillRect(innerLinkRect, fill)
 				rect.translate(2, 0)
 				painter.drawText(rect, align, str(e.linkType))
 				rect.translate(-2, 0)
@@ -369,7 +371,6 @@ class GraphDraw(QWidget):
 		elif tool == 'Edge - Change label':
 			for linkindex in range(len(self.graph.links)):
 				if self.linkPositionMap[linkindex].contains(eX, eY):
-					print self.graph.links[linkindex].linkType
 					r = EdgeReader(self.sumaX+eX, self.sumaY+eY, linkindex, self)
 					r.show()
 					r.setFocus(Qt.OtherFocusReason)

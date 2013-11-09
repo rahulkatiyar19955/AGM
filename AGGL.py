@@ -12,6 +12,7 @@ class AGMSymbol(object):
 		self.name = name
 		self.sType = sType
 		self.pos = pos
+		self.color = 'white'
 	def toString(self):
 		return str(self.name)+':'+str(self.sType)+'('+str(self.pos[0])+','+str(self.pos[1])+')'
 
@@ -21,10 +22,9 @@ class AGMLink(object):
 		self.a = a
 		self.b = b
 		self.linkType = linkType
-		self.enabled = enabled
+		self.color = 'white'
 	def toString(self):
 		v = ''
-		if not self.enabled: v = 'q '
 		return '\t\t'+str(self.a)+'->'+str(self.b)+'('+v+str(self.linkType)+')'
 	def __cmp__(self, other):
 		this =  self.linkType+ self.a+ self.b
@@ -73,7 +73,25 @@ class AGMGraph(object):
 		if minDist > -1:
 			return minName, True
 		else:
+			print 'aa32537'
 			raise Exception("")
+	def setColors(self, other, left):
+		for name in self.nodes.keys():
+			if not name in other.nodes.keys():
+				if left:
+					self.nodes[name].color = "red"
+				else:
+					self.nodes[name].color = "green"
+			else:
+				self.nodes[name].color = "white"
+		for l in range(len(self.links)):
+			if not self.links[l] in other.links:
+				if left:
+					self.links[l].color = "red"
+				else:
+					self.links[l].color = "green"
+			else:
+				self.links[l].color = "white"
 	def getNameRelaxed(self, xa, ya, diameter):
 		minDist = -1
 		minName = None

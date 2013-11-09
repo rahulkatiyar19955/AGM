@@ -158,6 +158,7 @@ class AGMEditor(QMainWindow):
 			frameinfo = getframeinfo(currentframe())
 			frameinfo = getframeinfo(currentframe())
 		self.ui.rulesList.setCurrentRow(0)
+		self.ui.rulesList.setFocus(Qt.OtherFocusReason)
 
 		# Node appearance
 		self.appearance = Appearance()
@@ -187,6 +188,8 @@ class AGMEditor(QMainWindow):
 	def about(self):
 		QMessageBox.information(self, "About", "Active Grammar-based Modeling:\nhttps://github.com/ljmanso/AGM/wiki")
 	def draw(self):
+		self.lhsPainter.graph.setColors(self.rhsPainter.graph, True)
+		self.rhsPainter.graph.setColors(self.lhsPainter.graph, False)
 		self.lhsPainter.update()
 		self.rhsPainter.update()
 		for r in range(len(self.agmData.agm.rules)):
@@ -266,7 +269,6 @@ class AGMEditor(QMainWindow):
 		rhs = self.rhsPainter.graph
 		for i in range(len(self.agmData.agm.rules)):
 			rule = self.agmData.agm.rules[i]
-			print i
 			# Export LHS
 			self.lhsPainter.graph = rule.lhs
 			lhsPathPNG = str(path)+'/rule'+str(i)+'_lhs.png'
@@ -294,8 +296,6 @@ class AGMEditor(QMainWindow):
 					lImageBox = rImageBox
 				if rImageBox == None:
 					rImageBox = lImageBox
-				print lImageBox, rImageBox
-				print 'Size ', wR, hR
 				w = wL
 				if w == None: w = wR
 				h = hL
@@ -314,13 +314,9 @@ class AGMEditor(QMainWindow):
 
 	def getProperBox(self, a, b, w, h):
 		c = h/2
-		print 'A', a
-		print 'B', b
-		print 'Size', w, h
 		y1 = min(a[1], b[1])
 		y2 = max(a[3], b[3])
 		ret = (0, y1, w, y2)
-		print ret
 		return ret
 		
 	def open(self):
