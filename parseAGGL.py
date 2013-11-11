@@ -100,9 +100,9 @@ class AGMFileDataParsing:
 				if i.prop == 'name': gotName = True
 			else:
 				try:
-					agmFD.properties[i.prop] = float(i.value)
+					agmFD.properties[i.prop] = int(i.value)
 				except:
-					print 'This is not a valid float:', i.value
+					print 'This is not a valid int:', i.value
 			number += 1
 		if not gotName:
 			print 'drats! no name'

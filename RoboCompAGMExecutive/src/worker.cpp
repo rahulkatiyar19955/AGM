@@ -273,6 +273,7 @@ void Worker::handleAcceptedModificationProposal()
 			currentSolution.cost = 0;
 			currentSolution.actions.clear();
 			int32_t ret;
+			/// Get/Update plan
 			if (missionChanged)
 			{
 				try
@@ -298,6 +299,8 @@ void Worker::handleAcceptedModificationProposal()
 					printf("can't get plan from planner\n");
 				}
 			}
+
+			/// Use plan
 			if (ret)
 			{
 				printf("got plan\n");
@@ -319,7 +322,7 @@ void Worker::handleAcceptedModificationProposal()
 				}
 			}
 
-			if (gotPlan && currentSolution.actions.size()>0)
+			if (gotPlan)
 			{
 				reactivateAgents();
 				RoboCompAGMWorldModel::World targetModelICE;
@@ -334,22 +337,14 @@ void Worker::handleAcceptedModificationProposal()
 				{
 					printf("can't publish executiveVisualizationTopic->update\n");
 				}
-
 			}
 			else
 			{
-				if (gotPlan)
-				{
-					printf("Goal achieved!\n :-)");
-				}
-				else
-				{
-					printf("PROBLEM STRING\n");
-					printf("%s\n", problemPDDLString.c_str());
-					printf("GRAMMAR STRING\n");
-					printf("%s\n", prms.agm->partialPDDLContent.c_str());
-					printf("No solution. :-(\n");
-				}
+				printf("PROBLEM STRING\n");
+				printf("%s\n", problemPDDLString.c_str());
+				printf("GRAMMAR STRING\n");
+				printf("%s\n", prms.agm->partialPDDLContent.c_str());
+				printf("No solution. :-(\n");
 			}
 		}
 		catch(RoboCompPlanning::ServerException exc)

@@ -34,6 +34,11 @@ void AGGLRule::print()
 	}
 }
 
+void AGGLRule::setCost(int32_t c)
+{
+	cost = c;
+}
+
 void AGGLRule::setName(const char *nam)
 {
 	name = std::string(nam);

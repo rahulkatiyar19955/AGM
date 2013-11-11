@@ -16,7 +16,6 @@ option (ROBOCOMP_SUPPORT "Build with support for RoboComp" ON)
 #################
 SET (AGM_CODE
   agm.cpp
-  agm_behavior.cpp
   agm_misc_functions.cpp
   agm_model.cpp
   agm_modelEdge.cpp
@@ -30,7 +29,6 @@ SET (AGM_CODE
 
 
 SET (HEADERS
-  agm_behavior.h
   agm.h
   agm_modelDrawer.h
   agm_modelEdge.h
@@ -143,9 +141,9 @@ SET(LIBS ${LIBS} -lfl )
 
 #  Library building  #
 ######################
-if (ROBOCOMP_SUPPORT)
+# if (ROBOCOMP_SUPPORT)
 add_library(agmdummy SHARED AGMWorldModel.cpp )
-endif (ROBOCOMP_SUPPORT)
+# endif (ROBOCOMP_SUPPORT)
 
 add_library(agm SHARED ${AGM_CODE} )
 target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES})

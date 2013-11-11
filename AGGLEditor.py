@@ -225,12 +225,15 @@ class AGMEditor(QMainWindow):
 	def changeRule(self, ruleN):
 		self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
 		self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
-		self.disconnect(self.ui.passiveCheckBox, SIGNAL("stateChanged(int)"), self.changePassive)
+		self.disconnect(self.ui.passiveCheckBox,    SIGNAL("stateChanged(int)"), self.changePassive)
+		self.disconnect(self.ui.cost,               SIGNAL("valueChanged(int)"), self.changeCost)
 		if self.agmData.agm.rules[ruleN].passive:
 			self.ui.passiveCheckBox.setChecked(True)
 		else:
 			self.ui.passiveCheckBox.setChecked(False)
+		self.ui.cost.setValue(int(self.agmData.agm.rules[ruleN].cost))
 		self.connect(self.ui.passiveCheckBox,    SIGNAL("stateChanged(int)"), self.changePassive)
+		self.connect(self.ui.cost,               SIGNAL("valueChanged(int)"), self.changeCost)
 
 		currRule = self.ui.rulesList.currentItem().text()
 	def generateCode(self):

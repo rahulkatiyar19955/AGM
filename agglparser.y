@@ -64,7 +64,7 @@ rules:
 ;
      
 rule:
-  STRING ':' STRING ENDLS '{' ENDLS graphL GETS ENDLS graphR '}' ENDLS {rule.computeEffects(); rule.setName($1); rule.setActive($3);agmRules->push_back(rule); rule.clear(); }
+  STRING ':' STRING '(' INT ')' ENDLS '{' ENDLS graphL GETS ENDLS graphR '}' ENDLS {rule.computeEffects(); rule.setName($1); rule.setActive($3); rule.setCost($5); agmRules->push_back(rule); rule.clear(); }
 ;
 
 graphL:
