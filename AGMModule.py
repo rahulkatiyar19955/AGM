@@ -361,10 +361,18 @@ class GraphDraw(QWidget):
 			except:
 				pass
 		elif tool == 'Node - Move':
-			self.pressName, found = self.graph.getName(eX, eY, 100)
+			found = False
+			try:
+				self.pressName, found = self.graph.getName(eX, eY, 100)
+			except:
+				pass
 			if not found: self.pressName = ''
 		elif tool == 'Edge - Add':
-			self.pressName, found = self.graph.getName(eX, eY, vertexDiameter)
+			found = False
+			try:
+				self.pressName, found = self.graph.getName(eX, eY, vertexDiameter)
+			except:
+				pass
 			if not found: self.pressName = ''
 		elif tool == 'Edge - Remove':
 			for linkindex in range(len(self.graph.links)):
@@ -396,7 +404,11 @@ class GraphDraw(QWidget):
 			global vertexDiameter
 			self.graph.moveNode(self.pressName, eX, eY, vertexDiameter)
 		elif tool == 'Edge - Add':
-			self.releaseName, found = self.graph.getName(eX, eY, vertexDiameter)
+			found = False
+			try:
+				self.releaseName, found = self.graph.getName(eX, eY, vertexDiameter)
+			except:
+				pass
 			if not found: self.releaseName = ''
 			if self.pressName != '' and self.releaseName != '':
 				self.graph.addEdge(self.pressName, self.releaseName)

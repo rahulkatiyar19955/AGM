@@ -73,7 +73,6 @@ class AGMGraph(object):
 		if minDist > -1:
 			return minName, True
 		else:
-			print 'aa32537'
 			raise Exception("")
 	def setColors(self, other, left):
 		for name in self.nodes.keys():

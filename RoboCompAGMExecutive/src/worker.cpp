@@ -268,45 +268,37 @@ void Worker::handleAcceptedModificationProposal()
 	{
 		try
 		{
-			bool gotPlan = false;
 			planString = "";
 			currentSolution.cost = 0;
 			currentSolution.actions.clear();
 			int32_t ret;
 			/// Get/Update plan
-			if (missionChanged)
+			try
 			{
-				try
+				if (missionChanged)
 				{
 					ret = prms.pelea->getSolution(prms.agm->partialPDDLContent, problemPDDLString, currentSolution);
 				}
-				catch(const Ice::Exception &e)
-				{
-					cout << "Can't connect to planner!!!!" << endl;
-					cout << e << endl;
-					throw e;
-				}
-				missionChanged = false;
-			}
-			else
-			{
-				try
+				else
 				{
 					ret = prms.pelea->getNextAction(problemPDDLString, currentSolution);
 				}
-				catch (...)
-				{
-					printf("can't get plan from planner\n");
-				}
 			}
+			catch(const Ice::Exception &e)
+			{
+				printf("can't get plan from planner\n");
+				cout << e << endl;
+				throw e;
+			}
+			missionChanged = false;
 
 			/// Use plan
 			if (ret)
 			{
-				printf("got plan\n");
-				gotPlan = true;
+				printf("planner answered\n");
 				if (currentSolution.actions.size() > 0)
 				{
+					printf(">0\n");
 					/// Fill plan string
 					planString = "";
 					for (uint32_t ac=0; ac<currentSolution.actions.size(); ac++)
@@ -320,10 +312,8 @@ void Worker::handleAcceptedModificationProposal()
 						planString += ")\n";
 					}
 				}
-			}
 
-			if (gotPlan)
-			{
+				printf("gotPlan");
 				reactivateAgents();
 				RoboCompAGMWorldModel::World targetModelICE;
 				RoboCompAGMWorldModel::World worldModelICE;
@@ -422,32 +412,42 @@ bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::E
 
 void Worker::reactivateAgents()
 {
+	printf("Building parameter's map\n");
+	// Build parameters' map
+	ParameterMap pm;
+	Parameter p;
+	p.editable = true;
+	// Action parameter
+	p.editable = true;
+	p.type = "string";
+	if (currentSolution.actions.size() > 0)
+	{
+		p.value = currentSolution.actions[0].name;
+		for (uint uu=0; uu<currentSolution.actions[0].symbols.size(); ++uu)
+		{
+			p.value += std::string(" ") + currentSolution.actions[0].symbols[uu];
+		}
+	}
+	else
+	{
+		p.value = "";
+	}
+	pm["action"] = p;
+	// Plan parameter
+	p.editable = true;
+	p.type = "string";
+	p.value = planString;
+	pm["plan"] = p;
+
 	printf("prms.agents.size() %ld\n", prms.agents.size());
 	for (uint i=0; i<prms.agents.size(); i++)
 	{
+		printf("%d\n", i);
 		printf("\tAGENT: %s\n", prms.agents[i].c_str());
 		try
 		{
 			// Print info
 			if (generateTXT) fprintf(fd, "activating agent %s\n", prms.agents[i].c_str());
-			// Build parameters' map
-			ParameterMap pm;
-			Parameter p;
-			p.editable = true;
-			// Action parameter
-			p.editable = true;
-			p.type = "string";
-			p.value = currentSolution.actions[0].name;
-			for (uint uu=0; uu<currentSolution.actions[0].symbols.size(); ++uu)
-			{
-				p.value += std::string(" ") + currentSolution.actions[0].symbols[uu];
-			}
-			pm["action"] = p;
-			// Plan parameter
-			p.editable = true;
-			p.type = "string";
-			p.value = planString;
-			pm["plan"] = p;
 
 			// Activation
 			bool ok = prms.agentProxies[prms.agents[i]]->activateAgent(pm);
