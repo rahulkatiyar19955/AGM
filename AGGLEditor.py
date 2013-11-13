@@ -5,7 +5,7 @@
 #  -----  AGGLEditor  -----
 #  -----------------------
 #
-#  A libre graph grammar drawing tool.
+#  A free/libre graph grammar drawing tool.
 #
 #    Copyright (C) 2012-2013 by Luis J. Manso
 #
@@ -108,6 +108,11 @@ class AGMEditor(QMainWindow):
 		#self.ui.actionNextRule.setShortcut(QKeySequence(Qt.Key_PageDown))
 		#self.ui.actionPrevRule.setShortcut(QKeySequence(Qt.Key_PageUp))
 
+		self.shortcutDown = QShortcut(QKeySequence("PgDown"), self)
+		self.shortcutUp   = QShortcut(QKeySequence("PgUp"  ), self)
+		self.connect(self.shortcutDown, SIGNAL("activated()"), self.pgDown)
+		self.connect(self.shortcutUp,   SIGNAL("activated()"), self.pgUp)
+
 		# Get settings
 		settings = QSettings("AGM", "mainWindowGeometry")
 		value = settings.value("geometry")
@@ -172,6 +177,11 @@ class AGMEditor(QMainWindow):
 		self.fontDialog.setCurrentFont(font)
 		self.font = self.fontDialog.currentFont()
 		self.connect(self.ui.actionChangeFont,                 SIGNAL("triggered(bool)"),                                      self.changeFont)
+
+	def pgDown(self):
+		self.ui.rulesList.setCurrentRow(self.ui.rulesList.currentRow()+1)
+	def pgUp(self):
+		self.ui.rulesList.setCurrentRow(self.ui.rulesList.currentRow()-1)
 
 	def appClose(self):
 		#if self.modified:
