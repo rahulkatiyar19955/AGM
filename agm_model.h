@@ -75,6 +75,7 @@ public:
 	int32_t getLinkedID(int32_t id, std::string linkname, int32_t i=0) const;
 	int32_t getIndexByIdentifier(int32_t targetId) const;
 	AGMModelSymbol::SPtr getSymbolByIdentifier(int32_t targetId) const;
+	AGMModelSymbol::SPtr getSymbolByName(const std::string &ss) const;
 
 	bool addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
 	bool removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);

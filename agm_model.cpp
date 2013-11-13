@@ -456,6 +456,19 @@ AGMModelSymbol::SPtr AGMModel::getSymbolByIdentifier(int32_t targetId) const
 // 	AGMMODELEXCEPTION(s.str()+std::string(" Trying to get the index of a node given it's identifier"));
 }
 
+AGMModelSymbol::SPtr AGMModel::getSymbolByName(const std::string &ss) const
+{
+	for (uint32_t i=0; i<symbols.size(); ++i)
+	{
+		if (symbols[i]->toString() == name)
+		{
+			return symbols[i];
+		}
+	}
+	std::cout << ss << std::endl;
+	AGMMODELEXCEPTION("getSymbolByName: Non-existing name");
+}
+
 
 bool AGMModel::removeSymbol(int32_t id)
 {

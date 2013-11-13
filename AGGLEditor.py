@@ -176,12 +176,16 @@ class AGMEditor(QMainWindow):
 		self.fontDialog = QFontDialog(font, self)
 		self.fontDialog.setCurrentFont(font)
 		self.font = self.fontDialog.currentFont()
-		self.connect(self.ui.actionChangeFont,                 SIGNAL("triggered(bool)"),                                      self.changeFont)
+		self.connect(self.ui.actionChangeFont, SIGNAL("triggered(bool)"), self.changeFont)
 
 	def pgDown(self):
-		self.ui.rulesList.setCurrentRow(self.ui.rulesList.currentRow()+1)
+		r = self.ui.rulesList.currentRow()+1
+		if r>=0 and r<self.ui.rulesList.count():
+			self.ui.rulesList.setCurrentRow(r)
 	def pgUp(self):
-		self.ui.rulesList.setCurrentRow(self.ui.rulesList.currentRow()-1)
+		r = self.ui.rulesList.currentRow()-1
+		if r>=0 and r<self.ui.rulesList.count():
+			self.ui.rulesList.setCurrentRow(r)
 
 	def appClose(self):
 		#if self.modified:
@@ -196,7 +200,7 @@ class AGMEditor(QMainWindow):
 		settings.setValue("geometry", g)
 
 	def about(self):
-		QMessageBox.information(self, "About", "Active Grammar-based Modeling:\nhttps://github.com/ljmanso/AGM/wiki")
+		QMessageBox.information(self, "About", "Active Graph Grammar Language Editor (AGGLEditor):\nhttps://github.com/ljmanso/AGM/wiki")
 	def draw(self):
 		self.lhsPainter.graph.setColors(self.rhsPainter.graph, True)
 		self.rhsPainter.graph.setColors(self.lhsPainter.graph, False)
