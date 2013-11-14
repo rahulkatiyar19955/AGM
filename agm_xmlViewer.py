@@ -22,6 +22,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with Graphmar. If not, see <http://www.gnu.org/licenses/>.
 
+# Ctrl+c handling
+import signal
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 # Python distribution imports
 import sys, traceback, os, re, threading, time, string, math
 # Qt interface

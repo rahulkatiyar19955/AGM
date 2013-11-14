@@ -8,7 +8,7 @@ int main(int argc, char **argv)
 {
 	if (argc < 4)
 	{
-		std::cout << "Usage:\n\t" << argv[0] << " initialModel.xml targetPattern.xml outputPDDLProblem.pddl" << std::endl;
+		std::cout << "Usage:\n\t" << argv[0] << " initialModel.xml targetPattern.xml outputPDDLProblem.pddl [newMemorySize]" << std::endl;
 		return -1;
 	}
 
