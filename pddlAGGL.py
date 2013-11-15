@@ -1,7 +1,7 @@
 import itertools
 
 global useDiff
-useDiff = False
+useDiff = True
 AGMListLastUsedName = 'ListAGMInternal'
 
 def translateList(alist, dictionary):

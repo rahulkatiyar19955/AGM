@@ -12,7 +12,7 @@ try:
 	if len(sys.argv)==7:
 		if sys.argv[1] != '-i':
 			ok = False
-		if sys.argv[3] != '-p':
+		if sys.argv[3] != '-a':
 			ok = False
 		if sys.argv[5] != '-f':
 			ok = False
@@ -27,7 +27,7 @@ try:
 		ok = False
 
 	if not ok:
-		print '\n'+sys.argv[0], ' -i <inputFile.aggl> -p <activeRules.pddl> -f <activeAndPassiveRules.pddl>\n'
+		print '\n'+sys.argv[0], ' -i <inputFile.aggl> -a <activeRules.pddl> -f <activeAndPassiveRules.pddl>\n'
 		ret = 1
 except:
 	print 'Error'

@@ -263,7 +263,7 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	allObjects.insert(allObjects.end(),   originalObjects.begin(),   originalObjects.end());
 // 	allObjects.insert(allObjects.end(),     targetObjects.begin(),     targetObjects.end());
 	allObjects.insert(allObjects.end(), unknownObjectsVec.begin(), unknownObjectsVec.end());
-	bool useDiff = false;
+	bool useDiff = true;
 	for (uint32_t ind1=0; ind1<allObjects.size() and useDiff; ind1++)
 	{
 		for (uint32_t ind2=0; ind2<allObjects.size(); ind2++)
