@@ -1,4 +1,6 @@
 from AGGL import *
+from PySide.QtCore import *
+from PySide.QtGui import *
 
 class AGMGraphParsing:
 	@staticmethod
@@ -13,6 +15,9 @@ class AGMGraphParsing:
 				pos = [multiply*int(t.x), multiply*int(t.y)]
 			except:
 				pass
+			if t.symbol in nodes:
+				QMessageBox.warning(None, "Invalid node name", "Two nodes can't have the same name in the same graph. Because some planners are case-insensitive, we also perform a case-insensitive comparison.\nNode name: "+t.symbol)
+
 			nodes[t.symbol] = AGMSymbol(t.symbol, t.symbolType, pos)
 		links = []
 		for l in i.links:

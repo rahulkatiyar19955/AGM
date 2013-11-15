@@ -47,6 +47,16 @@ class NodeNameReader(QLineEdit):
 			if self.parentW.graph.nodes[v].pos[0] == self.x:
 				if self.parentW.graph.nodes[v].pos[1] == self.y:
 					oldName = self.parentW.graph.nodes[v].name
+		if oldName == '':
+			print 'waaat e245234'
+			return
+		for v in self.parentW.graph.nodes.keys():
+			if str(v).lower() == newName.lower() and str(v).lower() != oldName.lower():
+				QMessageBox.warning(self, "Invalid node name", "Two nodes can't have the same name in the same graph. Because some planners are case-insensitive, we also perform a case-insensitive comparison.")
+				return
+		for v in self.parentW.graph.nodes.keys():
+			if self.parentW.graph.nodes[v].pos[0] == self.x:
+				if self.parentW.graph.nodes[v].pos[1] == self.y:
 					self.parentW.graph.nodes[v].name = newName
 		if oldName != '' and oldName != newName: 
 			self.parentW.graph.nodes[newName] = self.parentW.graph.nodes[oldName]

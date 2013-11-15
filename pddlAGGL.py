@@ -107,7 +107,7 @@ class AGMRulePDDL:
 		string += '\t\t:precondition (and'
 		string += AGMRulePDDL.existingNodesPDDLTypes(rule, nodeDict) # TYPE preconditions
 		string += AGMRulePDDL.listPDDLPreconditions(rule, agmlist, forgetList, newList, nodeDict) # Include precondition for nodes to be created
-		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule.stayingNodeList()+agmlist+forgetList) # Avoid using the same node more than once "!=". NOT INCLUDING THOSE IN THE LIST
+		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule, rule.stayingNodeList()+agmlist+forgetList) # Avoid using the same node more than once "!=". NOT INCLUDING THOSE IN THE LIST
 		string += AGMRulePDDL.linkPatternsPDDLPreconditions(rule, nodeDict)
 		string += ' )\n'
 
@@ -149,15 +149,26 @@ class AGMRulePDDL:
 				last = top
 		return ret
 	@staticmethod
-	def differentNodesPDDLPreconditions(nodesToUse):
+	def differentNodesPDDLPreconditions(rule, nodesToUse):
 		ret = ''
 		global useDiff
 		for i in itertools.combinations(nodesToUse, 2):
 			if i[0] != i[1]:
-				if useDiff:
-					ret += ' (diff ?v' + i[0] + ' ?v' + i[1] + ')'
-				else:
-					ret += ' (not(= ?v' + i[0] + ' ?v' + i[1] + '))'
+				avoid = False
+				if i[0] in rule.lhs.nodes.keys() and not i[1] in rule.lhs.nodes.keys():
+					avoid = True
+				if i[1] in rule.lhs.nodes.keys() and not i[0] in rule.lhs.nodes.keys():
+					avoid = True
+				if i[0] in rule.lhs.nodes.keys() and i[1] in rule.lhs.nodes.keys():
+					if rule.lhs.nodes[i[0]].sType != rule.lhs.nodes[i[1]].sType:
+						avoid = True
+				#if avoid:
+					#print 'Avoiding diff ', i[0], i[1]
+				if not avoid:
+					if useDiff:
+						ret += ' (diff ?v' + i[0] + ' ?v' + i[1] + ')'
+					else:
+						ret += ' (not(= ?v' + i[0] + ' ?v' + i[1] + '))'
 		return ret
 
 	#
