@@ -46,7 +46,7 @@ public:
 	void setActive(const char *act);
 	void setCost(int c);
 	void addSymbol(bool left, std::string name, std::string type);
-	void addLink(bool left, std::string a, std::string b, std::string label);
+	void addLink(bool left, std::string a, std::string b, std::string label, int negated);
 	void computeEffects();
 	void clear();
 	

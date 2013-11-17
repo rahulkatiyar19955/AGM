@@ -70,7 +70,7 @@ void AGGLRule::addSymbol(bool left, std::string name, std::string type)
 		rhsSymbolsTypes.push_back(type);
 	}
 }
-void AGGLRule::addLink(bool left, std::string a, std::string b, std::string label)
+void AGGLRule::addLink(bool left, std::string a, std::string b, std::string label, int negated)
 {
 	if (left)
 	{

@@ -15,7 +15,7 @@ bool leftGraph = true;
 
 
 std::string i2String(int i);
-void addLink(bool l, const char *a, const char *b, const char *label);
+void addLink(bool l, const char *a, const char *b, const char *label, int negated);
 void addSymbol(bool l, const char *id, const char *type, int x, int y);
 void addSymbol(bool l, int id, const char *type, int x, int y);
 
@@ -92,10 +92,14 @@ links:
 | link;
 
 link:
-  STRING LINKEDTO STRING '(' STRING ')' ENDLS {                                               addLink(leftGraph, $1, $3, $5); }
-| INT    LINKEDTO INT    '(' STRING ')' ENDLS { std::string s1=i2String($1), s2=i2String($3); addLink(leftGraph, s1.c_str(), s2.c_str(), $5); }
-| INT    LINKEDTO STRING '(' STRING ')' ENDLS { std::string s1=i2String($1); addLink(leftGraph, s1.c_str(), $3, $5); }
-| STRING LINKEDTO INT    '(' STRING ')' ENDLS { std::string s2=i2String($3); addLink(leftGraph, $1, s2.c_str(), $5); }
+  STRING LINKEDTO STRING '(' STRING ')' ENDLS {                                               addLink(leftGraph, $1, $3, $5, 0); }
+| INT    LINKEDTO INT    '(' STRING ')' ENDLS { std::string s1=i2String($1), s2=i2String($3); addLink(leftGraph, s1.c_str(), s2.c_str(), $5, 0); }
+| INT    LINKEDTO STRING '(' STRING ')' ENDLS { std::string s1=i2String($1); addLink(leftGraph, s1.c_str(), $3, $5, 0); }
+| STRING LINKEDTO INT    '(' STRING ')' ENDLS { std::string s2=i2String($3); addLink(leftGraph, $1, s2.c_str(), $5, 0); }
+|  STRING LINKEDTO STRING '(' STRING ')' '*' ENDLS {                                              addLink(leftGraph, $1, $3, $5, 1); }
+| INT    LINKEDTO INT    '(' STRING ')' '*' ENDLS { std::string s1=i2String($1), s2=i2String($3); addLink(leftGraph, s1.c_str(), s2.c_str(), $5, 1); }
+| INT    LINKEDTO STRING '(' STRING ')' '*' ENDLS { std::string s1=i2String($1); addLink(leftGraph, s1.c_str(), $3, $5, 1); }
+| STRING LINKEDTO INT    '(' STRING ')' '*' ENDLS { std::string s2=i2String($3); addLink(leftGraph, $1, s2.c_str(), $5, 1); }
 ;
 
 ENDLS:
@@ -113,9 +117,9 @@ std::string i2String(int i)
 	return std::string(text);
 }
 
-void addLink(bool l, const char *a, const char *b, const char *label)
+void addLink(bool l, const char *a, const char *b, const char *label, int negated)
 {
-	rule.addLink(l, std::string(a), std::string(b), std::string(label));
+	rule.addLink(l, std::string(a), std::string(b), std::string(label), negated);
 }
 
 void addSymbol(bool l, const char *id, const char *type, int x, int y)
