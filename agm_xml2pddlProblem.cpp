@@ -23,6 +23,7 @@ int main(int argc, char **argv)
 	AGMModel::SPtr xml2(new AGMModel());
 	AGMModelConverter::fromXMLToInternal(argv[2], xml2);
 
+	printf("Creating problem with %d potentially new symbols\n", unknownSymbols);
 	std::string ret = xml1->generatePDDLProblem(xml2, unknownSymbols, "active.pddl", argv[3]);
 
 	std::ofstream out(argv[3]);

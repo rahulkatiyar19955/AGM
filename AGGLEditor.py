@@ -80,6 +80,7 @@ class AGMEditor(QMainWindow):
 		self.ui.toolsList.addItem('Edge - Add')
 		self.ui.toolsList.addItem('Edge - Remove')
 		self.ui.toolsList.addItem('Edge - Change label')
+		self.ui.toolsList.addItem('Edge - Negate')
 		# Graph painters
 		self.lhsPainter = GraphDraw(self.ui.lhsParentWidget, self, "LHS")
 		self.rhsPainter = GraphDraw(self.ui.rhsParentWidget, self, "RHS")

@@ -23,33 +23,37 @@ class AGMLink(object):
 		self.b = b
 		self.linkType = linkType
 		self.color = 'white'
+		self.enabled = enabled
 	def toString(self):
 		v = ''
-		return '\t\t'+str(self.a)+'->'+str(self.b)+'('+v+str(self.linkType)+')'
+		if self.enabled:
+			return '\t\t'+str(self.a)+'->'+str(self.b)+'('+v+str(self.linkType)+')'
+		else:
+			return '\t\t'+str(self.a)+'->'+str(self.b)+'('+v+str(self.linkType)+')*'
 	def __cmp__(self, other):
-		this =  self.linkType+ self.a+ self.b
-		nhis = other.linkType+other.a+other.b
+		this =  self.linkType+ self.a+ self.b+str( self.enabled)
+		nhis = other.linkType+other.a+other.b+str(other.enabled)
 		if this < nhis: return -1
 		if this > nhis: return +1
 		return 0
 	def __eq__(self, other):
-		this =  self.linkType+ self.a+ self.b
-		nhis = other.linkType+other.a+other.b
+		this =  self.linkType+ self.a+ self.b+str( self.enabled)
+		nhis = other.linkType+other.a+other.b+str(other.enabled)
 		if this == nhis:
 			return True
 		return False
 	def __ne__(self, other):
-		this =  self.linkType+ self.a+ self.b
-		nhis = other.linkType+other.a+other.b
+		this =  self.linkType+ self.a+ self.b+str( self.enabled)
+		nhis = other.linkType+other.a+other.b+str(other.enabled)
 		if this == nhis:
 			return False
 		return True
 	def __hash__(self):
-		return len(self.a+self.b+self.linkType)
+		return len(self.a+self.b+self.linkType+str(self.enabled))
 	def __str__(self):
-		return self.a+'-->'+self.b+' ('+self.linkType+')'
+		return self.a+'-->'+self.b+' ('+self.linkType+')['+self.enabled+']'
 	def __repr__(self):
-		return self.a+'-->'+self.b+' ('+self.linkType+')'
+		return self.a+'-->'+self.b+' ('+self.linkType+')['+self.enabled+']'
 
 class AGMGraph(object):
 	def __init__(self, nodes=None, links=None, side='n'):

@@ -314,6 +314,13 @@ class GraphDraw(QWidget):
 				painter.fillRect(outterLinkRect, Qt.black)
 				painter.fillRect(innerLinkRect, fill)
 				rect.translate(2, 0)
+				if not e.enabled:
+					pp = painter.pen()
+					painter.setPen(QColor(0, 0, 255))
+					passs = 4
+					painter.drawLine(QLine(rect.x(),   rect.y()-passs, rect.x()+rect.width(), rect.y()+rect.height()+passs))
+					painter.drawLine(QLine(rect.x(),   rect.y()+rect.height()+passs, rect.x()+rect.width(), rect.y()-passs))
+					painter.setPen(pp)
 				painter.drawText(rect, align, str(e.linkType))
 				rect.translate(-2, 0)
 				painter.setBrush(QColor(0, 0, 0))
@@ -390,6 +397,10 @@ class GraphDraw(QWidget):
 					r = EdgeReader(self.sumaX+eX, self.sumaY+eY, linkindex, self)
 					r.show()
 					r.setFocus(Qt.OtherFocusReason)
+		elif tool == 'Edge - Negate':
+			for linkindex in range(len(self.graph.links)):
+				if self.linkPositionMap[linkindex].contains(eX, eY):
+					self.graph.links[linkindex].enabled = not self.graph.links[linkindex].enabled
 	def mouseReleaseEvent(self, e):
 		tool = self.main.tool
 		self.pressed = False
@@ -417,6 +428,8 @@ class GraphDraw(QWidget):
 		elif tool == 'Edge - Remove':
 			pass
 		elif tool == 'Edge - Change label':
+			pass
+		elif tool == 'Edge - Negate':
 			pass
 	def mouseMoveEvent(self, e):
 		tool = self.main.tool
