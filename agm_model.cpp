@@ -230,7 +230,7 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 		if (not found)
 		{
 			targetObjects.push_back(target->symbols[s]->toString());
-			unknowns++;
+// 			unknowns++;
 // 			stringStream << "		" << target->symbols[s]->toString() << "\n";
 		}
 	}

@@ -247,19 +247,28 @@ class AGMRulePDDL:
 		#print 'create', createLinks
 		for link in createLinks:
 			#print 'NEWLINK', str(link)
-			ret += ' ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + ')'
+			if link.enabled:
+				ret += ' ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + ')'
+			else:
+				ret += ' (not ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + '))'
 		deleteLinks = initialLinkSet.difference(posteriorLinkSet)
 		#print 'delete', deleteLinks
 		for link in deleteLinks:
 			#print 'REMOVELINK', str(link)
-			ret += ' (not ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + '))'
+			if link.enabled:
+				ret += ' (not ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + '))'
+			else:
+				ret += ' ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + ')'
 		return ret
 	@staticmethod
 	def linkPatternsPDDLPreconditions(rule, nodeDict, pddlVerbose=False):
 		ret = ''
 		for link in rule.lhs.links:
 			#if pddlVerbose: print 'LINK', str(link)
-			ret += ' ('+link.linkType + ' ?v'+ nodeDict[link.a] +' ?v'+ nodeDict[link.b] + ')'
+			if link.enabled:
+				ret += ' ('+link.linkType + ' ?v'+ nodeDict[link.a] +' ?v'+ nodeDict[link.b] + ')'
+			else:
+				ret += ' (not ('+link.linkType + ' ?v'+ nodeDict[link.a] +' ?v'+ nodeDict[link.b] + '))'
 		return ret
 	@staticmethod
 	def typeChangesPDDLEffects(rule, nodeDict, pddlVerbose=False):

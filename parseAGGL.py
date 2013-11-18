@@ -21,9 +21,9 @@ class AGMGraphParsing:
 			nodes[t.symbol] = AGMSymbol(t.symbol, t.symbolType, pos)
 		links = []
 		for l in i.links:
-			if verbose: print '\t\tL:', l.lhs, '->', l.rhs, '('+l.no, l.linkType+')'
+			if verbose: print '\t\tL:', l.lhs, '->', l.rhs, '('+l.no, l.linkType+') ['+l.enabled+']'
 			lV = True
-			if len(l.no)>0: lV = False
+			if len(l.enabled)>0: lV = False
 			links.append(AGMLink(l.lhs, l.rhs, l.linkType, lV))
 		if verbose: print '\t}'
 		return AGMGraph(nodes, links)
@@ -61,6 +61,7 @@ class AGMFileDataParsing:
 		plusorminus = Literal('+') | Literal('-')
 		number = Word(nums)
 		nu = Combine( Optional(plusorminus) + number )
+		neg = Optional(Literal('*'))
 		sep = Suppress("===")
 		eq = Suppress("=")
 		cn = Suppress(":")
@@ -76,7 +77,7 @@ class AGMFileDataParsing:
 		tb = Suppress("table")
 
 		# LINK
-		link  = Group(an.setResultsName("lhs") + lk + an.setResultsName("rhs") + po + Optional(no).setResultsName("no") + an.setResultsName("linkType") + pc)
+		link  = Group(an.setResultsName("lhs") + lk + an.setResultsName("rhs") + po + Optional(no).setResultsName("no") + an.setResultsName("linkType") + pc + neg.setResultsName("enabled"))
 		# NODE
 		node  = Group(an.setResultsName("symbol") + cn + an.setResultsName("symbolType") + Optional(po + nu.setResultsName("x") + co + nu.setResultsName("y") + pc))
 		# GRAPH
