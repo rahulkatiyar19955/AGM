@@ -61,6 +61,42 @@ class AGMGraph(object):
 		self.nodes = nodes
 		self.links = links
 		self.side = side
+	def __cmp__(self):
+		#print '__cmp__'
+		return object.__cmp__(self)
+	def __hash__(self):
+		#print '__hash__'
+		return len(self.nodes)+len(self.links)
+	def __eq__(self, other):
+		#print '__eq__'
+		return object.__eq__(self)
+		#print '__eq__'
+		# Basic: number of nodes
+		if len(self.nodes) != len(other.nodes):
+			return False
+		# Basic: number of links
+		if len(self.links) != len(other.links):
+			return False
+		# Exhaustive nodes
+		for check in [ [self, other], [other, self] ]:
+			for l in range(len(check[0].nodes)):
+				if not check[0].nodes[l] in check[1].nodes:
+					return False
+		# Exhaustive links
+		for check in [ [self, other], [other, self] ]:
+			for l in range(len(check[0].links)):
+				if not check[0].links[l] in check[1].links:
+					return False
+
+	def __cmp__(self, other):
+		# Basic: number of nodes
+		if len(self.nodes) != len(other.nodes):
+			return False
+		# Basic: number of links
+		if len(self.links) != len(other.links):
+			return False
+
+		return True
 	def getName(self, xa, ya, diameter):
 		minDist = -1
 		minName = None
