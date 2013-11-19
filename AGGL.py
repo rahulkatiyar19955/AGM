@@ -7,17 +7,21 @@ def distance(x1, y1, x2, y2):
 	return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
 
 class AGMSymbol(object):
-	def __init__(self, name, sType, pos):
+	def __init__(self, name, sType, pos=[0,0]):
 		object.__init__(self)
 		self.name = name
 		self.sType = sType
 		self.pos = pos
 		self.color = 'white'
+	def __str__(self):
+		return self.toString()
+	def __repr__(self):
+		return self.toString()
 	def toString(self):
-		return str(self.name)+':'+str(self.sType)+'('+str(self.pos[0])+','+str(self.pos[1])+')'
+		return str(self.name)+':'+str(self.sType)
 
 class AGMLink(object):
-	def __init__(self, a, b, linkType, enabled):
+	def __init__(self, a, b, linkType, enabled=True):
 		object.__init__(self)
 		self.a = a
 		self.b = b
@@ -51,9 +55,12 @@ class AGMLink(object):
 	def __hash__(self):
 		return len(self.a+self.b+self.linkType+str(self.enabled))
 	def __str__(self):
-		return self.a+'-->'+self.b+' ('+self.linkType+')['+self.enabled+']'
+		ret = '('+self.a+')--['+self.linkType+']--('+self.b+') '
+		if not self.enabled:
+			ret += '*'
+		return ret
 	def __repr__(self):
-		return self.a+'-->'+self.b+' ('+self.linkType+')['+self.enabled+']'
+		return self.__str__()
 
 class AGMGraph(object):
 	def __init__(self, nodes=None, links=None, side='n'):
@@ -65,6 +72,19 @@ class AGMGraph(object):
 		self.nodes = nodes
 		self.links = links
 		self.side = side
+	def __str__(self):
+		ret = '[ '
+		for i in self.nodes:
+			ret += str(self.nodes[i])
+			ret += ' '
+		ret += ']  << '
+		for l in self.links:
+			ret += str(l)
+			ret += ' '
+		ret += ' >>'
+		return ret
+	def __repr__(self):
+		return self.__str__()
 	def __cmp__(self):
 		#print '__cmp__'
 		return object.__cmp__(self)
@@ -72,25 +92,30 @@ class AGMGraph(object):
 		#print '__hash__'
 		return len(self.nodes)+len(self.links)
 	def __eq__(self, other):
-		#print '__eq__'
-		return object.__eq__(self)
-		#print '__eq__'
-		# Basic: number of nodes
-		if len(self.nodes) != len(other.nodes):
-			return False
-		# Basic: number of links
-		if len(self.links) != len(other.links):
-			return False
-		# Exhaustive nodes
-		for check in [ [self, other], [other, self] ]:
-			for l in range(len(check[0].nodes)):
-				if not check[0].nodes[l] in check[1].nodes:
+		try:
+			# Basic: number of nodes
+			if len(self.nodes) != len(other.nodes):
+				return False
+			# Basic: number of links
+			if len(self.links) != len(other.links):
+				return False
+			# Exhaustive nodes
+			for l in self.nodes:
+				if not l in other.nodes:
 					return False
-		# Exhaustive links
-		for check in [ [self, other], [other, self] ]:
-			for l in range(len(check[0].links)):
-				if not check[0].links[l] in check[1].links:
+			for l in other.nodes:
+				if not l in self.nodes:
 					return False
+			# Exhaustive links
+			for l in range(len(self.links)):
+				if not self.links[l] in other.links:
+					return False
+			for l in range(len(other.links)):
+				if not other.links[l] in self.links:
+					return False
+			return True
+		except:
+			return False
 
 	def __cmp__(self, other):
 		# Basic: number of nodes
