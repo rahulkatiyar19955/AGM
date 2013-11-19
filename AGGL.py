@@ -312,3 +312,11 @@ class AGMFileData(object):
 		w.write(text)
 		w.close()
 		
+	def generateAGGLPlannerCode(self, filename, skipPassiveRules=False):
+		w = open(filename, 'w')
+		a = copy.deepcopy(self.agm)
+		import generateAGGLPlannerCode
+		text = generateAGGLPlannerCode.generate(a, skipPassiveRules)
+		w.write(text)
+		w.close()
+		

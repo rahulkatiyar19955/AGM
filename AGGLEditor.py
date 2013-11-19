@@ -96,6 +96,7 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionRenameCurrentRule,          SIGNAL("triggered(bool)"),                                      self.renameCurrentRule)
 		self.connect(self.ui.actionExport,                     SIGNAL("triggered(bool)"),                                      self.exportRule)
 		self.connect(self.ui.actionGenerateCode,               SIGNAL("triggered(bool)"),                                      self.generateCode)
+		self.connect(self.ui.actionGenerateAGGLPlanner,        SIGNAL("triggered(bool)"),                                      self.generateAGGLPlannerCode)
 		self.connect(self.ui.actionExportAllRules,             SIGNAL("triggered(bool)"),                                      self.exportAll)
 		self.connect(self.ui.actionExportAllRulesPNG,          SIGNAL("triggered(bool)"),                                      self.exportAllPNG)
 		self.connect(self.ui.actionSaveAs,                     SIGNAL("triggered(bool)"),                                      self.saveAs)
@@ -255,12 +256,19 @@ class AGMEditor(QMainWindow):
 
 		currRule = self.ui.rulesList.currentItem().text()
 	def generateCode(self):
-		path_pddl = QFileDialog.getSaveFileName(self, "Save FULL grammar (model verification) file as", "", "*.pddl")[0]
+		path_pddl = QFileDialog.getSaveFileName(self, "Save FULL grammar (model verification) PDDL file as", "", "*.pddl")[0]
 		if not path_pddl.endswith(".pddl"): path_pddl += ".pddl"
 		self.agmData.generatePDDL(path_pddl, False)
-		path_pddl = QFileDialog.getSaveFileName(self, "Save partial grammar (active rules) file as", "", "*.pddl")[0]
+		path_pddl = QFileDialog.getSaveFileName(self, "Save partial grammar (active rules) PDDL file as", "", "*.pddl")[0]
 		if not path_pddl.endswith(".pddl"): path_pddl += ".pddl"
 		self.agmData.generatePDDL(path_pddl, True)
+	def generateAGGLPlannerCode(self):
+		path_apy = QFileDialog.getSaveFileName(self, "Save FULL grammar (model verification) AGGLPlanner file as", "", "*.apy")[0]
+		if not path_apy.endswith(".apy"): path_apy += ".apy"
+		self.agmData.generateAGGLPlannerCode(path_apy, False)
+		path_apy = QFileDialog.getSaveFileName(self, "Save partial grammar (active rules) AGGLPlanner file as", "", "*.apy")[0]
+		if not path_apy.endswith(".apy"): path_apy += ".apy"
+		self.agmData.generateAGGLPlannerCode(path_apy, True)
 	def exportRule(self):
 		path = str(QFileDialog.getSaveFileName(self, "Export rule", "", "*"))
 		if path[-4:] == '.svg': path = path[:-4]

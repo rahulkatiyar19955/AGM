@@ -181,7 +181,10 @@ INSTALL(PROGRAMS ui_appearance.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS parseAGGL.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS pddlAGGL.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS xmlModelParser.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS generateAGGLPlannerCode.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS AGMModule.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS AGGL.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS aggl_completion.bash DESTINATION /etc/bash_completion.d/ RENAME AGGLEditor)
+
 
 
