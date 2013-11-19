@@ -6,7 +6,7 @@ sys.path.append('/opt/robocomp/share')
 
 from AGGL import *
 from parseAGGL import *
-from pddlAGGL import *
+from generateAGGLPlannerCode import *
 
 ret = 0
 try:
@@ -23,8 +23,8 @@ try:
 			outputFileFull    = sys.argv[4]
 			outputFilePartial = sys.argv[6]
 			agmData = AGMFileDataParsing.fromFile(inputFile)
-			agmData.generatePDDL(outputFileFull, skipPassiveRules=False)
-			agmData.generatePDDL(outputFilePartial, skipPassiveRules=True)
+			agmData.generateAGGLPlannerCode(outputFileFull, skipPassiveRules=False)
+			agmData.generateAGGLPlannerCode(outputFilePartial, skipPassiveRules=True)
 	else:
 		ok = False
 

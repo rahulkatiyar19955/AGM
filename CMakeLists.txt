@@ -170,6 +170,8 @@ INSTALL(FILES ${HEADERS} DESTINATION /opt/robocomp/include/ )
 INSTALL(PROGRAMS agm_xml2pddlProblem DESTINATION /opt/robocomp/bin/ )
 INSTALL(PROGRAMS agm_xmlViewer.py DESTINATION /opt/robocomp/bin/ RENAME agm_xmlViewer )
 INSTALL(PROGRAMS AGGLEditor.py DESTINATION /opt/robocomp/bin/ RENAME AGGLEditor)
+INSTALL(PROGRAMS aggl2pddl DESTINATION /opt/robocomp/bin/ )
+INSTALL(PROGRAMS aggl2agglpy DESTINATION /opt/robocomp/bin/ )
 
 if (ROBOCOMP_SUPPORT)
 INSTALL(FILES AGMWorldModel.h DESTINATION /opt/robocomp/include/ )
