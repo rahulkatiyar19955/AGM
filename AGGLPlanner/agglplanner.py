@@ -64,7 +64,7 @@ class WorldStateHistory(object):
 		return self.graph.__str__()
 
 class PyPlan(object):
-	def __init__(self, domainPath, init, target):
+	def __init__(self, domainPath, init, targetPath):
 		object.__init__(self)
 		# Get initial world mdoel
 		self.initWorld  = WorldStateHistory(xmlModelParser.graphFromXML(init))
@@ -72,7 +72,7 @@ class PyPlan(object):
 		domain = imp.load_source('domain', domainPath)
 		self.domain     = domain.RuleSet()
 		# Get goal-checking code
-		import target
+		target = imp.load_source('target', targetPath)
 		self.targetCode = target.CheckTarget
 
 

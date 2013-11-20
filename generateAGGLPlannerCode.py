@@ -1,9 +1,12 @@
 from AGGL import *
 from operator import *
-import collections
+import collections, sys
+
+sys.path.append('/opt/robocomp/share')
 
 def constantHeader():
-	return """import copy
+	return """import copy, sys
+sys.path.append('/opt/robocomp/share')
 from AGGL import *
 from agglplanner import *
 

@@ -167,7 +167,8 @@ INSTALL(PROGRAMS agm_xmlViewer.py DESTINATION /opt/robocomp/bin/ RENAME agm_xmlV
 INSTALL(PROGRAMS AGGLEditor.py DESTINATION /opt/robocomp/bin/ RENAME AGGLEditor)
 INSTALL(PROGRAMS aggl2pddl DESTINATION /opt/robocomp/bin/ )
 INSTALL(PROGRAMS aggl2agglpy DESTINATION /opt/robocomp/bin/ )
-INSTALL(PROGRAMS AGGLPlanner/agglplanner.py DESTINATION /opt/robocomp/bin/agglplanner )
+INSTALL(PROGRAMS "AGGLPlanner/agglplanner.py" DESTINATION /opt/robocomp/bin/ RENAME agglplanner )
+INSTALL(PROGRAMS "AGGLPlanner/agglplanner.py" DESTINATION /opt/robocomp/share/ RENAME agglplanner.py )
 
 if (ROBOCOMP_SUPPORT)
 INSTALL(FILES AGMWorldModel.h DESTINATION /opt/robocomp/include/ )
