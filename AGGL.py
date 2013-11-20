@@ -159,6 +159,26 @@ class AGMGraph(object):
 					self.links[l].color = "green"
 			else:
 				self.links[l].color = "white"
+	def getNodeChanges(self, other):
+		toCreate = []
+		toRemove = []
+		for name in self.nodes.keys():
+			if not name in other.nodes.keys():
+					toRemove.append(self.nodes[name])
+		for name in other.nodes.keys():
+			if not name in self.nodes.keys():
+					toCreate.append(other.nodes[name])
+		return toCreate, toRemove
+	def getLinkChanges(self, other):
+		toCreate = []
+		toRemove = []
+		for l in range(len(self.links)):
+			if not self.links[l] in other.links:
+				toRemove.append(self.links[l])
+		for l in range(len(other.links)):
+			if not other.links[l] in self.links:
+				toCreate.append(other.links[l])
+		return toCreate, toRemove
 	def getNameRelaxed(self, xa, ya, diameter):
 		minDist = -1
 		minName = None

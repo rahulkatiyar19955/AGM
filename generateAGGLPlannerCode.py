@@ -35,10 +35,10 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere):
 	for link in linkList:
 		if newSymbol == link.a:
 			if link.b in alreadyThere:
-				ret += ' and ['+link.a + ', '+ link.b + ', '+ "'"+link.linkType+"'"+'] in links'
+				ret += ' and ["'+link.a + '", "'+ link.b + '", '+ "'"+link.linkType+"'"+'] in links'
 		elif newSymbol == link.b:
 			if link.a in alreadyThere:
-				ret += ' and ['+link.a + ', '+ link.b + ', '+ "'"+link.linkType+"'"+'] in links'
+				ret += ' and ["'+link.a + '", "'+ link.b + '", '+ "'"+link.linkType+"'"+'] in links'
 	return ret
 
 
@@ -75,6 +75,7 @@ def ruleImplementation(rule):
 
 	# Make a copy of the current graph node list
 	ret += indent+"nodes = copy.deep_copy(graph.nodes)"
+	ret += indent+"name2id = dict()"
 
 	# Generate the loop that perform the instantiation
 	symbols_in_stack = []
@@ -89,23 +90,27 @@ def ruleImplementation(rule):
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"
+		ret += indent+"name2id['"+n+"'] = symbol_"+n+"_name"
 	# Code for rule execution
 	ret += indent+"newNode = WorldStateHistory(node)"
-	ret += indent+"name2id = dict()"
+
 	ret += indent+"# Create nodes"
-	for newNode in newNodes(rule):
+	newNodes, deleteNodes = rule.lhs.getNodeChanges(rule.rhs)
+	for newNode in newNodes:
 		ret += indent+"newName = str(getNewIdForSymbol(newNode))"
-		ret += indent+"name2id['"+newNode[0]+"'] = newName"
-		ret += indent+"newNode.graph.nodes[newName] = AGMSymbol(newName, '"+newNode[1]+"')"
+		ret += indent+"name2id['"+newNode.name+"'] = newName"
+		ret += indent+"newNode.graph.nodes[newName] = AGMSymbol(newName, '"+newNode.sType+"')"
 	ret += indent+"# Remove nodes"
-	for deleteNode in deleteNodes(rule):
-		ret += indent+"delete_node AGMSymbol('"+rule.lhs.nodes[deleteNode[0]].name+"', '"+deleteNode[1]+"')"
+	for deleteNode in deleteNodes:
+		ret += indent+"delete_node AGMSymbol('"+deleteNode.name+"', '"+deleteNode.sType+"')"
+
 	ret += indent+"# Create links"
-	for newLink in newLinks(rule):
-		ret += indent+"newNode.graph.links.append(AGMLink(name2id['"+newLink[0]+"'], name2id['"+newLink[1]+"'], '"+newLink[2]+"'))"
+	newLinks, deleteLinks = rule.lhs.getLinkChanges(rule.rhs)
+	for newLink in newLinks:
+		ret += indent+"newNode.graph.links.append(AGMLink(name2id['"+newLink.a+"'], name2id['"+newLink.b+"'], '"+newLink.linkType+"'))"
 	ret += indent+"# Remove links"
-	for deleteLink in deleteLinks(rule):
-		ret += indent+"something that removes AGMLink(name2id['"+deleteLink[0]+"'], name2id['"+deleteLink[1]+"'], '"+deleteLink[2]+"'))"
+	for deleteLink in deleteLinks:
+		ret += indent+"something that removes AGMLink(name2id['"+deleteLink.a+"'], name2id['"+deleteLink.b+"'], '"+deleteLink.linkType+"'))"
 
 	ret += indent+"newNode.probability *= 1."
 	ret += indent+"newNode.cost += 1"
