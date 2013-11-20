@@ -93,7 +93,7 @@ def ruleImplementation(rule):
 		symbols_in_stack.append(n)
 		indent += "\t"
 	# Code for rule execution
-	ret += indent+"smap = n2id"
+	ret += indent+"smap = copy.deepcopy(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
 
 	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs)

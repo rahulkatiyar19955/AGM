@@ -157,11 +157,6 @@ add_executable ( agm_xml2pddlProblem agm_xml2pddlProblem.cpp )
 target_link_libraries ( agm_xml2pddlProblem  -L. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
-add_executable ( agglplanner agglplanner.cpp ${AGM_CODE} )
-target_link_libraries ( agglplanner  -L. ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
-add_dependencies(agglplanner agm)
-
-
 
 #  Installation  #
 ##################
@@ -172,6 +167,7 @@ INSTALL(PROGRAMS agm_xmlViewer.py DESTINATION /opt/robocomp/bin/ RENAME agm_xmlV
 INSTALL(PROGRAMS AGGLEditor.py DESTINATION /opt/robocomp/bin/ RENAME AGGLEditor)
 INSTALL(PROGRAMS aggl2pddl DESTINATION /opt/robocomp/bin/ )
 INSTALL(PROGRAMS aggl2agglpy DESTINATION /opt/robocomp/bin/ )
+INSTALL(PROGRAMS AGGLPlanner/agglplanner.py DESTINATION /opt/robocomp/bin/agglplanner )
 
 if (ROBOCOMP_SUPPORT)
 INSTALL(FILES AGMWorldModel.h DESTINATION /opt/robocomp/include/ )
