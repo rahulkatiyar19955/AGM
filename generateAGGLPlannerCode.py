@@ -17,7 +17,7 @@ def getNewIdForSymbol(node):
 class RuleSet(object):
 	def __init__(self):
 		object.__init__(self)
-		def getRules(self):
+	def getRules(self):
 		mapping = dict()
 
 """
@@ -35,10 +35,10 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere):
 	for link in linkList:
 		if newSymbol == link.a:
 			if link.b in alreadyThere:
-				ret += ' and ["'+link.a + '", "'+ link.b + '", '+ "'"+link.linkType+"'"+'] in links'
+				ret += ' and [n2id["'+link.a + '"], n2id["'+ link.b + '"], "'+link.linkType+'"] in snode.graph.links'
 		elif newSymbol == link.b:
 			if link.a in alreadyThere:
-				ret += ' and ["'+link.a + '", "'+ link.b + '", '+ "'"+link.linkType+"'"+'] in links'
+				ret += ' and [n2id["'+link.a + '"], n2id["'+ link.b + '"], "'+link.linkType+'"] in snode.graph.links'
 	return ret
 
 
@@ -55,10 +55,16 @@ def ruleImplementation(rule):
 	indent = "\n\t"
 	ret = ''
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "(self, graph):"
+	ret += indent+"def " + rule.name + "(self, snode):"
 	indent += "\t"
 	ret += indent+"ret = []"
-	# Generate Link list
+
+
+
+	# Make a copy of the current graph node list
+	ret += indent+"nodes = copy.deepcopy(snode.graph.nodes)"
+	ret += indent+"n2id = dict()"
+	## Generate Link list
 	linkList = []
 	for link_i in range(len(rule.lhs.links)):
 		link = rule.lhs.links[link_i]
@@ -72,17 +78,13 @@ def ruleImplementation(rule):
 		ret += "['" + link[0] + "', '" + link[1] + "', '" + link[2] + "']"
 	ret += " ]"
 
-
-	# Make a copy of the current graph node list
-	ret += indent+"nodes = copy.deep_copy(graph.nodes)"
-	ret += indent+"name2id = dict()"
-
 	# Generate the loop that perform the instantiation
 	symbols_in_stack = []
 	for n in rule.lhs.nodes:
 		ret += indent+"for symbol_"+n+"_name in nodes:"
 		indent += "\t"
 		ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
+		ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 		ret += indent+"if symbol_"+n+".sType == '"+rule.lhs.nodes[n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + other + ".name"
@@ -90,31 +92,39 @@ def ruleImplementation(rule):
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"
-		ret += indent+"name2id['"+n+"'] = symbol_"+n+"_name"
 	# Code for rule execution
-	ret += indent+"newNode = WorldStateHistory(node)"
+	ret += indent+"newNode = WorldStateHistory(snode)"
 
+	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs)
 	ret += indent+"# Create nodes"
-	newNodes, deleteNodes = rule.lhs.getNodeChanges(rule.rhs)
 	for newNode in newNodes:
 		ret += indent+"newName = str(getNewIdForSymbol(newNode))"
-		ret += indent+"name2id['"+newNode.name+"'] = newName"
+		ret += indent+"n2id['"+newNode.name+"'] = newName"
 		ret += indent+"newNode.graph.nodes[newName] = AGMSymbol(newName, '"+newNode.sType+"')"
+	ret += indent+"# Retype nodes"
+	for retypeNode in retypeNodes:
+		ret += indent+"newNode.graph.[n2id['"+retypeNode.name+"']].sType = '"+rule.rhs.nodes[retypeNode.name].sType + "'"
 	ret += indent+"# Remove nodes"
 	for deleteNode in deleteNodes:
-		ret += indent+"delete_node AGMSymbol('"+deleteNode.name+"', '"+deleteNode.sType+"')"
+		ret += indent+"del newNode.graph.nodes[n2id['"+deleteNode.name+"']]"
 
-	ret += indent+"# Create links"
 	newLinks, deleteLinks = rule.lhs.getLinkChanges(rule.rhs)
-	for newLink in newLinks:
-		ret += indent+"newNode.graph.links.append(AGMLink(name2id['"+newLink.a+"'], name2id['"+newLink.b+"'], '"+newLink.linkType+"'))"
 	ret += indent+"# Remove links"
-	for deleteLink in deleteLinks:
-		ret += indent+"something that removes AGMLink(name2id['"+deleteLink.a+"'], name2id['"+deleteLink.b+"'], '"+deleteLink.linkType+"'))"
+	deleteLinks_str = ''
+	for l in range(len(deleteLinks)):
+		if l > 0: deleteLinks_str += ", "
+		deleteLinks_str += "['" + deleteLinks[l].a + "', '" + deleteLinks[l].b + "', '" + deleteLinks[l].linkType + "']"
+	ret += indent+"newNode.graph.links = [x for x in newNode.graph.links if [x.a, x.b, x.linkType] not in [ "+deleteLinks_str+" ]]"
+	ret += indent+"# Create links"
+	for newLink in newLinks:
+		ret += indent+"l = AGMLink(n2id['"+newLink.a+"'], n2id['"+newLink.b+"'], '"+newLink.linkType+"')"
+		ret += indent+"if not l in newNode.graph.links:"
+		ret += indent+"\tnewNode.graph.links.append(l)"
 
+	ret += indent+"# Misc stuff"
 	ret += indent+"newNode.probability *= 1."
 	ret += indent+"newNode.cost += 1"
-	ret += indent+"newNode.history += ' "+rule.name+"'"
+	ret += indent+"newNode.history += ' "+rule.name+"(' + str(n2id)"+')'
 	ret += indent+"ret.append(newNode)"
 
 	# Rule ending
@@ -133,7 +143,3 @@ def generate(agm, skipPassiveRules):
 		text+= ruleImplementation(rule)
 
 	return text
-
-
-
-

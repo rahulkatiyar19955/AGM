@@ -35,20 +35,41 @@ class AGMLink(object):
 		else:
 			return '\t\t'+str(self.a)+'->'+str(self.b)+'('+v+str(self.linkType)+')*'
 	def __cmp__(self, other):
-		this =  self.linkType+ self.a+ self.b+str( self.enabled)
-		nhis = other.linkType+other.a+other.b+str(other.enabled)
+		this =  self.linkType+" "+ self.a+" "+ self.b+" "+str( self.enabled)
+		if isinstance(other, list):
+			nhis = other[2]+" "+other[0]+" "+other[1]+" "
+			if len(other)>3:
+				nhis+=str(other[3])
+			else:
+				nhis+=str(True)
+		else:
+			nhis = other.linkType+" "+other.a+" "+other.b+" "+str(other.enabled)
 		if this < nhis: return -1
 		if this > nhis: return +1
 		return 0
 	def __eq__(self, other):
-		this =  self.linkType+ self.a+ self.b+str( self.enabled)
-		nhis = other.linkType+other.a+other.b+str(other.enabled)
+		this =  self.linkType+" "+ self.a+" "+ self.b+" "+str( self.enabled)
+		if isinstance(other, list):
+			nhis = other[2]+" "+other[0]+" "+other[1]+" "
+			if len(other)>3:
+				nhis+=str(other[3])
+			else:
+				nhis+=str(True)
+		else:
+			nhis = other.linkType+" "+other.a+" "+other.b+" "+str(other.enabled)
 		if this == nhis:
 			return True
 		return False
 	def __ne__(self, other):
-		this =  self.linkType+ self.a+ self.b+str( self.enabled)
-		nhis = other.linkType+other.a+other.b+str(other.enabled)
+		this =  self.linkType+" "+ self.a+" "+ self.b+" "+str( self.enabled)
+		if isinstance(other, list):
+			nhis = other[2]+" "+other[0]+" "+other[1]+" "
+			if len(other)>3:
+				nhis+=str(other[3])
+			else:
+				nhis+=str(True)
+		else:
+			nhis = other.linkType+" "+other.a+" "+other.b+" "+str(other.enabled)
 		if this == nhis:
 			return False
 		return True
@@ -162,13 +183,17 @@ class AGMGraph(object):
 	def getNodeChanges(self, other):
 		toCreate = []
 		toRemove = []
+		toRetype = []
 		for name in self.nodes.keys():
 			if not name in other.nodes.keys():
 					toRemove.append(self.nodes[name])
+			else:
+				if self.nodes[name].sType != other.nodes[name].sType:
+					toRetype.append(self.nodes[name])
 		for name in other.nodes.keys():
 			if not name in self.nodes.keys():
 					toCreate.append(other.nodes[name])
-		return toCreate, toRemove
+		return toCreate, toRemove, toRetype
 	def getLinkChanges(self, other):
 		toCreate = []
 		toRemove = []
