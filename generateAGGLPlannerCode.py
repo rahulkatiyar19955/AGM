@@ -5,7 +5,7 @@ import collections
 def constantHeader():
 	return """import copy
 from AGGL import *
-from mojonplanner import *
+from agglplanner import *
 
 def getNewIdForSymbol(node):
 	m = 1
@@ -93,6 +93,7 @@ def ruleImplementation(rule):
 		symbols_in_stack.append(n)
 		indent += "\t"
 	# Code for rule execution
+	ret += indent+"smap = n2id"
 	ret += indent+"newNode = WorldStateHistory(snode)"
 
 	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs)
@@ -124,7 +125,7 @@ def ruleImplementation(rule):
 	ret += indent+"# Misc stuff"
 	ret += indent+"newNode.probability *= 1."
 	ret += indent+"newNode.cost += 1"
-	ret += indent+"newNode.history += ' "+rule.name+"(' + str(n2id)"+')'
+	ret += indent+"newNode.history += '" + rule.name + "(' + str(smap) + ')  ' "
 	ret += indent+"ret.append(newNode)"
 
 	# Rule ending

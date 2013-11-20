@@ -85,25 +85,25 @@ class PyPlan(object):
 		results = []
 		explored = 0
 
-		for k in self.ruleMap:
-			print 'Rule ', k
-		print ''
+		#for k in self.ruleMap:
+			#print 'Rule ', k
+		#print ''
 
 		# Main loop
 		try:
 			while True:
 				head = openNodes.pop()
 				# Small test
-				print 'Expanding'.ljust(10), head
+				#print 'Expanding'.ljust(10), head
 				for k in self.ruleMap:
-					print '  ',k
+					#print '  ',k
 					for deriv in self.ruleMap[k](head):
 						explored += 1
 						if explored % 100 == 0: print 'Explored nodes:', explored
 						if self.targetCode(deriv.graph):
 							results.append(deriv)
 						if not deriv in knownNodes:
-							print '    ','to'.ljust(10), deriv
+							#print '    ','to'.ljust(10), deriv
 							knownNodes.append(head)
 							openNodes.appendleft(deriv)
 		except IndexError, e:
@@ -123,4 +123,5 @@ if __name__ == '__main__': # program domain problem result
 		print 'Usage\n\t', sys.argv[0], ' domain.py init.xml target.xml'
 	else:
 		p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3])
+
 
