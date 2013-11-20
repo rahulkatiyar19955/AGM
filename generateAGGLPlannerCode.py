@@ -51,6 +51,8 @@ def newLinks(rule):
 def deleteLinks(rule):
 	return [ ['a', 'b', 'remove'] ]
 
+
+
 def ruleImplementation(rule):
 	indent = "\n\t"
 	ret = ''
@@ -144,3 +146,47 @@ def generate(agm, skipPassiveRules):
 		text+= ruleImplementation(rule)
 
 	return text
+
+
+
+
+def generateTarget(graph):
+	ret = "def CheckTarget(graph):"
+	indent = "\n\t"
+	# Make a copy of the current graph node list
+	ret += indent+"nodes = copy.deepcopy(snode.graph.nodes)"
+	ret += indent+"n2id = dict()"
+	## Generate Link list
+	linkList = []
+	for link_i in range(len(rule.lhs.links)):
+		link = rule.lhs.links[link_i]
+		linkList.append([link.a, link.b, link.linkType])
+	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
+
+	# Generate the loop that perform the instantiation
+	symbols_in_stack = []
+	for n in rule.lhs.nodes:
+		ret += indent+"for symbol_"+n+"_name in nodes:"
+		indent += "\t"
+		ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
+		ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+		ret += indent+"if symbol_"+n+".sType == '"+rule.lhs.nodes[n].sType+"'"
+		for other in symbols_in_stack:
+			ret += " and symbol_"+n+".name!=symbol_" + other + ".name"
+		ret += extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
+		ret += ":"
+		symbols_in_stack.append(n)
+		indent += "\t"
+	# Code for rule execution
+	ret += indent+"smap = copy.deepcopy(n2id)"
+	ret += indent+"newNode = WorldStateHistory(snode)"
+
+
+	# Rule ending
+	indent = "\n\t\t"
+	ret += indent+"return ret"
+	ret += indent+""
+	ret += indent+""
+	ret += "\n"
+	return ret
+

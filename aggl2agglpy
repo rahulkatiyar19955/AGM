@@ -25,11 +25,27 @@ try:
 			agmData = AGMFileDataParsing.fromFile(inputFile)
 			agmData.generateAGGLPlannerCode(outputFileFull, skipPassiveRules=False)
 			agmData.generateAGGLPlannerCode(outputFilePartial, skipPassiveRules=True)
+	if len(sys.argv)==5:
+		if sys.argv[1] != '-x':
+			ok = False
+		if sys.argv[3] != '-o':
+			ok = False
+		if ok:
+			inputXML = sys.argv[2]
+			outputPY = sys.argv[4]
+			graph = graphFromXML(inputXML)
+			ofile = open(outputPY, 'w')
+			ofile.write(generateTarget(graph))
+			ofile.close()
 	else:
 		ok = False
 
 	if not ok:
-		print '\n'+sys.argv[0], ' -i <inputFile.aggl> -a <activeRules.pddl> -f <activeAndPassiveRules.pddl>\n'
+		print '\n\naggl2agglpy usage:'
+		print '\n - To generate domain code:'
+		print sys.argv[0], ' -i <inputFile.aggl> -a <activeRules.pddl> -f <activeAndPassiveRules.pddl>'
+		print '\n - To generate goal-checking code:'
+		print sys.argv[0], ' -x <targetPattern.xml> -o <targetCode.py>\n'
 		ret = 1
 except:
 	print 'Error'
