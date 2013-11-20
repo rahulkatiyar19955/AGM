@@ -266,7 +266,7 @@ class AGMEditor(QMainWindow):
 		path_apy = QFileDialog.getSaveFileName(self, "Save FULL grammar (model verification) AGGLPlanner file as", "", "*.aggl.py")[0]
 		if not path_apy.endswith(".aggl.py"): path_apy += ".aggl.py"
 		self.agmData.generateAGGLPlannerCode(path_apy, False)
-		path_apy = QFileDialog.getSaveFileName(self, "Save partial grammar (active rules) AGGLPlanner file as", "", "*.apy")[0]
+		path_apy = QFileDialog.getSaveFileName(self, "Save partial grammar (active rules) AGGLPlanner file as", "", "*.aggl.py")[0]
 		if not path_apy.endswith(".aggl.py"): path_apy += ".aggl.py"
 		self.agmData.generateAGGLPlannerCode(path_apy, True)
 	def exportRule(self):
