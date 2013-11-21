@@ -1,8 +1,10 @@
-from AGGL import *
 from operator import *
 import collections, sys
 
 sys.path.append('/opt/robocomp/share')
+
+from AGGL import *
+from xmlModelParser import *
 
 def constantHeader():
 	return """import copy, sys
@@ -35,14 +37,17 @@ def ruleDeclaration(agm):
 
 def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere):
 	ret = ''
+	number = 0
 	for link in linkList:
 		if newSymbol == link.a:
 			if link.b in alreadyThere:
-				ret += ' and [n2id["'+link.a + '"], n2id["'+ link.b + '"], "'+link.linkType+'"] in snode.graph.links'
+				ret += ' and [n2id["'+link.a + '"],n2id["'+ link.b + '"],"'+link.linkType+'"] in snode.graph.links'
+				number += 1
 		elif newSymbol == link.b:
 			if link.a in alreadyThere:
-				ret += ' and [n2id["'+link.a + '"], n2id["'+ link.b + '"], "'+link.linkType+'"] in snode.graph.links'
-	return ret
+				ret += ' and [n2id["'+link.a + '"],n2id["'+ link.b + '"],"'+link.linkType+'"] in snode.graph.links'
+				number += 1
+	return ret, number
 
 
 def newNodes(rule):
@@ -93,7 +98,8 @@ def ruleImplementation(rule):
 		ret += indent+"if symbol_"+n+".sType == '"+rule.lhs.nodes[n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + other + ".name"
-		ret += extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
+		conditions, number = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
+		ret += conditions
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"
@@ -109,7 +115,7 @@ def ruleImplementation(rule):
 		ret += indent+"newNode.graph.nodes[newName] = AGMSymbol(newName, '"+newNode.sType+"')"
 	ret += indent+"# Retype nodes"
 	for retypeNode in retypeNodes:
-		ret += indent+"newNode.graph.[n2id['"+retypeNode.name+"']].sType = '"+rule.rhs.nodes[retypeNode.name].sType + "'"
+		ret += indent+"newNode.graph.nodes[n2id['"+retypeNode.name+"']].sType = '"+rule.rhs.nodes[retypeNode.name].sType + "'"
 	ret += indent+"# Remove nodes"
 	for deleteNode in deleteNodes:
 		ret += indent+"del newNode.graph.nodes[n2id['"+deleteNode.name+"']]"
@@ -154,40 +160,45 @@ def generate(agm, skipPassiveRules):
 
 
 def generateTarget(graph):
-	ret = "def CheckTarget(graph):"
+	ret = """import copy, sys
+sys.path.append('/opt/robocomp/share')
+from AGGL import *
+from agglplanner import *
+def CheckTarget(graph):"""
 	indent = "\n\t"
 	# Make a copy of the current graph node list
-	ret += indent+"nodes = copy.deepcopy(snode.graph.nodes)"
 	ret += indent+"n2id = dict()"
+	ret += indent+"score = 0"
 	## Generate Link list
 	linkList = []
-	for link_i in range(len(rule.lhs.links)):
-		link = rule.lhs.links[link_i]
+	for link_i in range(len(graph.links)):
+		link = graph.links[link_i]
 		linkList.append([link.a, link.b, link.linkType])
 	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
 
 	# Generate the loop that perform the instantiation
 	symbols_in_stack = []
-	for n in rule.lhs.nodes:
-		ret += indent+"for symbol_"+n+"_name in nodes:"
+	score = 0
+	for n in graph.nodes:
+		ret += indent+"for symbol_"+n+"_name in graph.nodes:"
 		indent += "\t"
-		ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
+		ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
 		ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
-		ret += indent+"if symbol_"+n+".sType == '"+rule.lhs.nodes[n].sType+"'"
+		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + other + ".name"
-		ret += extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
+		conditions, number = extractNewLinkConditionsFromList(graph.links, n, symbols_in_stack)
+		conditions = conditions.replace("snode.graph", "graph")
+		ret += conditions
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"
-	# Code for rule execution
-	ret += indent+"smap = copy.deepcopy(n2id)"
-	ret += indent+"newNode = WorldStateHistory(snode)"
-
-
+		score -= 1+number
+		ret += indent + "if "+str(score)+" < score: score = " + str(score)
+	ret += indent+"return score, True"
 	# Rule ending
-	indent = "\n\t\t"
-	ret += indent+"return ret"
+	indent = "\n\t"
+	ret += indent+"return score, False"
 	ret += indent+""
 	ret += indent+""
 	ret += "\n"

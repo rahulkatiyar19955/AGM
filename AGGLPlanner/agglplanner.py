@@ -23,14 +23,19 @@
 #  along with MojonPlanner. If not, see <http://www.gnu.org/licenses/>.
 
 # Python distribution imports
+import signal
+signal.signal(signal.SIGINT, signal.SIG_DFL)
 import sys, traceback, os, re, threading, time, string, math, copy
-import collections, imp
+import collections, imp, heapq
 
 sys.path.append('/opt/robocomp/share')
 
 import xmlModelParser
 from AGGL import *
 import inspect
+
+class GoalAchieved(Exception):
+    pass
 
 class WorldStateHistory(object):
 	def __init__(self, init):
@@ -41,12 +46,14 @@ class WorldStateHistory(object):
 			self.probability = 1
 			self.cost = 0
 			self.history = ''
+			self.score = 0
 		elif isinstance(type(init), type(WorldStateHistory)):
 			self.graph = copy.deepcopy(init.graph)
 			self.parent = init
 			self.probability = init.probability
 			self.cost = init.cost
 			self.history = init.history
+			self.score = 0
 		else:
 			print 'Human... wat r u doing... stahp... please, stahp'
 			print type(init)
@@ -78,45 +85,53 @@ class PyPlan(object):
 
 		# Some little initialization
 		self.ruleMap = self.domain.getRules()
-		openNodes = collections.deque()
-		openNodes.appendleft(copy.deepcopy(self.initWorld))
+		openNodes = []
+		heapq.heappush(openNodes, (0, copy.deepcopy(self.initWorld)))
 		print 'INIT'.ljust(20), self.initWorld
 		knownNodes = []
 		results = []
 		explored = 0
 
-		#for k in self.ruleMap:
-			#print 'Rule ', k
-		#print ''
-
 		# Main loop
 		try:
 			while True:
-				head = openNodes.pop()
+				head = heapq.heappop(openNodes)[1]
+				print head.cost, head.score
+				if head.cost > 3: break
 				# Small test
-				#print 'Expanding'.ljust(10), head
+				#print 'Expanding'.ljust(5), head
 				for k in self.ruleMap:
 					#print '  ',k
 					for deriv in self.ruleMap[k](head):
 						explored += 1
-						if explored % 100 == 0: print 'Explored nodes:', explored
-						if self.targetCode(deriv.graph):
+						if explored % 100 == 0: print 'Explored nodes:', explored, "(last cost:"+str(head.cost)+")"
+						deriv.score, achieved = self.targetCode(deriv.graph)
+						if achieved:
 							results.append(deriv)
+							print 'achieved', deriv.score
+							#raise IndexError
 						if not deriv in knownNodes:
-							#print '    ','to'.ljust(10), deriv
 							knownNodes.append(head)
-							openNodes.appendleft(deriv)
+							heapq.heappush(openNodes, (deriv.score, deriv))
 		except IndexError, e:
-			if len(results)==0:
-				print 'Empty search space: no plan found.'
-			else:
-				print 'Got plans!'
-				for i in results:
-					print '-------------------------------------------'
-					print 'Cost', i.cost
-					print 'Probability', i.probability
-					print 'Actions', i.history
-					print i
+			pass
+		except GoalAchieved, e:
+			pass
+		except target.GoalAchieved, e:
+			pass
+
+		if len(results)==0:
+			print 'Empty search space: no plan found.'
+		else:
+			print 'Got plans!'
+			for i in results:
+				print '-------------------------------------------'
+				print 'Cost', i.cost
+				print 'Score', i.score
+				print 'Probability', i.probability
+				print 'Actions', i.history
+				print i
+			print "\nExplored", explored, "nodes"
 
 if __name__ == '__main__': # program domain problem result
 	if len(sys.argv)<4:
