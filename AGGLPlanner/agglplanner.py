@@ -189,6 +189,7 @@ class PyPlan(object):
 								if breadthFirst: print 'Using breadth-first search'
 								print 'Explored nodes:', explored,
 								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
+								print head
 						deriv.score, achieved = self.targetCode(deriv.graph)
 						if verbose>4: print deriv.score, achieved, deriv
 						if achieved:
@@ -203,9 +204,9 @@ class PyPlan(object):
 								if breadthFirst:
 									openNodes.appendleft(deriv)
 								else:
-									heapq.heappush(openNodes, (-deriv.score, deriv))
-									#heapq.heappush(openNodes, (deriv.score, deriv))
-									#heapq.heappush(openNodes, (-deriv.depth, deriv))
+									heapq.heappush(openNodes, (-deriv.score, deriv)) # The more the better
+									#heapq.heappush(openNodes, ( deriv.cost , deriv)) # The less the better
+									#heapq.heappush(openNodes, (-deriv.depth, deriv)) # The more the better
 		except IndexError, e:
 			print 'End: state space exhausted'
 			pass
