@@ -220,7 +220,7 @@ def CheckTarget(graph):"""
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"
-		score -= 1+number
+		score += 1+number
 		ret += indent + "if "+str(score)+" < score: score = " + str(score)
 	ret += indent+"return score, True"
 	# Rule ending

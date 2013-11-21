@@ -203,7 +203,7 @@ class PyPlan(object):
 								if breadthFirst:
 									openNodes.appendleft(deriv)
 								else:
-									heapq.heappush(openNodes, (-deriv.score, deriv))
+									heapq.heappush(openNodes, (-deriv.score, deriv)) # Negative, because the more score the better
 									#heapq.heappush(openNodes, (deriv.score, deriv))
 									#heapq.heappush(openNodes, (-deriv.depth, deriv))
 		except IndexError, e:
