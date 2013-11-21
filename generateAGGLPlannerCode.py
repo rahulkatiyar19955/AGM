@@ -22,16 +22,25 @@ def getNewIdForSymbol(node):
 class RuleSet(object):
 	def __init__(self):
 		object.__init__(self)
-	def getRules(self):
-		mapping = dict()
+
 """
 
 def ruleDeclaration(agm):
-	ret = ''
+	ret = """\tdef getRules(self):
+		mapping = dict()"""
 	for r in agm.rules:
 		if not r.passive:
-			ret += "		mapping['"+ r.name + "'] = self." + r.name + "\n"
-	ret += "		return mapping\n"
+			ret += "\n		mapping['"+ r.name + "'] = self." + r.name
+	ret += "\n		return mapping\n\n"
+	return ret
+
+def ruleTriggerDeclaration(agm):
+	ret = """\tdef getTriggers(self):
+		mapping = dict()"""
+	for r in agm.rules:
+		if not r.passive:
+			ret += "\n		mapping['"+ r.name + "'] = self." + r.name + "_trigger"
+	ret += "\n		return mapping\n\n"
 	return ret
 
 
@@ -48,17 +57,6 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere):
 				ret += ' and [n2id["'+link.a + '"],n2id["'+ link.b + '"],"'+link.linkType+'"] in snode.graph.links'
 				number += 1
 	return ret, number
-
-
-def newNodes(rule):
-	return [ ['name1', 'type1'], ['name2', 'type2'] ]
-def deleteNodes(rule):
-	return [ ['ooooh', 'toDelete'] ]
-def newLinks(rule):
-	return [ ['a', 'b', 'in'], ['anode', 'another', 'near'] ]
-def deleteLinks(rule):
-	return [ ['a', 'b', 'remove'] ]
-
 
 
 def ruleImplementation(rule):
@@ -121,7 +119,26 @@ def ruleImplementation(rule):
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"
-	# Code for rule execution
+	# Code to call rule execution
+	ret += indent+"# At this point we meet all the conditions."
+	ret += indent+"# Insert additional conditions manually here if you want."
+	ret += indent+"# (beware that the code could be regenerated and you might lose your changes)."
+	ret += indent+"ret.append(self."+rule.name+"_trigger(snode, n2id))"
+	# Rule ending
+	indent = "\n\t\t"
+	ret += indent+"return ret"
+	ret += indent+""
+	ret += indent+""
+	ret += "\n"
+
+
+
+	indent = "\n\t"
+	ret += indent+"# Rule " + rule.name
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id):"
+	indent += "\t"
+	ret += indent+"ret = []"
+
 	ret += indent+"smap = copy.deepcopy(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
 
@@ -154,12 +171,9 @@ def ruleImplementation(rule):
 	ret += indent+"# Misc stuff"
 	ret += indent+"newNode.probability *= 1."
 	ret += indent+"newNode.cost += "+str(rule.cost)
-	ret += indent+"newNode.history += '" + rule.name + "(' + str(smap) + ')  ' "
-	ret += indent+"ret.append(newNode)"
-
-	# Rule ending
-	indent = "\n\t\t"
-	ret += indent+"return ret"
+	ret += indent+"newNode.depth += 1"
+	ret += indent+"newNode.history.append('" + rule.name + "@' + str(smap) )"
+	ret += indent+"return newNode"
 	ret += indent+""
 	ret += indent+""
 	ret += "\n"
@@ -169,24 +183,19 @@ def generate(agm, skipPassiveRules):
 	text = ''
 	text += constantHeader()
 	text += ruleDeclaration(agm)
+	text += ruleTriggerDeclaration(agm)
 	for rule in agm.rules:
 		text+= ruleImplementation(rule)
-
 	return text
-
-
 
 
 def generateTarget(graph):
 	ret = """import copy, sys
-sys.path.append('/opt/robocomp/share')
-from AGGL import *
-from agglplanner import *
+sys.path.append('/opt/robocomp/share')\nfrom AGGL import *\nfrom agglplanner import *
 def CheckTarget(graph):"""
 	indent = "\n\t"
 	# Make a copy of the current graph node list
-	ret += indent+"n2id = dict()"
-	ret += indent+"score = 0"
+	ret += indent+"n2id = dict()\n"+indent+"score = 0"
 	## Generate Link list
 	linkList = []
 	for link_i in range(len(graph.links)):
