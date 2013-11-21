@@ -24,13 +24,13 @@ class RuleSet(object):
 		object.__init__(self)
 	def getRules(self):
 		mapping = dict()
-
 """
 
 def ruleDeclaration(agm):
 	ret = ''
 	for r in agm.rules:
-		ret += "		mapping['"+ r.name + "'] = self." + r.name + "\n"
+		if not r.passive:
+			ret += "		mapping['"+ r.name + "'] = self." + r.name + "\n"
 	ret += "		return mapping\n"
 	return ret
 
@@ -62,8 +62,9 @@ def deleteLinks(rule):
 
 
 def ruleImplementation(rule):
-	indent = "\n\t"
+	if rule.passive: return ''
 	ret = ''
+	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
 	ret += indent+"def " + rule.name + "(self, snode):"
 	indent += "\t"
@@ -88,9 +89,26 @@ def ruleImplementation(rule):
 		ret += "['" + link[0] + "', '" + link[1] + "', '" + link[2] + "']"
 	ret += " ]"
 
+
+	# Compute the not-actually-optimal order TODO improve this!
+	counter = dict()
+	for n in rule.lhs.nodes:
+		counter[n] = 0
+	for n in rule.lhs.nodes:
+		for link in linkList:
+			if n == link[0] or n == link[1]:
+				counter[n] = counter[n] + 1
+	optimal_node_list_t = []
+	for n in counter.keys():
+		optimal_node_list_t.append((counter[n], n))
+	optimal_node_list_t = sorted(optimal_node_list_t, reverse=True)
+	optimal_node_list = []
+	for o in optimal_node_list_t:
+		optimal_node_list.append(o[1])
+
 	# Generate the loop that perform the instantiation
 	symbols_in_stack = []
-	for n in rule.lhs.nodes:
+	for n in optimal_node_list:
 		ret += indent+"for symbol_"+n+"_name in nodes:"
 		indent += "\t"
 		ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
@@ -135,7 +153,7 @@ def ruleImplementation(rule):
 
 	ret += indent+"# Misc stuff"
 	ret += indent+"newNode.probability *= 1."
-	ret += indent+"newNode.cost += 1"
+	ret += indent+"newNode.cost += "+str(rule.cost)
 	ret += indent+"newNode.history += '" + rule.name + "(' + str(smap) + ')  ' "
 	ret += indent+"ret.append(newNode)"
 

@@ -87,7 +87,8 @@ class PyPlan(object):
 		self.ruleMap = self.domain.getRules()
 		openNodes = []
 		heapq.heappush(openNodes, (0, copy.deepcopy(self.initWorld)))
-		print 'INIT'.ljust(20), self.initWorld
+		verbose = False
+		if verbose: print 'INIT'.ljust(20), self.initWorld
 		knownNodes = []
 		results = []
 		explored = 0
@@ -96,20 +97,24 @@ class PyPlan(object):
 		try:
 			while True:
 				head = heapq.heappop(openNodes)[1]
-				print head.cost, head.score
-				if head.cost > 3: break
+				#print head.cost, head.score
+				if head.cost > 30: break
 				# Small test
-				#print 'Expanding'.ljust(5), head
+				if verbose: print 'Expanding'.ljust(5), head
 				for k in self.ruleMap:
-					#print '  ',k
+					prtd = False
 					for deriv in self.ruleMap[k](head):
+						if not prtd:
+							if verbose: print '  ',k
+							prtd = True
 						explored += 1
-						if explored % 100 == 0: print 'Explored nodes:', explored, "(last cost:"+str(head.cost)+")"
+						if verbose:
+							if explored % 100 == 0:
+								print 'Explored nodes:', explored, "(last cost:"+str(head.cost)+")"
 						deriv.score, achieved = self.targetCode(deriv.graph)
+						if verbose: print deriv.score, achieved, deriv
 						if achieved:
 							results.append(deriv)
-							print 'achieved', deriv.score
-							#raise IndexError
 						if not deriv in knownNodes:
 							knownNodes.append(head)
 							heapq.heappush(openNodes, (deriv.score, deriv))
@@ -124,13 +129,18 @@ class PyPlan(object):
 			print 'Empty search space: no plan found.'
 		else:
 			print 'Got plans!'
-			for i in results:
-				print '-------------------------------------------'
-				print 'Cost', i.cost
-				print 'Score', i.score
-				print 'Probability', i.probability
-				print 'Actions', i.history
-				print i
+			mincost = results[0].cost
+			min_idx = 0
+			for i in range(len(results)):
+				if results[i].cost < mincost:
+					mincost = results[i].cost
+					min_idx = i
+			print '-------------------------------------------'
+			print 'Cost', results[i].cost
+			print 'Score', results[i].score
+			print 'Probability', results[i].probability
+			print 'Actions', results[i].history
+			print i
 			print "\nExplored", explored, "nodes"
 
 if __name__ == '__main__': # program domain problem result
