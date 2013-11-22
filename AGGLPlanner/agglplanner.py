@@ -194,6 +194,7 @@ class PyPlan(object):
 								if breadthFirst: print 'Using breadth-first search'
 								print 'Explored nodes:', explored,
 								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
+								print head
 						deriv.score, achieved = self.targetCode(deriv.graph)
 						if verbose>4: print deriv.score, achieved, deriv
 						if achieved:
