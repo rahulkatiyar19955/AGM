@@ -277,6 +277,19 @@ class AGMGraph(object):
 			ret.add(l.linkType)
 		return ret
 
+	def toXML(self, path):
+		f = open(path, 'w')
+		f.write('<AGMModel>\n')
+		for n in self.nodes:
+			f.write('\t<symbol id="'+str(self.nodes[n].name)+'" type="'+str(self.nodes[n].sType)+'">\n')
+			#v = ''
+			#f.write('\t\t<attribute key="'+v+'" value="'+v+'">')
+			f.write('\t</symbol>\n')
+		for l in self.links:
+			f.write('\t<link src="'+str(l.a)+'" dst="'+str(l.b)+'" label="'+str(l.linkType)+'" />\n')
+		f.write('</AGMModel>\n\n')
+		f.close()
+
 class AGMRule(object):
 	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1):
 		object.__init__(self)

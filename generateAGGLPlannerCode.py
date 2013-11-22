@@ -94,7 +94,9 @@ def ruleImplementation(rule):
 		counter[n] = 0
 	for n in rule.lhs.nodes:
 		for link in linkList:
-			if n == link[0] or n == link[1]:
+			if n == link[0]:
+				counter[n] = counter[n] + 2
+			if n == link[1]:
 				counter[n] = counter[n] + 1
 	optimal_node_list_t = []
 	for n in counter.keys():
@@ -146,14 +148,14 @@ def ruleImplementation(rule):
 	ret += indent+"# Create nodes"
 	for newNode in newNodes:
 		ret += indent+"newName = str(getNewIdForSymbol(newNode))"
-		ret += indent+"n2id['"+newNode.name+"'] = newName"
+		ret += indent+"smap['"+newNode.name+"'] = newName"
 		ret += indent+"newNode.graph.nodes[newName] = AGMSymbol(newName, '"+newNode.sType+"')"
 	ret += indent+"# Retype nodes"
 	for retypeNode in retypeNodes:
 		ret += indent+"newNode.graph.nodes[n2id['"+retypeNode.name+"']].sType = '"+rule.rhs.nodes[retypeNode.name].sType + "'"
 	ret += indent+"# Remove nodes"
 	for deleteNode in deleteNodes:
-		ret += indent+"del newNode.graph.nodes[n2id['"+deleteNode.name+"']]"
+		ret += indent+"del newNode.graph.nodes[smap['"+deleteNode.name+"']]"
 
 	newLinks, deleteLinks = rule.lhs.getLinkChanges(rule.rhs)
 	ret += indent+"# Remove links"
@@ -164,7 +166,7 @@ def ruleImplementation(rule):
 	ret += indent+"newNode.graph.links = [x for x in newNode.graph.links if [x.a, x.b, x.linkType] not in [ "+deleteLinks_str+" ]]"
 	ret += indent+"# Create links"
 	for newLink in newLinks:
-		ret += indent+"l = AGMLink(n2id['"+newLink.a+"'], n2id['"+newLink.b+"'], '"+newLink.linkType+"')"
+		ret += indent+"l = AGMLink(smap['"+newLink.a+"'], smap['"+newLink.b+"'], '"+newLink.linkType+"')"
 		ret += indent+"if not l in newNode.graph.links:"
 		ret += indent+"\tnewNode.graph.links.append(l)"
 
@@ -172,7 +174,7 @@ def ruleImplementation(rule):
 	ret += indent+"newNode.probability *= 1."
 	ret += indent+"newNode.cost += "+str(rule.cost)
 	ret += indent+"newNode.depth += 1"
-	ret += indent+"newNode.history.append('" + rule.name + "@' + str(smap) )"
+	ret += indent+"newNode.history.append('" + rule.name + "@' + str(n2id) )"
 	ret += indent+"return newNode"
 	ret += indent+""
 	ret += indent+""
@@ -220,7 +222,7 @@ def CheckTarget(graph):"""
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"
-		score += 1+number
+		score += 3+number
 		ret += indent + "if "+str(score)+" > score: score = " + str(score)
 	ret += indent+"return score, True"
 	# Rule ending

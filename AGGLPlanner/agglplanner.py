@@ -134,12 +134,17 @@ class PyPlan(object):
 		target = imp.load_source('target', targetPath)
 		self.targetCode = target.CheckTarget
 
-
-		# Some little initialization
-		mincostOnList = 0
+		# C O N F I G U R A T I O N
+		# C O N F I G U R A T I O N
+		# C O N F I G U R A T I O N
 		maxWorldSize = len(self.initWorld.graph.nodes.keys())+50
 		breadthFirst = False
 		#breadthFirst = True
+		stopWithFirstPlan = True
+
+
+		# Some little initialization
+		mincostOnList = 0
 		self.ruleMap = self.domain.getRules()
 		openNodes = []
 		if breadthFirst:
@@ -189,7 +194,6 @@ class PyPlan(object):
 								if breadthFirst: print 'Using breadth-first search'
 								print 'Explored nodes:', explored,
 								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-								print head
 						deriv.score, achieved = self.targetCode(deriv.graph)
 						if verbose>4: print deriv.score, achieved, deriv
 						if achieved:
@@ -197,6 +201,8 @@ class PyPlan(object):
 							cheaperSolutionCost = results[0].cost
 							for s in results:
 								if s.cost < cheaperSolutionCost: cheaperSolutionCost = s.cost
+							if stopWithFirstPlan:
+								raise GoalAchieved
 						if not deriv in knownNodes:
 							if len(deriv.graph.nodes.keys()) <= maxWorldSize:
 								knownNodes.append(head)
@@ -204,9 +210,9 @@ class PyPlan(object):
 								if breadthFirst:
 									openNodes.appendleft(deriv)
 								else:
-									heapq.heappush(openNodes, (-deriv.score, deriv)) # The more the better
+									#heapq.heappush(openNodes, (-deriv.score, deriv)) # The more the better
 									#heapq.heappush(openNodes, ( deriv.cost , deriv)) # The less the better
-									#heapq.heappush(openNodes, (-deriv.depth, deriv)) # The more the better
+									heapq.heappush(openNodes, ( (float(deriv.cost)/(float(deriv.score)+1.), deriv)) ) # The more the better
 		except IndexError, e:
 			print 'End: state space exhausted'
 			pass
@@ -217,20 +223,18 @@ class PyPlan(object):
 			print 'End: best solution found'
 			pass
 		except GoalAchieved, e:
-			print 'End: preemptive exit: goal achieved'
+			print 'End: goal achieved'
 			pass
 		except target.GoalAchieved, e:
-			print 'End: preemptive exit: goal achieved'
+			print 'End: goal achieved'
 			pass
 
 		if len(results)==0:
 			print 'No plan found.'
 		else:
 			print 'Got', len(results),' plans!'
-			print 'Costs:',
 			min_idx = 0
 			for i in range(len(results)):
-				print "", results[i].cost,
 				if results[i].cost < results[min_idx].cost:
 					min_idx = i
 			i = min_idx

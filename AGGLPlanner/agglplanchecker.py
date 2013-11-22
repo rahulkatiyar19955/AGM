@@ -37,7 +37,7 @@ from agglplanner import *
 
 
 class PyPlanChecker(object):
-	def __init__(self, domainPath, init, planPath, targetPath=''):
+	def __init__(self, domainPath, init, planPath, targetPath, resultPath=''):
 		object.__init__(self)
 		# Get initial world mdoel
 		self.initWorld  = WorldStateHistory(xmlModelParser.graphFromXML(init))
@@ -65,22 +65,36 @@ class PyPlanChecker(object):
 				print world
 		except WrongRuleExecution, e:
 			print e
-		
+
+
+		# Get result
+		score, achieved = self.targetCode(world.graph)
+
+		if achieved:
+			print 'GOAL ACHIEVED'
+
+		if resultPath!='':
+			world.graph.toXML(resultPath)
+
 		
 
 if __name__ == '__main__': # program domain problem result
-	if len(sys.argv)!=4 and len(sys.argv)!=5:
-		print 'Usage\n\t', sys.argv[0], ' domain.py init.xml plan.plan [target.xml]'
-	elif len(sys.argv)==4:
-		domain = sys.argv[1]
-		init   = sys.argv[2]
-		plan   = sys.argv[3]
-		p = PyPlanChecker(domain, init, plan)
+	if len(sys.argv)!=6 and len(sys.argv)!=5:
+		print 'Usage\n\t', sys.argv[0], ' domain.py init.xml plan.plan target.aggl.py [result.xml]'
+		sys.exit(0)
 	elif len(sys.argv)==5:
 		domain = sys.argv[1]
 		init   = sys.argv[2]
 		plan   = sys.argv[3]
 		target = sys.argv[4]
-		p = PyPlanChecker(domain, init, plan, target)
+		result = ''
+	elif len(sys.argv)==6:
+		domain = sys.argv[1]
+		init   = sys.argv[2]
+		plan   = sys.argv[3]
+		target = sys.argv[4]
+		result = sys.argv[5]
+
+	p = PyPlanChecker(domain, init, plan, target, result)
 
 
