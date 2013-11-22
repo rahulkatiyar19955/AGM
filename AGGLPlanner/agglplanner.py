@@ -137,7 +137,7 @@ class PyPlan(object):
 		# C O N F I G U R A T I O N
 		# C O N F I G U R A T I O N
 		# C O N F I G U R A T I O N
-		maxWorldSize = len(self.initWorld.graph.nodes.keys())+50
+		maxWorldSize = len(self.initWorld.graph.nodes.keys())+40
 		breadthFirst = False
 		#breadthFirst = True
 		stopWithFirstPlan = True
