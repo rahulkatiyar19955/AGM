@@ -93,6 +93,16 @@ class AGMGraph(object):
 		self.nodes = nodes
 		self.links = links
 		self.side = side
+	def removeDanglingEdges(self):
+		linkindex = 0
+		while linkindex < len(self.links):
+			e = self.links[linkindex]
+			try:
+				v1 = self.nodes[e.a]
+				v2 = self.nodes[e.b]
+				linkindex += 1
+			except:
+				del self.links[linkindex]
 	def __str__(self):
 		ret = '[ '
 		for i in self.nodes:

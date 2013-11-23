@@ -159,6 +159,7 @@ def ruleImplementation(rule):
 	# Remove nodes
 	for deleteNode in deleteNodes:
 		ret += indent+"del newNode.graph.nodes[smap['"+deleteNode.name+"']]"
+	ret += indent+"newNode.graph.removeDanglingEdges()"
 
 	# Remove links
 	newLinks, deleteLinks = rule.lhs.getLinkChanges(rule.rhs)
