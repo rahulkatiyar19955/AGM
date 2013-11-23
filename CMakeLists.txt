@@ -9,7 +9,7 @@ INCLUDE_DIRECTORIES ( . )
 #  Optional features  #
 #######################
 option (PYTHON_BINDINGS "Build python bindings" OFF)
-option (ROBOCOMP_SUPPORT "Build with support for RoboComp" ON)
+option (ROBOCOMP_SUPPORT "Build with support for RoboComp" OFF)
 
 
 #  Set sources  #
