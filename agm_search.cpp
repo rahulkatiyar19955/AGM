@@ -22,7 +22,7 @@ bool AGMSearch::go(const AGMModel::SPtr &current_, const AGMModel::SPtr &goal_, 
 		return true;
 	}
 
-	printf("nodesToExplore: %ld\n", nodesToExplore.size());
+	printf("nodesToExplore: %d\n", (int)nodesToExplore.size());
 
 	//Main loop
 	uint32_t nodes=0;
@@ -33,7 +33,7 @@ bool AGMSearch::go(const AGMModel::SPtr &current_, const AGMModel::SPtr &goal_, 
 		//Expand best node
 		AGMSearchPathList l;
 		l = expandBestNodeAndRemoveItFromTheNodesToExplore();
-		printf("expanded: %ld\n", l.size());
+		printf("expanded: %d\n", (int)l.size());
 		//Check if anyone of the expanded nodes meet goal's conditions and (if not)
 		//include them in the "nodes to explore" list.
 		for (AGMSearchPathList::iterator iter=l.begin(); iter!=l.end(); iter++)

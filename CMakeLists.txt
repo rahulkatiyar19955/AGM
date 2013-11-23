@@ -85,14 +85,14 @@ if (PYTHON_BINDINGS)
 endif (PYTHON_BINDINGS)
 
 # RoboComp support
-# if (ROBOCOMP_SUPPORT)
+if (ROBOCOMP_SUPPORT)
 	MESSAGE(STATUS "ROBOCOMP PATH:        $ENV{ROBOCOMP}")
 	INCLUDE( $ENV{ROBOCOMP}/CMake/robocomp.cmake )
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 	SET(ICE_LIBS -lIce)
 	ROBOCOMP_WRAP_ICE( AGMWorldModel )
 	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
-# endif (ROBOCOMP_SUPPORT)
+endif (ROBOCOMP_SUPPORT)
 
 # LibXML
 FIND_PACKAGE(LibXml2 REQUIRED)
@@ -141,9 +141,9 @@ SET(LIBS ${LIBS} -lfl )
 
 #  Library building  #
 ######################
-# if (ROBOCOMP_SUPPORT)
-add_library(agmdummy SHARED AGMWorldModel.cpp )
-# endif (ROBOCOMP_SUPPORT)
+if (ROBOCOMP_SUPPORT)
+   add_library(agmdummy SHARED AGMWorldModel.cpp )
+endif (ROBOCOMP_SUPPORT)
 
 add_library(agm SHARED ${AGM_CODE} )
 target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES})

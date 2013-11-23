@@ -7,7 +7,7 @@
 #include <libxml2/libxml/parser.h>
 #include <libxml2/libxml/tree.h>
 
-// #ifdef ROBOCOMP_SUPPORT
+#ifdef ROBOCOMP_SUPPORT
 void AGMModelConverter::fromInternalToIce(const AGMModel::SPtr &src, RoboCompAGMWorldModel::World &dst)
 {
 	dst.nodes.clear();
@@ -114,7 +114,8 @@ bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMW
 	return false;
 }
 
-// #endif
+#endif
+
 
 void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr &dst)
 {
