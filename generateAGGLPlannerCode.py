@@ -144,6 +144,7 @@ def ruleImplementation(rule):
 	ret += indent+"smap = copy.deepcopy(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
 
+	# Create nodes
 	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs)
 	ret += indent+"# Create nodes"
 	for newNode in newNodes:
@@ -151,19 +152,23 @@ def ruleImplementation(rule):
 		ret += indent+"smap['"+newNode.name+"'] = newName"
 		ret += indent+"newNode.graph.nodes[newName] = AGMSymbol(newName, '"+newNode.sType+"')"
 	ret += indent+"# Retype nodes"
+	# Retype nodes
 	for retypeNode in retypeNodes:
 		ret += indent+"newNode.graph.nodes[n2id['"+retypeNode.name+"']].sType = '"+rule.rhs.nodes[retypeNode.name].sType + "'"
 	ret += indent+"# Remove nodes"
+	# Remove nodes
 	for deleteNode in deleteNodes:
 		ret += indent+"del newNode.graph.nodes[smap['"+deleteNode.name+"']]"
 
+	# Remove links
 	newLinks, deleteLinks = rule.lhs.getLinkChanges(rule.rhs)
 	ret += indent+"# Remove links"
 	deleteLinks_str = ''
 	for l in range(len(deleteLinks)):
 		if l > 0: deleteLinks_str += ", "
-		deleteLinks_str += "['" + deleteLinks[l].a + "', '" + deleteLinks[l].b + "', '" + deleteLinks[l].linkType + "']"
+		deleteLinks_str += "[smap['" + deleteLinks[l].a + "'], smap['" + deleteLinks[l].b + "'], '" + deleteLinks[l].linkType + "']"
 	ret += indent+"newNode.graph.links = [x for x in newNode.graph.links if [x.a, x.b, x.linkType] not in [ "+deleteLinks_str+" ]]"
+	# Create links
 	ret += indent+"# Create links"
 	for newLink in newLinks:
 		ret += indent+"l = AGMLink(smap['"+newLink.a+"'], smap['"+newLink.b+"'], '"+newLink.linkType+"')"
@@ -205,10 +210,34 @@ def CheckTarget(graph):"""
 		linkList.append([link.a, link.b, link.linkType])
 	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
 
-	# Generate the loop that perform the instantiation
+	ret += indent+"scoreA = 0"
+	ret += '\n'
+	if True:
+		ret += indent+"# Easy score"
+		typesDict = dict()
+		for n in graph.nodes:
+			t = graph.nodes[n].sType
+			if t in typesDict:
+				typesDict[t] += 1
+			else:
+				typesDict[t] = 1
+		ret += indent+"typesDict = dict()"
+		for t in typesDict:
+			ret += indent+"typesDict['"+t+"'] = "+str(typesDict[t])
+		ret += indent+"for n in graph.nodes:"
+		ret += indent+"	if graph.nodes[n].sType in typesDict:"
+		ret += indent+"		scoreA += 1"
+		ret += indent+"		typesDict[graph.nodes[n].sType] -= 1"
+		ret += indent+"		if typesDict[graph.nodes[n].sType] == 0:"
+		ret += indent+"			del typesDict[graph.nodes[n].sType]"
+		ret += '\n'
+
+	# Generate the loop that checks the actual model
 	symbols_in_stack = []
 	score = 0
+	ret += indent+"# Hard score"
 	for n in graph.nodes:
+		ret += indent+"# "+n
 		ret += indent+"for symbol_"+n+"_name in graph.nodes:"
 		indent += "\t"
 		ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
@@ -222,12 +251,12 @@ def CheckTarget(graph):"""
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"
-		score += 3+number
+		score += 3*(1+number)
 		ret += indent + "if "+str(score)+" > score: score = " + str(score)
 	ret += indent+"return score, True"
 	# Rule ending
 	indent = "\n\t"
-	ret += indent+"return score, False"
+	ret += indent+"return score+scoreA, False"
 	ret += indent+""
 	ret += indent+""
 	ret += "\n"

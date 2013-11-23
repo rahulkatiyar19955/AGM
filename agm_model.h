@@ -80,7 +80,7 @@ public:
 	bool addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
 	bool removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
 
-	
+	void setLastId(int32_t i) { lastId = i; }
 	/// PLANNING RELATED !!
 	std::string generatePDDLProblem(const AGMModel::SPtr &target, int32_t unknowns, const std::string domainName, const std::string problemName="problemName") const;
 

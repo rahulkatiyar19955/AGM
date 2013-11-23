@@ -152,7 +152,7 @@ class PyPlan(object):
 			openNodes.appendleft(copy.deepcopy(self.initWorld))
 		else:
 			heapq.heappush(openNodes, (0, copy.deepcopy(self.initWorld)))
-		verbose = 1
+		verbose = 0
 		if verbose>0: print 'INIT'.ljust(20), self.initWorld
 		knownNodes = []
 		results = []
@@ -215,38 +215,39 @@ class PyPlan(object):
 									#heapq.heappush(openNodes, ( deriv.cost , deriv)) # The less the better
 									heapq.heappush(openNodes, ( (float(deriv.cost)/(float(deriv.score)+1.), deriv)) ) # The more the better
 		except IndexError, e:
-			print 'End: state space exhausted'
+			if verbose > 0: print 'End: state space exhausted'
 			pass
 		except MaxCostReached, e:
-			print 'End: max cost reached:', e.cost
+			if verbose > 0: print 'End: max cost reached:', e.cost
 			pass
 		except BestSolutionFound, e:
-			print 'End: best solution found'
+			if verbose > 0: print 'End: best solution found'
 			pass
 		except GoalAchieved, e:
-			print 'End: goal achieved'
+			if verbose > 0: print 'End: goal achieved'
 			pass
 		except target.GoalAchieved, e:
-			print 'End: goal achieved'
+			if verbose > 0: print 'End: goal achieved'
 			pass
 
 		if len(results)==0:
-			print 'No plan found.'
+			if verbose > 0: print 'No plan found.'
 		else:
-			print 'Got', len(results),' plans!'
+			if verbose > 0: print 'Got', len(results),' plans!'
 			min_idx = 0
 			for i in range(len(results)):
 				if results[i].cost < results[min_idx].cost:
 					min_idx = i
 			i = min_idx
-			print '-------------------------------------------'
-			print 'Cost', results[i].cost
-			print 'Score', results[i].score
-			print 'Probability', results[i].probability
-			print 'Actions\n----------------'
+			if verbose > 0:
+				print '-------------------------------------------'
+				print 'Cost', results[i].cost
+				print 'Score', results[i].score
+				print 'Probability', results[i].probability
+				print 'Actions\n----------------'
 			for action in results[i].history:
 				print action
-			print "----------------\nExplored", explored, "nodes"
+			if verbose > 0: print "----------------\nExplored", explored, "nodes"
 
 if __name__ == '__main__': # program domain problem result
 	if len(sys.argv)<4:
