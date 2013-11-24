@@ -137,10 +137,26 @@ def ruleImplementation(rule):
 
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, checked=True):"
 	indent += "\t"
-	ret += indent+"ret = []"
-
+	ret += indent+"if not checked:"
+	indent += "\t"
+	lelele = 0
+	symbols_in_stack = []
+	for n in optimal_node_list:
+		lelele += 1
+		ret += indent+"test_symbol_"+n+" = snode.graph.nodes[n2id['"+n+"']]"
+		ret += indent+"if not (test_symbol_"+n+".sType == '"+rule.lhs.nodes[n].sType+"'"
+		for other in symbols_in_stack:
+			ret += " and test_symbol_"+n+".name!=test_symbol_" + other + ".name"
+		conditions, number = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
+		ret += conditions
+		ret += "):"
+		symbols_in_stack.append(n)
+		indent += "\t"
+		ret += indent+"raise WrongRuleExecution('"+rule.name+"_trigger"+str(lelele)+" ')"
+		indent = indent[:-1]
+	indent = indent[:-1]
 	ret += indent+"smap = copy.deepcopy(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
 

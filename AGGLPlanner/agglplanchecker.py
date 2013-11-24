@@ -55,16 +55,21 @@ class PyPlanChecker(object):
 		try:
 			world = copy.deepcopy(self.initWorld)
 			print world
+			line = 0
 			for action in self.plan:
+				line += 1
 				print action
 				for p in action.parameters.keys():
 					if not action.parameters[p] in world.graph.nodes.keys():
 						raise WrongRuleExecution("Parameter '"+action.parameters[p]+"' (variable '"+p+"') doesn't exists in the current world model.")
-				world = self.domain.getTriggers()[action.name](world, action.parameters)
+				world = self.domain.getTriggers()[action.name](world, action.parameters, checked=False)
 				print 'result:'
 				print world
+				world.graph.toXML('after_plan_step'+str(line)+".xml")
 		except WrongRuleExecution, e:
-			print e
+			print 'Invalid rule execution', action
+			print 'Rule: ', e
+			print 'Line: ', line
 
 
 		# Get result
@@ -74,7 +79,6 @@ class PyPlanChecker(object):
 			print 'GOAL ACHIEVED'
 			for action in self.plan:
 				print action
-
 		if resultPath!='':
 			world.graph.toXML(resultPath)
 

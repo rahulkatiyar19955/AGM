@@ -123,7 +123,7 @@ class WorldStateHistory(object):
 		return self.graph.__str__()
 
 class PyPlan(object):
-	def __init__(self, domainPath, init, targetPath):
+	def __init__(self, domainPath, init, targetPath, resultFile):
 		object.__init__(self)
 		# Get initial world mdoel
 		self.initWorld  = WorldStateHistory(xmlModelParser.graphFromXML(init))
@@ -177,7 +177,7 @@ class PyPlan(object):
 								mincostOnList = n.cost
 				#print head.cost, head.score
 				
-				if (len(results)>0 and head.cost>3*cheaperSolutionCost) or (head.cost > 50):
+				if (len(results)>0 and head.cost>3*cheaperSolutionCost) or (head.cost > 20):
 					raise MaxCostReached(head.cost)
 				# Small test
 				if verbose>5: print 'Expanding'.ljust(5), head
@@ -247,12 +247,16 @@ class PyPlan(object):
 				print 'Actions\n----------------'
 			for action in results[i].history:
 				print action
+				if resultFile != None:
+					resultFile.write(str(action)+'\n')
 			if verbose > 0: print "----------------\nExplored", explored, "nodes"
 
 if __name__ == '__main__': # program domain problem result
 	if len(sys.argv)<4:
-		print 'Usage\n\t', sys.argv[0], ' domain.py init.xml target.xml'
+		print 'Usage\n\t', sys.argv[0], ' domain.py init.xml target.xml [result.plan]'
+	if len(sys.argv)<5:
+		p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], None)
 	else:
-		p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3])
+		p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], open(sys.argv[4], 'w'))
 
 

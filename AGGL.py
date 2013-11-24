@@ -104,15 +104,14 @@ class AGMGraph(object):
 			except:
 				del self.links[linkindex]
 	def __str__(self):
-		ret = '[ '
+		ret = 'NODES [ '
 		for i in self.nodes:
-			ret += str(self.nodes[i])
-			ret += ' '
-		ret += ']  << '
+			ret += ' '+str(self.nodes[i])+' '
+		ret += ']\n'
+		ret += 'LINKS [ '
 		for l in self.links:
-			ret += str(l)
-			ret += ' '
-		ret += ' >>'
+			ret += ' '+str(l)+' '
+		ret += ']\n'
 		return ret
 	def __repr__(self):
 		return self.__str__()
