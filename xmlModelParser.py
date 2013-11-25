@@ -1,93 +1,78 @@
-import libxml2
+import xmllib, string, sys
 
+sys.path.append('/opt/robocomp/share')
 from AGGL import *
 
+class AGMWorldModelParser(xmllib.XMLParser):
+	def __init__(self, path):
+		xmllib.XMLParser.__init__(self)
+		self.world = False
+		self.currentSymbol = None
+
+		self.nodes = dict()
+		self.links = list()
+
+		filehandle = open(path, 'r')
+		data = filehandle.read()
+		filehandle.close()
+		self.feed(data)
+
+	def handle_data(self, data):
+		pass
+
+	def start_AGMModel(self, attrs):
+		if not self.world:
+			self.world = True
+		else:
+			print 'errorrr'
+			sys.exit(-1)
+
+	def end_AGMModel(self):
+		if self.world:
+			self.world = False
+		else:
+			print 'errorrr'
+			sys.exit(-1)
+
+	def start_symbol(self, attrs):
+		ids = attrs['id']
+		self.currentSymbol = ids
+		x = ''
+		if 'x' in attrs: x = attrs['x']
+		y = ''
+		if 'y' in attrs: y = attrs['y']
+		self.nodes[ids] = AGMSymbol(ids, attrs['type'], [x, y])
+
+	def end_symbol(self):
+		self.currentSymbol = None
+
+	def start_link(self, attrs):
+		src = attrs['src']
+		dst = attrs['dst']
+		if not src in self.nodes:
+			print 'No node', src
+			sys.exit(-1)
+		if not dst in self.nodes:
+			print 'No node', dst
+			sys.exit(-1)
+		self.links.append(AGMLink(src, dst, attrs['label'], True))
+
+	def end_link(self):
+		pass
+
+	def start_attribute(self, attrs):
+		pass
+
+	def end_attribute(self):
+		pass
 
 def graphFromXML(path):
-	# Initialize empty graph
-	nodes = dict()
-	links = list()
-	# Open XML
 	try:
-		file = open(path, 'r')
+		parser = AGMWorldModelParser(path)
+		parser.close()
+		return AGMGraph(parser.nodes, parser.links)
 	except:
 		print 'Can\'t open ' + path + '.'
 		return AGMGraph(dict(), list())
-	data = file.read()
-	xmldoc = libxml2.parseDoc(data)
-	root = xmldoc.children
-	if root is not None:
-		nodes, links = parseRoot(root, nodes, links)
-	xmldoc.freeDoc()
-	return AGMGraph(nodes, links)
 
-
-def parseRoot(root, nodes, links):
-	if root.type == "element" and root.name == "AGMModel":
-		child = root.children
-		while child is not None:
-			if child.type == "element":
-				if child.name == "symbol":
-					nodes, links = parseSymbol(child, nodes, links)
-				elif child.name == "link":
-					nodes, links = parseLink(child, nodes, links)
-				else:
-					print "error: "+str(child.name)
-			child = child.next
-	return nodes, links
-
-
-def parseSymbol(root, nodes, links):
-	if root.type == "element" and root.name == "symbol":
-		# props
-		child = root.children
-		idens = parseSingleValue(root,   'id')
-		types = parseSingleValue(root, 'type')
-		x = 0
-		xs = parseSingleValue(root, 'x', False)
-		if xs != None:
-			x = int(xs)
-		y = 0
-		ys = parseSingleValue(root, 'y', False)
-		if ys != None:
-			y = int(ys)
-		nodes[idens] = AGMSymbol(idens, types, [int(x), int(y)])
-		# children
-		while child is not None:
-			if child.type == "element":
-				if child.name == "attribute":
-					#parseAttribute(child, component)
-					pass
-				else:
-					print 'boooooooooo'
-			child = child.next
-	else:
-		print 'parseSymbol with no symbol element'
-	return nodes, links
-
-
-def parseLink(root, nodes, links):
-	if root.type == "element" and root.name == "link":
-		# props
-		child = root.children
-		src = parseSingleValue(root, 'src')
-		dst = parseSingleValue(root, 'dst')
-		lab = parseSingleValue(root, 'label')
-		links.append(AGMLink(src, dst, lab, True))
-		# children
-		while child is not None:
-			if child.type == "element":
-					print 'boooooooooo'
-			child = child.next
-	else:
-		print 'parseLink with no link element'
-	return nodes, links
-
-
-def parseSingleValue(node, arg, doCheck=True):
-	if not node.hasProp(arg) and doCheck: print 'WARNING: ' + arg + ' attribute expected'
-	else:
-		ret = node.prop(arg)
-		node.unsetProp(arg)
-		return ret
 
