@@ -20,8 +20,8 @@ try:
 			ok = False
 		if ok:
 			inputFile         = sys.argv[2]
-			outputFileFull    = sys.argv[6]
 			outputFilePartial = sys.argv[4]
+			outputFileFull    = sys.argv[6]
 			agmData = AGMFileDataParsing.fromFile(inputFile)
 			agmData.generatePDDL(outputFileFull, skipPassiveRules=False)
 			agmData.generatePDDL(outputFilePartial, skipPassiveRules=True)

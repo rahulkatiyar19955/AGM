@@ -1,28 +1,12 @@
 spacePattern=3
-lineThickness=2.5
+lineThickness=2
 name=lokito
 vertexDiameter=40
 shortPattern=1
-nodeThickness=2.5
+nodeThickness=2
 longPattern=3
 ===
-agents
-{
-ballTracker ( off track )
-handApproacher ( off touch restPosition )
-dialogManager ( off on )
-}
-configurations{ resting beCool goTouchTheBall touchingTheBall goRest }
-table
-{
- off       off            on
- track     off            on
- track     touch          on
- track     off            on
- track     restPosition   on
-}
-===
-init : resting
+init : active(1)
 {
 	{
 		S:startsymbol(100,100)
@@ -35,7 +19,7 @@ init : resting
 	}
 }
 
-ballFound : beCool
+ballFound : active(1)
 {
 	{
 		loki:robot(100,100)
@@ -48,7 +32,7 @@ ballFound : beCool
 	}
 }
 
-ballLostWhileHappy : beCool
+ballLostWhileHappy : active(1)
 {
 	{
 		loki:robot(100,100)
@@ -65,7 +49,7 @@ ballLostWhileHappy : beCool
 	}
 }
 
-ballLostWhileBored : beCool
+ballLostWhileBored : active(1)
 {
 	{
 		loki:robot(100,100)
@@ -82,7 +66,7 @@ ballLostWhileBored : beCool
 	}
 }
 
-ballCentered : beCool
+ballCentered : active(1)
 {
 	{
 		loki:robot(100,100)
@@ -98,7 +82,7 @@ ballCentered : beCool
 	}
 }
 
-ballNotCentered : beCool
+ballNotCentered : active(1)
 {
 	{
 		loki:robot(100,100)
@@ -114,7 +98,7 @@ ballNotCentered : beCool
 	}
 }
 
-ballTouched : goTouchTheBall
+ballTouched : active(1)
 {
 	{
 		loki:robot(100,100)
@@ -134,7 +118,7 @@ ballTouched : goTouchTheBall
 	}
 }
 
-ballNotTouched : goRest
+ballNotTouched : active(1)
 {
 	{
 		loki:robot(100,100)
@@ -150,7 +134,7 @@ ballNotTouched : goRest
 	}
 }
 
-setRest : goRest
+setRest : active(1)
 {
 	{
 		loki:robot(100,100)
@@ -166,7 +150,7 @@ setRest : goRest
 	}
 }
 
-unsetRest : goTouchTheBall
+unsetRest : active(1)
 {
 	{
 		loki:robot(100,100)
@@ -182,7 +166,7 @@ unsetRest : goTouchTheBall
 	}
 }
 
-gotBored : beCool
+gotBored : active(1)
 {
 	{
 		loki:robot(100,100)

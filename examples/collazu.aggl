@@ -1,41 +1,12 @@
 spacePattern=3
-lineThickness=2.5
+lineThickness=2
 name=collazu
 vertexDiameter=40
 shortPattern=1
-nodeThickness=2.5
+nodeThickness=2
 longPattern=3
 ===
-agents
-{
-pitchNRoll ( off enabled )
-yaw ( off enabled )
-saccade ( off downwards frontal firstWall nextWall smallRight specific )
-distance ( off floor wall maintenance )
-wander ( off enabled )
-unknownFinder ( off floor table )
-obstacleModeler ( off enabled )
-objectModeler ( off enabled )
-}
-configurations{ pitchAndRoll lookUnknownFloor heightBehavior lookPerpendicularFloor yaw lookFirstWall modelWall lookNextWall maintainWallDistances insertUnknownStuff obstaclesSaccade none findObstacles }
-table
-{
- enabled off off off off off off off
- off off downwards off off off off off
- off off off floor off off off off
- off off frontal off off off off off
- off enabled off off off off off off
- off enabled firstWall maintenance off off off off
- off off off wall off off off off
- off enabled nextWall maintenance off off off off
- off enabled off maintenance enabled off off off
- off enabled off maintenance enabled floor off off
- off enabled specific maintenance off off off off
- off off off off off off off off
- off enabled smallRight maintenance off off off off
-}
-===
-modelGravity : pitchAndRoll
+modelGravity : active(1)
 {
 	{
 		s:start(370,120)
@@ -48,7 +19,7 @@ modelGravity : pitchAndRoll
 	}
 }
 
-lookFloor : pitchAndRoll
+lookFloor : active(1)
 {
 	{
 		g:gravity(170,40)
@@ -63,7 +34,7 @@ lookFloor : pitchAndRoll
 	}
 }
 
-modelHeight : pitchAndRoll
+modelHeight : active(1)
 {
 	{
 		g:gravity(270,40)
@@ -79,7 +50,7 @@ modelHeight : pitchAndRoll
 	}
 }
 
-lookPerpendicularFloor : pitchAndRoll
+lookPerpendicularFloor : active(1)
 {
 	{
 		gualzru:robot(40,40)
@@ -94,7 +65,7 @@ lookPerpendicularFloor : pitchAndRoll
 	}
 }
 
-modelYaw : pitchAndRoll
+modelYaw : active(1)
 {
 	{
 		gualzru:robot(40,40)
@@ -109,7 +80,7 @@ modelYaw : pitchAndRoll
 	}
 }
 
-lookFirstWall : pitchAndRoll
+lookFirstWall : active(1)
 {
 	{
 		gualzru:robot(40,40)
@@ -132,7 +103,7 @@ lookFirstWall : pitchAndRoll
 	}
 }
 
-lookNextWall : pitchAndRoll
+lookNextWall : active(1)
 {
 	{
 		w2:notWall(270,40)
@@ -151,7 +122,7 @@ lookNextWall : pitchAndRoll
 	}
 }
 
-modelWall : pitchAndRoll
+modelWall : active(1)
 {
 	{
 		w2:notWall(310,40)
@@ -170,7 +141,7 @@ modelWall : pitchAndRoll
 	}
 }
 
-modelLastWall : pitchAndRoll
+modelLastWall : active(1)
 {
 	{
 		floor:floor(40,160)
@@ -205,7 +176,7 @@ modelLastWall : pitchAndRoll
 	}
 }
 
-lockRobot : none
+lockRobot : active(1)
 {
 	{
 		robot:robot(250,160)
@@ -220,7 +191,7 @@ lockRobot : none
 	}
 }
 
-addObstacle : findObstacles
+addObstacle : active(1)
 {
 	{
 		view:view(210,180)
@@ -247,7 +218,7 @@ addObstacle : findObstacles
 	}
 }
 
-markViewCovered : findObstacles
+markViewCovered : active(1)
 {
 	{
 		view:view(210,180)
@@ -272,7 +243,7 @@ markViewCovered : findObstacles
 	}
 }
 
-saccadeFinishesInspectionMovement : none
+saccadeFinishesInspectionMovement : active(1)
 {
 	{
 		lock:locked(470,100)
@@ -297,7 +268,7 @@ saccadeFinishesInspectionMovement : none
 	}
 }
 
-markRoomObserved : findObstacles
+markRoomObserved : active(1)
 {
 	{
 		view:view(210,180)
@@ -322,7 +293,7 @@ markRoomObserved : findObstacles
 	}
 }
 
-boringRoom : none
+boringRoom : active(1)
 {
 	{
 		lock:locked(470,100)
