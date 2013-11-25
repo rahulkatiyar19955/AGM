@@ -44,7 +44,7 @@ try:
 	if not ok:
 		print '\n\naggl2agglpy usage:'
 		print '\n - To generate domain code:'
-		print sys.argv[0], ' -i <inputFile.aggl> -a <activeRules.pddl> -f <activeAndPassiveRules.pddl>'
+		print sys.argv[0], ' -i <inputFile.aggl> -a <activeRules.aggl.py> -f <activeAndPassiveRules.aggl.py>'
 		print '\n - To generate goal-checking code:'
 		print sys.argv[0], ' -x <targetPattern.xml> -o <targetCode.py>\n'
 		ret = 1

@@ -254,7 +254,7 @@ class PyPlan(object):
 if __name__ == '__main__': # program domain problem result
 	if len(sys.argv)<4:
 		print 'Usage\n\t', sys.argv[0], ' domain.py init.xml target.xml [result.plan]'
-	if len(sys.argv)<5:
+	elif len(sys.argv)<5:
 		p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], None)
 	else:
 		p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], open(sys.argv[4], 'w'))
