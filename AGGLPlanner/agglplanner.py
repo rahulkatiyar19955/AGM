@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env pypy
 # -*- coding: utf-8 -*-
 #
 #  -------------------------
@@ -253,7 +253,7 @@ class PyPlan(object):
 
 if __name__ == '__main__': # program domain problem result
 	if len(sys.argv)<4:
-		print 'Usage\n\t', sys.argv[0], ' domain.py init.xml target.xml [result.plan]'
+		print 'Usage\n\t', sys.argv[0], ' domain.aggl.py init.xml target.xml.py [result.plan]'
 	elif len(sys.argv)<5:
 		p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], None)
 	else:

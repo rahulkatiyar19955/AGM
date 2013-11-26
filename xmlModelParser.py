@@ -71,7 +71,8 @@ def graphFromXML(path):
 		parser = AGMWorldModelParser(path)
 		parser.close()
 		return AGMGraph(parser.nodes, parser.links)
-	except:
+	except Exception, e:
+		print e
 		print 'Can\'t open ' + path + '.'
 		return AGMGraph(dict(), list())
 
