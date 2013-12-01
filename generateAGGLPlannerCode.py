@@ -255,8 +255,11 @@ def CheckTarget(graph):"""
 	ret += indent+"# Hard score"
 	for n in graph.nodes:
 		ret += indent+"# "+n
-		ret += indent+"for symbol_"+n+"_name in graph.nodes:"
-		indent += "\t"
+		if n[0] in "0123456789":
+			ret += indent+"symbol_"+n+"_name = '" + n + "'"
+		else:
+			ret += indent+"for symbol_"+n+"_name in graph.nodes:"
+			indent += "\t"
 		ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
 		ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n].sType+"'"

@@ -163,7 +163,6 @@ class PyPlan(object):
 
 
 
-
 		# Main loop
 		try:
 			self.initWorld.score, achieved = self.targetCode(self.initWorld.graph)
