@@ -13,6 +13,7 @@ class AGMSymbol(object):
 		self.sType = sType
 		self.pos = pos
 		self.color = 'white'
+		self.attributes = dict()
 	def __str__(self):
 		return self.toString()
 	def __repr__(self):

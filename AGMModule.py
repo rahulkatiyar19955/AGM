@@ -231,12 +231,15 @@ class GraphDraw(QWidget):
 			painter.drawEllipse(v.pos[0]-(vertexDiameter/2), v.pos[1]-0.7001*(vertexDiameter/2), vertexDiameter, vertexDiameter*0.7001)
 			# Temp
 			align = Qt.AlignLeft
-			fixedVerticalOffsetName = -3
-			fixedVerticalOffsetType = -5
+			fixedVerticalOffsetName = -1
+			fixedVerticalOffsetType = -2
 			# Draw identifier
-			rect = painter.boundingRect(QRectF(float(v.pos[0]), float(v.pos[1]), 1, 1), align, str(v.name))
+			textId = str(v.name)
+			if "alias" in v.attributes:
+				textId += ":" + v.attributes["alias"]
+			rect = painter.boundingRect(QRectF(float(v.pos[0]), float(v.pos[1]), 1, 1), align, textId)
 			rect.translate(-rect.width()/2, -rect.height()+fixedVerticalOffsetName)
-			painter.drawText(rect, align, str(v.name))
+			painter.drawText(rect, align, textId)
 			# Draw type
 			rect = painter.boundingRect(QRectF(float(v.pos[0]), float(v.pos[1]), 1, 1), align, str(v.sType))
 			rect.translate(-rect.width()/2, fixedVerticalOffsetType)

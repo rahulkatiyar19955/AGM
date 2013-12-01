@@ -152,7 +152,7 @@ class PyPlan(object):
 			openNodes.appendleft(copy.deepcopy(self.initWorld))
 		else:
 			heapq.heappush(openNodes, (0, copy.deepcopy(self.initWorld)))
-		verbose = 0
+		verbose = 1
 		if verbose>0: print 'INIT'.ljust(20), self.initWorld
 		knownNodes = []
 		results = []
@@ -160,8 +160,20 @@ class PyPlan(object):
 
 		cheaperSolutionCost = -1
 
+
+
+
+
 		# Main loop
 		try:
+			self.initWorld.score, achieved = self.targetCode(self.initWorld.graph)
+			if achieved:
+				results.append(self.initWorld)
+				cheaperSolutionCost = results[0].cost
+				for s in results:
+					if s.cost < cheaperSolutionCost: cheaperSolutionCost = s.cost
+				if stopWithFirstPlan:
+					raise GoalAchieved
 			while True:
 				if breadthFirst:
 					head = openNodes.pop()

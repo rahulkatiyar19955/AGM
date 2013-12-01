@@ -65,8 +65,7 @@ fontSize = 14
 
 
 from AGMModule import *
-import libxml2
-
+import xmlModelParser
 
 class GraphViewer(QMainWindow):
 	def __init__(self, fileList):
@@ -108,7 +107,7 @@ class GraphViewer(QMainWindow):
 			self.ui.horizontalLayout.addWidget(self.widgets[fil])
 		for fil in range(len(fileList)):
 			self.drawers.append(GraphDraw(self.widgets[fil], self, "xxxx"))
-			self.drawers[fil].graph = self.graphFromXML(fileList[fil])
+			self.drawers[fil].graph = xmlModelParser.graphFromXML(fileList[fil])
 			self.drawers[fil].show()
 
 		self.timer = QTimer()
@@ -145,85 +144,6 @@ class GraphViewer(QMainWindow):
 		self.fontDialog.show()
 	def changeAppearance(self):
 		self.appearance.show()
-	def graphFromXML(self, path):
-		# Initialize empty graph
-		nodes = dict()
-		links = list()
-		# Open XML
-		try:
-			file = open(path, 'r')
-		except:
-			print 'Can\'t open ' + path + '.'
-			return AGMGraph(dict(), list())
-		data = file.read()
-		xmldoc = libxml2.parseDoc(data)
-		root = xmldoc.children
-		if root is not None:
-			nodes, links = self.parseRoot(root, nodes, links)
-		xmldoc.freeDoc()
-		return AGMGraph(nodes, links)
-	def parseRoot(self, root, nodes, links):
-		if root.type == "element" and root.name == "AGMModel":
-			child = root.children
-			while child is not None:
-				if child.type == "element":
-					if child.name == "symbol":
-						nodes, links = self.parseSymbol(child, nodes, links)
-					elif child.name == "link":
-						nodes, links = self.parseLink(child, nodes, links)
-					else:
-						print "error: "+str(child.name)
-				child = child.next
-		return nodes, links
-	def parseSymbol(self, root, nodes, links):
-		if root.type == "element" and root.name == "symbol":
-			# props
-			child = root.children
-			idens = self.parseSingleValue(root,   'id')
-			types = self.parseSingleValue(root, 'type')
-			x = 0
-			xs = self.parseSingleValue(root, 'x', False)
-			if xs != None:
-				x = int(xs)
-			y = 0
-			ys = self.parseSingleValue(root, 'y', False)
-			if ys != None:
-				y = int(ys)
-			nodes[idens] = AGMSymbol(idens, types, [int(x), int(y)])
-			# children
-			while child is not None:
-				if child.type == "element":
-					if child.name == "attribute":
-						#parseAttribute(child, component)
-						pass
-					else:
-						print 'boooooooooo'
-				child = child.next
-		else:
-			print 'parseSymbol with no symbol element'
-		return nodes, links
-	def parseLink(self, root, nodes, links):
-		if root.type == "element" and root.name == "link":
-			# props
-			child = root.children
-			src = self.parseSingleValue(root, 'src')
-			dst = self.parseSingleValue(root, 'dst')
-			lab = self.parseSingleValue(root, 'label')
-			links.append(AGMLink(src, dst, lab, True))
-			# children
-			while child is not None:
-				if child.type == "element":
-						print 'boooooooooo'
-				child = child.next
-		else:
-			print 'parseLink with no link element'
-		return nodes, links
-	def parseSingleValue(self, node, arg, doCheck=True):
-		if not node.hasProp(arg) and doCheck: print 'WARNING: ' + arg + ' attribute expected'
-		else:
-			ret = node.prop(arg)
-			node.unsetProp(arg)
-			return ret
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)

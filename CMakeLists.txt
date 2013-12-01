@@ -171,6 +171,8 @@ INSTALL(PROGRAMS "AGGLPlanner/agglplanner.py" DESTINATION /opt/robocomp/bin/ REN
 INSTALL(PROGRAMS "AGGLPlanner/agglplanner.py" DESTINATION /opt/robocomp/share/ RENAME agglplanner.py )
 INSTALL(PROGRAMS "AGGLPlanner/agglplanchecker.py" DESTINATION /opt/robocomp/bin/ RENAME agglplanchecker )
 INSTALL(PROGRAMS "AGGLPlanner/agglplanchecker.py" DESTINATION /opt/robocomp/share/ RENAME agglplanchecker.py )
+INSTALL(PROGRAMS "AGGLPlanner/agglplan.py" DESTINATION /opt/robocomp/bin/ RENAME agglplan )
+INSTALL(PROGRAMS "AGGLPlanner/agglplan.py" DESTINATION /opt/robocomp/share/ RENAME agglplan.py )
 
 if (ROBOCOMP_SUPPORT)
 INSTALL(FILES AGMWorldModel.h DESTINATION /opt/robocomp/include/ )
