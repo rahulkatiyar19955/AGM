@@ -229,11 +229,13 @@ def CheckTarget(graph):"""
 
 	ret += indent+"scoreA = 0"
 	ret += '\n'
+	easy = 1
 	if True:
 		ret += indent+"# Easy score"
 		typesDict = dict()
 		for n in graph.nodes:
 			t = graph.nodes[n].sType
+			easy += 1
 			if t in typesDict:
 				typesDict[t] += 1
 			else:
@@ -249,6 +251,7 @@ def CheckTarget(graph):"""
 		ret += indent+"			del typesDict[graph.nodes[n].sType]"
 		ret += '\n'
 
+	conditionsListList = []
 	# Generate the loop that checks the actual model
 	symbols_in_stack = []
 	score = 0
@@ -267,13 +270,26 @@ def CheckTarget(graph):"""
 			ret += " and symbol_"+n+".name!=symbol_" + other + ".name"
 		conditions, number = extractNewLinkConditionsFromList(graph.links, n, symbols_in_stack)
 		conditions = conditions.replace("snode.graph", "graph")
-		ret += conditions
+		conditionsListList.append( [conditions, number] )
+		#ret += conditions
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"
-		score += 3*(1+number)
+		score += 3
 		ret += indent + "if "+str(score)+" > score: score = " + str(score)
-	ret += indent+"return score, True"
+
+	allConditionsStr = ''
+	for c in conditionsListList:
+		allConditionsStr += c[0]
+	conditionsSeparated = allConditionsStr.split("and ")
+	realCond = 0
+	for cond in conditionsSeparated:
+		if len(cond) > 1:
+			realCond += 1
+			ret += indent+"if " + cond + ": score += 3"
+	ret += indent+"if score == " + str(score + realCond*3) + ":"
+	indent +="\t"
+	ret += indent+"return score+scoreA, True"
 	# Rule ending
 	indent = "\n\t"
 	ret += indent+"return score+scoreA, False"

@@ -139,9 +139,7 @@ class PyPlan(object):
 		# C O N F I G U R A T I O N
 		maxWorldSize = len(self.initWorld.graph.nodes.keys())+40
 		breadthFirst = False
-		#breadthFirst = True
 		stopWithFirstPlan = True
-
 
 		# Some little initialization
 		mincostOnList = 0
@@ -206,6 +204,8 @@ class PyPlan(object):
 								print 'Explored nodes:', explored,
 								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
 								print head
+								print '(', openNodes[ 0][1].cost, ',', openNodes[ 0][1].score, ')'
+								print '(', openNodes[-1][1].cost, ',', openNodes[-1][1].score, ')'
 						deriv.score, achieved = self.targetCode(deriv.graph)
 						if verbose>4: print deriv.score, achieved, deriv
 						if achieved:

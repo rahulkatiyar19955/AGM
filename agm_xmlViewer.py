@@ -61,7 +61,7 @@ dashPattern = []
 global fontName
 fontName = "Arial"
 global fontSize
-fontSize = 14
+fontSize = 9
 
 
 from AGMModule import *

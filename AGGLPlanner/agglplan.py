@@ -24,9 +24,9 @@
 
 # Python distribution imports
 
-import sys, traceback
-sys.path.append('/opt/robocomp/share')
+import sys, traceback, subprocess
 
+sys.path.append('/opt/robocomp/share')
 from AGGL import *
 from parseAGGL import *
 from generateAGGLPlannerCode import *
@@ -41,7 +41,7 @@ if __name__ == '__main__': # program domain problem result
 		targetFile = sys.argv[3]
 		result = None
 		if len(sys.argv)>4:
-			result = open(sys.argv[4], 'w')
+			result = sys.argv[4]
 
 		# Generate domain Python file
 		agmData = AGMFileDataParsing.fromFile(domainFile)
@@ -55,6 +55,9 @@ if __name__ == '__main__': # program domain problem result
 		ofile.close()
 
 		# Run planner
-		p = PyPlan("/tmp/domain.py", worldFile, "/tmp/target.py", result)
+		if result:
+			subprocess.call(["agglplanner", "/tmp/domain.py", worldFile, "/tmp/target.py", result])
+		else:
+			subprocess.call(["agglplanner", "/tmp/domain.py", worldFile, "/tmp/target.py"])
 
 
