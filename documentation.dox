@@ -4,8 +4,7 @@
 \tableofcontents
 
 \section intro_sec Introduction
- 
-AGM (Active Grammar-based modeling) is a modern core for perception-aware robotic architectures. It relies on a visual language named AGGL (Active Graph Grammar Language) that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. In conjunction with an AI planner, AGGL descriptions are used by AGM to reason about what to do depending on the current objectives and world model. In the context of AGM, a behavior is the resulting phenomena of the coordinated interaction between the main modules of the architecture. These modules eventually propose world model changes to the executive, entering in a loop in which AGM activates some modules and --after a modeling or performing some action-- these modules propose model changes.
+AGM (Active Grammar-based modeling) is a modern core for <em>perception-aware robotic architectures</em>. It relies on a visual language named AGGL (Active Graph Grammar Language) that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. In conjunction with an AI planner, AGGL descriptions are used by AGM to reason about what to do depending on the current objectives and world model.
 
 AGGL (Active Graph Grammar Language) is a powerful (yet easy to understand) visual language visual language that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. The description of these changes, expressed as graph-grammar rules, can be used for several purposes:
 
@@ -15,12 +14,23 @@ AGGL (Active Graph Grammar Language) is a powerful (yet easy to understand) visu
 <li>Verifying world model modifications</li>
 </ul>
 
-\section install_sec Installation
 
-\section examples_sec Examples
+<table style="border:0;">
+	<tr>
+		<td>\ref agmworks How does AGM work?</td>
+		<td>Installation</td>
+		<td>AGM Executive</td>
+</table>
+**/
 
-<p>
-The configuration file AGMExecutive/etc/config ...
-</p>
+
+
+/**
+\page agmworks Whow does AGM work?
+
+lalala
+
+In the context of AGM, a behavior is the resulting phenomena of the coordinated interaction between the main modules of the architecture. These modules eventually propose world model changes to the executive, entering in a loop in which AGM activates some modules and --after a modeling or performing some action-- these modules propose model changes.
+
 
 **/
