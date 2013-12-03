@@ -120,3 +120,37 @@ extern "C" FILE *yyin;
 
 
 */
+
+
+
+
+/**
+\page components What do I get with AGM?
+
+The project is composed of four different elements:
+<ul>
+	<li>libAGM, the framework-agnostic library that is used to implement AGM executives (libagm).</li>
+	<li>The AGGL visual editor (AGGLEditor).</li>
+	<li>A problem visualizer (agm_xmlViewer).</li>
+	<li>An AGGL to PDDL compiler (aggl2pddl).</li>
+	<li>An PDDL problem generator (agm_xml2problem).</li>
+	<li>The implementation of an executive designed to work with the RoboComp framework (RoboCompAGMExecutive).</li>
+</ul>
+
+\subsection comp_agm AGM library
+The library that implements the core of AGM (libagm). The API of the library is available here.
+
+\subsection comp_aggleditor AGGL Visual editor
+The visual editor, AGGLEditor, eases the process of designing grammars. It's use is described in its own wiki page: AGGLEditor.
+
+\subsection comp_probvisual Problem visualizer
+agm_xmlViewer initialWorld.xml goalPattern.xml
+
+\subsection comp_compiler AGGL to PDDL domain compiler
+aggl2pddl -i grammar.aggl -p activeRules.pddl -f activeAndPassiveRules.pddl
+
+\subsection comp_problemgen PDDL problem generator
+agm_xml2problem initialWorld.xml goal.xml problem.pddl [unknownMemorySize]
+
+\subsection comp_executive The AGM executive
+There's a AGM executive that works with the RoboComp framework. It is described in a separate page \ref executive d.
