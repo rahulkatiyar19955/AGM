@@ -3,7 +3,7 @@
 
 
 \section intro_sec Introduction
-AGM (Active Grammar-based modeling) is a modern core for <em>perception-aware robotic architectures</em>. It relies on a visual language named AGGL (Active Graph Grammar Language) that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. In conjunction with an AI planner, AGGL descriptions are used by AGM to reason about what to do depending on the current objectives and world model.
+AGM (Active Grammar-based modeling) is a modern core for <strong>perception-aware robotic architectures</strong>. It relies on a visual language named AGGL (Active Graph Grammar Language) that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. In conjunction with an AI planner, AGGL descriptions are used by AGM to reason about what to do depending on the current objectives and world model.
 
 AGGL (Active Graph Grammar Language) is a powerful (yet easy to understand) visual language visual language that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. The description of these changes, expressed as graph-grammar rules, can be used for several purposes:
 
@@ -15,6 +15,8 @@ AGGL (Active Graph Grammar Language) is a powerful (yet easy to understand) visu
 
 
 \section more_sec Read more
+\ref components
+<br />
 \ref installation
 <br />
 \ref agmworks
@@ -41,7 +43,7 @@ In the context of AGM, a behavior is the resulting phenomena of the coordinated 
 
 \section download Download
 
-Despite we haven't made a release yet, the repository is quite stable and is unlikely to be broken. You can download a repository snapshot using this link or clone the repository using a git client (url: git://github.com/ljmanso/AGM.git).
+Despite we haven't made a release yet, the repository is quite stable and is unlikely to be broken. You can download a repository snapshot using this <a href="https://github.com/ljmanso/AGM/archive/master.zip">link</a> or clone the repository using a git client (url: git://github.com/ljmanso/AGM.git).
 
 \section install Install
 
@@ -127,30 +129,112 @@ extern "C" FILE *yyin;
 /**
 \page components What do I get with AGM?
 
+\tableofcontents
+
+
 The project is composed of four different elements:
 <ul>
-	<li>libAGM, the framework-agnostic library that is used to implement AGM executives (libagm).</li>
-	<li>The AGGL visual editor (AGGLEditor).</li>
-	<li>A problem visualizer (agm_xmlViewer).</li>
-	<li>An AGGL to PDDL compiler (aggl2pddl).</li>
-	<li>An PDDL problem generator (agm_xml2problem).</li>
-	<li>The implementation of an executive designed to work with the RoboComp framework (RoboCompAGMExecutive).</li>
+	<li>libAGM, the framework-agnostic library that is used to implement AGM executives (<strong>libagm</strong>).</li>
+	<li>The AGGL visual editor (<strong>AGGLEditor</strong>).</li>
+	<li>A problem visualizer (<strong>agm_xmlViewer</strong>).</li>
+	<li>An AGGL to PDDL compiler (<strong>aggl2pddl</strong>).</li>
+	<li>An PDDL problem generator (<strong>agm_xml2problem</strong>).</li>
+	<li>The implementation of an executive designed to work with the <a href="http://robocomp.org">RoboComp framework</a> (<strong>RoboCompAGMExecutive</strong>).</li>
 </ul>
 
-\subsection comp_agm AGM library
-The library that implements the core of AGM (libagm). The API of the library is available here.
+\section compagm AGM library
+The library that implements the core of AGM (libagm).
 
-\subsection comp_aggleditor AGGL Visual editor
-The visual editor, AGGLEditor, eases the process of designing grammars. It's use is described in its own wiki page: AGGLEditor.
+The API of the library is available here.
 
-\subsection comp_probvisual Problem visualizer
+\section compaggleditor AGGL Visual editor
+The visual editor, AGGLEditor, eases the process of designing grammars. It's use is described in its own page: \ref AGGLEditor.
+
+\section compprobvisual Problem visualizer
 agm_xmlViewer initialWorld.xml goalPattern.xml
 
-\subsection comp_compiler AGGL to PDDL domain compiler
+\section compcompiler AGGL to PDDL domain compiler
 aggl2pddl -i grammar.aggl -p activeRules.pddl -f activeAndPassiveRules.pddl
 
-\subsection comp_problemgen PDDL problem generator
+\section compproblemgen PDDL problem generator
 agm_xml2problem initialWorld.xml goal.xml problem.pddl [unknownMemorySize]
 
-\subsection comp_executive The AGM executive
-There's a AGM executive that works with the RoboComp framework. It is described in a separate page \ref executive d.
+\section compexecutive The AGM executive
+There's a AGM executive that works with the RoboComp framework.
+
+It is described in a separate page (\ref executive).
+
+**/
+
+/**
+\page AGGLEditor AGGLEditor
+
+\tableofcontents
+
+\section AGGLEditor_if Description of the user interface
+
+\image html AGGLEditor_A.png
+
+\section AGGLEditor_why Why another language?
+
+AGGLEditor is a visual editor for AGGL files. Writing graph-grammar rules in other languages such as PDDL can be daunting, specially if the context of the rule is of a considerable size. Take the following rule as an example:
+
+\image html AGGLEditor.png
+
+The corresponding PDDL code would be the following. Looks pretty nasty right? You don't want to write that code manually. That's what AGGLEditor is for. We want to make designing graph grammars easier.
+
+\code{.lisp}
+(:action tellHumanAboutMug
+                :parameters ( ?vc ?vsr ?vm ?vo ?vp ?vr ?vcont1 ?vcont2 ?vh ?vListAGMInternal ?vlist0 ?vlist1 ?vlist2 ?vlist3 ?vlist4 ?vlist5 ?vlist6 ?vlist7 )
+                :precondition (and (ISclassified ?vc) (ISstatus ?vsr) (ISmug ?vm) (ISobject ?vo) (ISposition ?vp) (ISrobot ?vr) (ISobject ?vcont1) (ISobject ?vcont2) (IShuman ?vh) (firstunknown ?vlist7) (unknownorder ?vlist7 ?vlist6) (unknownorder ?vlist6 ?vlist5) (unknownorder ?vlist5 ?vlist4) (unknownorder ?vlist4 ?vlist3) (unknownorder ?vlist3 ?vlist2) (unknownorder ?vlist2 ?vlist1) (unknownorder ?vlist1 ?vlist0) (unknownorder ?vlist0 ?vListAGMInternal) (diff ?vo ?vcont1) (diff ?vo ?vcont2) (diff ?vcont1 ?vcont2) (diff ?vListAGMInternal ?vlist0) (diff ?vListAGMInternal ?vlist1) (diff ?vListAGMInternal ?vlist2) (diff ?vListAGMInternal ?vlist3) (diff ?vListAGMInternal ?vlist4) (diff ?vListAGMInternal ?vlist5) (diff ?vListAGMInternal ?vlist6) (diff ?vListAGMInternal ?vlist7) (diff ?vlist0 ?vlist1) (diff ?vlist0 ?vlist2) (diff ?vlist0 ?vlist3) (diff ?vlist0 ?vlist4) (diff ?vlist0 ?vlist5) (diff ?vlist0 ?vlist6) (diff ?vlist0 ?vlist7) (diff ?vlist1 ?vlist2) (diff ?vlist1 ?vlist3) (diff ?vlist1 ?vlist4) (diff ?vlist1 ?vlist5) (diff ?vlist1 ?vlist6) (diff ?vlist1 ?vlist7) (diff ?vlist2 ?vlist3) (diff ?vlist2 ?vlist4) (diff ?vlist2 ?vlist5) (diff ?vlist2 ?vlist6) (diff ?vlist2 ?vlist7) (diff ?vlist3 ?vlist4) (diff ?vlist3 ?vlist5) (diff ?vlist3 ?vlist6) (diff ?vlist3 ?vlist7) (diff ?vlist4 ?vlist5) (diff ?vlist4 ?vlist6) (diff ?vlist4 ?vlist7) (diff ?vlist5 ?vlist6) (diff ?vlist5 ?vlist7) (diff ?vlist6 ?vlist7) (know ?vr ?vo) (interacting ?vr ?vh) (link ?vsr ?vp) (has ?vo ?vsr) (link ?vsr ?vc) (link ?vsr ?vm) (in ?vsr ?vcont1) (eq ?vcont1 ?vcont2) )
+                :effect (and (not (firstunknown ?vlist7)) (not (unknownorder ?vlist7 ?vlist6)) (not (unknownorder ?vlist6 ?vlist5)) (not (unknownorder ?vlist5 ?vlist4)) (not (unknownorder ?vlist4 ?vlist3)) (not (unknownorder ?vlist3 ?vlist2)) (not (unknownorder ?vlist2 ?vlist1)) (not (unknownorder ?vlist1 ?vlist0)) (not (unknownorder ?vlist0 ?vListAGMInternal)) (firstunknown ?vListAGMInternal) (ISclassified ?vlist7) (ISobject ?vlist6) (ISreach ?vlist5) (ISsee ?vlist4) (ISmug ?vlist3) (ISstatus ?vlist2) (ISreachable ?vlist1) (ISposition ?vlist0) (link ?vlist2 ?vlist7) (link ?vlist2 ?vlist1) (eq ?vo ?vlist6) (link ?vlist2 ?vlist0) (know ?vh ?vlist6) (in ?vlist2 ?vcont2) (has ?vlist6 ?vlist2) (link ?vlist2 ?vlist3) (link ?vlist2 ?vlist5) (link ?vlist2 ?vlist4) (increase (total-cost) 1) )
+        )
+\endcode
+
+
+\section AGGLEditor_us Using AGGLEditor
+a
+\subsection AGGLEditor_us_cr Creating and saving new AGGL files
+a
+\subsubsection AGGLEditor_us_cr_cr Create
+a
+\subsubsection AGGLEditor_us_cr_sa Save
+
+\subsection AGGLEditor_us_crru Creating and deleting rules
+d
+\subsubsection AGGLEditor_us_crru_cr Create rule
+d
+\subsubsection AGGLEditor_us_crru_de Delete rule
+d
+
+\subsection AGGLEditor_us_crsy Creating deleting and modifying symbols
+f
+\subsubsection AGGLEditor_us_crsy_cr Create symbol
+f
+\subsubsection AGGLEditor_us_crsy_de Delete symbol
+f
+\subsubsection AGGLEditor_us_crsy_na Changing name
+ff
+\subsubsection AGGLEditor_us_crsy_ty Changing type
+ff
+
+\subsection AGGLEditor_us_cred Creating and deleting edges and modifying their labels
+f
+\subsubsection AGGLEditor_us_cred_cr Create edge
+f
+\subsubsection AGGLEditor_us_cred_de Delete edge
+f
+\subsubsection AGGLEditor_us_cred_mo Edit label
+f
+
+
+\section AGGLEditor_generatePDDL Generating PDDL code (in case you want to use a PDDL planner)
+
+Generate PDDL code (full, active).
+
+\section AGGLEditor_generatePNG Exporting rules to PNG
+
+Export
+
+
+**/
