@@ -17,6 +17,7 @@ class AGMModelEdge;
 class AGMModelConverter;
 class AGMModelSymbol;
 
+
 class AGMModel
 {
 friend class AGMModelConverter;

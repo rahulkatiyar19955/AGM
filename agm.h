@@ -8,6 +8,45 @@
 #include <agm_search.h>
 #include <agm_rule.h>
 
+/** \mainpage libAGM
+ *
+ * \section intro_sec Introduction
+ *
+ * The AGM library
+ *
+ *
+ * \section install_sec Installation
+ *
+ * \subsection install1_ssec Software depencences
+ * AGMExecutive ...
+ *
+ * \subsection install2_ssec Compile and install
+ * cd AGMExecutive
+ * <br>
+ * cmake . && make
+ * <br>
+ * To install:
+ * <br>
+ * sudo make install
+ *
+ * \section guide_sec User guide
+ *
+ * \subsection config_ssec Configuration file
+ *
+ * <p>
+ * The configuration file AGMExecutive/etc/config ...
+ * </p>
+ *
+ * \subsection execution_ssec Execution
+ *
+ * Just: "${PATH_TO_BINARY}/AGMExecutive --Ice.Config=${PATH_TO_CONFIG_FILE}"
+ *
+ * \subsection running_ssec Once running
+ *
+ * ...
+ *
+ */
+
 bool parseAGGL(const char *path, AGM *agm, std::vector <AGGLRule> *rules);
 
 class AGM
@@ -19,6 +58,7 @@ public:
 	AGM(std::string agglfile, std::string pddlFileFull_, std::string pddlFilePartial_);
 	void print();
 
+	//* 
 	bool checkModel(AGMModel::SPtr model);
 	bool proposeModel(AGMModel::SPtr model);
 	bool updateModel(AGMModelSymbol);
