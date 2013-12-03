@@ -17,7 +17,7 @@
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/** \mainpage AGMExecutive
+/** \page AGMExecutive AGM RoboComp executive
  *
  * \section intro_sec Introduction
  *
