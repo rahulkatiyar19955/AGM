@@ -1,5 +1,5 @@
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "AGM"
+PROJECT_NAME           = "Active Grammar-based Modeling"
 PROJECT_NUMBER         = ""
 PROJECT_BRIEF          = "Active Grammar-based Modeling"
 PROJECT_LOGO           = /home/ljmanso/AGM/doc/logo.png

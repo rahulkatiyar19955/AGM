@@ -1,7 +1,6 @@
 /**
 \mainpage main page
 
-\tableofcontents
 
 \section intro_sec Introduction
 AGM (Active Grammar-based modeling) is a modern core for <em>perception-aware robotic architectures</em>. It relies on a visual language named AGGL (Active Graph Grammar Language) that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. In conjunction with an AI planner, AGGL descriptions are used by AGM to reason about what to do depending on the current objectives and world model.
@@ -15,22 +14,109 @@ AGGL (Active Graph Grammar Language) is a powerful (yet easy to understand) visu
 </ul>
 
 
-<table style="border:0;">
-	<tr>
-		<td>\ref agmworks How does AGM work?</td>
-		<td>Installation</td>
-		<td>AGM Executive</td>
-</table>
+\section more_sec Read more
+\ref installation
+<br />
+\ref agmworks
+<br />
+\ref executive
+
 **/
 
 
 
 /**
-\page agmworks Whow does AGM work?
-
-lalala
+\page agmworks How does AGM work?
 
 In the context of AGM, a behavior is the resulting phenomena of the coordinated interaction between the main modules of the architecture. These modules eventually propose world model changes to the executive, entering in a loop in which AGM activates some modules and --after a modeling or performing some action-- these modules propose model changes.
 
 
 **/
+
+
+/**
+\page installation Installation
+
+\tableofcontents
+
+\section download Download
+
+Despite we haven't made a release yet, the repository is quite stable and is unlikely to be broken. You can download a repository snapshot using this link or clone the repository using a git client (url: git://github.com/ljmanso/AGM.git).
+
+\section install Install
+
+In addition the regular C++ requirements for the library, you will need to install some dependencies for the editor. Some of them are mandatory (PySide, pyparsing) and others are optional, depending on what you intend to do, specially if you want to export AGGL rules to PNG files (numpy, ImageOps). In Debian-based GNU/Linux distributions these dependencies can be installed using the following commands (as root):
+
+Mandatory dependencies: 
+\code{.sh}
+apt-get install cmake ppython python-pyside python-pyparsing
+\endcode
+
+Optional:
+\code{.sh}
+apt-get install python-numpy python-imaging
+\endcode
+
+Once the dependencies have been installed AGM and its associated applications can safely be installed using a script that allows users to select which optional features to activate (you can also run cmake-gui manually if you wish):
+
+sh compile
+
+\section compilationproblems Common compilation problems
+
+\subsection lackdeps Lack of dependencies
+
+Lack of required dependencies is the most common issue when compiling, make sure you installed all of them. In case you are using a Debian-based distribution (and it's not very outdated) you can try running the instDep.sh script. Basically, the required dependencies are:
+
+cmake
+G++
+Python
+PyParsing
+PySide
+RoboComp: Optional. Required if it is desired to use AGM with RoboComp.
+libboost-python: Optional. Required for libAGM Python bindings.
+
+\subsection prevdecl Previous declaration of yyparse with C++ linkage
+
+\code{.cpp}
+agglparser.hpp:XXX:5: error: previous declaration of ‘int yyparse()’ with ‘C++’ linkage
+\endcode
+
+This seems to be caused by a bug in the bison version that comes with the latest Debian and Ubuntu. This is solved by editing aggllexer.l and agglparser.y, changing 'extern "C"' to 'extern'. In aggllexer you need to change:
+
+\code{.cpp}
+#define YY_DECL extern "C" int yylex()
+\endcode
+
+to
+
+\code{.cpp}
+#define YY_DECL extern int yylex()
+\endcode
+
+and, in agglparser.y:
+
+\code{.cpp}
+extern "C" int yylex();
+extern "C" int yyparse();
+extern "C" FILE *yyin;
+\endcode
+
+to
+
+\code{.cpp}
+extern "C" int yylex();
+extern "C" int yyparse();
+extern "C" FILE *yyin;
+\endcode
+
+**/
+
+
+
+/**
+\page executive AGM Executive
+
+\tableofcontents
+
+
+*/
