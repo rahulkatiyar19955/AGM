@@ -65,7 +65,7 @@ sh compile
 
 \section compilationproblems Common compilation problems
 
-\subsection lackdeps Lack of dependencies
+\section lackdeps Lack of dependencies
 
 Lack of required dependencies is the most common issue when compiling, make sure you installed all of them. In case you are using a Debian-based distribution (and it's not very outdated) you can try running the instDep.sh script. Basically, the required dependencies are:
 
@@ -77,7 +77,7 @@ PySide
 RoboComp: Optional. Required if it is desired to use AGM with RoboComp.
 libboost-python: Optional. Required for libAGM Python bindings.
 
-\subsection prevdecl Previous declaration of yyparse with C++ linkage
+\section prevdecl Previous declaration of yyparse with C++ linkage
 
 \code{.cpp}
 agglparser.hpp:XXX:5: error: previous declaration of ‘int yyparse()’ with ‘C++’ linkage
@@ -171,9 +171,9 @@ It is described in a separate page (\ref executive).
 
 \tableofcontents
 
-\section AGGLEditor_if Description of the user interface
+\section AGGLEditor_intro Introduction
 
-\image html AGGLEditor_A.png
+AGGLEditor is the tool that AGM provides for developing AGGL domain files.
 
 \section AGGLEditor_why Why another language?
 
@@ -192,49 +192,113 @@ The corresponding PDDL code would be the following. Looks pretty nasty right? Yo
 \endcode
 
 
-\section AGGLEditor_us Using AGGLEditor
+\section AGGLEditor_us_cr Create & save AGGL files
 a
-\subsection AGGLEditor_us_cr Creating and saving new AGGL files
+\subsection AGGLEditor_us_cr_cr Create
 a
-\subsubsection AGGLEditor_us_cr_cr Create
-a
-\subsubsection AGGLEditor_us_cr_sa Save
+\subsection AGGLEditor_us_cr_sa Save
 
-\subsection AGGLEditor_us_crru Creating and deleting rules
+\section AGGLEditor_us_crru Create & delete rules
 d
-\subsubsection AGGLEditor_us_crru_cr Create rule
+\subsection AGGLEditor_us_crru_cr Create
 d
-\subsubsection AGGLEditor_us_crru_de Delete rule
+\subsection AGGLEditor_us_crru_de Delete
 d
 
-\subsection AGGLEditor_us_crsy Creating deleting and modifying symbols
+\section AGGLEditor_us_crsy Create delete & modify symbols
 f
-\subsubsection AGGLEditor_us_crsy_cr Create symbol
+\subsection AGGLEditor_us_crsy_cr Create symbol
 f
-\subsubsection AGGLEditor_us_crsy_de Delete symbol
+\subsection AGGLEditor_us_crsy_de Delete symbol
 f
-\subsubsection AGGLEditor_us_crsy_na Changing name
+\subsection AGGLEditor_us_crsy_na Changing name
 ff
-\subsubsection AGGLEditor_us_crsy_ty Changing type
+\subsection AGGLEditor_us_crsy_ty Changing type
 ff
 
-\subsection AGGLEditor_us_cred Creating and deleting edges and modifying their labels
+\section AGGLEditor_us_cred Create, delete & modify edge labels
 f
-\subsubsection AGGLEditor_us_cred_cr Create edge
+\subsection AGGLEditor_us_cred_cr Create edge
 f
-\subsubsection AGGLEditor_us_cred_de Delete edge
+\subsection AGGLEditor_us_cred_de Delete edge
 f
-\subsubsection AGGLEditor_us_cred_mo Edit label
+\subsection AGGLEditor_us_cred_mo Edit label
 f
 
 
-\section AGGLEditor_generatePDDL Generating PDDL code (in case you want to use a PDDL planner)
+\section AGGLEditor_generatePDDL Generate PDDL code
+In case you want to use a PDDL planner...
 
 Generate PDDL code (full, active).
 
-\section AGGLEditor_generatePNG Exporting rules to PNG
+\section AGGLEditor_generatePNG Export rules to PNG
 
 Export
 
 
 **/
+
+
+
+/**
+\page commontasks Common tasks when using AGM
+\tableofcontents
+
+\section creating Creating a modeling
+doc doc doc
+
+\section modifying Making a structural modification to a model
+Este código borra el símbolo de identificador cero e introduce dos símbolos en su lugar. Es pues un cambio estructural:
+
+
+\code{.cpp}
+// Create a new copy of the model
+AGMModel::SPtr newModel(new AGMModel(worldModel));
+// Create two symbols
+AGMModelSymbol::SPtr robot  = newModel->newSymbol("robot");
+AGMModelSymbol::SPtr status = newModel->newSymbol("status");
+// Create a link
+AGMModelEdge edge(robot->identifier, status->identifier, "bored");
+newModel->edges.push_back(edge);
+// Remove symbol
+newModel->removeSymbol(0);
+// Create a modification event with the previous and proposed model
+RoboCompAGMWorldModel::Event e;
+e.sender = "balltracker";
+e.why = RoboCompAGMWorldModel::BehaviorBasedModification;
+AGMModelConverter::fromInternalToIce(worldModel, e.backModel);
+AGMModelConverter::fromInternalToIce(newModel, e.newModel);
+try { agmagenttopic->modificationProposal(e);}
+catch(const Ice::Exception &e) { std::cout << e << std::endl;};
+\endcode
+
+Como resultado, este código publica una propuesta de modificación que capturará el ejecutivo. Si se desarrolla un componente que haga muchos cambios es posible que sea conveniente meter las últimas siete líneas dentro de una función.
+
+
+\section update Updating a symbol
+Las actualización de un nodo es más sencilla:
+
+\code{.cpp}
+// Modify the attributes in the current model
+worldModel->symbols[ballIndex]->attributes["x"] = xPos;
+worldModel->symbols[ballIndex]->attributes["y"] = yPos;
+worldModel->symbols[ballIndex]->attributes["z"] = zPos;
+// Fill a RoboCompAGMWorldModel::Node structure with
+// the new data.
+RoboCompAGMWorldModel::Node node;
+AGMModelConverter::fromInternalToIce(worldModel->symbols[ballIndex], node);
+// Publish the proposal
+try { agmagenttopic->update(node); }
+catch(const Ice::Exception &e) { cout << e << endl; }
+\endcode
+
+
+\section print Printing a model
+Da igual que sea un AGMModel::Sptr o la versión Ice del tipo de datos, usaremos la misma función:
+
+\code{.cpp}
+AGMModelPrinter::printWorld(model);
+\endcode   
+
+**/
+

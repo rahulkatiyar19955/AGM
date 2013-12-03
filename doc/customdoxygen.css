@@ -261,6 +261,8 @@ div.contents {
 	margin-top: 10px;
 	margin-left: 12px;
 	margin-right: 8px;
+	width: 95%;
+	margin: 0 auto;
 }
 
 td.indexkey {
@@ -1050,7 +1052,9 @@ dl.section dd {
 
 .image
 {
-        text-align: center;
+	text-align: center;
+	width: 50%;
+	
 }
 
 .dotgraph
@@ -1180,5 +1184,22 @@ tr.heading h2 {
     overflow:inherit;
     display:inline;
   }
+
+div.image img
+{ 
+    width: 100px; 
 }
+
+div.image img[src="../../AGGLEditor.png"]{ 
+    width:100px; 
+}
+
+div.image img[src="AGGLEditor.png"]{ 
+    width:100px; 
+}
+
+}
+
+
+
 
