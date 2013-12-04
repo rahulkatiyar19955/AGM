@@ -33,19 +33,33 @@ class AGMGraphParsing:
 class AGMRuleParsing:
 	@staticmethod
 	def parseRuleFromAST(i, verbose=False):
-		if verbose: print '\nRule:', i.name
-		LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
-		if verbose: print '\t===>'
-		RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-		passive = False
-		if i.passive == 'passive':
-			passive = True
-		elif i.passive == 'active':
+		print i.name
+		if hasattr(i, 'lhs') and (hasattr(i, 'lhs') and len(i.lhs)>0 and hasattr(i, 'lhs')): # We are dealing with a normal rule!
+			# We are dealing with a normal rule!
+			if verbose: print '\nRule:', i.name
+			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
+			if verbose: print '\t===>'
+			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
 			passive = False
+			if i.passive == 'passive':
+				passive = True
+			elif i.passive == 'active':
+				passive = False
+			else:
+				print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
+			return AGMRule(i.name, LHS, RHS, passive, i.cost)
+		elif hasattr(i, 'atoms'): # We are dealing with a rule combo!
+			print '  Combo'
+			# We are dealing with a rule combo!
+			print i.name
+			print i.passive
+			print i.atoms
+			print i.equivalences
+			#return AGMRuleCombo(i.name, LHS, RHS, passive, i.cost)
 		else:
-			print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
-		return AGMRule(i.name, LHS, RHS, passive, i.cost)
-
+			print '  Error'
+			sys.exit(-1)
+		
 
 class AGMFileDataParsing:
 	@staticmethod
@@ -59,6 +73,7 @@ class AGMFileDataParsing:
 
 		# Define AGM's DSL meta-model
 		an = Word(srange("[a-zA-Z0-9_.]"))
+		ids = Word(srange("[a-zA-Z0-9_]"))
 		plusorminus = Literal('+') | Literal('-')
 		number = Word(nums)
 		nu = Combine( Optional(plusorminus) + number )
@@ -72,10 +87,9 @@ class AGMFileDataParsing:
 		cl = Suppress("}")
 		po = Suppress("(")
 		co = Suppress(",")
+		pt = Suppress(".")
 		pc = Suppress(")")
 		no = Suppress("!")
-		ag = Suppress("agents")
-		tb = Suppress("table")
 
 		# LINK
 		link  = Group(an.setResultsName("lhs") + lk + an.setResultsName("rhs") + po + Optional(no).setResultsName("no") + an.setResultsName("linkType") + pc + neg.setResultsName("enabled"))
@@ -83,8 +97,16 @@ class AGMFileDataParsing:
 		node  = Group(an.setResultsName("symbol") + cn + an.setResultsName("symbolType") + Optional(po + nu.setResultsName("x") + co + nu.setResultsName("y") + pc))
 		# GRAPH
 		graph = Group(op + ZeroOrMore(node).setResultsName("nodes") + ZeroOrMore(link).setResultsName("links") + cl)
-		# RULE
-		rule  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
+		# RULE SEQUENCE
+		atom = Group(ids.setResultsName("name") + Suppress("as") + ids.setResultsName("alias"))
+		equivElement = Group(ids.setResultsName("rule") + pt + ids.setResultsName("variable"))
+		equivRhs = eq + equivElement
+		equiv = Group(equivElement.setResultsName("first") + OneOrMore(equivRhs).setResultsName("more"))
+		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + op + OneOrMore(atom).setResultsName("atoms") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
+		# NORMAL RULE
+		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
+		# GENERAL RULE
+		rule = rule_nrm | rule_seq
 		# PROPERTY
 		prop  = Group(an.setResultsName("prop") + eq + an.setResultsName("value"))
 		# WHOLE FILE

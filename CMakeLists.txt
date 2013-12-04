@@ -176,7 +176,6 @@ endif(DOXYGEN_FOUND)
 #  fake project to execute command  #
 #####################################
 add_subdirectory(fake)
-add_dependencies(agm fake)
 
 
 
