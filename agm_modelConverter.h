@@ -1,5 +1,6 @@
 #pragma once
 
+#include <agm_config.h>
 #include <agm_model.h>
 #include <agm_modelEdge.h>
 #include <agm_modelSymbols.h>

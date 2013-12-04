@@ -40,6 +40,7 @@ SET (HEADERS
   agm_modelConverter.h
   agm_search.h
   agm_rule.h
+  agm_config.h
 )
 
 
@@ -171,6 +172,11 @@ if(DOXYGEN_FOUND)
   COMMENT "Generating API documentation with Doxygen" VERBATIM
 )
 endif(DOXYGEN_FOUND)
+
+#  fake project to execute command  #
+#####################################
+add_subdirectory(fake)
+add_dependencies(agm fake)
 
 
 
