@@ -212,8 +212,9 @@ class AGMEditor(QMainWindow):
 		self.lhsPainter.update()
 		self.rhsPainter.update()
 		for r in range(len(self.agmData.agm.rules)):
-			item = self.ui.rulesList.item(r)
-			item.setText(self.agmData.agm.rules[r].name)
+			if type(r) == AGMRule:
+				item = self.ui.rulesList.item(r)
+				item.setText(self.agmData.agm.rules[r].name)
 	def changePassive(self, passive):
 		p = True
 		if passive == Qt.Unchecked:
@@ -357,9 +358,11 @@ class AGMEditor(QMainWindow):
 
 		self.ui.rulesList.clear()
 		for rule in self.agmData.agm.rules:
-			q = QListWidgetItem()
-			q.setText(rule.name)
-			self.ui.rulesList.addItem(q)
+			if type(rule) == AGMRule:
+				print rule.name
+				q = QListWidgetItem()
+				q.setText(rule.name)
+				self.ui.rulesList.addItem(q)
 	def saveAs(self):
 		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
 		self.save(False, path)

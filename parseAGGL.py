@@ -34,28 +34,26 @@ class AGMRuleParsing:
 	@staticmethod
 	def parseRuleFromAST(i, verbose=False):
 		print i.name
+		passive = False
+		if i.passive == 'passive':
+			passive = True
+		elif i.passive == 'active':
+			passive = False
+		else:
+			print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
 		if hasattr(i, 'lhs') and (hasattr(i, 'lhs') and len(i.lhs)>0 and hasattr(i, 'lhs')): # We are dealing with a normal rule!
 			# We are dealing with a normal rule!
 			if verbose: print '\nRule:', i.name
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 			if verbose: print '\t===>'
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-			passive = False
-			if i.passive == 'passive':
-				passive = True
-			elif i.passive == 'active':
-				passive = False
-			else:
-				print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
 			return AGMRule(i.name, LHS, RHS, passive, i.cost)
 		elif hasattr(i, 'atoms'): # We are dealing with a rule combo!
 			print '  Combo'
 			# We are dealing with a rule combo!
-			print i.name
-			print i.passive
-			print i.atoms
-			print i.equivalences
-			#return AGMRuleCombo(i.name, LHS, RHS, passive, i.cost)
+			combo = AGMComboRule(i.name, passive, i.atoms, i.equivalences)
+			print combo.toString()
+			return combo
 		else:
 			print '  Error'
 			sys.exit(-1)

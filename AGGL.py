@@ -342,6 +342,28 @@ class AGMRule(object):
 	def linkTypes(self):
 		return self.lhs.linkTypes().union(self.rhs.linkTypes())
 
+class AGMComboRule(object):
+	def __init__(self, name='', passive=False, atoms=[], equivalences=[]):
+		object.__init__(self)
+		self.name = name
+		self.passive = passive
+		self.atoms = atoms
+		self.equivalences = equivalences
+	def toString(self):
+		passiveStr = "active"
+		if self.passive: passiveStr = "passive"
+		ret = self.name + ' : ' + passiveStr + '\n{\n'
+		for a in self.atoms:
+			ret += '\t' + a[0] + ' as ' + a[1] + '\n'
+		ret += '\twhere:\n'
+		for e in self.equivalences:
+			ret += '\t' + e[0][0] + '.' + e[0][1]
+			for p in e[1:]:
+				ret += ' = ' + p[0] + '.' + p[1]
+			ret += '\n'
+		ret += '}\n'
+		return ret
+
 
 class AGM(object):
 	def __init__(self):
