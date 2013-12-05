@@ -69,8 +69,23 @@ def ruleImplementation(rule):
 	ret += indent+"ret = []"
 
 
+	if type(rule) == AGMRule:
+		ret = normalRuleImplementation(rule, ret, indent)
+	elif type(rule) == AGMComboRule:
+		ret = comboRuleImplementation(rule, ret, indent)
+	else:
+		print 'Unknown rule type'
+		sys.exit(-2346)
+	return ret
 
-	# Make a copy of the current graph node list
+def comboRuleImplementation(rule, ret, indent):
+	ret += indent + 'pass'
+	ret += indent
+	return ret
+
+
+def normalRuleImplementation(rule, ret, indent):
+		# Make a copy of the current graph node list
 	ret += indent+"nodes = copy.deepcopy(snode.graph.nodes)"
 	ret += indent+"n2id = dict()"
 	## Generate Link list
@@ -86,8 +101,6 @@ def ruleImplementation(rule):
 			ret += ", "
 		ret += "['" + link[0] + "', '" + link[1] + "', '" + link[2] + "']"
 	ret += " ]"
-
-
 	# Compute the not-actually-optimal order TODO improve this!
 	counter = dict()
 	for n in rule.lhs.nodes:
@@ -105,7 +118,6 @@ def ruleImplementation(rule):
 	optimal_node_list = []
 	for o in optimal_node_list_t:
 		optimal_node_list.append(o[1])
-
 	# Generate the loop that perform the instantiation
 	symbols_in_stack = []
 	for n in optimal_node_list:
@@ -132,9 +144,6 @@ def ruleImplementation(rule):
 	ret += indent+""
 	ret += indent+""
 	ret += "\n"
-
-
-
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
 	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, checked=True):"
@@ -159,7 +168,6 @@ def ruleImplementation(rule):
 	indent = indent[:-1]
 	ret += indent+"smap = copy.deepcopy(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
-
 	# Create nodes
 	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs)
 	ret += indent+"# Create nodes"
@@ -176,7 +184,6 @@ def ruleImplementation(rule):
 	for deleteNode in deleteNodes:
 		ret += indent+"del newNode.graph.nodes[smap['"+deleteNode.name+"']]"
 	ret += indent+"newNode.graph.removeDanglingEdges()"
-
 	# Remove links
 	newLinks, deleteLinks = rule.lhs.getLinkChanges(rule.rhs)
 	ret += indent+"# Remove links"
@@ -191,7 +198,6 @@ def ruleImplementation(rule):
 		ret += indent+"l = AGMLink(smap['"+newLink.a+"'], smap['"+newLink.b+"'], '"+newLink.linkType+"')"
 		ret += indent+"if not l in newNode.graph.links:"
 		ret += indent+"\tnewNode.graph.links.append(l)"
-
 	ret += indent+"# Misc stuff"
 	ret += indent+"newNode.probability *= 1."
 	ret += indent+"newNode.cost += "+str(rule.cost)
@@ -202,6 +208,8 @@ def ruleImplementation(rule):
 	ret += indent+""
 	ret += "\n"
 	return ret
+
+
 
 def generate(agm, skipPassiveRules):
 	text = ''

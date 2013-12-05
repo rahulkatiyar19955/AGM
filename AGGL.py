@@ -1,5 +1,4 @@
-#from pyparsing import Word, alphas, alphanums, nums, OneOrMore, Literal, Combine, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
-import math, traceback, itertools, copy
+import math, traceback, itertools, copy, sys
 
 from pddlAGGL import *
 
@@ -343,12 +342,12 @@ class AGMRule(object):
 		return self.lhs.linkTypes().union(self.rhs.linkTypes())
 
 class AGMComboRule(object):
-	def __init__(self, name='', passive=False, atoms=[], equivalences=[]):
+	def __init__(self, name='', passive=False, ats=list(), eqs=list()):
 		object.__init__(self)
 		self.name = name
 		self.passive = passive
-		self.atoms = atoms
-		self.equivalences = equivalences
+		self.atoms = ats
+		self.equivalences = eqs
 	def toString(self):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"

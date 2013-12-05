@@ -51,11 +51,11 @@ class AGMRuleParsing:
 		elif hasattr(i, 'atoms'): # We are dealing with a rule combo!
 			print '  Combo'
 			# We are dealing with a rule combo!
-			combo = AGMComboRule(i.name, passive, i.atoms, i.equivalences)
+			combo = AGMComboRule(i.name, passive, i.atoms.asList(), i.equivalences.asList())
 			print combo.toString()
 			return combo
 		else:
-			print '  Error'
+			print '  Error rrrrrrrrr'
 			sys.exit(-1)
 		
 
