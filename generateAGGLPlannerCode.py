@@ -64,9 +64,6 @@ def ruleImplementation(rule):
 	ret = ''
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "(self, snode):"
-	indent += "\t"
-	ret += indent+"ret = []"
 
 
 	if type(rule) == AGMRule:
@@ -78,14 +75,67 @@ def ruleImplementation(rule):
 		sys.exit(-2346)
 	return ret
 
-def comboRuleImplementation(rule, ret, indent):
-	ret += indent + 'pass'
+def comboRuleImplementation(rule, r, indent):
+	ret = ''
+	ret += indent+"def " + rule.name + "(self, snode, stack=[], equivalences=[]):"
+	indent += "\t"
+	ret += indent+"return self." + rule.name + "_trigger(snode, dict())"
 	ret += indent
-	return ret
+	ret += "\n"
 
+	indent = "\n\t"
+	ret += indent+"# Rule " + rule.name
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True):"
+	indent += "\t"
+	ret += indent+"aliasDict = dict()"
+	ret += indent+"for atom in ["
+	for a in reversed(rule.atoms):
+		ret += "['"+a[0]+"','"+a[1]+"'], "
+	ret = ret[:-2]
+	ret += ']:'
+	indent += "\t"
+	ret += indent+'idInStack = len(stack)'
+	ret += indent+'stack.append((idInStack, atom[0]))'
+	ret += indent+'aliasDict[atom[1]] = idInStack'
+	indent = indent[:-1]
+	ret += indent+'for equivalence in ' + str(rule.equivalences) + ':'
+	indent += "\t"
+	ret += indent+'equivList = []'
+	ret += indent+'for similar in equivalence:'
+	indent += "\t"
+	ret += indent+'equivList.append([aliasDict[similar[0]], similar[1]])'
+	indent = indent[:-1]
+	ret += indent+'equivalences.append([equivList, None])'
+	indent = indent[:-1]
+	ret += indent+'print "Current stack:", stack'
+	ret += indent+'print stack[-1]'
+	ret += indent+'print stack[-1][0]'
+	ret += indent+'return self.getRules()[stack[-1][1]](snode, stack, equivalences)'
+
+	ret += "\n"
+	ret += "\n"
+	return r + ret
+	
 
 def normalRuleImplementation(rule, ret, indent):
-		# Make a copy of the current graph node list
+	ret += indent+"def " + rule.name + "(self, snode, stack=[], equivalences=[]):"
+	indent += "\t"
+	ret += indent+"if len(stack) > 0:"
+	indent += "\t"
+	ret += indent+"me = stack.pop()"
+	ret += indent+"print 'MEEEE', me"
+	ret += indent+"print 'MEEEE', me"
+	ret += indent+"print equivalences"
+	ret += indent+"print 'MEEEE', me"
+	ret += indent+"print 'MEEEE', me"
+	indent = indent[:-1]
+	ret += indent+"else:"
+	indent += "\t"
+	for n in rule.lhs.nodes:
+		ret += indent+"symbol_"+n+"_nodes = copy.deepcopy(snode.graph.nodes)"
+	indent = indent[:-1]
+	ret += indent+"ret = []"
+	# Make a copy of the current graph node list
 	ret += indent+"nodes = copy.deepcopy(snode.graph.nodes)"
 	ret += indent+"n2id = dict()"
 	## Generate Link list
@@ -121,7 +171,7 @@ def normalRuleImplementation(rule, ret, indent):
 	# Generate the loop that perform the instantiation
 	symbols_in_stack = []
 	for n in optimal_node_list:
-		ret += indent+"for symbol_"+n+"_name in nodes:"
+		ret += indent+"for symbol_"+n+"_name in symbol_"+n+"_nodes:"
 		indent += "\t"
 		ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
 		ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
@@ -146,7 +196,7 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += "\n"
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, checked=True):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True):"
 	indent += "\t"
 	ret += indent+"if not checked:"
 	indent += "\t"
