@@ -19,6 +19,8 @@ def getNewIdForSymbol(node):
 				m = int(node.graph.nodes[k].name)+1
 	return m
 
+lastNodeId = 0
+
 class RuleSet(object):
 	def __init__(self):
 		object.__init__(self)
@@ -112,8 +114,13 @@ def comboRuleImplementation(rule, r, indent):
 	#ret += indent+'print "Current stack:", stack'
 	#ret += indent+'print stack[-1]'
 	#ret += indent+'print stack[-1][0]'
-	
+
 	ret += indent+"newNode = WorldStateHistory(snode)"
+	ret += indent+"global lastNodeId"
+	ret += indent+"lastNodeId += 1"
+	ret += indent+"newNode.nodeId = lastNodeId"
+	ret += indent+"newNode.parentId = snode.nodeId"
+	ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
 	ret += indent+"sid = str(len(stack))"
 	ret += indent+"newNode.history.append('#STARTS COMBO:"+rule.name+"_' + sid)"
 	#ret += indent+"print 'Calling ', stack[-1][1]"
@@ -135,13 +142,18 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"if len(stack) > 0:"
 	indent += "\t"
 	ret += indent+"me = stack.pop()[0]"
-	ret += indent+"print snode.depth"
-	ret += indent+"print '"+rule.name+"', me"
-	ret += indent+"print '"+rule.name+"', me"
-	ret += indent+"print stack"
-	ret += indent+"print equivalences"
-	ret += indent+"print '"+rule.name+"', me"
-	ret += indent+"print '"+rule.name+"', me"
+	debug = True
+	if debug:
+		ret += indent+"print snode.nodeId, 'from', snode.parentId"
+		ret += indent+"print snode.nodeId, 'from', snode.parentId"
+		ret += indent+"print snode.nodeId, 'from', snode.parentId"
+		ret += indent+"print 'Depth: ', snode.depth"
+		ret += indent+"print '"+rule.name+"', me"
+		ret += indent+"print '"+rule.name+"', me"
+		ret += indent+"print stack"
+		ret += indent+"print equivalences"
+		ret += indent+"print '"+rule.name+"', me"
+		ret += indent+"print '"+rule.name+"', me"
 	for n in rule.lhs.nodes:
 		ret += indent+"# Find equivalence for "+n
 		ret += indent+"symbol_"+n+"_nodes = copy.deepcopy(snode.graph.nodes)"
@@ -238,6 +250,11 @@ def normalRuleImplementation(rule, ret, indent):
 	#ret += indent+"print stack2[-1]"
 	#ret += indent+"print stack2[-1][0]"
 	ret += indent+"newNode = WorldStateHistory(r1)"
+	ret += indent+"global lastNodeId"
+	ret += indent+"lastNodeId += 1"
+	ret += indent+"newNode.nodeId = lastNodeId"
+	ret += indent+"newNode.parentId = snode.nodeId"
+	ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
 	ret += indent+"ret.extend(self.getRules()[stack2[-1][1]](newNode, stack2, equivalences2))"
 	indent = indent[:-2]
 
@@ -271,6 +288,11 @@ def normalRuleImplementation(rule, ret, indent):
 	indent = indent[:-1]
 	ret += indent+"smap = copy.deepcopy(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
+	ret += indent+"global lastNodeId"
+	ret += indent+"lastNodeId += 1"
+	ret += indent+"newNode.nodeId = lastNodeId"
+	ret += indent+"newNode.parentId = snode.nodeId"
+	ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
 	# Create nodes
 	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs)
 	ret += indent+"# Create nodes"

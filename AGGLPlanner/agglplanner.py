@@ -92,15 +92,17 @@ class WorldStateHistory(object):
 		object.__init__(self)
 		if isinstance(init, AGMGraph):
 			self.graph = copy.deepcopy(init)
-			self.parent = None
+			#self.parent = None
+			self.parentId = 0
 			self.probability = 1
 			self.cost = 0
 			self.history = []
+			self.nodeId = -1
 			self.depth = 0
 			self.score = 0
 		elif isinstance(type(init), type(WorldStateHistory)):
 			self.graph = copy.deepcopy(init.graph)
-			self.parent = copy.deepcopy(init)
+			#self.parent = copy.deepcopy(init)
 			self.probability = copy.deepcopy(init.probability)
 			self.cost = copy.deepcopy(init.cost)
 			self.history = copy.deepcopy(init.history)
