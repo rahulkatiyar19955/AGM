@@ -80,7 +80,12 @@ def comboRuleImplementation(rule, r, indent):
 	ret = ''
 	ret += indent+"def " + rule.name + "(self, snode, stack=[], equivalences=[]):"
 	indent += "\t"
-	#ret += indent+"print '"+rule.name+"'"
+	ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
+	if rule.mindepth > 0:
+		ret += indent+"if snode.depth < "+ str(rule.mindepth) + ":"
+		indent += '\t'
+		ret += indent + "return []"
+		indent = indent[:-1]
 	ret += indent+"return self." + rule.name + "_trigger(snode, dict(), stack, equivalences)"
 	ret += indent
 	ret += "\n"
@@ -120,14 +125,13 @@ def comboRuleImplementation(rule, r, indent):
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
 	ret += indent+"newNode.parentId = snode.nodeId"
-	ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
+	ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '" + rule.name + "'"
 	ret += indent+"sid = str(len(stack))"
 	ret += indent+"newNode.history.append('#STARTS COMBO:"+rule.name+"_' + sid)"
 	#ret += indent+"print 'Calling ', stack[-1][1]"
 	ret += indent+'ret = self.getRules()[stack[-1][1]](newNode, stack, equivalences)'
 	ret += indent+"for r in ret: r.history.append('#ENDS COMBO:"+rule.name+"_' + sid)"
 	ret += indent+"return ret"
-
 
 	ret += "\n"
 	ret += "\n"
@@ -137,6 +141,12 @@ def comboRuleImplementation(rule, r, indent):
 def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"def " + rule.name + "(self, snode, stack=[], equivalences=[]):"
 	indent += "\t"
+	#ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
+	if rule.mindepth > 0:
+		ret += indent+"if snode.depth < "+ str(rule.mindepth) + ":"
+		indent += '\t'
+		ret += indent + "return []"
+		indent = indent[:-1]
 	#ret += indent+"stack = copy.deepcopy(stack)"
 	#ret += indent+"equivalences = copy.deepcopy(equivalences)"
 	ret += indent+"if len(stack) > 0:"

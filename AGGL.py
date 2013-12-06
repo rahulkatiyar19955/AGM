@@ -307,6 +307,7 @@ class AGMRule(object):
 		self.rhs = rhs
 		self.cost = cost
 		self.passive = passive
+		self.mindepth = 0
 		if lhs == None:
 			self.lhs = AGMGraph()
 		if rhs == None:
@@ -315,7 +316,7 @@ class AGMRule(object):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
 		costStr = str(self.cost)
-		ret = self.name + ' : ' + passiveStr + '(' + costStr + ')' + '\n{\n'
+		ret = self.name + ' : ' + passiveStr + '(' + costStr + ') mindepth(' + str(self.mindepth) + ')\n{\n'
 		ret += self.lhs.toString() + '\n'
 		ret += '\t=>\n'
 		ret += self.rhs.toString() + '\n'
