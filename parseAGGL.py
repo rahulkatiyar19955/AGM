@@ -42,6 +42,10 @@ class AGMRuleParsing:
 		else:
 			print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
 			sys.exit(-345)
+		try:
+			mindepth = int(i.depth.value)
+		except:
+			mindepth = 0
 		if hasattr(i, 'lhs') and (hasattr(i, 'lhs') and len(i.lhs)>0 and hasattr(i, 'lhs')): # We are dealing with a normal rule!
 			# We are dealing with a normal rule!
 			if verbose: print '\nRule:', i.name
@@ -102,9 +106,9 @@ class AGMFileDataParsing:
 		equivElement = Group(ids.setResultsName("rule") + pt + ids.setResultsName("variable"))
 		equivRhs = eq + equivElement
 		equiv = Group(equivElement.setResultsName("first") + OneOrMore(equivRhs).setResultsName("more"))
-		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive")  + Optional(dep + po + nu.setResultsName("va") + pc).setResultsName("depth") + op + OneOrMore(atom).setResultsName("atoms") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
+		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive")  + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + OneOrMore(atom).setResultsName("atoms") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
 		# NORMAL RULE
-		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("va") + pc).setResultsName("depth") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
+		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
 		# GENERAL RULE
 		rule = rule_nrm | rule_seq
 		# PROPERTY
