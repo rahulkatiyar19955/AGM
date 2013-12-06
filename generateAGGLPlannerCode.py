@@ -65,7 +65,6 @@ def ruleImplementation(rule):
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
 
-
 	if type(rule) == AGMRule:
 		ret = normalRuleImplementation(rule, ret, indent)
 	elif type(rule) == AGMComboRule:
@@ -79,7 +78,8 @@ def comboRuleImplementation(rule, r, indent):
 	ret = ''
 	ret += indent+"def " + rule.name + "(self, snode, stack=[], equivalences=[]):"
 	indent += "\t"
-	ret += indent+"return self." + rule.name + "_trigger(snode, dict())"
+	#ret += indent+"print '"+rule.name+"'"
+	ret += indent+"return self." + rule.name + "_trigger(snode, dict(), stack, equivalences)"
 	ret += indent
 	ret += "\n"
 
@@ -88,6 +88,8 @@ def comboRuleImplementation(rule, r, indent):
 	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True):"
 	indent += "\t"
 	ret += indent+"aliasDict = dict()"
+	#ret += indent+"stack = copy.deepcopy(stack)"
+	#ret += indent+"equivalences = copy.deepcopy(equivalences)"
 	ret += indent+"for atom in ["
 	for a in reversed(rule.atoms):
 		ret += "['"+a[0]+"','"+a[1]+"'], "
@@ -107,10 +109,18 @@ def comboRuleImplementation(rule, r, indent):
 	indent = indent[:-1]
 	ret += indent+'equivalences.append([equivList, None])'
 	indent = indent[:-1]
-	ret += indent+'print "Current stack:", stack'
-	ret += indent+'print stack[-1]'
-	ret += indent+'print stack[-1][0]'
-	ret += indent+'return self.getRules()[stack[-1][1]](snode, stack, equivalences)'
+	#ret += indent+'print "Current stack:", stack'
+	#ret += indent+'print stack[-1]'
+	#ret += indent+'print stack[-1][0]'
+	
+	ret += indent+"newNode = WorldStateHistory(snode)"
+	ret += indent+"sid = str(len(stack))"
+	ret += indent+"newNode.history.append('#STARTS COMBO:"+rule.name+"_' + sid)"
+	#ret += indent+"print 'Calling ', stack[-1][1]"
+	ret += indent+'ret = self.getRules()[stack[-1][1]](newNode, stack, equivalences)'
+	ret += indent+"for r in ret: r.history.append('#ENDS COMBO:"+rule.name+"_' + sid)"
+	ret += indent+"return ret"
+
 
 	ret += "\n"
 	ret += "\n"
@@ -120,14 +130,30 @@ def comboRuleImplementation(rule, r, indent):
 def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"def " + rule.name + "(self, snode, stack=[], equivalences=[]):"
 	indent += "\t"
+	#ret += indent+"stack = copy.deepcopy(stack)"
+	#ret += indent+"equivalences = copy.deepcopy(equivalences)"
 	ret += indent+"if len(stack) > 0:"
 	indent += "\t"
-	ret += indent+"me = stack.pop()"
-	ret += indent+"print 'MEEEE', me"
-	ret += indent+"print 'MEEEE', me"
+	ret += indent+"me = stack.pop()[0]"
+	ret += indent+"print snode.depth"
+	ret += indent+"print '"+rule.name+"', me"
+	ret += indent+"print '"+rule.name+"', me"
+	ret += indent+"print stack"
 	ret += indent+"print equivalences"
-	ret += indent+"print 'MEEEE', me"
-	ret += indent+"print 'MEEEE', me"
+	ret += indent+"print '"+rule.name+"', me"
+	ret += indent+"print '"+rule.name+"', me"
+	for n in rule.lhs.nodes:
+		ret += indent+"# Find equivalence for "+n
+		ret += indent+"symbol_"+n+"_nodes = copy.deepcopy(snode.graph.nodes)"
+		ret += indent+"for equiv in equivalences:"
+		indent += "\t"
+		ret += indent+"if [me, '"+n+"'] in equiv[0]:"
+		indent += "\t"
+		ret += indent+"if equiv[1] != None:"
+		indent += "\t"
+		#ret += indent+"print 'got "+n+" from equivalences!!'"
+		ret += indent+"symbol_"+n+"_nodes = [equiv[1]]"
+		indent = indent[:-3]
 	indent = indent[:-1]
 	ret += indent+"else:"
 	indent += "\t"
@@ -187,7 +213,34 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"# At this point we meet all the conditions."
 	ret += indent+"# Insert additional conditions manually here if you want."
 	ret += indent+"# (beware that the code could be regenerated and you might lose your changes)."
-	ret += indent+"ret.append(self."+rule.name+"_trigger(snode, n2id))"
+	#ret += indent+"print 'Running rule "+rule.name+"'"
+	ret += indent+"stack2        = copy.deepcopy(stack)"
+	ret += indent+"equivalences2 = copy.deepcopy(equivalences)"
+	ret += indent+"r1 = self."+rule.name+"_trigger(snode, n2id, stack2, equivalences2)"
+	ret += indent+"ret.append(r1)"
+	ret += indent+"if len(stack2) > 0:"
+	indent += "\t"
+	#ret += indent+"print '"+rule.name+" with stack'"
+	#ret += indent+"equiv_deriv = copy.deepcopy(equivalences)"
+
+	for n in optimal_node_list:
+		ret += indent+"# Set symbol for "+n+"..."
+		ret += indent+"for equiv in equivalences2:"
+		indent += "\t"
+		ret += indent+"if [me, '"+n+"'] in equiv[0]:"
+		indent += "\t"
+		ret += indent+"equiv[1] = symbol_"+n+"_name"
+		#ret += indent+"print 'setting equivalence for " + n + "'"
+		indent = indent[:-2]
+
+	#ret += indent+"print 'Current stack2:', stack2"
+	#ret += indent+"print 'Current equivs2:', equivalences2"
+	#ret += indent+"print stack2[-1]"
+	#ret += indent+"print stack2[-1][0]"
+	ret += indent+"newNode = WorldStateHistory(r1)"
+	ret += indent+"ret.extend(self.getRules()[stack2[-1][1]](newNode, stack2, equivalences2))"
+	indent = indent[:-2]
+
 	# Rule ending
 	indent = "\n\t\t"
 	ret += indent+"return ret"

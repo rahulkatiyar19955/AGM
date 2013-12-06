@@ -55,9 +55,13 @@ if __name__ == '__main__': # program domain problem result
 		ofile.close()
 
 		# Run planner
+		import time
+		start = time.time()
 		if result:
 			subprocess.call(["agglplanner", "/tmp/domain.py", worldFile, "/tmp/target.py", result])
 		else:
 			subprocess.call(["agglplanner", "/tmp/domain.py", worldFile, "/tmp/target.py"])
+		end = time.time()
+		print 'It took', end - start, 'seconds'
 
 

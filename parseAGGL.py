@@ -41,6 +41,7 @@ class AGMRuleParsing:
 			passive = False
 		else:
 			print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
+			sys.exit(-345)
 		if hasattr(i, 'lhs') and (hasattr(i, 'lhs') and len(i.lhs)>0 and hasattr(i, 'lhs')): # We are dealing with a normal rule!
 			# We are dealing with a normal rule!
 			if verbose: print '\nRule:', i.name
