@@ -78,6 +78,7 @@ class AGMFileDataParsing:
 		nu = Combine( Optional(plusorminus) + number )
 		neg = Optional(Literal('*'))
 		sep = Suppress("===")
+		dep = Suppress("mindepth")
 		eq = Suppress("=")
 		cn = Suppress(":")
 		lk = Suppress("->")
@@ -101,9 +102,9 @@ class AGMFileDataParsing:
 		equivElement = Group(ids.setResultsName("rule") + pt + ids.setResultsName("variable"))
 		equivRhs = eq + equivElement
 		equiv = Group(equivElement.setResultsName("first") + OneOrMore(equivRhs).setResultsName("more"))
-		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + op + OneOrMore(atom).setResultsName("atoms") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
+		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive")  + Optional(dep + po + nu.setResultsName("va") + pc).setResultsName("depth") + op + OneOrMore(atom).setResultsName("atoms") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
 		# NORMAL RULE
-		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
+		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("va") + pc).setResultsName("depth") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
 		# GENERAL RULE
 		rule = rule_nrm | rule_seq
 		# PROPERTY
