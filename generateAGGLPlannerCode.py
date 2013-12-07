@@ -99,15 +99,14 @@ def comboRuleImplementation(rule, r, indent):
 	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True):"
 	indent += "\t"
 	ret += indent+"aliasDict = dict()"
-	ret += indent+"sid = str(len(stack)+len("+str(len(rule.atoms))+"))"
-
+	ret += indent+"sid = str(len(stack)+"+str(len(rule.atoms))+")"
 	#ret += indent+"stack = copy.deepcopy(stack)"
 	#ret += indent+"equivalences = copy.deepcopy(equivalences)"
 	ret += indent+"for atom in ["
 	a_n = 0
 	for a in reversed(rule.atoms):
 		if a_n == 0:
-			ret += "['"+a[0]+"','"+a[1]+"', '"+"ENDS COMBO: "+rule.name+"_'+sid+], "
+			ret += "['"+a[0]+"','"+a[1]+"', '"+"#ENDS COMBO:"+rule.name+"_'+sid], "
 		else:
 			ret += "['"+a[0]+"','"+a[1]+"'], "
 		a_n += 1
@@ -115,7 +114,10 @@ def comboRuleImplementation(rule, r, indent):
 	ret += ']:'
 	indent += "\t"
 	ret += indent+'idInStack = len(stack)'
-	ret += indent+'stack.append((idInStack, atom[0]))'
+	ret += indent+'if len(atom)<3:'
+	ret += indent+'\tstack.append((idInStack, atom[0]))'
+	ret += indent+'else:'
+	ret += indent+'\tstack.append((idInStack, atom[0], atom[2]))'
 	ret += indent+'aliasDict[atom[1]] = idInStack'
 	indent = indent[:-1]
 	ret += indent+'for equivalence in ' + str(rule.equivalences) + ':'
@@ -151,6 +153,7 @@ def comboRuleImplementation(rule, r, indent):
 def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"def " + rule.name + "(self, snode, stack=[], equivalences=[]):"
 	indent += "\t"
+	ret += indent + "finishesCombo = False"
 	#ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
 	if rule.mindepth > 0:
 		ret += indent+"if snode.depth < "+ str(rule.mindepth) + ":"
@@ -161,7 +164,12 @@ def normalRuleImplementation(rule, ret, indent):
 	#ret += indent+"equivalences = copy.deepcopy(equivalences)"
 	ret += indent+"if len(stack) > 0:"
 	indent += "\t"
-	ret += indent+"me = stack.pop()[0]"
+	ret += indent+"pop = stack.pop()"
+	ret += indent+"me = pop[0]"
+	ret += indent+"print 'COMO?', pop"
+	ret += indent+"if len(pop)>2:"
+	ret += indent+"\tfinishesCombo = pop[2]"
+
 	if debug:
 		ret += indent+"print snode.nodeId, 'from', snode.parentId"
 		ret += indent+"print snode.nodeId, 'from', snode.parentId"
@@ -248,6 +256,9 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"stack2        = copy.deepcopy(stack)"
 	ret += indent+"equivalences2 = copy.deepcopy(equivalences)"
 	ret += indent+"r1 = self."+rule.name+"_trigger(snode, n2id, stack2, equivalences2)"
+	ret += indent+"if finishesCombo:"
+	ret += indent+"\tr1.history.append(finishesCombo)"
+	ret += indent+"\tprint 'COMBU', finishesCombo"
 	ret += indent+"ret.append(r1)"
 	ret += indent+"if len(stack2) > 0:"
 	indent += "\t"
