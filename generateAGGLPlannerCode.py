@@ -6,6 +6,9 @@ sys.path.append('/opt/robocomp/share')
 from AGGL import *
 from xmlModelParser import *
 
+
+debug = True
+
 def constantHeader():
 	return """import copy, sys
 sys.path.append('/opt/robocomp/share')
@@ -80,7 +83,8 @@ def comboRuleImplementation(rule, r, indent):
 	ret = ''
 	ret += indent+"def " + rule.name + "(self, snode, stack=[], equivalences=[]):"
 	indent += "\t"
-	ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
+	if debug:
+		ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
 	if rule.mindepth > 0:
 		ret += indent+"if snode.depth < "+ str(rule.mindepth) + ":"
 		indent += '\t'
@@ -95,11 +99,18 @@ def comboRuleImplementation(rule, r, indent):
 	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True):"
 	indent += "\t"
 	ret += indent+"aliasDict = dict()"
+	ret += indent+"sid = str(len(stack)+len("+str(len(rule.atoms))+"))"
+
 	#ret += indent+"stack = copy.deepcopy(stack)"
 	#ret += indent+"equivalences = copy.deepcopy(equivalences)"
 	ret += indent+"for atom in ["
+	a_n = 0
 	for a in reversed(rule.atoms):
-		ret += "['"+a[0]+"','"+a[1]+"'], "
+		if a_n == 0:
+			ret += "['"+a[0]+"','"+a[1]+"', '"+"ENDS COMBO: "+rule.name+"_'+sid+], "
+		else:
+			ret += "['"+a[0]+"','"+a[1]+"'], "
+		a_n += 1
 	ret = ret[:-2]
 	ret += ']:'
 	indent += "\t"
@@ -125,12 +136,11 @@ def comboRuleImplementation(rule, r, indent):
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
 	ret += indent+"newNode.parentId = snode.nodeId"
-	ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '" + rule.name + "'"
-	ret += indent+"sid = str(len(stack))"
+	if debug:
+		ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '" + rule.name + "'"
 	ret += indent+"newNode.history.append('#STARTS COMBO:"+rule.name+"_' + sid)"
 	#ret += indent+"print 'Calling ', stack[-1][1]"
 	ret += indent+'ret = self.getRules()[stack[-1][1]](newNode, stack, equivalences)'
-	ret += indent+"for r in ret: r.history.append('#ENDS COMBO:"+rule.name+"_' + sid)"
 	ret += indent+"return ret"
 
 	ret += "\n"
@@ -152,7 +162,6 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"if len(stack) > 0:"
 	indent += "\t"
 	ret += indent+"me = stack.pop()[0]"
-	debug = True
 	if debug:
 		ret += indent+"print snode.nodeId, 'from', snode.parentId"
 		ret += indent+"print snode.nodeId, 'from', snode.parentId"
@@ -264,7 +273,8 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
 	ret += indent+"newNode.parentId = snode.nodeId"
-	ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
+	if debug:
+		ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
 	ret += indent+"ret.extend(self.getRules()[stack2[-1][1]](newNode, stack2, equivalences2))"
 	indent = indent[:-2]
 
@@ -302,7 +312,8 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
 	ret += indent+"newNode.parentId = snode.nodeId"
-	ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
+	if debug:
+		ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
 	# Create nodes
 	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs)
 	ret += indent+"# Create nodes"
@@ -357,6 +368,7 @@ def generate(agm, skipPassiveRules):
 
 
 def generateTarget(graph):
+	scorePerContition = 20
 	ret = """import copy, sys
 sys.path.append('/opt/robocomp/share')\nfrom AGGL import *\nfrom agglplanner import *
 def CheckTarget(graph):"""
@@ -418,7 +430,7 @@ def CheckTarget(graph):"""
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"
-		score += 3
+		score += scorePerContition
 		ret += indent + "if "+str(score)+" > score: score = " + str(score)
 
 	allConditionsStr = ''
@@ -429,8 +441,8 @@ def CheckTarget(graph):"""
 	for cond in conditionsSeparated:
 		if len(cond) > 1:
 			realCond += 1
-			ret += indent+"if " + cond + ": score += 3"
-	ret += indent+"if score == " + str(score + realCond*3) + ":"
+			ret += indent+"if " + cond + ": score += "+str(scorePerContition)+""
+	ret += indent+"if score == " + str(score + realCond*scorePerContition) + ":"
 	indent +="\t"
 	ret += indent+"return score+scoreA, True"
 	# Rule ending

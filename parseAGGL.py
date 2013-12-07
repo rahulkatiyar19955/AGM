@@ -121,7 +121,8 @@ class AGMFileDataParsing:
 
 
 		# Parse input file
-		result = agm.parseString(open(filename, 'r').read())
+		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('#')])
+		result = agm.parseString(inputText)
 		if verbose: print "Result:\n",result
 
 		# Fill AGMFileData and AGM data
