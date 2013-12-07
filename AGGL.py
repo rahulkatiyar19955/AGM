@@ -343,11 +343,12 @@ class AGMRule(object):
 		return self.lhs.linkTypes().union(self.rhs.linkTypes())
 
 class AGMComboRule(object):
-	def __init__(self, name='', passive=False, ats=list(), eqs=list()):
+	def __init__(self, name='', passive=False, cost=1, ats=list(), eqs=list()):
 		object.__init__(self)
 		self.name = name
 		self.passive = passive
 		self.atoms = ats
+		self.cost = cost
 		self.equivalences = []
 		for eq in eqs:
 			print eq

@@ -53,14 +53,14 @@ class AGMRuleParsing:
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
 			regular = AGMRule(i.name, LHS, RHS, passive, i.cost)
 			regular.mindepth = mindepth
-			print regular.toString()
+			#print regular.toString()
 			return regular
 		elif hasattr(i, 'atoms'): # We are dealing with a rule combo!
 			print '  Combo'
 			# We are dealing with a rule combo!
-			combo = AGMComboRule(i.name, passive, i.atoms.asList(), i.equivalences.asList())
+			combo = AGMComboRule(i.name, passive, i.cost, i.atoms.asList(), i.equivalences.asList())
 			combo.mindepth = mindepth
-			print combo.toString()
+			#print combo.toString()
 			return combo
 		else:
 			print '  Error rrrrrrrrr'
@@ -109,7 +109,7 @@ class AGMFileDataParsing:
 		equivElement = Group(ids.setResultsName("rule") + pt + ids.setResultsName("variable"))
 		equivRhs = eq + equivElement
 		equiv = Group(equivElement.setResultsName("first") + OneOrMore(equivRhs).setResultsName("more"))
-		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive")  + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + OneOrMore(atom).setResultsName("atoms") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
+		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + OneOrMore(atom).setResultsName("atoms") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
 		# NORMAL RULE
 		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
 		# GENERAL RULE

@@ -7,7 +7,8 @@ from AGGL import *
 from xmlModelParser import *
 
 
-debug = True
+#debug = True
+debug = False
 
 def constantHeader():
 	return """import copy, sys
@@ -81,13 +82,17 @@ def ruleImplementation(rule):
 
 def comboRuleImplementation(rule, r, indent):
 	ret = ''
-	ret += indent+"def " + rule.name + "(self, snode, stack=[], equivalences=[]):"
+	ret += indent+"def " + rule.name + "(self, snode, stackP=[], equivalencesP=[]):"
 	indent += "\t"
-	if debug:
-		ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
+	ret += indent+"stack        = copy.deepcopy(stackP)"
+	ret += indent+"equivalences = copy.deepcopy(equivalencesP)"
+	#if debug:
+		#ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
 	if rule.mindepth > 0:
 		ret += indent+"if snode.depth < "+ str(rule.mindepth) + ":"
 		indent += '\t'
+		if debug:
+			ret += indent + "print 'return because of mindepth: node has', snode.depth, ' and rule\'s min is "+ rule.mindepth +"'"
 		ret += indent + "return []"
 		indent = indent[:-1]
 	ret += indent+"return self." + rule.name + "_trigger(snode, dict(), stack, equivalences)"
@@ -106,7 +111,7 @@ def comboRuleImplementation(rule, r, indent):
 	a_n = 0
 	for a in reversed(rule.atoms):
 		if a_n == 0:
-			ret += "['"+a[0]+"','"+a[1]+"', '"+"#ENDS COMBO:"+rule.name+"_'+sid], "
+			ret += "['"+a[0]+"','"+a[1]+"', '"+"# ENDS COMBO:"+rule.name+"_'+sid], "
 		else:
 			ret += "['"+a[0]+"','"+a[1]+"'], "
 		a_n += 1
@@ -134,13 +139,16 @@ def comboRuleImplementation(rule, r, indent):
 	#ret += indent+'print stack[-1][0]'
 
 	ret += indent+"newNode = WorldStateHistory(snode)"
+	#ret += indent+"newNode.depth -= 1 + " + str(len(rule.atoms))
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
+	ret += indent+"newNode.cost += " + str(rule.cost)
+	ret += indent+"newNode.depth += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
 	ret += indent+"newNode.parentId = snode.nodeId"
 	if debug:
 		ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '" + rule.name + "'"
-	ret += indent+"newNode.history.append('#STARTS COMBO:"+rule.name+"_' + sid)"
+	ret += indent+"newNode.history.append('# STARTS COMBO:"+rule.name+"_' + sid)"
 	#ret += indent+"print 'Calling ', stack[-1][1]"
 	ret += indent+'ret = self.getRules()[stack[-1][1]](newNode, stack, equivalences)'
 	ret += indent+"return ret"
@@ -151,9 +159,11 @@ def comboRuleImplementation(rule, r, indent):
 	
 
 def normalRuleImplementation(rule, ret, indent):
-	ret += indent+"def " + rule.name + "(self, snode, stack=[], equivalences=[]):"
+	ret += indent+"def " + rule.name + "(self, snode, stackP=[], equivalencesP=[]):"
 	indent += "\t"
-	ret += indent + "finishesCombo = False"
+	ret += indent + "stack        = copy.deepcopy(stackP)"
+	ret += indent + "equivalences = copy.deepcopy(equivalencesP)"
+	ret += indent + "finishesCombo = ''"
 	#ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
 	if rule.mindepth > 0:
 		ret += indent+"if snode.depth < "+ str(rule.mindepth) + ":"
@@ -166,20 +176,16 @@ def normalRuleImplementation(rule, ret, indent):
 	indent += "\t"
 	ret += indent+"pop = stack.pop()"
 	ret += indent+"me = pop[0]"
-	ret += indent+"print 'COMO?', pop"
 	ret += indent+"if len(pop)>2:"
+	ret += indent+"\tprint 'COMBOOOOOOO'"
 	ret += indent+"\tfinishesCombo = pop[2]"
 
 	if debug:
 		ret += indent+"print snode.nodeId, 'from', snode.parentId"
-		ret += indent+"print snode.nodeId, 'from', snode.parentId"
-		ret += indent+"print snode.nodeId, 'from', snode.parentId"
 		ret += indent+"print 'Depth: ', snode.depth"
-		ret += indent+"print '"+rule.name+"', me"
 		ret += indent+"print '"+rule.name+"', me"
 		ret += indent+"print stack"
 		ret += indent+"print equivalences"
-		ret += indent+"print '"+rule.name+"', me"
 		ret += indent+"print '"+rule.name+"', me"
 	for n in rule.lhs.nodes:
 		ret += indent+"# Find equivalence for "+n
@@ -256,10 +262,12 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"stack2        = copy.deepcopy(stack)"
 	ret += indent+"equivalences2 = copy.deepcopy(equivalences)"
 	ret += indent+"r1 = self."+rule.name+"_trigger(snode, n2id, stack2, equivalences2)"
-	ret += indent+"if finishesCombo:"
+	ret += indent+"if finishesCombo!='':"
+	ret += indent+"\tprint 'combuuuuuu', r1.nodeId"
 	ret += indent+"\tr1.history.append(finishesCombo)"
-	ret += indent+"\tprint 'COMBU', finishesCombo"
-	ret += indent+"ret.append(r1)"
+	ret += indent+"c = copy.deepcopy(r1)"
+	ret += indent+"if len(stack2) > 1: c.stop = True"
+	ret += indent+"ret.append(c)"
 	ret += indent+"if len(stack2) > 0:"
 	indent += "\t"
 	#ret += indent+"print '"+rule.name+" with stack'"
@@ -286,11 +294,17 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"newNode.parentId = snode.nodeId"
 	if debug:
 		ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
-	ret += indent+"ret.extend(self.getRules()[stack2[-1][1]](newNode, stack2, equivalences2))"
+	ret += indent+"derivsx = self.getRules()[stack2[-1][1]](newNode, stack2, equivalences2)"
+	ret += indent+"if finishesCombo != '':"
+	ret += indent+"\tfor d in derivsx:"
+	ret += indent+"\t\td.history.append(finishesCombo)"
+	ret += indent+"ret.extend(derivsx)"
 	indent = indent[:-2]
 
 	# Rule ending
 	indent = "\n\t\t"
+	if debug:
+		ret += indent+"if len(ret) == 0: print snode.nodeId, '-> " + rule.name + " was a dead end'"
 	ret += indent+"return ret"
 	ret += indent+""
 	ret += indent+""
@@ -357,8 +371,9 @@ def normalRuleImplementation(rule, ret, indent):
 		ret += indent+"\tnewNode.graph.links.append(l)"
 	ret += indent+"# Misc stuff"
 	ret += indent+"newNode.probability *= 1."
-	ret += indent+"newNode.cost += "+str(rule.cost)
-	ret += indent+"newNode.depth += 1"
+	ret += indent+"if len(stack) == 0:"
+	ret += indent+"\tnewNode.cost += "+str(rule.cost)
+	ret += indent+"\tnewNode.depth += 1"
 	ret += indent+"newNode.history.append('" + rule.name + "@' + str(n2id) )"
 	ret += indent+"return newNode"
 	ret += indent+""

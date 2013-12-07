@@ -34,6 +34,14 @@ import xmlModelParser
 from AGGL import *
 import inspect
 
+# C O N F I G U R A T I O N
+# C O N F I G U R A T I O N
+# C O N F I G U R A T I O N
+maxWorldIncrement = 40
+stopWithFirstPlan = True
+verbose = 1
+
+
 class GoalAchieved(Exception):
 	pass
 class MaxCostReached(Exception):
@@ -99,6 +107,7 @@ class WorldStateHistory(object):
 			self.history = []
 			self.nodeId = -1
 			self.depth = 0
+			self.stop = False
 			self.score = 0
 		elif isinstance(type(init), type(WorldStateHistory)):
 			self.graph = copy.deepcopy(init.graph)
@@ -107,6 +116,7 @@ class WorldStateHistory(object):
 			self.cost = copy.deepcopy(init.cost)
 			self.history = copy.deepcopy(init.history)
 			self.depth = copy.deepcopy(init.depth)
+			self.stop = False
 			self.score = 0
 		else:
 			print 'Human... wat r u doing... stahp... please, stahp'
@@ -124,11 +134,23 @@ class WorldStateHistory(object):
 	def __str__(self):
 		return self.graph.__str__()
 
+def printResult(result):
+	if verbose > 0:
+		print '-------------------------------------------'
+		print 'Cost', result.cost
+		print 'Score', result.score
+		print 'Probability', result.probability
+		print 'NodeID', result.nodeId
+		print 'Actions\n----------------'
+	for action in result.history:
+		print action
+
 class PyPlan(object):
 	def __init__(self, domainPath, init, targetPath, resultFile):
 		object.__init__(self)
 		# Get initial world mdoel
-		self.initWorld  = WorldStateHistory(xmlModelParser.graphFromXML(init))
+		self.initWorld = WorldStateHistory(xmlModelParser.graphFromXML(init))
+		self.initWorld.nodeId = 0
 		# Get graph rewriting rules
 		domain = imp.load_source('domain', domainPath)
 		self.domain     = domain.RuleSet()
@@ -136,23 +158,13 @@ class PyPlan(object):
 		target = imp.load_source('target', targetPath)
 		self.targetCode = target.CheckTarget
 
-		# C O N F I G U R A T I O N
-		# C O N F I G U R A T I O N
-		# C O N F I G U R A T I O N
-		maxWorldSize = len(self.initWorld.graph.nodes.keys())+40
-		breadthFirst = False
-		stopWithFirstPlan = True
 
 		# Some little initialization
+		maxWorldSize = maxWorldIncrement+len(self.initWorld.graph.nodes.keys())
 		mincostOnList = 0
 		self.ruleMap = self.domain.getRules()
 		openNodes = []
-		if breadthFirst:
-			openNodes = collections.deque()
-			openNodes.appendleft(copy.deepcopy(self.initWorld))
-		else:
-			heapq.heappush(openNodes, (0, copy.deepcopy(self.initWorld)))
-		verbose = 1
+		heapq.heappush(openNodes, (0, copy.deepcopy(self.initWorld)))
 		if verbose>0: print 'INIT'.ljust(20), self.initWorld
 		knownNodes = []
 		results = []
@@ -174,19 +186,15 @@ class PyPlan(object):
 				if stopWithFirstPlan:
 					raise GoalAchieved
 			while True:
-				if breadthFirst:
-					head = openNodes.pop()
-				else:
-					head = heapq.heappop(openNodes)[1]
+				head = heapq.heappop(openNodes)[1]
 				if head.cost <= mincostOnList:
 					if len(openNodes)==0:
 						mincostOnList = 0
 					else:
-						mincostOnList = openNodes[0].cost
+						mincostOnList = openNodes[0][1].cost
 						for n in openNodes:
-							if n.cost < mincostOnList:
-								mincostOnList = n.cost
-				#print head.cost, head.score
+							if n[1].cost < mincostOnList:
+								mincostOnList = n[1].cost
 				
 				if (len(results)>0 and head.cost>3*cheaperSolutionCost) or (head.cost > 20):
 					raise MaxCostReached(head.cost)
@@ -202,12 +210,11 @@ class PyPlan(object):
 						explored += 1
 						if verbose > 0:
 							if explored % 100 == 0:
-								if breadthFirst: print 'Using breadth-first search'
 								print 'Explored nodes:', explored,
 								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-								print head
-								print '(', openNodes[ 0][1].cost, ',', openNodes[ 0][1].score, ')'
-								print '(', openNodes[-1][1].cost, ',', openNodes[-1][1].score, ')'
+								#print head
+								print 'First(cost:'+str(openNodes[0][1].cost) +', score:'+str(openNodes[0][1].score) +', depth:'+str(openNodes[0][1].depth)+')'
+								print  'Last(cost:'+str(openNodes[-1][1].cost)+', score:'+str(openNodes[-1][1].score)+', depth:'+str(openNodes[-1][1].depth)+')'
 						deriv.score, achieved = self.targetCode(deriv.graph)
 						if verbose>4: print deriv.score, achieved, deriv
 						if achieved:
@@ -216,17 +223,15 @@ class PyPlan(object):
 							for s in results:
 								if s.cost < cheaperSolutionCost: cheaperSolutionCost = s.cost
 							if stopWithFirstPlan:
+								print 'Goal ACHIEVED'
+								printResult(deriv)
 								raise GoalAchieved
-						if not deriv in knownNodes:
+						if not deriv in knownNodes and deriv.stop == False:
 							if len(deriv.graph.nodes.keys()) <= maxWorldSize:
 								knownNodes.append(head)
-								#print -deriv.score
-								if breadthFirst:
-									openNodes.appendleft(deriv)
-								else:
-									#heapq.heappush(openNodes, (-deriv.score, deriv)) # The more the better
-									#heapq.heappush(openNodes, ( deriv.cost , deriv)) # The less the better
-									heapq.heappush(openNodes, ( (float(deriv.cost)/(float(deriv.score)+1.), deriv)) ) # The more the better
+								#heapq.heappush(openNodes, (-deriv.score, deriv)) # The more the better
+								#heapq.heappush(openNodes, ( deriv.cost , deriv)) # The less the better
+								heapq.heappush(openNodes, ( (float(deriv.cost)/(float(deriv.score)+1.), deriv)) ) # The more the better
 		except IndexError, e:
 			if verbose > 0: print 'End: state space exhausted'
 			pass
@@ -252,14 +257,8 @@ class PyPlan(object):
 				if results[i].cost < results[min_idx].cost:
 					min_idx = i
 			i = min_idx
-			if verbose > 0:
-				print '-------------------------------------------'
-				print 'Cost', results[i].cost
-				print 'Score', results[i].score
-				print 'Probability', results[i].probability
-				print 'Actions\n----------------'
+			printResult(results[i])
 			for action in results[i].history:
-				print action
 				if resultFile != None:
 					resultFile.write(str(action)+'\n')
 			if verbose > 0: print "----------------\nExplored", explored, "nodes"
