@@ -9,6 +9,7 @@ from xmlModelParser import *
 
 #debug = True
 debug = False
+scorePerContition = 100
 
 def constantHeader():
 	return """import copy, sys
@@ -397,7 +398,6 @@ def generate(agm, skipPassiveRules):
 
 
 def generateTarget(graph):
-	scorePerContition = 20
 	ret = """import copy, sys
 sys.path.append('/opt/robocomp/share')\nfrom AGGL import *\nfrom agglplanner import *
 def CheckTarget(graph):"""
