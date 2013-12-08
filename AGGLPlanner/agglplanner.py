@@ -40,7 +40,7 @@ import inspect
 maxWorldIncrement = 40
 maxCost = 200
 stopWithFirstPlan = True
-verbose = 1
+verbose = 0
 
 
 class GoalAchieved(Exception):

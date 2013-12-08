@@ -56,7 +56,7 @@ class AGMRuleParsing:
 			#print regular.toString()
 			return regular
 		elif hasattr(i, 'atoms'): # We are dealing with a rule combo!
-			print '  Combo'
+			#print '  Combo'
 			# We are dealing with a rule combo!
 			combo = AGMComboRule(i.name, passive, i.cost, i.atoms.asList(), i.equivalences.asList())
 			combo.mindepth = mindepth

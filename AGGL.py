@@ -351,13 +351,13 @@ class AGMComboRule(object):
 		self.cost = cost
 		self.equivalences = []
 		for eq in eqs:
-			print eq
+			#print eq
 			eqResult = list()
 			for element in eq:
 				eqResult.append([element[0], element[1]])
 			self.equivalences.append(eqResult)
 	def toString(self):
-		print self.equivalences
+		#print self.equivalences
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
 		ret = self.name + ' : ' + passiveStr + '\n{\n'
