@@ -38,6 +38,7 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 maxWorldIncrement = 40
+maxCost = 200
 stopWithFirstPlan = True
 verbose = 1
 
@@ -196,7 +197,7 @@ class PyPlan(object):
 							if n[1].cost < mincostOnList:
 								mincostOnList = n[1].cost
 				
-				if (len(results)>0 and head.cost>3*cheaperSolutionCost) or (head.cost > 20):
+				if (len(results)>0 and head.cost>3*cheaperSolutionCost) or (head.cost > maxCost):
 					raise MaxCostReached(head.cost)
 				# Small test
 				if verbose>5: print 'Expanding'.ljust(5), head
@@ -231,7 +232,7 @@ class PyPlan(object):
 								knownNodes.append(head)
 								#heapq.heappush(openNodes, (-deriv.score, deriv)) # The more the better
 								#heapq.heappush(openNodes, ( deriv.cost , deriv)) # The less the better
-								heapq.heappush(openNodes, ( (float(deriv.cost)/(float(deriv.score)+1.), deriv)) ) # The more the better
+								heapq.heappush(openNodes, ( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better
 		except IndexError, e:
 			if verbose > 0: print 'End: state space exhausted'
 			pass
