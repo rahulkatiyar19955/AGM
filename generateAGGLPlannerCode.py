@@ -101,7 +101,7 @@ def comboRuleImplementation(rule, r, indent):
 
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True, finish=''):"
 	indent += "\t"
 	ret += indent+"aliasDict = dict()"
 	ret += indent+"sid = str(len(stack)+"+str(len(rule.atoms))+")"
@@ -177,8 +177,10 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"pop = stack.pop()"
 	ret += indent+"me = pop[0]"
 	ret += indent+"if len(pop)>2:"
-	ret += indent+"\tprint 'COMBOOOOOOO'"
-	ret += indent+"\tfinishesCombo = pop[2]"
+	ret += indent+"\tfinishesCombo = copy.deepcopy(pop[2])"
+	#ret += indent+"\tsnode.history.append('<'+finishesCombo)"
+	ret += indent+"\tfina = copy.deepcopy(pop[2])"
+	ret += indent+"\tfinb = copy.deepcopy(pop[2])"
 
 	if debug:
 		ret += indent+"print snode.nodeId, 'from', snode.parentId"
@@ -261,12 +263,11 @@ def normalRuleImplementation(rule, ret, indent):
 	#ret += indent+"print 'Running rule "+rule.name+"'"
 	ret += indent+"stack2        = copy.deepcopy(stack)"
 	ret += indent+"equivalences2 = copy.deepcopy(equivalences)"
-	ret += indent+"r1 = self."+rule.name+"_trigger(snode, n2id, stack2, equivalences2)"
-	ret += indent+"if finishesCombo!='':"
-	ret += indent+"\tprint 'combuuuuuu', r1.nodeId"
-	ret += indent+"\tr1.history.append(finishesCombo)"
+	ret += indent+"r1 = self."+rule.name+"_trigger(snode, n2id, stack2, equivalences2, copy.deepcopy(finishesCombo))"
 	ret += indent+"c = copy.deepcopy(r1)"
-	ret += indent+"if len(stack2) > 1: c.stop = True"
+	ret += indent+"if 'fina' in locals():"
+	ret += indent+"\tc.history.append(finishesCombo)"
+	ret += indent+"if len(stack2) > 0: c.stop = True"
 	ret += indent+"ret.append(c)"
 	ret += indent+"if len(stack2) > 0:"
 	indent += "\t"
@@ -295,9 +296,10 @@ def normalRuleImplementation(rule, ret, indent):
 	if debug:
 		ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
 	ret += indent+"derivsx = self.getRules()[stack2[-1][1]](newNode, stack2, equivalences2)"
-	ret += indent+"if finishesCombo != '':"
-	ret += indent+"\tfor d in derivsx:"
-	ret += indent+"\t\td.history.append(finishesCombo)"
+	ret += indent+"if 'fina' in locals():"
+	ret += indent+"\tfor n in derivsx: n.history.append(finishesCombo)"
+	ret += indent+"\tfor n in derivsx: n.history.append(fina)"
+	ret += indent+"\tfor n in derivsx: n.history.append(finb)"
 	ret += indent+"ret.extend(derivsx)"
 	indent = indent[:-2]
 
@@ -311,7 +313,7 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += "\n"
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True, finish=''):"
 	indent += "\t"
 	ret += indent+"if not checked:"
 	indent += "\t"
@@ -375,6 +377,7 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"\tnewNode.cost += "+str(rule.cost)
 	ret += indent+"\tnewNode.depth += 1"
 	ret += indent+"newNode.history.append('" + rule.name + "@' + str(n2id) )"
+	ret += indent+"if finish!='': newNode.history.append(finish)"
 	ret += indent+"return newNode"
 	ret += indent+""
 	ret += indent+""
