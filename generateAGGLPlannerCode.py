@@ -185,7 +185,6 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"\tfinishesCombo = copy.deepcopy(pop[2])"
 	#ret += indent+"\tsnode.history.append('<'+finishesCombo)"
 	ret += indent+"\tfina = copy.deepcopy(pop[2])"
-	ret += indent+"\tfinb = copy.deepcopy(pop[2])"
 
 	if debug:
 		ret += indent+"print snode.nodeId, 'from', snode.parentId"
@@ -222,13 +221,13 @@ def normalRuleImplementation(rule, ret, indent):
 		link = rule.lhs.links[link_i]
 		linkList.append([link.a, link.b, link.linkType])
 	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
-	ret += indent+"links = [ "
-	for link_i in range(len(linkList)):
-		link = linkList[link_i]
-		if link_i > 0:
-			ret += ", "
-		ret += "['" + link[0] + "', '" + link[1] + "', '" + link[2] + "']"
-	ret += " ]"
+	#ret += indent+"links = [ "
+	#for link_i in range(len(linkList)):
+		#link = linkList[link_i]
+		#if link_i > 0:
+			#ret += ", "
+		#ret += "['" + link[0] + "', '" + link[1] + "', '" + link[2] + "']"
+	#ret += " ]"
 	# Compute the not-actually-optimal order TODO improve this!
 	counter = dict()
 	for n in rule.lhs.nodes:
@@ -304,7 +303,6 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"if 'fina' in locals():"
 	ret += indent+"\tfor n in derivsx: n.history.append(finishesCombo)"
 	ret += indent+"\tfor n in derivsx: n.history.append(fina)"
-	ret += indent+"\tfor n in derivsx: n.history.append(finb)"
 	ret += indent+"ret.extend(derivsx)"
 	indent = indent[:-2]
 
