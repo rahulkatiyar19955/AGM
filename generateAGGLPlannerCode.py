@@ -55,14 +55,18 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere):
 	ret = ''
 	number = 0
 	for link in linkList:
-		if newSymbol == link.a:
-			if link.b in alreadyThere:
-				ret += ' and [n2id["'+link.a + '"],n2id["'+ link.b + '"],"'+link.linkType+'"] in snode.graph.links'
-				number += 1
-		elif newSymbol == link.b:
-			if link.a in alreadyThere:
-				ret += ' and [n2id["'+link.a + '"],n2id["'+ link.b + '"],"'+link.linkType+'"] in snode.graph.links'
-				number += 1
+		if newSymbol == link.a or newSymbol == link.b:
+			pre = ' and '
+			if not link.enabled:
+				pre += 'not '
+			if newSymbol == link.a:
+				if link.b in alreadyThere:
+					ret += pre + '[n2id["'+link.a + '"],n2id["'+ link.b + '"],"'+link.linkType+'"] in snode.graph.links'
+					number += 1
+			elif newSymbol == link.b:
+				if link.a in alreadyThere:
+					ret += pre + '[n2id["'+link.a + '"],n2id["'+ link.b + '"],"'+link.linkType+'"] in snode.graph.links'
+					number += 1
 	return ret, number
 
 

@@ -39,7 +39,7 @@ import inspect
 # C O N F I G U R A T I O N
 maxWorldIncrement = 40
 maxCost = 200
-stopWithFirstPlan = True
+stopWithFirstPlan = False
 verbose = 0
 
 
@@ -136,8 +136,8 @@ class WorldStateHistory(object):
 		return self.graph.__str__()
 
 def printResult(result):
+	print '-----  R  E  S  U  L  T  S  -----'
 	if verbose > 0:
-		print '-------------------------------------------'
 		print 'Cost', result.cost
 		print 'Score', result.score
 		print 'Probability', result.probability
@@ -224,9 +224,11 @@ class PyPlan(object):
 							for s in results:
 								if s.cost < cheaperSolutionCost: cheaperSolutionCost = s.cost
 							if stopWithFirstPlan:
-								print 'Goal ACHIEVED'
-								printResult(deriv)
+								#print 'Goal ACHIEVED'
+								#printResult(deriv)
 								raise GoalAchieved
+							else:
+								print '+'
 						if not deriv in knownNodes and deriv.stop == False:
 							if len(deriv.graph.nodes.keys()) <= maxWorldSize:
 								knownNodes.append(head)
