@@ -54,7 +54,13 @@ class AGMPDDL:
 		writeString = ''
 		typeSet = set()
 		for r in agm.rules:
-			typeSet = typeSet.union(r.nodeTypes())
+			if hasattr(r, 'nodeTypes'):
+				typeSet = typeSet.union(r.nodeTypes())
+			else:
+				print 'Sorry, but aggl2pddl does not support COMBO rules.'
+				print 'exiting...'
+				import sys
+				sys.exit(-348)
 		for t in typeSet:
 			writeString += '\t\t(IS'+t+' ?n)\n'
 		return writeString
