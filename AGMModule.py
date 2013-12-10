@@ -1,5 +1,5 @@
 # Python distribution imports
-import sys, traceback, os, re, threading, time, string, math
+import sys, traceback, os, re, threading, time, string, math, random
 import numpy as np
 # Qt interface
 from PySide.QtCore import *
@@ -165,19 +165,70 @@ class GraphDraw(QWidget):
 		painter.end()
 		painter = None
 	def iterateSpring(self):
-		if hasattr(self, 'velocities'):
+		# Constants
+		spring_length = 3.*float(vertexDiameter)
+		hookes_constant = float(0.4)
+		field_force_multiplier = float(500.0)*float(vertexDiameter)
+		time_step = float(0.12)
+		roza = float(0.9)
+		# Make sure every node has a velocity associated
+		if not hasattr(self, 'velocities'):
 			self.velocities = dict()
-			for node in self.graph.nodes:
-				self.velocities[node.name] = [0., 0.]
+
 		for node in self.graph.nodes:
-			if type(self.graph.nodes[ww].pos[0]) == str:
-				if len(self.graph.nodes[ww].pos[0]) == 0:
-					self.graph.nodes[ww].pos[0] = '0'
-			if type(self.graph.nodes[ww].pos[1]) == str:
-				if len(self.graph.nodes[ww].pos[1]) == 0:
-					self.graph.nodes[ww].pos[1] = '0'
-			x = int(self.graph.nodes[ww].pos[0])
-			y = int(self.graph.nodes[ww].pos[1])
+			if not node in self.velocities.keys():
+				self.velocities[node] = [0., 0.]
+		# Do the job
+		for n in self.graph.nodes:
+			node = self.graph.nodes[n]
+			force_x = force_y = 0.
+			for n2 in self.graph.nodes:
+				node2 = self.graph.nodes[n2]
+				if n == n2: continue
+				try:
+					ix = float(node.x) - float(node2.x)
+				except:
+					ix = 0
+				try:
+					iy = float(node.y) - float(node2.y)
+				except:
+					iy = 0
+				while ix == 0 and iy == 0:
+					node.pos[0]  = random.uniform(-100, 100)
+					node2.pos[0] = random.uniform(-100, 100)
+					node.pos[1]  = random.uniform(-100, 100)
+					node2.pos[1] = random.uniform(-100, 100)
+					ix = float(node.x) - float(node2.x)
+					iy = float(node.y) - float(node2.y)
+
+				angle = math.atan2(iy, ix)
+				dist2 = ((abs((iy*iy) + (ix*ix))) ** 0.5) ** 2.
+				if dist2 < spring_length: dist2 = spring_length
+				force = field_force_multiplier / dist2
+				force_x += force * math.cos(angle)
+				force_y += force * math.sin(angle)
+
+			for n2 in self.graph.nodes:
+				node2 = self.graph.nodes[n2]
+				if node2.linkedTo(node, self.graph) or node.linkedTo(node2, self.graph):
+					ix = float(node.x) - float(node2.x)
+					iy = float(node.y) - float(node2.y)
+					angle = math.atan2(iy, ix)
+					force = math.sqrt(abs((iy*iy) + (ix*ix)))      # force means distance actually
+					if force <= spring_length: continue       # "
+					force -= float(spring_length)                  # force means spring strain now
+					force = float(force) * float(hookes_constant)           # now force means force :-)
+					force_x -= force*math.cos(angle)
+					force_y -= force*math.sin(angle)
+
+			self.velocities[node.name][0] = (self.velocities[node.name][0]*roza + (force_x*time_step))
+			self.velocities[node.name][1] = (self.velocities[node.name][1]*roza + (force_y*time_step))
+
+		# Update positions
+		for n in self.graph.nodes:
+			node = self.graph.nodes[n]
+			node.pos[0] += self.velocities[node.name][0]
+			node.pos[1] += self.velocities[node.name][1]
 		
 	def paintOnPainter(self, painter, w, h, drawlines=True):
 		global vertexDiameter
