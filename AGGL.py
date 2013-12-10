@@ -19,6 +19,18 @@ class AGMSymbol(object):
 		return self.toString()
 	def toString(self):
 		return str(self.name)+':'+str(self.sType)
+	@property
+	def x(self):
+		return self.pos[0]
+	@property
+	def y(self):
+		return self.pos[1]
+	def linkedTo(self, node, graph):
+		for link in graph.links:
+			if link.a == self.name and link.b == node.name:
+				return True
+		return False
+
 
 class AGMLink(object):
 	def __init__(self, a, b, linkType, enabled=True):
