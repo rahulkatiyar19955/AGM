@@ -285,14 +285,17 @@ class AGMGraph(object):
 		for l in self.links:
 			ret.add(l.linkType)
 		return ret
+	
+	def getNode(self, identifier):
+		return self.nodes[identifier]
 
 	def toXML(self, path):
 		f = open(path, 'w')
 		f.write('<AGMModel>\n')
 		for n in self.nodes:
 			f.write('\t<symbol id="'+str(self.nodes[n].name)+'" type="'+str(self.nodes[n].sType)+'">\n')
-			#v = ''
-			#f.write('\t\t<attribute key="'+v+'" value="'+v+'">')
+			for attr in self.nodes[n].attributes.keys():
+				f.write('\t\t<attribute key="'+attr+'" value="'+self.nodes[n].attributes[attr]+'" />\n')
 			f.write('\t</symbol>\n')
 		for l in self.links:
 			f.write('\t<link src="'+str(l.a)+'" dst="'+str(l.b)+'" label="'+str(l.linkType)+'" />\n')

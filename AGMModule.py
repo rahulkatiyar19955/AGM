@@ -164,6 +164,21 @@ class GraphDraw(QWidget):
 		pixmap.save(path, "png")
 		painter.end()
 		painter = None
+	def iterateSpring(self):
+		if hasattr(self, 'velocities'):
+			self.velocities = dict()
+			for node in self.graph.nodes:
+				self.velocities[node.name] = [0., 0.]
+		for node in self.graph.nodes:
+			if type(self.graph.nodes[ww].pos[0]) == str:
+				if len(self.graph.nodes[ww].pos[0]) == 0:
+					self.graph.nodes[ww].pos[0] = '0'
+			if type(self.graph.nodes[ww].pos[1]) == str:
+				if len(self.graph.nodes[ww].pos[1]) == 0:
+					self.graph.nodes[ww].pos[1] = '0'
+			x = int(self.graph.nodes[ww].pos[0])
+			y = int(self.graph.nodes[ww].pos[1])
+		
 	def paintOnPainter(self, painter, w, h, drawlines=True):
 		global vertexDiameter
 		global nodeThickness
@@ -186,6 +201,12 @@ class GraphDraw(QWidget):
 		maxY = 0
 		first = True
 		for ww in self.graph.nodes:
+			if type(self.graph.nodes[ww].pos[0]) == str:
+				if len(self.graph.nodes[ww].pos[0]) == 0:
+					self.graph.nodes[ww].pos[0] = '0'
+			if type(self.graph.nodes[ww].pos[1]) == str:
+				if len(self.graph.nodes[ww].pos[1]) == 0:
+					self.graph.nodes[ww].pos[1] = '0'
 			x = int(self.graph.nodes[ww].pos[0])
 			y = int(self.graph.nodes[ww].pos[1])
 			if minX > x or first: minX = x
