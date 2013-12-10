@@ -61,10 +61,7 @@ class AGMWorldModelParser(xmllib.XMLParser):
 		pass
 
 	def start_attribute(self, attrs):
-		for i in attrs:
-			self.nodes[self.currentSymbol].attributes[i] = attrs[i]
-		#print attrs
-
+		self.nodes[self.currentSymbol].attributes[attrs['key']] = attrs['value']
 
 	def end_attribute(self):
 		pass
