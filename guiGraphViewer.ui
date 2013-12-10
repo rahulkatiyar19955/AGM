@@ -36,7 +36,15 @@
     <addaction name="actionChangeAppearance"/>
     <addaction name="actionChangeFont"/>
    </widget>
+   <widget class="QMenu" name="menuLayout">
+    <property name="title">
+     <string>Layout</string>
+    </property>
+    <addaction name="actionAutomatic"/>
+    <addaction name="actionManual"/>
+   </widget>
    <addaction name="menuEdit"/>
+   <addaction name="menuLayout"/>
   </widget>
   <action name="actionChangeAppearance">
    <property name="text">
@@ -141,6 +149,16 @@
   <action name="actionSave">
    <property name="text">
     <string>Save</string>
+   </property>
+  </action>
+  <action name="actionAutomatic">
+   <property name="text">
+    <string>Automatic</string>
+   </property>
+  </action>
+  <action name="actionManual">
+   <property name="text">
+    <string>Manual</string>
    </property>
   </action>
  </widget>
