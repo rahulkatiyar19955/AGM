@@ -74,11 +74,13 @@ class GraphViewer(QMainWindow):
 		self.ui.setupUi(self)
 		# Graph painters
 		self.tool = 'Node - Move'
-		self.connect(self.ui.actionChangeAppearance,           SIGNAL("triggered(bool)"),                                      self.changeAppearance)
-		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),                                      self.appClose)
+		self.connect(self.ui.actionChangeAppearance, SIGNAL("triggered(bool)"),  self.changeAppearance)
+		self.connect(self.ui.actionQuit,             SIGNAL("triggered(bool)"),  self.appClose)
+		self.connect(self.ui.actionAutomatic,        SIGNAL("triggered(bool)"),  self.setAutomaticLayout)
+		self.connect(self.ui.actionManual,           SIGNAL("triggered(bool)"),  self.setManualLayout)
 		self.drawers = []
 		self.widgets = []
-
+		self.automatic = True
 		
 		global vertexDiameter
 		global fontName
@@ -112,7 +114,7 @@ class GraphViewer(QMainWindow):
 
 		self.timer = QTimer()
 		self.connect(self.timer, SIGNAL('timeout()'), self.draw)
-		self.timer.start(100)
+		self.timer.start(20)
 
 	def appClose(self):
 		#if self.modified:
@@ -120,6 +122,11 @@ class GraphViewer(QMainWindow):
 		#else:
 			#self.close()
 		self.close()
+
+	def setAutomaticLayout(self):
+		self.automatic = True
+	def setManualLayout(self):
+		self.automatic = False
 	# Manages close events
 	def closeEvent(self, closeevent):
 		settings = QSettings("AGM", "mainWindowGeometry");
@@ -128,20 +135,26 @@ class GraphViewer(QMainWindow):
 
 	def about(self):
 		QMessageBox.information(self, "About", "Active Grammar-based Modeling:\nhttps://github.com/ljmanso/AGM/wiki")
-	def draw(self):
 
+	def draw(self):
 		for d in self.drawers:
 			d.update()
+			if self.automatic:
+				for i in range(1):
+					d.iterateSpring()
 
 	def changePassive(self, passive):
 		p = True
 		if passive == Qt.Unchecked:
 			p = False
 		self.agmData.agm.rules[self.ui.rulesList.currentRow()].passive = p
+
 	def selectTool(self, tool):
 		self.tool = str(self.ui.toolsList.item(tool).text())
+
 	def changeFont(self):
 		self.fontDialog.show()
+
 	def changeAppearance(self):
 		self.appearance.show()
 
