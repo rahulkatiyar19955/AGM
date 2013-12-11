@@ -13,6 +13,12 @@
 class AGMModel;
 class AGMModelConverter;
 
+/*!
+ * @brief Nodes --symbols-- of AGMModel graphs
+ *
+ * 
+ * 
+ */
 class AGMModelSymbol
 {
 friend class AGMModel;

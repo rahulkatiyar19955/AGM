@@ -93,19 +93,6 @@ int32_t AGMModel::numberOfSymbols() const
 }
 
 
-AGMModelSymbol::SPtr AGMModel::getSymbol(int32_t identif) const
-{
-	for (uint32_t i=0; i<symbols.size(); ++i)
-	{
-		if (symbols[i]->identifier == identif)
-		{
-			return symbols[i];
-		}
-	}
-// 	printf("%d\n", __LINE__);
-	throw "No such symbol";
-}
-
 int32_t AGMModel::getIdentifierByName(std::string name) const
 {
 	for (uint32_t i=0; i<symbols.size(); ++i)
@@ -115,8 +102,6 @@ int32_t AGMModel::getIdentifierByName(std::string name) const
 			return symbols[i]->identifier;
 		}
 	}
-// 	printf("%d\n", __LINE__);
-// 	throw "No such symbol";
 	return -1;
 }
 
@@ -137,8 +122,6 @@ int32_t AGMModel::indexOfSymbol(const AGMModelSymbol::SPtr &value, int32_t from)
 			return i;
 		}
 	}
-// 	fprintf(stderr, "AGMModel::indexOfSymbol: unknown symbol \"%s\"\n", value->symbolType.c_str());
-// 	printf("%d\n", __LINE__);
 	return -1;
 }
 
@@ -197,14 +180,14 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	std::ostringstream stringStream;
 	if (target->symbols.size() == 0) return "";
 
-	/// H E A D E R
+	// H E A D E R
 	stringStream << "(define (problem " << problemName << ")\n";
 	stringStream << "\n";
 
-	/// D O M A I N
+	// D O M A I N
 	stringStream << "	(:domain AGGL )\n";
 
-	/// D E C L A R E   O B J E C T S
+	// D E C L A R E   O B J E C T S
 	stringStream << "	(:objects\n";
 	std::list <std::string> originalObjects;
 	// Symbols that are present in the original model
@@ -247,7 +230,7 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	stringStream << "	)\n";
 	stringStream << "\n";
 
-	/// I N I T I A L   W O R L D
+	// I N I T I A L   W O R L D
 	stringStream << "	(:init\n";
 	// Initial cost
 	stringStream << "		(= (total-cost) 0)\n";
@@ -287,8 +270,8 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	}
 	stringStream << "	)\n";
 
-	/// T A R G E T    W O R L D
-	/// T A R G E T    W O R L D
+	// T A R G E T    W O R L D
+	// T A R G E T    W O R L D
 	stringStream << "	\n";
 	stringStream << "	(:goal\n";
 	if (targetObjects.size()>0)
@@ -344,7 +327,7 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	stringStream << "	)\n";
 	stringStream << "\n";
 
-	/// M E T R I C   D E F I N I T I O N
+	// M E T R I C   D E F I N I T I O N
 	stringStream << "	(:metric minimize (total-cost))\n";
 	stringStream << "\n";
 	stringStream << "\n";
@@ -433,6 +416,7 @@ int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 
 
 
+
 int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 {
 	for (uint32_t idx=0; idx<symbols.size(); ++idx)
@@ -443,17 +427,33 @@ int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 		}
 	}
 
-	std::ostringstream s;
-	s << "Exception: " << targetId;
 	return -1;
-// 	AGMMODELEXCEPTION(s.str()+std::string(" Trying to get the index of a node given it's identifier"));
 }
 
 AGMModelSymbol::SPtr AGMModel::getSymbolByIdentifier(int32_t targetId) const
 {
 	const int32_t index = getIndexByIdentifier(targetId);
-	return symbols[index];
-// 	AGMMODELEXCEPTION(s.str()+std::string(" Trying to get the index of a node given it's identifier"));
+	if (index != -1)
+	{
+		return symbols[index];
+	}
+	std::ostringstream s;
+	s << "Exception: " << targetId;
+	AGMMODELEXCEPTION(std::string("Exception: Trying to get a node with an unexistent identifier (")+s.str()+std::string(")."));
+}
+
+AGMModelSymbol::SPtr AGMModel::getSymbol(int32_t identif) const
+{
+	for (uint32_t i=0; i<symbols.size(); ++i)
+	{
+		if (symbols[i]->identifier == identif)
+		{
+			return symbols[i];
+		}
+	}
+	std::ostringstream s;
+	s << "Exception: " << identif;
+	AGMMODELEXCEPTION(std::string("Exception: Trying to get a node with an unexistent index (")+s.str()+std::string(")."));
 }
 
 AGMModelSymbol::SPtr AGMModel::getSymbolByName(const std::string &ss) const
@@ -465,8 +465,7 @@ AGMModelSymbol::SPtr AGMModel::getSymbolByName(const std::string &ss) const
 			return symbols[i];
 		}
 	}
-	std::cout << ss << std::endl;
-	AGMMODELEXCEPTION("getSymbolByName: Non-existing name");
+	AGMMODELEXCEPTION(std::string("Exception: Trying to get a node with an unexistent name (")+ss+std::string(")."));
 }
 
 
@@ -590,3 +589,21 @@ bool AGMModel::removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &
 	return false;
 }
 
+AGMModelSymbol::SPtr AGMModel::newSymbol(std::string typ, int32_t id)
+{
+	return newSymbol(id, typ);
+}
+
+AGMModelSymbol::SPtr AGMModel::newSymbol(int32_t identifier, std::string typ)
+{
+	AGMModelSymbol *s = new AGMModelSymbol(this, identifier, typ);
+	return symbols[getIndexByIdentifier(s->identifier)];
+}
+
+AGMModelSymbol::SPtr AGMModel::newSymbol(int32_t identifier, std::string typ, std::map<std::string, std::string> atr)
+{
+	AGMModelSymbol *s = new AGMModelSymbol(this, identifier, typ, atr);
+	return symbols[getIndexByIdentifier(s->identifier)];
+}
+
+	

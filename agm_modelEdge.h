@@ -7,6 +7,12 @@
 
 #include "agm_model.h"
 
+/*!
+ * @brief Edges --relationships between symbols-- of AGMModel graphs
+ *
+ * 
+ * 
+ */
 class AGMModelEdge
 {
 public:

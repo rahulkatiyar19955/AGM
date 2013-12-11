@@ -19,6 +19,12 @@
 #define FIELD_FORCE_MULTIPLIER 60000.
 
 
+/*!
+ * @brief AGMModel drawing class
+ *
+ * 
+ * 
+ */
 class AGMModelDrawer : QObject
 {
 Q_OBJECT

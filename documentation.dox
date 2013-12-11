@@ -3,9 +3,9 @@
 
 
 \section intro_sec Introduction
-AGM (Active Grammar-based modeling) is a modern core for <strong>perception-aware robotic architectures</strong>. It relies on a visual language named AGGL (Active Graph Grammar Language) that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. In conjunction with an AI planner, AGGL descriptions are used by AGM to reason about what to do depending on the current objectives and world model.
+<strong>AGM</strong> (Active Grammar-based modeling) is a modern core for robotic architectures capable of performing <strong>perception-aware planning</strong> (that means that, besides any regular plannin-related task, you can use AGM to plan goals that involve detecting and modeling new objects). It relies on a visual language named <strong>AGGL</strong> (Active Graph Grammar Language) that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. In conjunction with an AI planner, AGGL descriptions are used by AGM to reason about what to do depending on the robots' current goal and world model.
 
-AGGL (Active Graph Grammar Language) is a powerful (yet easy to understand) visual language visual language that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. The description of these changes, expressed as graph-grammar rules, can be used for several purposes:
+<strong>AGGL</strong> (Active Graph Grammar Language) is a powerful (yet easy to understand) visual language visual language that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. The description of these changes, expressed as graph-grammar rules, can be used for several purposes:
 
 <ul>
 <li>Generating plans to perceive the world</li>
@@ -21,8 +21,13 @@ AGGL (Active Graph Grammar Language) is a powerful (yet easy to understand) visu
 <br />
 \ref agmworks
 <br />
+\ref AGGLEditor
+<br />
+<!--
 \ref executive
-
+<br />
+\ref commontasks
+-->
 **/
 
 
@@ -151,16 +156,25 @@ The API of the library is available here.
 The visual editor, AGGLEditor, eases the process of designing grammars. It's use is described in its own page: \ref AGGLEditor.
 
 \section compprobvisual Problem visualizer
+Usage:
+\code{.sh}
 agm_xmlViewer initialWorld.xml goalPattern.xml
+\endcode
 
 \section compcompiler AGGL to PDDL domain compiler
+Usage:
+\code{.sh}
 aggl2pddl -i grammar.aggl -p activeRules.pddl -f activeAndPassiveRules.pddl
+\endcode
 
 \section compproblemgen PDDL problem generator
+Usage:
+\code{.sh}
 agm_xml2problem initialWorld.xml goal.xml problem.pddl [unknownMemorySize]
+\endcode
 
 \section compexecutive The AGM executive
-There's a AGM executive that works with the RoboComp framework.
+There's a AGM executive that works with the <a href="http://robocomp.org">RoboComp</a> framework.
 
 It is described in a separate page (\ref executive).
 

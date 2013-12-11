@@ -7,6 +7,12 @@
 #include <string>
 #include <sstream>
 
+/*!
+ * @brief Generic AGM exception.
+ *
+ * 
+ * 
+ */
 class AGMModelException : public std::exception
 {
 public:

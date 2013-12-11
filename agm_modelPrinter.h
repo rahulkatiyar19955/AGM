@@ -8,6 +8,12 @@
 #include "agm_modelEdge.h"
 #include "agm_modelSymbols.h"
 
+/*!
+ * @brief Utility class to print AGMModel graphs
+ *
+ * 
+ * 
+ */
 class AGMModelPrinter
 {
 public:

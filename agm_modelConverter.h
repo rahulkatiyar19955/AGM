@@ -9,6 +9,12 @@
 #include "AGMWorldModel.h"
 #endif
 
+/*!
+ * @brief Utility class used to convert between different graph representation.
+ *
+ * 
+ * 
+ */
 class AGMModelConverter
 {
 public:
