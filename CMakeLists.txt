@@ -105,12 +105,12 @@ set(LIBS ${LIBS} ${LIBXML2_LIBRARIES} )
 MACRO( WRAP_PYTHON_UI )
   FOREACH( input_file ${ARGN} )
     ADD_CUSTOM_COMMAND (
-      OUTPUT ui/ui_${input_file}.py
-      COMMAND pyside-uic ui/${input_file}.ui -o ui/ui_${input_file}.py
-      DEPENDS ui/${input_file}.ui
-      COMMENT "Generating ui/ui_${input_file}.py from ui/${input_file}.ui"
+      OUTPUT tools/ui/ui_${input_file}.py
+      COMMAND pyside-uic tools/ui/${input_file}.ui -o tools/ui/ui_${input_file}.py
+      DEPENDS tools/ui/${input_file}.ui
+      COMMENT "Generating tools/ui/ui_${input_file}.py from tools/ui/${input_file}.ui"
     )
-    ADD_CUSTOM_TARGET(ui_${input_file} ALL DEPENDS ui/ui_${input_file}.py )
+    ADD_CUSTOM_TARGET(ui_${input_file} ALL DEPENDS tools/ui/ui_${input_file}.py )
   ENDFOREACH( input_file )
 ENDMACRO( WRAP_PYTHON_UI )
 
@@ -206,9 +206,9 @@ INSTALL(PROGRAMS python/generateAGGLPlannerCode.py DESTINATION /opt/robocomp/sha
 INSTALL(PROGRAMS python/AGMModule.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS python/AGGL.py DESTINATION /opt/robocomp/share)
 
-INSTALL(PROGRAMS ui/ui_guiAGGLEditor.py DESTINATION /opt/robocomp/share)
-INSTALL(PROGRAMS ui/ui_guiGraphViewer.py DESTINATION /opt/robocomp/share)
-INSTALL(PROGRAMS ui/ui_appearance.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS tools/ui/ui_guiAGGLEditor.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS tools/ui/ui_guiGraphViewer.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS tools/ui/ui_appearance.py DESTINATION /opt/robocomp/share)
 
 INSTALL(PROGRAMS tools/aggl_completion.bash DESTINATION /etc/bash_completion.d/ RENAME AGGLEditor)
 
