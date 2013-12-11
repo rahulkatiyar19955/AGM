@@ -3,7 +3,7 @@ cmake_minimum_required( VERSION 2.8)
 #  General options  #
 #####################
 set(CMAKE_CXX_FLAGS "-Wall -Wfatal-errors " )
-INCLUDE_DIRECTORIES ( . )
+INCLUDE_DIRECTORIES ( . libagm )
 
 
 #  Optional features  #
@@ -15,32 +15,32 @@ option (ROBOCOMP_SUPPORT "Build with support for RoboComp" OFF)
 #  Set sources  #
 #################
 SET (AGM_CODE
-  agm.cpp
-  agm_misc_functions.cpp
-  agm_model.cpp
-  agm_modelEdge.cpp
-  agm_modelPrinter.cpp
-  agm_modelSymbols.cpp
-  agm_modelConverter.cpp
-  agm_search.cpp
-  agm_searchPath.cpp
-  agm_rule.cpp
+  libagm/agm.cpp
+  libagm/agm_misc_functions.cpp
+  libagm/agm_model.cpp
+  libagm/agm_modelEdge.cpp
+  libagm/agm_modelPrinter.cpp
+  libagm/agm_modelSymbols.cpp
+  libagm/agm_modelConverter.cpp
+  libagm/agm_search.cpp
+  libagm/agm_searchPath.cpp
+  libagm/agm_rule.cpp
 )
 
 
 SET (HEADERS
-  agm.h
-  agm_modelDrawer.h
-  agm_modelEdge.h
-  agm_modelException.h
-  agm_model.h
-  agm_modelPrinter.h
-  agm_modelSymbols.h
-  agm_misc_functions.h
-  agm_modelConverter.h
-  agm_search.h
-  agm_rule.h
-  agm_config.h
+  libagm/agm.h
+  libagm/agm_modelDrawer.h
+  libagm/agm_modelEdge.h
+  libagm/agm_modelException.h
+  libagm/agm_model.h
+  libagm/agm_modelPrinter.h
+  libagm/agm_modelSymbols.h
+  libagm/agm_misc_functions.h
+  libagm/agm_modelConverter.h
+  libagm/agm_search.h
+  libagm/agm_rule.h
+  libagm/agm_config.h
 )
 
 
@@ -69,7 +69,7 @@ MESSAGE(STATUS "\n\n")
 # Python bindings
 if (PYTHON_BINDINGS)
 	# Add bindings source code file
-	SET(SOURCES ${SOURCES} agm_python.cpp)
+	SET(SOURCES ${SOURCES} libagm/agm_python.cpp)
 	# Linking and wrapping stuff
 	# (boost)
 	set(Boost_USE_STATIC_LIBS   OFF)
@@ -105,12 +105,12 @@ set(LIBS ${LIBS} ${LIBXML2_LIBRARIES} )
 MACRO( WRAP_PYTHON_UI )
   FOREACH( input_file ${ARGN} )
     ADD_CUSTOM_COMMAND (
-      OUTPUT ui_${input_file}.py
-      COMMAND pyside-uic ${input_file}.ui -o ui_${input_file}.py
-      DEPENDS ${input_file}.ui
-      COMMENT "Generating ui_${input_file}.py from ${input_file}.ui"
+      OUTPUT ui/ui_${input_file}.py
+      COMMAND pyside-uic ui/${input_file}.ui -o ui/ui_${input_file}.py
+      DEPENDS ui/${input_file}.ui
+      COMMENT "Generating ui/ui_${input_file}.py from ui/${input_file}.ui"
     )
-    ADD_CUSTOM_TARGET(ui_${input_file} ALL DEPENDS ui_${input_file}.py )
+    ADD_CUSTOM_TARGET(ui_${input_file} ALL DEPENDS ui/ui_${input_file}.py )
   ENDFOREACH( input_file )
 ENDMACRO( WRAP_PYTHON_UI )
 
@@ -122,17 +122,17 @@ WRAP_PYTHON_UI( guiAGGLEditor guiGraphViewer appearance )
 # Create target for the parser
 ADD_CUSTOM_TARGET(AGGLParser echo "Creating agglparser.cpp")
 ADD_CUSTOM_COMMAND(
-  SOURCE aggllexer.l
+  SOURCE libagm/aggllexer.l
   COMMAND flex
-  ARGS --outfile=aggllexer.cpp aggllexer.l
-  OUTPUT aggllexer.cpp
+  ARGS --outfile=libagm/aggllexer.cpp libagm/aggllexer.l
+  OUTPUT libagm/aggllexer.cpp
 )
  ADD_CUSTOM_COMMAND(
-   SOURCE agglparser.y
+   SOURCE libagm/agglparser.y
    COMMAND bison
-   ARGS -d -y agglparser.y -o agglparser.cpp
-   DEPENDS aggllexer.cpp
-   OUTPUT agglparser.cpp agglparser.hpp
+   ARGS -d -y libagm/agglparser.y -o libagm/agglparser.cpp
+   DEPENDS libagm/aggllexer.cpp
+   OUTPUT libagm/agglparser.cpp libagm/agglparser.hpp
 )
 SET_SOURCE_FILES_PROPERTIES(agglparser.cpp GENERATED) 
 SET_SOURCE_FILES_PROPERTIES(aggllexer.cpp GENERATED) 
@@ -150,11 +150,11 @@ add_library(agm SHARED ${AGM_CODE} )
 target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES})
 add_dependencies(agm agmdummy)
 
-add_executable ( testagm testagm.cpp )
+add_executable ( testagm tools/testagm.cpp )
 target_link_libraries ( testagm  -L. -lagm ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
-add_executable ( agm_xml2pddlProblem agm_xml2pddlProblem.cpp )
+add_executable ( agm_xml2pddlProblem tools/agm_xml2pddlProblem.cpp )
 target_link_libraries ( agm_xml2pddlProblem  -L. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
@@ -165,9 +165,9 @@ add_dependencies(testagm agm)
 #############
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
   add_custom_target(doc
-  ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+  ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   COMMENT "Generating API documentation with Doxygen" VERBATIM
 )
