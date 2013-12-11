@@ -134,9 +134,9 @@ ADD_CUSTOM_COMMAND(
    DEPENDS libagm/aggllexer.cpp
    OUTPUT libagm/agglparser.cpp libagm/agglparser.hpp
 )
-SET_SOURCE_FILES_PROPERTIES(agglparser.cpp GENERATED) 
-SET_SOURCE_FILES_PROPERTIES(aggllexer.cpp GENERATED) 
-SET(AGM_CODE ${AGM_CODE} aggllexer.cpp agglparser.cpp)
+SET_SOURCE_FILES_PROPERTIES(libagm/agglparser.cpp GENERATED) 
+SET_SOURCE_FILES_PROPERTIES(libagm/aggllexer.cpp GENERATED) 
+SET(AGM_CODE ${AGM_CODE} libagm/aggllexer.cpp libagm/agglparser.cpp)
 SET(LIBS ${LIBS} -lfl )
 
 
