@@ -405,6 +405,7 @@ bool Worker::eventIsCompatibleWithTheCurrentModel(const RoboCompAGMWorldModel::E
 	catch (...)
 	{
 		printf("Can't connect to model-checking planner\n");
+		return false;
 	}
 #endif
 }
