@@ -1,132 +1,62 @@
-<!DOCTYPE html>
+<!doctype html>
+<!-- The Time Machine GitHub pages theme was designed and developed by Jon Rohan, on Feb 7, 2012. -->
+<!-- Follow him for fun. http://twitter.com/jonrohan. Tail his code on http://github.com/jonrohan -->
 <html>
-  <head>
-    <meta charset='utf-8'>
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
-    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+  <link rel="stylesheet" href="stylesheets/stylesheet.css" media="screen"/>
+  <link rel="stylesheet" href="stylesheets/pygment_trac.css"/>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+  <script type="text/javascript" src="javascripts/script.js"></script>
 
-    <title>AGM by ljmanso</title>
-  </head>
+  <title>AGM</title>
+  <meta name="description" content="Active Grammar-based Modeling">
 
-  <body>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+</head>
+
+<body>
+
+  <div class="wrapper">
     <header>
-      <div class="inner">
-        <h1>AGM</h1>
-        <h2>Active Grammar-based Modeling</h2>
-        <a href="https://github.com/ljmanso/AGM" class="button"><small>View project on</small>GitHub</a>
-      </div>
+      <h1 class="title">AGM</h1>
     </header>
-
-    <div id="content-wrapper">
-      <div class="inner clearfix">
-        <section id="main-content">
-          <h1>
-<a name="agm" class="anchor" href="#agm"><span class="octicon octicon-link"></span></a>AGM</h1>
-
-<p><strong>AGM</strong> (Active Grammar-based modeling) is a modern core for <strong>perception-aware robotic architectures</strong>. It relies on a visual language named AGGL (Active Graph Grammar Language) that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired.
-In conjunction with an AI planner, AGGL descriptions are used by AGM to reason about what to do depending on the current objectives and world model. In the context of AGM, a <em>behavior</em> is the resulting phenomena of the coordinated interaction between the main modules of the architecture. These modules eventually propose world model changes to the executive, entering in a loop in which AGM activates some modules and --after a modeling or performing some action-- these modules propose model changes.</p>
-
-<p><strong>AGGL</strong> (Active Graph Grammar Language) is a powerful (yet easy to understand) visual language visual language that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. The description of these changes, expressed as graph-grammar rules, can be used for several purposes:</p>
-
-<ul>
-<li>Generating plans to perceive the world</li>
-<li>Generating plans to modify the world or the relationship between the robot and the world</li>
-<li>Verifying world model modifications</li>
-</ul><h2>
-<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation:</h2>
-
-<h3>
-<a name="download" class="anchor" href="#download"><span class="octicon octicon-link"></span></a>Download</h3>
-
-<p>Despite we haven't made a release yet, the repository is quite stable and is unlikely to be broken. You can download a repository snapshot <a href="https://github.com/ljmanso/AGM/archive/master.zip">using this link</a> or clone the repository using a git client (url: git://github.com/ljmanso/AGM.git).</p>
-
-<h3>
-<a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h3>
-
-<p>In addition the regular C++ requirements for the library, you will need to install some dependencies for the editor. Some of them are mandatory (PySide, pyparsing) and others are optional, depending on what you intend to do, specially if you want to export AGGL rules to PNG files (numpy, ImageOps). In Debian-based GNU/Linux distributions these dependencies can be installed using the following commands (as root):</p>
-
-<p><em>Mandatory dependencies</em>: <code>apt-get install cmake ppython python-pyside python-pyparsing</code></p>
-
-<p><em>Optional</em>: <code>apt-get install python-numpy python-imaging</code></p>
-
-<p>Once the dependencies have been installed you can safely install AGM and its associated appliactions:</p>
-
-<p><code>cmake .</code></p>
-
-<p><code>make</code></p>
-
-<p>and, finally, as root:</p>
-
-<p><code>make install</code></p>
-
-<h2>
-<a name="what-do-i-get-with-agm" class="anchor" href="#what-do-i-get-with-agm"><span class="octicon octicon-link"></span></a>What do I get with AGM?</h2>
-
-<p>The project is composed of four different elements:</p>
-
-<ul>
-<li>libAGM, the framework-agnostic library that is used to implement executives (<em>libagm</em>).</li>
-<li>The AGGL visual editor (<em>AGGLEditor</em>).</li>
-<li>An AGGL to PDDL compiler (<em>aggl2pddl</em>).</li>
-<li>A problem visualizer (<em>agm_xmlViewer</em>).</li>
-<li>An PDDL problem generator (<em>agm_xml2problem</em>).</li>
-<li>The implementation of an executive designed to work with the <a href="http://robocomp.org">RoboComp framework</a> (<em>RoboCompAGMExecutive</em>).</li>
-</ul><h3>
-<a name="agm-library" class="anchor" href="#agm-library"><span class="octicon octicon-link"></span></a>AGM library</h3>
-
-<p>The library that implements the core of AGM (<em>libagm</em>). The API of the library is available <a href="http://here">here</a>.</p>
-
-<h3>
-<a name="aggl-visual-editor" class="anchor" href="#aggl-visual-editor"><span class="octicon octicon-link"></span></a>AGGL Visual editor</h3>
-
-<p>The visual editor, AGGLEditor, eases the process of designing grammars. It's use is described in its own wiki page: [[AGGLEditor]].</p>
-
-<h3>
-<a name="problem-visualizer" class="anchor" href="#problem-visualizer"><span class="octicon octicon-link"></span></a>Problem visualizer</h3>
-
-<p>agm_xmlViewer initialWorld.xml goalPattern.xml</p>
-
-<h3>
-<a name="aggl-to-pddl-compiler" class="anchor" href="#aggl-to-pddl-compiler"><span class="octicon octicon-link"></span></a>AGGL to PDDL compiler</h3>
-
-<p>aggl2pddl -i grammar.aggl -p activeRules.pddl -f activeAndPassiveRules.pddl</p>
-
-<h3>
-<a name="problem-viewer" class="anchor" href="#problem-viewer"><span class="octicon octicon-link"></span></a>Problem viewer</h3>
-
-<p>agm_xmlViewer initialWorld.xml goal.xml</p>
-
-<h3>
-<a name="pddl-problem-generator" class="anchor" href="#pddl-problem-generator"><span class="octicon octicon-link"></span></a>PDDL problem generator</h3>
-
-<p>agm_xml2problem initialWorld.xml goal.xml problem.pddl [unknownMemorySize]</p>
-        </section>
-
-        <aside id="sidebar">
-          <a href="https://github.com/ljmanso/AGM/zipball/master" class="button">
-            <small>Download</small>
-            .zip file
-          </a>
-          <a href="https://github.com/ljmanso/AGM/tarball/master" class="button">
-            <small>Download</small>
-            .tar.gz file
-          </a>
-
-          <p class="repo-owner"><a href="https://github.com/ljmanso/AGM"></a> is maintained by <a href="https://github.com/ljmanso">ljmanso</a>.</p>
-
-          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
-        </aside>
+    <div id="container">
+      <p class="tagline">Active Grammar-based Modeling</p>
+      <div id="main" role="main">
+        <div class="download-bar">
+        <div class="inner">
+          <a href="https://github.com/ljmanso/AGM/tarball/master" class="download-button tar"><span>Download</span></a>
+          <a href="https://github.com/ljmanso/AGM/zipball/master" class="download-button zip"><span>Download</span></a>
+          <a href="https://github.com/ljmanso/AGM" class="code">View AGM on GitHub</a>
+        </div>
+        <span class="blc"></span><span class="trc"></span>
+        </div>
+        <article class="markdown-body">
+          <p>Moved to <a href="http://ljmanso.com/agmdoc">AGM documentation</a></p>
+        </article>
       </div>
     </div>
+    <footer>
+      <div class="owner">
+      <p><a href="https://github.com/ljmanso" class="avatar"><img src="https://2.gravatar.com/avatar/224c0e71337a977414b69be53feea43e?d=https%3A%2F%2Fidenticons.github.com%2F5c312c6fbecb02d1537857bc7a87f874.png&amp;r=x&amp;s=60" width="48" height="48"/></a> <a href="https://github.com/ljmanso">ljmanso</a> maintains <a href="https://github.com/ljmanso/AGM">AGM</a></p>
+
+
+      </div>
+      <div class="creds">
+        <small>This page generated using <a href="http://pages.github.com/">GitHub Pages</a><br/>theme by <a href="https://twitter.com/jonrohan/">Jon Rohan</a></small>
+      </div>
+    </footer>
+  </div>
+  <div class="current-section">
+    <a href="#top">Scroll to top</a>
+    <a href="https://github.com/ljmanso/AGM/tarball/master" class="tar">tar</a><a href="https://github.com/ljmanso/AGM/zipball/master" class="zip">zip</a><a href="" class="code">source code</a>
+    <p class="name"></p>
+  </div>
 
   
-  </body>
+</body>
 </html>
