@@ -175,7 +175,7 @@ endif(DOXYGEN_FOUND)
 
 #  fake project to execute command  #
 #####################################
-add_subdirectory(fake)
+add_subdirectory(libagm/fake)
 
 
 
@@ -184,10 +184,10 @@ add_subdirectory(fake)
 INSTALL(FILES libagm.so DESTINATION /opt/robocomp/lib/ )
 INSTALL(FILES ${HEADERS} DESTINATION /opt/robocomp/include/ )
 INSTALL(PROGRAMS agm_xml2pddlProblem DESTINATION /opt/robocomp/bin/ )
-INSTALL(PROGRAMS agm_xmlViewer.py DESTINATION /opt/robocomp/bin/ RENAME agm_xmlViewer )
-INSTALL(PROGRAMS AGGLEditor.py DESTINATION /opt/robocomp/bin/ RENAME AGGLEditor)
-INSTALL(PROGRAMS aggl2pddl DESTINATION /opt/robocomp/bin/ )
-INSTALL(PROGRAMS aggl2agglpy DESTINATION /opt/robocomp/bin/ )
+INSTALL(PROGRAMS tools/agm_xmlViewer.py DESTINATION /opt/robocomp/bin/ RENAME agm_xmlViewer )
+INSTALL(PROGRAMS tools/AGGLEditor.py DESTINATION /opt/robocomp/bin/ RENAME AGGLEditor)
+INSTALL(PROGRAMS tools/aggl2pddl DESTINATION /opt/robocomp/bin/ )
+INSTALL(PROGRAMS tools/aggl2agglpy DESTINATION /opt/robocomp/bin/ )
 INSTALL(PROGRAMS "AGGLPlanner/agglplanner.py" DESTINATION /opt/robocomp/bin/ RENAME agglplanner )
 INSTALL(PROGRAMS "AGGLPlanner/agglplanner.py" DESTINATION /opt/robocomp/share/ RENAME agglplanner.py )
 INSTALL(PROGRAMS "AGGLPlanner/agglplanchecker.py" DESTINATION /opt/robocomp/bin/ RENAME agglplanchecker )
@@ -199,16 +199,17 @@ if (ROBOCOMP_SUPPORT)
 INSTALL(FILES AGMWorldModel.h DESTINATION /opt/robocomp/include/ )
 endif (ROBOCOMP_SUPPORT)
 
-INSTALL(PROGRAMS ui_guiAGGLEditor.py DESTINATION /opt/robocomp/share)
-INSTALL(PROGRAMS ui_guiGraphViewer.py DESTINATION /opt/robocomp/share)
-INSTALL(PROGRAMS ui_appearance.py DESTINATION /opt/robocomp/share)
-INSTALL(PROGRAMS parseAGGL.py DESTINATION /opt/robocomp/share)
-INSTALL(PROGRAMS pddlAGGL.py DESTINATION /opt/robocomp/share)
-INSTALL(PROGRAMS xmlModelParser.py DESTINATION /opt/robocomp/share)
-INSTALL(PROGRAMS generateAGGLPlannerCode.py DESTINATION /opt/robocomp/share)
-INSTALL(PROGRAMS AGMModule.py DESTINATION /opt/robocomp/share)
-INSTALL(PROGRAMS AGGL.py DESTINATION /opt/robocomp/share)
-INSTALL(PROGRAMS aggl_completion.bash DESTINATION /etc/bash_completion.d/ RENAME AGGLEditor)
+INSTALL(PROGRAMS python/parseAGGL.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS python/pddlAGGL.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS python/xmlModelParser.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS python/generateAGGLPlannerCode.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS python/AGMModule.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS python/AGGL.py DESTINATION /opt/robocomp/share)
 
+INSTALL(PROGRAMS ui/ui_guiAGGLEditor.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS ui/ui_guiGraphViewer.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS ui/ui_appearance.py DESTINATION /opt/robocomp/share)
+
+INSTALL(PROGRAMS tools/aggl_completion.bash DESTINATION /etc/bash_completion.d/ RENAME AGGLEditor)
 
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-filepath="../libagm/agm_config.h"
+filepath="../agm_config.h"
 words=`wc ${filepath} | awk '{ print $2 }'`
 
 back="ddd"
