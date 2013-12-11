@@ -1,4 +1,0 @@
-#rm agglparser.cpp agglparser.hpp;
-make agglplanner && ./agglplanner parse.aggl modelA.xml modelB.xml 
-
-
