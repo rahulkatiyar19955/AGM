@@ -4,9 +4,13 @@
 #include <stdio.h>
 
 #include <agm_config.h>
-#include "agm_model.h"
-#include "agm_modelEdge.h"
-#include "agm_modelSymbols.h"
+#include <agm_model.h>
+#include <agm_modelEdge.h>
+#include <agm_modelSymbols.h>
+
+#ifdef ROBOCOMP_SUPPORT
+#include <AGMWorldModel.h>
+#endif
 
 /*!
  * @brief Utility class to print AGMModel graphs

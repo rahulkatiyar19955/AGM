@@ -71,7 +71,7 @@ if (PYTHON_BINDINGS)
 	# Add bindings source code file
 	SET(SOURCES ${SOURCES} libagm/agm_python.cpp)
 	# Linking and wrapping stuff
-	# (boost)
+	# (boost)me lo he inventado o l
 	set(Boost_USE_STATIC_LIBS   OFF)
 	set(Boost_USE_MULTITHREADED ON)
 	find_package(Boost COMPONENTS system thread python REQUIRED)
@@ -151,11 +151,11 @@ target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES})
 add_dependencies(agm agmdummy)
 
 add_executable ( testagm tools/testagm.cpp )
-target_link_libraries ( testagm  -L. -lagm ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+target_link_libraries ( testagm  -L. -L.. -lagm ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
 add_executable ( agm_xml2pddlProblem tools/agm_xml2pddlProblem.cpp )
-target_link_libraries ( agm_xml2pddlProblem  -L. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+target_link_libraries ( agm_xml2pddlProblem  -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
 
@@ -165,7 +165,7 @@ add_dependencies(testagm agm)
 #############
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile @ONLY)
   add_custom_target(doc
   ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
   WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}

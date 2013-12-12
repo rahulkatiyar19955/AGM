@@ -1,4 +1,5 @@
 #include "agm_modelSymbols.h"
+#include "agm_modelEdge.h"
 #include "agm_model.h"
 
 AGMModelSymbol::AGMModelSymbol(AGMModel *model, std::string typ, int32_t id) { init(model, typ, id); }
@@ -115,3 +116,84 @@ std::string AGMModelSymbol::getAttribute(std::string a)
 }
 
 
+edgeIterator::edgeIterator(AGMModel *m, AGMModelSymbol *s)
+{
+	index = -1;
+	symRef = s;
+	modelRef = m;
+}
+
+edgeIterator::edgeIterator(edgeIterator &iter)
+{
+	index = iter.index;
+	symRef = iter.symRef;
+	modelRef = iter.modelRef;
+}
+
+edgeIterator edgeIterator::begin(AGMModel *m, AGMModelSymbol *s)
+{
+	edgeIterator iter(m, s);
+	iter.index = -1; // -1 is a special case which makes the iterator start over
+	return iter;
+}
+
+edgeIterator edgeIterator::end(AGMModel *m, AGMModelSymbol *s)
+{
+	edgeIterator iter(m, s);
+	iter.index = -10;
+	return iter;
+}
+
+bool edgeIterator::operator==(const edgeIterator &rhs)
+{
+	return index == rhs.index;
+}
+
+bool edgeIterator::operator!=(const edgeIterator &rhs)
+{
+	return index != rhs.index;
+}
+
+edgeIterator edgeIterator::operator++()
+{
+	// The end can't be incremented
+	if (index == -10)
+		return *this;
+	// Otherwise, increment the index
+	index++;
+
+	// Now, increment until we reach a related edge
+	const int32_t t=modelRef->edges.size();
+	while (index < t)
+	{
+		if (modelRef->edges[index].symbolPair.first == symRef->identifier or modelRef->edges[index].symbolPair.second == symRef->identifier)
+		{
+			return *this;
+		}
+		index++;
+	}
+	// Didn't find any edge
+	index = -10;
+	return *this;
+}
+
+edgeIterator edgeIterator::operator++(int32_t times)
+{
+	while (times > 0)
+	{
+		operator++();
+		times--;
+	}
+	return *this;
+}
+
+AGMModelEdge edgeIterator::operator*()
+{
+	return modelRef->edges[index];
+}
+
+AGMModelEdge edgeIterator::operator->()
+{
+	return modelRef->edges[index];
+}
+	
