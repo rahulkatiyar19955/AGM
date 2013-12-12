@@ -116,45 +116,45 @@ std::string AGMModelSymbol::getAttribute(std::string a)
 }
 
 
-edgeIterator::edgeIterator(AGMModel *m, AGMModelSymbol *s)
+AGMModelSymbol::iterator::iterator(AGMModel *m, AGMModelSymbol *s)
 {
 	index = -1;
 	symRef = s;
 	modelRef = m;
 }
 
-edgeIterator::edgeIterator(edgeIterator &iter)
+AGMModelSymbol::iterator::iterator(iterator &iter)
 {
 	index = iter.index;
 	symRef = iter.symRef;
 	modelRef = iter.modelRef;
 }
 
-edgeIterator edgeIterator::begin(AGMModel *m, AGMModelSymbol *s)
+AGMModelSymbol::iterator AGMModelSymbol::iterator::begin(AGMModel *m, AGMModelSymbol *s)
 {
-	edgeIterator iter(m, s);
+	iterator iter(m, s);
 	iter.index = -1; // -1 is a special case which makes the iterator start over
 	return iter;
 }
 
-edgeIterator edgeIterator::end(AGMModel *m, AGMModelSymbol *s)
+AGMModelSymbol::iterator AGMModelSymbol::iterator::end(AGMModel *m, AGMModelSymbol *s)
 {
-	edgeIterator iter(m, s);
+	iterator iter(m, s);
 	iter.index = -10;
 	return iter;
 }
 
-bool edgeIterator::operator==(const edgeIterator &rhs)
+bool AGMModelSymbol::iterator::operator==(const iterator &rhs)
 {
 	return index == rhs.index;
 }
 
-bool edgeIterator::operator!=(const edgeIterator &rhs)
+bool AGMModelSymbol::iterator::operator!=(const iterator &rhs)
 {
 	return index != rhs.index;
 }
 
-edgeIterator edgeIterator::operator++()
+AGMModelSymbol::iterator AGMModelSymbol::iterator::operator++()
 {
 	// The end can't be incremented
 	if (index == -10)
@@ -177,7 +177,7 @@ edgeIterator edgeIterator::operator++()
 	return *this;
 }
 
-edgeIterator edgeIterator::operator++(int32_t times)
+AGMModelSymbol::iterator AGMModelSymbol::iterator::operator++(int32_t times)
 {
 	while (times > 0)
 	{
@@ -187,12 +187,12 @@ edgeIterator edgeIterator::operator++(int32_t times)
 	return *this;
 }
 
-AGMModelEdge edgeIterator::operator*()
+AGMModelEdge AGMModelSymbol::iterator::operator*()
 {
 	return modelRef->edges[index];
 }
 
-AGMModelEdge edgeIterator::operator->()
+AGMModelEdge AGMModelSymbol::iterator::operator->()
 {
 	return modelRef->edges[index];
 }

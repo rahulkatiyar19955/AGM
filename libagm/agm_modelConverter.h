@@ -6,7 +6,7 @@
 #include <agm_modelSymbols.h>
 
 #ifdef ROBOCOMP_SUPPORT
-#include "AGMWorldModel.h"
+#include <AGMWorldModel.h>
 #endif
 
 /*!

@@ -24,7 +24,7 @@ SET (AGM_CODE
   libagm/agm_modelConverter.cpp
   libagm/agm_search.cpp
   libagm/agm_searchPath.cpp
-  libagm/agm_rule.cpp
+#   libagm/agm_rule.cpp
 )
 
 
@@ -39,7 +39,7 @@ SET (HEADERS
   libagm/agm_misc_functions.h
   libagm/agm_modelConverter.h
   libagm/agm_search.h
-  libagm/agm_rule.h
+#   libagm/agm_rule.h
   libagm/agm_config.h
 )
 

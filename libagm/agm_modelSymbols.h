@@ -15,50 +15,6 @@ class AGMModelConverter;
 class AGMModelEdge;
 class AGMModelSymbol;
 
-/*!
-	* @brief Iterator class for accessing the edges of a particular symbol.
-	*
-	* 
-	* 
-	*/
-class edgeIterator
-{
-public:
-	/// Constructor
-	edgeIterator(AGMModel *m, AGMModelSymbol *s);
-
-	/// Copy constructor
-	edgeIterator(edgeIterator &iter);
-
-	/// Access to the begin of the list.
-	static edgeIterator begin(AGMModel *m, AGMModelSymbol *s);
-
-	/// Access to an unaccessible element of the list.
-	static edgeIterator end(AGMModel *m, AGMModelSymbol *s);
-
-	/// Comparison operator
-	bool operator==(const edgeIterator &rhs);
-
-	/// Not-equal operator
-	bool operator!=(const edgeIterator &rhs);
-
-	/// Increment
-	edgeIterator operator++();
-
-	/// Parametrized increment
-	edgeIterator operator++(int32_t times);
-
-	/// Get referenced edge.
-	AGMModelEdge operator*();
-
-	/// Get referenced edge.
-	AGMModelEdge operator->();
-
-private:
-	int32_t index;
-	AGMModel *modelRef;
-	AGMModelSymbol *symRef;
-};
 
 /*!
  * @brief Nodes --symbols-- of AGMModel graphs
@@ -69,6 +25,41 @@ private:
 class AGMModelSymbol
 {
 friend class AGMModel;
+public:
+	/*!
+		* @brief Iterator class for accessing the edges of a particular symbol.
+		*
+		* 
+		* 
+		*/
+	class iterator
+	{
+	public:
+		/// Constructor
+		iterator(AGMModel *m, AGMModelSymbol *s);
+		/// Copy constructor
+		iterator(iterator &iter);
+		/// Access to the begin of the list.
+		static iterator begin(AGMModel *m, AGMModelSymbol *s);
+		/// Access to an unaccessible element of the list.
+		static iterator end(AGMModel *m, AGMModelSymbol *s);
+		/// Comparison operator
+		bool operator==(const iterator &rhs);
+		/// Not-equal operator
+		bool operator!=(const iterator &rhs);
+		/// Increment
+		iterator operator++();
+		/// Parametrized increment
+		iterator operator++(int32_t times);
+		/// Get referenced edge.
+		AGMModelEdge operator*();
+		/// Get referenced edge.
+		AGMModelEdge operator->();
+	private:
+		int32_t index;
+		AGMModel *modelRef;
+		AGMModelSymbol *symRef;
+	};
 
 private:
 	AGMModelSymbol(AGMModel *model, std::string typ, int32_t id=-1);
@@ -94,8 +85,8 @@ public:
 	void setAttribute(std::string a, std::string v);
 	std::string getAttribute(std::string a);
 
-// 	edgeIterator edgesBegin(AGMModel *m) { return edgeIterator::begin(m, this); }
-// 	edgeIterator edgesEnd(AGMModel *m) { return edgeIterator::end(m, this); }
+// 	iterator edgesBegin(AGMModel *m) { return iterator::begin(m, this); }
+// 	iterator edgesEnd(AGMModel *m) { return iterator::end(m, this); }
 
 	bool operator==(const AGMModelSymbol &p) const;
 

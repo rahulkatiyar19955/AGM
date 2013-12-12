@@ -93,7 +93,7 @@ LAYOUT_FILE            =
 CITE_BIB_FILES         = 
 QUIET                  = YES
 WARNINGS               = YES
-WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_UNDOCUMENTED   = NO
 WARN_IF_DOC_ERROR      = YES
 WARN_NO_PARAMDOC       = NO
 WARN_FORMAT            = "$file:$line: $text"
@@ -121,78 +121,56 @@ FILE_PATTERNS = \
 RECURSIVE              = YES
 
 EXCLUDE = \
-	../tools/ui/ui_* \
-	tools/ui/ui_* \
-	ui/ui_* \
-	ui_* \
-	../tools/RoboCompAGMExecutive \
-	../RoboCompAGMExecutive \
-	RoboCompAGMExecutive \
+	AGGLEditor.py \
+	AGGLPlanner \
+	AGGL.py \
+	AGMModule.py \
+	AGMWorldModel.cpp \
+	AGMWorldModel.h \
 	../CMakeFiles \
 	CMakeFiles \
 	../examples \
-	libagm/fake \
-	AGGLPlanner \
-	libagm/agglparser.cpp \
-	libagm/agglparser.hpp \
-	libagm/agglparser.y \
-	libagm/aggllexer.l \
-	libagm/lex.yy.c \
-	libagm/aggllexer.cpp \
-	tools/ui/*.ui \
-	*.sh \
-	tools/agm_xml2pddlProblem.cpp \
-	libagm/agm_search.cpp \
-	libagm/agm_search.h \
-	libagm/libagm/agm_rule.cpp \
-	libagm/agm_rule.h \
-	tools/agm_xmlViewer.py \
-	python/parseAGGL.py \
-	tools/ui/appearance.ui \
-	tools/ui/guiGraphViewer.ui \
-	tools/ui/guiAGGLEditor.ui \
-	tools/ui/ui_appearance.py \
-	tools/ui/ui_guiAGGLEditor.py \
-	tools/ui/ui_guiGraphViewer.py \
-	tools/AGGLEditor.py \
-	tools/xmlModelParser.py \
-	python/AGMModule.py \
-	python/pddlAGGL.py \
-	AGMWorldModel.cpp \
-	AGMWorldModel.h \
-	python/AGGL.py \
-	tools/RoboCompAGMExecutive \
-	RoboCompAGMMissionControllerExample \
-	CMakeFiles \
 	examples \
-	libagm/fake \
-	AGGLPlanner \
+	lex.yy.c \
+	libagm/aggllexer.cpp \
+	libagm/aggllexer.l \
 	libagm/agglparser.cpp \
 	libagm/agglparser.hpp \
 	libagm/agglparser.y \
-	libagm/aggllexer.l \
-	libagm/aggllexer.cpp \
-	AGGLEditor.py \
-	AGMModule.py \
-	tools/ui/*.ui \
-	*.sh \
-	tools/agm_xml2pddlProblem.cpp \
-	libagm/agm_search.cpp \
-	libagm/agm_search.h \
-	libagm/libagm/agm_rule.cpp \
+	libagm/agm_rule.cpp \
 	libagm/agm_rule.h \
-	tools/agm_xmlViewer.py \
+	libagm/agm_search.cpp \
+	libagm/agm_searchPath.cpp \
+	libagm/agm_search.h \
+	libagm/agm_searchPath.h \
+	libagm/fake \
+	libagm/lex.yy.c \
+	python/AGGL.py \
+	python/AGMModule.py \
 	python/parseAGGL.py \
+	python/pddlAGGL.py \
+	../RoboCompAGMExecutive \
+	RoboCompAGMExecutive \
+	RoboCompAGMMissionControllerExample \
+	*.sh \
+	tools/AGGLEditor.py \
+	tools/agm_xml2pddlProblem.cpp \
+	tools/agm_xmlViewer.py \
+	../tools/RoboCompAGMExecutive \
+	tools/RoboCompAGMExecutive \
 	tools/ui/appearance.ui \
-	tools/ui/guiGraphViewer.ui \
 	tools/ui/guiAGGLEditor.ui \
+	tools/ui/guiGraphViewer.ui \
+	../tools/ui/ui_* \
+	tools/ui/*.ui \
+	tools/ui/ui_* \
 	tools/ui/ui_appearance.py \
 	tools/ui/ui_guiAGGLEditor.py \
 	tools/ui/ui_guiGraphViewer.py \
-	python/pddlAGGL.py \
+	tools/xmlModelParser.py \
+	ui_* \
+	ui/ui_* \
 	xmlModelParser.py \
-	lex.yy.c \
-	AGGL.py
 
 EXCLUDE_SYMLINKS       = YES
 EXCLUDE_PATTERNS       = 
@@ -200,7 +178,7 @@ EXCLUDE_SYMBOLS        = AGM
 EXAMPLE_PATH           = 
 EXAMPLE_PATTERNS       = *
 EXAMPLE_RECURSIVE      = NO
-IMAGE_PATH             = 
+IMAGE_PATH             = doc/
 INPUT_FILTER           = 
 FILTER_PATTERNS        = 
 FILTER_SOURCE_FILES    = NO
