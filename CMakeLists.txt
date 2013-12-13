@@ -110,7 +110,7 @@ MACRO( WRAP_PYTHON_UI )
       DEPENDS tools/ui/${input_file}.ui
       COMMENT "Generating tools/ui/ui_${input_file}.py from tools/ui/${input_file}.ui"
     )
-    ADD_CUSTOM_TARGET(tools/ui/ui_${input_file} ALL DEPENDS tools/ui/ui_${input_file}.py )
+    ADD_CUSTOM_TARGET(ui_${input_file} ALL DEPENDS tools/ui/ui_${input_file}.py )
   ENDFOREACH( input_file )
 ENDMACRO( WRAP_PYTHON_UI )
 

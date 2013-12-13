@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 
 filepath="../../agm_config.h"
-words=`wc ${filepath} | awk '{ print $2 }'`
+if [ -e ${filepath} ] ; then
+	words=`wc ${filepath} | awk '{ print $2 }'`
+else
+	words=""
+fi
 
 back="ddd"
 if [ "${words}" = "3" ] ; then
