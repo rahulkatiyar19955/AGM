@@ -56,9 +56,9 @@ public:
 		iterator operator++();
 		/// Parametrized increment
 		iterator operator++(int32_t times);
-		/// Get referenced edge.
+		/// Returns the referenced symbol.
 		AGMModelSymbol::SPtr operator*();
-		/// Get referenced edge.
+		/// Returns the referenced symbol.
 		AGMModelSymbol::SPtr operator->();
 	private:
 		int32_t index;

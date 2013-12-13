@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 
-filepath="../../agm_config.h"
+filepath="../agm_config.h"
 if [ -e ${filepath} ] ; then
+# 	echo "${filepath} exists"
 	words=`wc ${filepath} | awk '{ print $2 }'`
 else
 	words=""
+# 	echo "${filepath} does NOT exist"
 fi
+# echo "wc ${words}"
 
 back="ddd"
 if [ "${words}" = "3" ] ; then
@@ -21,5 +24,7 @@ if [ "$back" != "$1" ] ; then
 	else
 		echo "" > ${filepath}
 	fi
+# else
+# 	echo "not updating"
 fi
 

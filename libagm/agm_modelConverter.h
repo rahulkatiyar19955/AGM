@@ -18,14 +18,25 @@
 class AGMModelConverter
 {
 public:
+
 #ifdef ROBOCOMP_SUPPORT
+	/// Converts an AGM world model from an AGMModel container to a RoboCompAGMWorldModel::World container.
 	static void fromInternalToIce(const AGMModel::SPtr &world, RoboCompAGMWorldModel::World &dst);
+	/// Converts an AGM world model from a RoboCompAGMWorldModel::World container to an AGMModel container.
 	static void fromIceToInternal(const RoboCompAGMWorldModel::World &world, AGMModel::SPtr &dst);
+
+	/// Converts an AGM symbol model from an AGMModelSymbol container (given by a shared pointer) to a RoboCompAGMWorldModel::Node container.
 	static void fromInternalToIce(const AGMModelSymbol::SPtr &node, RoboCompAGMWorldModel::Node &dst);
-	static void fromIceToInternal(const RoboCompAGMWorldModel::Node &node, AGMModelSymbol::SPtr &dst);
+	/// Converts an AGM symbol model from an AGMModelSymbol container (given by a regular pointer) to a RoboCompAGMWorldModel::Node container.
 	static void fromInternalToIce(const AGMModelSymbol *node, RoboCompAGMWorldModel::Node &dst);
+	/// Converts an AGM symbol model from a RoboCompAGMWorldModel::Node container to an AGMModelSymbol container.
+	static void fromIceToInternal(const RoboCompAGMWorldModel::Node &node, AGMModelSymbol::SPtr &dst);
+
+	/// Updates an AGM world model (an AGMModel object) using an updated node (given a RoboCompAGMWorldModel::Node instance).
 	static bool includeIceModificationInInternalModel(const RoboCompAGMWorldModel::Node &node, AGMModel::SPtr &world);
 #endif
+
+	/// Creates an AGM world model (AGMModel object) given the path to an existing XML description.
 	static void fromXMLToInternal(const std::string path, AGMModel::SPtr &dst);
 
 

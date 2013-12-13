@@ -16,16 +16,19 @@
 class AGMModelException : public std::exception
 {
 public:
+	/// Constructor
 	AGMModelException(std::string file__, int32_t line__, std::string text__="") throw()
 	{
 		file_      =      file__;
 		line_      =      line__;
 		text_      =      text__;
 	}
+	/// Destructor
 	~AGMModelException() throw()
 	{
 	}
 
+	/// <strong>This is the method you should call when capturing an AGMModelException object</strong>.
 	const char* what() const throw()
 	{
 		std::ostringstream ss;
@@ -37,6 +40,7 @@ public:
 		return ss.str().c_str();
 	}
 
+private:
 	std::string file_;
 	uint32_t line_;
 	std::string text_;

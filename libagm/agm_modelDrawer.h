@@ -29,6 +29,7 @@ class AGMModelDrawer : QObject
 {
 Q_OBJECT
 public:
+	/// Constructor. It is parametrized with a RCDraw object and an <strong>optional</strong> QTableWidget object (used to show nodes' attributes).
 	AGMModelDrawer(RCDraw *drawer_, QTableWidget *tableWidget_=NULL)
 	{
 		drawer = drawer_;
@@ -36,9 +37,9 @@ public:
 		tableWidget = tableWidget_;
 		modified = false;
 		connect(drawer, SIGNAL(newCoor(QPointF)), this, SLOT(clickedNode(QPointF)));
-
 	}
 
+	/// This method updates the widget with the current model ('w' vairable).
 	void update(const AGMModel::SPtr &w)
 	{
 		drawer->autoResize();
@@ -49,10 +50,11 @@ public:
 		drawer->update();
 	}
 
+private:
+	/// Inspects the current model to detect significant changes.
 	void updateStructure()
 	{
-// 		printf("UPDATING STRUCTURE\n");
-		/// Push back new nodes
+		// Push back new nodes
 		for (uint32_t e1=0; e1<model->symbols.size(); e1++)
 		{
 			bool found = false;
@@ -78,7 +80,7 @@ public:
 				nodes.push_back(node);
 			}
 		}
-		/// Remove deleted nodes
+		// Remove deleted nodes
 		for (uint32_t e1=0; e1<nodes.size();)
 		{
 			bool found = false;
@@ -95,14 +97,14 @@ public:
 			else
 				e1++;
 		}
-		/// Clear edges
+		// Clear edges
 		for (uint32_t e=0; e<nodes.size();e++)
 		{
 			nodes[e].edges.clear();
 			nodes[e].edgesOriented.clear();
 			nodes[e].edgesNames.clear();
 		}
-		/// Push back edges again
+		// Push back edges again
 		for (uint32_t e=0; e<model->edges.size(); e++)
 		{
 			std::string first  = model->symbols[model->getIndexByIdentifier(model->edges[e].symbolPair.first) ]->toString();
@@ -123,7 +125,6 @@ public:
 
 				nodes[idx1].edgesOriented.push_back(idx2);
 				nodes[idx1].edgesNames.push_back(model->edges[e].linking);
-// 				printf("%s -----(%s)-----> %s\n", nodes[idx1].name.c_str(), nodes[idx1].edgesNames.back().c_str(), nodes[nodes[idx1].edgesOriented.back()].name.c_str());
 			}
 			else
 			{
@@ -134,6 +135,7 @@ public:
 		modified = true;
 	}
 
+	/// Move the nodes according to a edges-attraction / nodes-repulsion simulation.
 	void recalculatePositions()
 	{
 		static QTime timer = QTime::currentTime();
@@ -141,8 +143,7 @@ public:
 		timer = QTime::currentTime();
 		if (time > 500) time = 500;
 
-		// Compute forces and integrate velocities, storing updated velocities
-		// in nodes[n].vel[0-1]
+		// Compute forces and integrate velocities, storing updated velocities in nodes[n].vel[0-1]
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
 			int32_t i[2];
@@ -214,9 +215,9 @@ public:
 				nodes[n].pos[1] -= totalY;
 			}
 		}
-
 	}
 
+	// Actually draw the model in the widget.
 	void draw()
 	{
 		const float radius = 25.;
@@ -292,6 +293,7 @@ public:
 	}
 
 private:
+	// Internal representation for nodes.
 	struct GraphicalNodeInfo
 	{
 		std::string name;
@@ -312,6 +314,7 @@ private:
 	QTableWidget *tableWidget;
 	std::string interest;
 
+	// Draws attribute table.
 	void drawTable()
 	{
 		int32_t index2 = -1;
@@ -358,6 +361,7 @@ private:
 
 
 public slots:
+	// Updates selected node in the attribute table according to the provided coordinates.
 	void clickedNode(QPointF pC)
 	{
 		if (tableWidget == NULL) return;
