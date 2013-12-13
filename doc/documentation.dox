@@ -3,23 +3,23 @@
 
 
 \section intro_sec Introduction
-<strong>AGM</strong> (Active Grammar-based modeling) is a modern core for robotic architectures capable of performing <strong>perception-aware planning</strong> (that means that, besides any regular plannin-related task, you can use AGM to plan goals that involve detecting and modeling new objects). It relies on a visual language named <strong>AGGL</strong> (Active Graph Grammar Language) that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. In conjunction with an AI planner, AGGL descriptions are used by AGM to reason about what to do depending on the robots' current goal and world model.
+<strong>AGM</strong> (Active Grammar-based modeling) is a modern core for robotic architectures capable of performing <strong>perception-aware planning</strong> (that means that, besides any regular planning-related task, you can use AGM to plan goals that involve detecting and modeling new objects). AGM relies on a visual language named <strong>AGGL</strong> (Active Graph Grammar Language) that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. In conjunction with an AI planner, AGGL descriptions are used by AGM to reason about what to do depending on the robots' current goal and world model.
 
 <strong>AGGL</strong> (Active Graph Grammar Language) is a powerful (yet easy to understand) visual language visual language that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. The description of these changes, expressed as graph-grammar rules, can be used for several purposes:
 
 <ul>
-<li>Generating plans to perceive the world</li>
 <li>Generating plans to modify the world or the relationship between the robot and the world</li>
+<li>Generating plans to perceive the world</li>
 <li>Verifying world model modifications</li>
 </ul>
 
 
 \section more_sec Read more
+\ref agmworks
+<br />
 \ref components
 <br />
 \ref installation
-<br />
-\ref agmworks
 <br />
 \ref AGGLEditor
 <br />
