@@ -29,6 +29,42 @@ class AGMModel
 friend class AGMModelConverter;
 friend class AGMModelSymbol;
 public:
+	/*!
+		* @brief Iterator class for accessing the symbols in an AGMModel object.
+		*
+		* 
+		* 
+		*/
+	class iterator
+	{
+	public:
+		/// Default constructor
+		iterator() { modelRef = NULL; }
+		/// Constructor
+		iterator(AGMModel *m);
+		/// Copy constructor
+		iterator(iterator &iter);
+		/// Access to the begin of the list.
+		static iterator begin(AGMModel *m);
+		/// Access to an unaccessible element of the list.
+		static iterator end(AGMModel *m);
+		/// Comparison operator
+		bool operator==(const iterator &rhs);
+		/// Not-equal operator
+		bool operator!=(const iterator &rhs);
+		/// Increment
+		iterator operator++();
+		/// Parametrized increment
+		iterator operator++(int32_t times);
+		/// Get referenced edge.
+		AGMModelSymbol::SPtr operator*();
+		/// Get referenced edge.
+		AGMModelSymbol::SPtr operator->();
+	private:
+		int32_t index;
+		AGMModel *modelRef;
+	};
+
 
 	//
 	// Constructors and related

@@ -606,4 +606,85 @@ AGMModelSymbol::SPtr AGMModel::newSymbol(int32_t identifier, std::string typ, st
 	return symbols[getIndexByIdentifier(s->identifier)];
 }
 
-	
+
+
+AGMModel::iterator::iterator(AGMModel *m)
+{
+	index = -1;
+	modelRef = m;
+}
+
+AGMModel::iterator::iterator(iterator &iter)
+{
+	index = iter.index;
+	modelRef = iter.modelRef;
+}
+
+AGMModel::iterator AGMModel::iterator::begin(AGMModel *m)
+{
+	iterator iter(m);
+	iter.index = -1; // -1 is a special case which makes the iterator start over
+	return iter;
+}
+
+AGMModel::iterator AGMModel::iterator::end(AGMModel *m)
+{
+	iterator iter(m);
+	iter.index = -10;
+	return iter;
+}
+
+bool AGMModel::iterator::operator==(const iterator &rhs)
+{
+	return index == rhs.index;
+}
+
+bool AGMModel::iterator::operator!=(const iterator &rhs)
+{
+	return index != rhs.index;
+}
+
+AGMModel::iterator AGMModel::iterator::operator++()
+{
+	if (modelRef == NULL) AGMMODELEXCEPTION(std::string("Attempting to use uninitialized iterator!"));
+
+	// The end can't be incremented
+	if (index == -10)
+		return *this;
+
+	index++;
+
+	if (index < (int32_t)modelRef->symbols.size())
+	{
+		index++;
+	}
+	else
+	{
+		index = -10;
+	}
+	return *this;
+}
+
+AGMModel::iterator AGMModel::iterator::operator++(int32_t times)
+{
+	while (times > 0)
+	{
+		operator++();
+		times--;
+	}
+	return *this;
+}
+
+AGMModelSymbol::SPtr AGMModel::iterator::operator*()
+{
+	if (modelRef == NULL) AGMMODELEXCEPTION(std::string("Attempting to use uninitialized iterator!"));
+	return modelRef->symbols[index];
+}
+
+AGMModelSymbol::SPtr AGMModel::iterator::operator->()
+{
+	if (modelRef == NULL) AGMMODELEXCEPTION(std::string("Attempting to use uninitialized iterator!"));
+	return modelRef->symbols[index];
+}
+
+

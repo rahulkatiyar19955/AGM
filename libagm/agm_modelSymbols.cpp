@@ -91,7 +91,7 @@ std::string AGMModelSymbol::typeString() const
 	stringStream << symbolType;
   return stringStream.str();
 }
-	
+
 
 
 void AGMModelSymbol::setType(std::string t)
@@ -114,6 +114,7 @@ std::string AGMModelSymbol::getAttribute(std::string a)
 {
 	return attributes[a];
 }
+
 
 
 AGMModelSymbol::iterator::iterator(AGMModel *m, AGMModelSymbol *s)
@@ -156,6 +157,8 @@ bool AGMModelSymbol::iterator::operator!=(const iterator &rhs)
 
 AGMModelSymbol::iterator AGMModelSymbol::iterator::operator++()
 {
+	if (modelRef == NULL) AGMMODELEXCEPTION(std::string("Attempting to use uninitialized iterator!"));
+
 	// The end can't be incremented
 	if (index == -10)
 		return *this;
@@ -166,11 +169,11 @@ AGMModelSymbol::iterator AGMModelSymbol::iterator::operator++()
 	const int32_t t=modelRef->edges.size();
 	while (index < t)
 	{
+		index++;
 		if (modelRef->edges[index].symbolPair.first == symRef->identifier or modelRef->edges[index].symbolPair.second == symRef->identifier)
 		{
 			return *this;
 		}
-		index++;
 	}
 	// Didn't find any edge
 	index = -10;
@@ -189,11 +192,13 @@ AGMModelSymbol::iterator AGMModelSymbol::iterator::operator++(int32_t times)
 
 AGMModelEdge AGMModelSymbol::iterator::operator*()
 {
+	if (modelRef == NULL) AGMMODELEXCEPTION(std::string("Attempting to use uninitialized iterator!"));
 	return modelRef->edges[index];
 }
 
 AGMModelEdge AGMModelSymbol::iterator::operator->()
 {
+	if (modelRef == NULL) AGMMODELEXCEPTION(std::string("Attempting to use uninitialized iterator!"));
 	return modelRef->edges[index];
 }
-	
+

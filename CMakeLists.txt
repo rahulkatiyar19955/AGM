@@ -24,7 +24,7 @@ SET (AGM_CODE
   libagm/agm_modelConverter.cpp
   libagm/agm_search.cpp
   libagm/agm_searchPath.cpp
-#   libagm/agm_rule.cpp
+  libagm/agm_rule.cpp
 )
 
 
@@ -39,7 +39,7 @@ SET (HEADERS
   libagm/agm_misc_functions.h
   libagm/agm_modelConverter.h
   libagm/agm_search.h
-#   libagm/agm_rule.h
+  libagm/agm_rule.h
   libagm/agm_config.h
 )
 
@@ -151,11 +151,11 @@ target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES})
 add_dependencies(agm agmdummy)
 
 add_executable ( testagm tools/testagm.cpp )
-target_link_libraries ( testagm  -L. -L.. -lagm ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+target_link_libraries ( testagm agm -L. -L.. -lagm ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
 add_executable ( agm_xml2pddlProblem tools/agm_xml2pddlProblem.cpp )
-target_link_libraries ( agm_xml2pddlProblem  -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+target_link_libraries ( agm_xml2pddlProblem agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
 

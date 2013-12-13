@@ -35,6 +35,8 @@ public:
 	class iterator
 	{
 	public:
+		/// Default constructor
+		iterator() { modelRef = NULL; }
 		/// Constructor
 		iterator(AGMModel *m, AGMModelSymbol *s);
 		/// Copy constructor
