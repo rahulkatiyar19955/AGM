@@ -39,8 +39,8 @@ import inspect
 # C O N F I G U R A T I O N
 maxWorldIncrement = 40
 maxCost = 200
-stopWithFirstPlan = False
-verbose = 0
+stopWithFirstPlan = True
+verbose = 1
 
 
 class GoalAchieved(Exception):
@@ -141,7 +141,7 @@ def printResult(result):
 		print 'Cost', result.cost
 		print 'Score', result.score
 		print 'Probability', result.probability
-		print 'NodeID', result.nodeId
+		#print 'NodeID', result.nodeId
 		print 'Actions\n----------------'
 	for action in result.history:
 		print action
@@ -166,7 +166,7 @@ class PyPlan(object):
 		self.ruleMap = self.domain.getRules()
 		openNodes = []
 		heapq.heappush(openNodes, (0, copy.deepcopy(self.initWorld)))
-		if verbose>0: print 'INIT'.ljust(20), self.initWorld
+		if verbose>1: print 'INIT'.ljust(20), self.initWorld
 		knownNodes = []
 		results = []
 		explored = 0
@@ -228,7 +228,7 @@ class PyPlan(object):
 								#printResult(deriv)
 								raise GoalAchieved
 							else:
-								print '+'
+								print '+',
 						if not deriv in knownNodes and deriv.stop == False:
 							if len(deriv.graph.nodes.keys()) <= maxWorldSize:
 								knownNodes.append(head)
