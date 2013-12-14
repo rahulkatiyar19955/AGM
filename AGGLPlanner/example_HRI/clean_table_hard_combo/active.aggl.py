@@ -40,6 +40,7 @@ class RuleSet(object):
 		mapping['humanTellsUsAboutTable'] = self.humanTellsUsAboutTable
 		mapping['robotMovesMugFromTableToBox'] = self.robotMovesMugFromTableToBox
 		mapping['humanMovesMugFromTableToBox'] = self.humanMovesMugFromTableToBox
+		mapping['setTableClean'] = self.setTableClean
 		mapping['MOVEtoCLEAN'] = self.MOVEtoCLEAN
 		return mapping
 
@@ -67,6 +68,7 @@ class RuleSet(object):
 		mapping['humanTellsUsAboutTable'] = self.humanTellsUsAboutTable_trigger
 		mapping['robotMovesMugFromTableToBox'] = self.robotMovesMugFromTableToBox_trigger
 		mapping['humanMovesMugFromTableToBox'] = self.humanMovesMugFromTableToBox_trigger
+		mapping['setTableClean'] = self.setTableClean_trigger
 		mapping['MOVEtoCLEAN'] = self.MOVEtoCLEAN_trigger
 		return mapping
 
@@ -4463,6 +4465,37 @@ class RuleSet(object):
 		l = AGMLink(smap['s'], smap['c2'], 'in')
 		if not l in newNode.graph.links:
 			newNode.graph.links.append(l)
+
+		# <<Hardcoded stuff                                                                                                                    # MANUALCODE
+		#print 'a'                                                                                                                             # MANUALCODE
+		for l in newNode.graph.links:                                                                                                          # MANUALCODE
+			if l.b == movedObject and l.linkType == 'eq':                                                                                       # MANUALCODE
+				#print 'b'                                                                                                                       # MANUALCODE
+				similarObject = l.a                                                                                                              # MANUALCODE
+				#print 'similarObject', similarObject                                                                                            # MANUALCODE
+				for l2 in newNode.graph.links:                                                                                                   # MANUALCODE
+					if l2.a == similarObject and l2.linkType == 'has':                                                                            # MANUALCODE
+						#print 'c'                                                                                                                 # MANUALCODE
+						similarStatus = l2.b                                                                                                       # MANUALCODE
+						#print 'similarStatus', similarStatus                                                                                      # MANUALCODE
+						for l3 in newNode.graph.links:                                                                                             # MANUALCODE
+							if l3.a == similarStatus and l3.linkType == 'in':                                                                       # MANUALCODE
+								#print 'd'                                                                                                           # MANUALCODE
+								similarOldContainter = l3.b                                                                                          # MANUALCODE
+								#print 'similarOldContainter', similarOldContainter                                                                  # MANUALCODE
+								for l4 in newNode.graph.links:                                                                                       # MANUALCODE
+									if l4.b == newContainer and l4.linkType == 'eq':                                                                  # MANUALCODE
+										#print 'e'                                                                                                     # MANUALCODE
+										similarNewContainer = l4.a                                                                                     # MANUALCODE
+										#print 'similarNewContainer', similarNewContainer                                                              # MANUALCODE
+										for enlace in newNode.graph.links:                                                                             # MANUALCODE
+											if enlace.a == similarStatus and enlace.b == similarOldContainter and enlace.linkType == 'in':              # MANUALCODE
+												#print 'f                                                                                                # MANUALCODE'
+												#print enlace.a, enlace.b, enlace.linkType                                                               # MANUALCODE
+												enlace.b = similarNewContainer                                                                           # MANUALCODE
+												#print enlace.a, enlace.b, enlace.linkType                                                               # MANUALCODE
+												#print 'g'                                                                                               # MANUALCODE
+
 		# Misc stuff
 		newNode.probability *= 1.
 		if len(stack) == 0:
@@ -4774,6 +4807,163 @@ class RuleSet(object):
 			newNode.cost += 1
 			newNode.depth += 1
 		newNode.history.append('humanMovesMugFromTableToBox@' + str(n2id) )
+		if finish!='': newNode.history.append(finish)
+		return newNode
+		
+		
+
+	# Rule setTableClean
+	def setTableClean(self, snode, stackP=[], equivalencesP=[]):
+		stack        = copy.deepcopy(stackP)
+		equivalences = copy.deepcopy(equivalencesP)
+		finishesCombo = ''
+		if len(stack) > 0:
+			pop = stack.pop()
+			me = pop[0]
+			if len(pop)>2:
+				finishesCombo = copy.deepcopy(pop[2])
+				fina = copy.deepcopy(pop[2])
+			# Find equivalence for s
+			symbol_s_nodes = copy.deepcopy(snode.graph.nodes)
+			for equiv in equivalences:
+				if [me, 's'] in equiv[0]:
+					if equiv[1] != None:
+						symbol_s_nodes = [equiv[1]]
+			# Find equivalence for r
+			symbol_r_nodes = copy.deepcopy(snode.graph.nodes)
+			for equiv in equivalences:
+				if [me, 'r'] in equiv[0]:
+					if equiv[1] != None:
+						symbol_r_nodes = [equiv[1]]
+			# Find equivalence for m
+			symbol_m_nodes = copy.deepcopy(snode.graph.nodes)
+			for equiv in equivalences:
+				if [me, 'm'] in equiv[0]:
+					if equiv[1] != None:
+						symbol_m_nodes = [equiv[1]]
+			# Find equivalence for o
+			symbol_o_nodes = copy.deepcopy(snode.graph.nodes)
+			for equiv in equivalences:
+				if [me, 'o'] in equiv[0]:
+					if equiv[1] != None:
+						symbol_o_nodes = [equiv[1]]
+		else:
+			symbol_s_nodes = copy.deepcopy(snode.graph.nodes)
+			symbol_r_nodes = copy.deepcopy(snode.graph.nodes)
+			symbol_m_nodes = copy.deepcopy(snode.graph.nodes)
+			symbol_o_nodes = copy.deepcopy(snode.graph.nodes)
+		ret = []
+		nodes = copy.deepcopy(snode.graph.nodes)
+		n2id = dict()
+		for symbol_s_name in symbol_s_nodes:
+			symbol_s = nodes[symbol_s_name]
+			n2id['s'] = symbol_s_name
+			if symbol_s.sType == 'status':
+				for symbol_o_name in symbol_o_nodes:
+					symbol_o = nodes[symbol_o_name]
+					n2id['o'] = symbol_o_name
+					if symbol_o.sType == 'object' and symbol_o.name!=symbol_s.name and [n2id["o"],n2id["s"],"has"] in snode.graph.links:
+						for symbol_r_name in symbol_r_nodes:
+							symbol_r = nodes[symbol_r_name]
+							n2id['r'] = symbol_r_name
+							if symbol_r.sType == 'robot' and symbol_r.name!=symbol_s.name and symbol_r.name!=symbol_o.name and [n2id["r"],n2id["o"],"know"] in snode.graph.links:
+								for symbol_m_name in symbol_m_nodes:
+									symbol_m = nodes[symbol_m_name]
+									n2id['m'] = symbol_m_name
+									if symbol_m.sType == 'table' and symbol_m.name!=symbol_s.name and symbol_m.name!=symbol_o.name and symbol_m.name!=symbol_r.name and [n2id["s"],n2id["m"],"link"] in snode.graph.links and not [n2id["s"],n2id["m"],"clean"] in snode.graph.links:
+										anyObject = False                                                                                       # MANUALCODE
+										for link in snode.graph.links:                                                                          # MANUALCODE
+											if link.b == n2id['o'] and link.linkType == "in":                                                    # MANUALCODE
+												# Ok, there is something... is it a mug?                                                          # MANUALCODE
+												status = link.a # this is the status of the object, let's check if it's a mug                     # MANUALCODE
+												for link2 in snode.graph.links:                                                                   # MANUALCODE
+													if link2.a == status:                                                                          # MANUALCODE
+														prop = link2.b                                                                              # MANUALCODE
+														if snode.graph.nodes[prop].sType == 'mug':                                                  # MANUALCODE
+															anyObject = True                                                                         # MANUALCODE
+															break                                                                                    # MANUALCODE
+												if anyObject == True: break                                                                       # MANUALCODE
+										if anyObject == True: continue                                                                          # MANUALCODE
+										# At this point we meet all the conditions.
+										# Insert additional conditions manually here if you want.
+										# (beware that the code could be regenerated and you might lose your changes).
+										stack2        = copy.deepcopy(stack)
+										equivalences2 = copy.deepcopy(equivalences)
+
+										r1 = self.setTableClean_trigger(snode, n2id, stack2, equivalences2, copy.deepcopy(finishesCombo))
+										c = copy.deepcopy(r1)
+										if 'fina' in locals():
+											c.history.append(finishesCombo)
+										if len(stack2) > 0: c.stop = True
+										ret.append(c)
+										if len(stack2) > 0:
+											# Set symbol for s...
+											for equiv in equivalences2:
+												if [me, 's'] in equiv[0]:
+													equiv[1] = symbol_s_name
+											# Set symbol for o...
+											for equiv in equivalences2:
+												if [me, 'o'] in equiv[0]:
+													equiv[1] = symbol_o_name
+											# Set symbol for r...
+											for equiv in equivalences2:
+												if [me, 'r'] in equiv[0]:
+													equiv[1] = symbol_r_name
+											# Set symbol for m...
+											for equiv in equivalences2:
+												if [me, 'm'] in equiv[0]:
+													equiv[1] = symbol_m_name
+											newNode = WorldStateHistory(r1)
+											global lastNodeId
+											lastNodeId += 1
+											newNode.nodeId = lastNodeId
+											newNode.parentId = snode.nodeId
+											derivsx = self.getRules()[stack2[-1][1]](newNode, stack2, equivalences2)
+											if 'fina' in locals():
+												for n in derivsx: n.history.append(finishesCombo)
+												for n in derivsx: n.history.append(fina)
+											ret.extend(derivsx)
+		return ret
+		
+		
+
+	# Rule setTableClean
+	def setTableClean_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True, finish=''):
+		if not checked:
+			test_symbol_s = snode.graph.nodes[n2id['s']]
+			if not (test_symbol_s.sType == 'status'):
+				raise WrongRuleExecution('setTableClean_trigger1 ')
+			test_symbol_o = snode.graph.nodes[n2id['o']]
+			if not (test_symbol_o.sType == 'object' and test_symbol_o.name!=test_symbol_s.name and [n2id["o"],n2id["s"],"has"] in snode.graph.links):
+				raise WrongRuleExecution('setTableClean_trigger2 ')
+			test_symbol_r = snode.graph.nodes[n2id['r']]
+			if not (test_symbol_r.sType == 'robot' and test_symbol_r.name!=test_symbol_s.name and test_symbol_r.name!=test_symbol_o.name and [n2id["r"],n2id["o"],"know"] in snode.graph.links):
+				raise WrongRuleExecution('setTableClean_trigger3 ')
+			test_symbol_m = snode.graph.nodes[n2id['m']]
+			if not (test_symbol_m.sType == 'table' and test_symbol_m.name!=test_symbol_s.name and test_symbol_m.name!=test_symbol_o.name and test_symbol_m.name!=test_symbol_r.name and [n2id["s"],n2id["m"],"link"] in snode.graph.links and not [n2id["s"],n2id["m"],"clean"] in snode.graph.links):
+				raise WrongRuleExecution('setTableClean_trigger4 ')
+		smap = copy.deepcopy(n2id)
+		newNode = WorldStateHistory(snode)
+		global lastNodeId
+		lastNodeId += 1
+		newNode.nodeId = lastNodeId
+		newNode.parentId = snode.nodeId
+		# Create nodes
+		# Retype nodes
+		# Remove nodes
+		newNode.graph.removeDanglingEdges()
+		# Remove links
+		newNode.graph.links = [x for x in newNode.graph.links if [x.a, x.b, x.linkType] not in [ [smap['s'], smap['m'], 'clean'] ]]
+		# Create links
+		l = AGMLink(smap['s'], smap['m'], 'clean')
+		if not l in newNode.graph.links:
+			newNode.graph.links.append(l)
+		# Misc stuff
+		newNode.probability *= 1.
+		if len(stack) == 0:
+			newNode.cost += 1
+			newNode.depth += 1
+		newNode.history.append('setTableClean@' + str(n2id) )
 		if finish!='': newNode.history.append(finish)
 		return newNode
 		
