@@ -1013,6 +1013,31 @@ humanMovesMugFromTableToBox : active(1)
 	}
 }
 
+setTableClean : active(1)
+{
+	{
+		r:robot(-130,-200)
+		o:object(-130,-75)
+		s:status(95,-75)
+		m:table(275,65)
+		r->o(know)
+		o->s(has)
+		s->m(link)
+		s->m(clean)*
+	}
+	=>
+	{
+		r:robot(-130,-200)
+		o:object(-130,-75)
+		s:status(95,-75)
+		m:table(275,65)
+		r->o(know)
+		o->s(has)
+		s->m(link)
+		s->m(clean)
+	}
+}
+
 MOVEtoCLEAN : active(1)
 {
 	robotMovesMugFromTableToBox as move

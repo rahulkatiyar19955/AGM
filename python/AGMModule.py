@@ -164,51 +164,44 @@ class GraphDraw(QWidget):
 		pixmap.save(path, "png")
 		painter.end()
 		painter = None
+
+
+
 	def iterateSpring(self):
 		# Constants
-		spring_length = 3.*float(vertexDiameter)
-		hookes_constant = float(0.4)
-		field_force_multiplier = float(500.0)*float(vertexDiameter)
-		time_step = float(0.12)
-		roza = float(0.9)
-		# Make sure every node has a velocity associated
+		spring_length = 1.*float(vertexDiameter)
+		hookes_constant = float(5.)
+		field_force_multiplier = float(50000.0)*float(vertexDiameter)
+		time_step = float(0.05)
+		roza = float(0.95)
+		# Make sure every node has a velocity associated and a proper position
 		if not hasattr(self, 'velocities'):
 			self.velocities = dict()
-
 		for node in self.graph.nodes:
 			if not node in self.velocities.keys():
 				self.velocities[node] = [0., 0.]
+			if type(self.graph.nodes[node].x) == str: self.graph.nodes[node].x = float(self.graph.nodes[node].x)
+			if type(self.graph.nodes[node].y) == str: self.graph.nodes[node].y = float(self.graph.nodes[node].y)
 		# Do the job
 		for n in self.graph.nodes:
 			node = self.graph.nodes[n]
-			force_x = force_y = 0.
+			force_x = 0.
+			force_y = 0.
 			for n2 in self.graph.nodes:
 				node2 = self.graph.nodes[n2]
-				if n == n2: continue
-				try:
-					ix = float(node.x) - float(node2.x)
-				except:
-					ix = 0
-				try:
-					iy = float(node.y) - float(node2.y)
-				except:
-					iy = 0
-				while ix == 0 and iy == 0:
-					node.pos[0]  = random.uniform(-100, 100)
-					node2.pos[0] = random.uniform(-100, 100)
-					node.pos[1]  = random.uniform(-100, 100)
-					node2.pos[1] = random.uniform(-100, 100)
-					ix = float(node.x) - float(node2.x)
-					iy = float(node.y) - float(node2.y)
-
+				ix = float(node.x) - float(node2.x)
+				iy = float(node.y) - float(node2.y)
 				angle = math.atan2(iy, ix)
-				dist2 = ((abs((iy*iy) + (ix*ix))) ** 0.5) ** 2.
-				if dist2 < spring_length: dist2 = spring_length
-				force = field_force_multiplier / dist2
+				dist = math.sqrt(abs((iy*iy) + (ix*ix)))
+				if abs(dist)<2.:
+					dist = 10.
+					angle = 0.
+				#if dist < spring_length: dist = spring_length
+				force = field_force_multiplier / (dist*dist)
 				force_x += force * math.cos(angle)
 				force_y += force * math.sin(angle)
-
 			for n2 in self.graph.nodes:
+				if n == n2: continue
 				node2 = self.graph.nodes[n2]
 				if node2.linkedTo(node, self.graph) or node.linkedTo(node2, self.graph):
 					ix = float(node.x) - float(node2.x)
@@ -221,8 +214,8 @@ class GraphDraw(QWidget):
 					force_x -= force*math.cos(angle)
 					force_y -= force*math.sin(angle)
 
-			self.velocities[node.name][0] = (self.velocities[node.name][0]*roza + (force_x*time_step))
-			self.velocities[node.name][1] = (self.velocities[node.name][1]*roza + (force_y*time_step))
+			self.velocities[node.name][0] = self.velocities[node.name][0]*roza + (force_x*time_step*time_step)
+			self.velocities[node.name][1] = self.velocities[node.name][1]*roza + (force_y*time_step*time_step)
 
 		# Update positions
 		for n in self.graph.nodes:
@@ -300,7 +293,12 @@ class GraphDraw(QWidget):
 			else:
 				painter.setBrush(QColor(155, 155, 155, 255))
 			# Draw node
-			painter.drawEllipse(v.pos[0]-(vertexDiameter/2), v.pos[1]-0.7001*(vertexDiameter/2), vertexDiameter, vertexDiameter*0.7001)
+			try:
+				painter.drawEllipse(v.pos[0]-(vertexDiameter/2), v.pos[1]-0.7001*(vertexDiameter/2), vertexDiameter, vertexDiameter*0.7001)
+			except OverflowError, o:
+				self.graph.nodes[w].pos[0] = float(random.uniform(-100, 100))
+				self.graph.nodes[w].pos[1] = float(random.uniform(-100, 100))
+
 			# Temp
 			align = Qt.AlignLeft
 			fixedVerticalOffsetName = -1
