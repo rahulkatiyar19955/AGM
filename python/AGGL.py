@@ -60,18 +60,21 @@ class AGMLink(object):
 		if this > nhis: return +1
 		return 0
 	def __eq__(self, other):
-		this =  self.linkType+" "+ self.a+" "+ self.b+" "+str( self.enabled)
+		#this = self.linkType+" "+ self.a+" "+ self.b+" "+str( self.enabled)
 		if isinstance(other, list):
-			nhis = other[2]+" "+other[0]+" "+other[1]+" "
+			if other[2] != self.linkType: return False
+			if other[0] != self.a: return False
+			if other[1] != self.b: return False
 			if len(other)>3:
-				nhis+=str(other[3])
+				if str(self.enabled) != str(other[3]): return False
 			else:
-				nhis+=str(True)
+				if str(self.enabled) != str(True): return False
 		else:
-			nhis = other.linkType+" "+other.a+" "+other.b+" "+str(other.enabled)
-		if this == nhis:
-			return True
-		return False
+			if self.a != other.a: return False
+			if self.b != other.b: return False
+			if self.linkType != other.linkType: return False
+			if self.enabled != other.enabled: return False
+		return True
 	def __ne__(self, other):
 		this =  self.linkType+" "+ self.a+" "+ self.b+" "+str( self.enabled)
 		if isinstance(other, list):
@@ -145,16 +148,16 @@ class AGMGraph(object):
 			for l in self.nodes:
 				if not l in other.nodes:
 					return False
-			for l in other.nodes:
-				if not l in self.nodes:
-					return False
+			#for l in other.nodes:                       SINCE WE HAVE THE SAME NUMBER OF NODES (checked above) ITS
+				#if not l in self.nodes:                  NOT NECESSARY TO PERFORM THE CHECK IN BOTH WAYS
+					#return False
 			# Exhaustive links
 			for l in range(len(self.links)):
 				if not self.links[l] in other.links:
 					return False
-			for l in range(len(other.links)):
-				if not other.links[l] in self.links:
-					return False
+			#for l in range(len(other.links)):           SINCE WE HAVE THE SAME NUMBER OF LINKS (checked above) ITS
+				#if not other.links[l] in self.links:     NOT NECESSARY TO PERFORM THE CHECK IN BOTH WAYS
+					#return False
 			return True
 		except:
 			return False
