@@ -132,7 +132,7 @@ class AGMGraph(object):
 		return object.__cmp__(self)
 	def __hash__(self):
 		#print '__hash__'
-		return len(self.nodes)+len(self.links)
+		return (len(self.nodes), len(self.links))
 	def __eq__(self, other):
 		try:
 			# Basic: number of nodes

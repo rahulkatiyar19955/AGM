@@ -199,11 +199,11 @@ def normalRuleImplementation(rule, ret, indent):
 		ret += indent+"symbol_"+n+"_nodes = symbol_nodes_copy"
 		ret += indent+"for equiv in equivalences:"
 		indent += "\t"
-		ret += indent+"if [me, '"+n+"'] in equiv[0] and  equiv[1] != None:"
+		ret += indent+"if [me, '"+n+"'] in equiv[0] and equiv[1] != None:"
 		indent += "\t"
 		#ret += indent+"print 'got "+n+" from equivalences!!'"
 		ret += indent+"symbol_"+n+"_nodes = [equiv[1]]"
-		indent = indent[:-3]
+		indent = indent[:-2]
 	indent = indent[:-1]
 	ret += indent+"else:"
 	indent += "\t"

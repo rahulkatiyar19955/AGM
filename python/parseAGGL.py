@@ -33,7 +33,6 @@ class AGMGraphParsing:
 class AGMRuleParsing:
 	@staticmethod
 	def parseRuleFromAST(i, verbose=False):
-		print i.name
 		passive = False
 		if i.passive == 'passive':
 			passive = True
@@ -46,7 +45,6 @@ class AGMRuleParsing:
 			mindepth = int(i.depth.value)
 		except:
 			mindepth = 0
-		print ' ', passive
 		if hasattr(i, 'lhs') and (hasattr(i, 'lhs') and len(i.lhs)>0 and hasattr(i, 'lhs')): # We are dealing with a normal rule!
 			# We are dealing with a normal rule!
 			if verbose: print '\nRule:', i.name
@@ -63,7 +61,7 @@ class AGMRuleParsing:
 				sys.exit(-1)
 			#print '  Combo'
 			# We are dealing with a rule combo!
-			print i.atoms
+			#print i.atoms
 			combo = AGMComboRule(i.name, passive, i.cost, i.atoms.asList(), i.equivalences.asList())
 			combo.mindepth = mindepth
 			#print combo.toString()
