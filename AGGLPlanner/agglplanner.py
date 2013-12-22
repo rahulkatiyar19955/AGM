@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env pypy
+
 # -*- coding: utf-8 -*-
 #
 #  -------------------------
@@ -267,11 +268,12 @@ class PyPlan(object):
 			if verbose > 0: print "----------------\nExplored", explored, "nodes"
 
 if __name__ == '__main__': # program domain problem result
-	from pycallgraph import PyCallGraph
-	from pycallgraph.output import GraphvizOutput
-	graphviz = GraphvizOutput()
-	graphviz.output_file = 'basic.png'
-	with PyCallGraph(output=graphviz):
+	#from pycallgraph import PyCallGraph
+	#from pycallgraph.output import GraphvizOutput
+	#graphviz = GraphvizOutput()
+	#graphviz.output_file = 'basic.png'
+	if True:
+	#with PyCallGraph(output=graphviz):
 		if len(sys.argv)<4:
 			print 'Usage\n\t', sys.argv[0], ' domain.aggl.py init.xml target.xml.py [result.plan]'
 		elif len(sys.argv)<5:

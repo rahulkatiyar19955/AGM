@@ -1049,4 +1049,14 @@ MOVEtoCLEAN : active(1)
 	move.c1 = set.o
 }
 
+TELLhumanInorderTOmove : active(1)
+{
+	tellHumanAboutMug as tell
+	humanMovesMugFromTableToBox as humanmoves
+	where:
+	tell.cont2 = humanmoves.c1
+	tell.h = humanMovesMugFromTableToBox.r
+}
+
+
 
