@@ -1,4 +1,4 @@
-from pyparsing import Word, alphas, alphanums, nums, OneOrMore, Literal, Combine, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
+from pyparsing import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn, Literal, Combine, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
 from AGGL import *
 from PySide.QtCore import *
 from PySide.QtGui import *
@@ -53,7 +53,14 @@ class AGMRuleParsing:
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
 			regular = AGMRule(i.name, LHS, RHS, passive, i.cost)
 			regular.mindepth = mindepth
-			#print regular.toString()
+			if len(i.conditions) > 0:
+				regular.conditions = str(i.conditions[0])
+			else:
+				regular.conditions = ''
+			if len(i.effects) > 0:
+				regular.effects = str(i.effects[0])
+			else:
+				regular.effects = ''
 			return regular
 		elif hasattr(i, 'atoms'): # We are dealing with a rule combo!
 			if len(i.atoms) == 0:
@@ -84,6 +91,9 @@ class AGMFileDataParsing:
 		# Define AGM's DSL meta-model
 		an = Word(srange("[a-zA-Z0-9_.]"))
 		ids = Word(srange("[a-zA-Z0-9_]"))
+		almostanything = CharsNotIn("{}")
+		conditions = Suppress("conditions")
+		effects = Suppress("effects")
 		plusorminus = Literal('+') | Literal('-')
 		number = Word(nums)
 		nu = Combine( Optional(plusorminus) + number )
@@ -115,7 +125,7 @@ class AGMFileDataParsing:
 		equiv = Group(equivElement.setResultsName("first") + OneOrMore(equivRhs).setResultsName("more"))
 		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + OneOrMore(atom).setResultsName("atoms") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
 		# NORMAL RULE
-		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
+		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Optional(conditions + op + almostanything + cl).setResultsName("conditions") + Optional(effects + op + almostanything + cl).setResultsName("effects") + cl)
 		# GENERAL RULE
 		rule = rule_nrm | rule_seq
 		# PROPERTY
@@ -126,7 +136,7 @@ class AGMFileDataParsing:
 
 		# Parse input file
 		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('#')])
-		result = agm.parseString(inputText)
+		result = agm.parseWithTabs().parseString(inputText)
 		if verbose: print "Result:\n",result
 
 		# Fill AGMFileData and AGM data

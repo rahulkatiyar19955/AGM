@@ -256,8 +256,16 @@ class AGMEditor(QMainWindow):
 		r = RuleRenamer(self.width()/2, self.height()/2, self.agmData.agm.rules[pos], self)
 		r.setFocus(Qt.OtherFocusReason)
 	def changeRule(self, ruleN):
-		self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
-		self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
+		if type(self.agmData.agm.rules[ruleN]) == AGMRule:
+			self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
+			self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
+		else:
+			d1 = dict()
+			d1['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...")
+			self.lhsPainter.graph = AGMGraph(d1, side='L')
+			d2 = dict()
+			d2['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...")
+			self.rhsPainter.graph = AGMGraph(d2, side='R')
 		self.disconnect(self.ui.passiveCheckBox,    SIGNAL("stateChanged(int)"), self.changePassive)
 		self.disconnect(self.ui.cost,               SIGNAL("valueChanged(int)"), self.changeCost)
 		if self.agmData.agm.rules[ruleN].passive:
@@ -371,10 +379,12 @@ class AGMEditor(QMainWindow):
 
 		self.ui.rulesList.clear()
 		for rule in self.agmData.agm.rules:
+			q = QListWidgetItem()
+			q.setText(rule.name)
+			self.ui.rulesList.addItem(q)
 			if type(rule) == AGMRule:
-				q = QListWidgetItem()
-				q.setText(rule.name)
-				self.ui.rulesList.addItem(q)
+				pass
+
 	def saveAs(self):
 		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
 		self.save(False, path)

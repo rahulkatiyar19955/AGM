@@ -334,10 +334,17 @@ class AGMRule(object):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
 		costStr = str(self.cost)
-		ret = self.name + ' : ' + passiveStr + '(' + costStr + ') mindepth(' + str(self.mindepth) + ')\n{\n'
+		ret = self.name + ' : ' + passiveStr + '(' + costStr + ')'
+		if self.mindepth != 0:
+			ret += 'mindepth(' + str(self.mindepth) + ')'
+		ret += '\n{\n'
 		ret += self.lhs.toString() + '\n'
 		ret += '\t=>\n'
 		ret += self.rhs.toString() + '\n'
+		if len(self.conditions) > 0:
+			ret += '\tconditions\n\t{' + self.conditions + '}\n'
+		if len(self.effects) > 0:
+			ret += '\teffects\n\t{' + self.effects + '}\n'
 		ret += '}'
 		return ret
 	def forgetNodesList(self):
@@ -378,7 +385,7 @@ class AGMComboRule(object):
 		#print self.equivalences
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
-		ret = self.name + ' : ' + passiveStr + '\n{\n'
+		ret = self.name + ' : ' + passiveStr + '('+ str(self.cost) +')\n{\n'
 		for a in self.atoms:
 			ret += '\t' + a[0] + ' as ' + a[1] + '\n'
 		ret += '\twhere:\n'
