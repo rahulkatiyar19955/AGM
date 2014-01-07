@@ -76,6 +76,9 @@ def ruleImplementation(rule):
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
 
+
+	AGGLCodeParsing.parse(rule.conditions)
+
 	if type(rule) == AGMRule:
 		ret = normalRuleImplementation(rule, ret, indent)
 	elif type(rule) == AGMComboRule:
@@ -103,7 +106,7 @@ def comboRuleImplementation(rule, r, indent):
 	ret += indent+"return self." + rule.name + "_trigger(snode, dict(), stack, equivalences)"
 	ret += indent
 	ret += "\n"
-
+	
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
 	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True, finish=''):"
