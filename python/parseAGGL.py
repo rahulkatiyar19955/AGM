@@ -2,6 +2,8 @@ from pyparsing import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn, Lite
 from AGGL import *
 from PySide.QtCore import *
 from PySide.QtGui import *
+import sys
+from parseQuantifiers import *
 
 class AGMGraphParsing:
 	@staticmethod
@@ -162,13 +164,39 @@ class AGMFileDataParsing:
 			print 'drats! no name'
 
 		verbose=True
-		verbose=False
+		#verbose=False
 		if verbose: print '\nRules:', len(result.rules)
 		number = 0
 		for i in result.rules:
 			if verbose: print '\nRule:('+str(number)+')'
 			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, verbose))
-			number += 1
+			#print 'Conditions:', i.conditions
+			print 'Effects:', i.effects
+		print 'Parsing these effects...'
+		effectTree = AGGLCodeParsing.parse(str(i.effects[0]))
+		print str(effectTree)
+		print "TREE"
+		AGMFileDataParsing.interpretEffect(effectTree[0])
 
+		sys.exit(1)
 		return agmFD
 		
+	@staticmethod
+	def interpretEffect(tree, pre=''):
+		if tree.type == "not":
+			print pre+'not'
+			AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
+		elif tree.type == "or":
+			print pre+'or'
+			for i in tree.more:
+				AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
+		elif tree.type == "and":
+			print pre+'and'
+			for i in tree.more:
+				AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
+		elif tree.type == "forall":
+			print pre+'forall'
+		elif tree.type == "when":
+			print pre+'when'
+		else:
+			print pre+"link <"+tree.type+"> between <"+tree.a+"> and <"+tree.b+">"
