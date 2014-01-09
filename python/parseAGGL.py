@@ -183,6 +183,7 @@ class AGMFileDataParsing:
 		
 	@staticmethod
 	def interpretEffect(tree, pre=''):
+		#print tree
 		if tree.type == "not":
 			print pre+'not'
 			AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
@@ -193,7 +194,7 @@ class AGMFileDataParsing:
 		elif tree.type == "and":
 			print pre+'and'
 			for i in tree.more:
-				AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
+				AGMFileDataParsing.interpretEffect(i, pre+"\t")
 		elif tree.type == "forall":
 			print pre+'forall'
 		elif tree.type == "when":
