@@ -174,8 +174,8 @@ class AGMFileDataParsing:
 			print 'Effects:', i.effects
 		print 'Parsing these effects...'
 		effectTree = AGGLCodeParsing.parse(str(i.effects[0]))
-		print str(effectTree)
-		print "TREE"
+		#print str(effectTree)
+		#print "TREE"
 		AGMFileDataParsing.interpretEffect(effectTree[0])
 
 		sys.exit(1)
@@ -197,7 +197,16 @@ class AGMFileDataParsing:
 				AGMFileDataParsing.interpretEffect(i, pre+"\t")
 		elif tree.type == "forall":
 			print pre+'forall'
+			print pre+'\t',
+			for i in tree.vars:
+				print pre+str(i),
+			print ''
+			AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
 		elif tree.type == "when":
 			print pre+'when'
+			print pre+'\tif'
+			AGMFileDataParsing.interpretEffect(tree.iff, pre+"\t\t")
+			print pre+'\tthen'
+			AGMFileDataParsing.interpretEffect(tree.then, pre+"\t\t")
 		else:
 			print pre+"link <"+tree.type+"> between <"+tree.a+"> and <"+tree.b+">"
