@@ -87,25 +87,26 @@ class AGMEditor(QMainWindow):
 		self.timer = QTimer()
 		self.tool = ''
 		self.statusBar().hide()
-		self.connect(self.timer,                               SIGNAL('timeout()'),                                            self.draw)
-		self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),                               self.selectTool)
-		self.connect(self.ui.rulesList,                        SIGNAL('currentRowChanged(int)'),                               self.changeRule)
-		self.connect(self.ui.actionChangeAppearance,           SIGNAL("triggered(bool)"),                                      self.changeAppearance)
-		self.connect(self.ui.actionAddRule,                    SIGNAL("triggered(bool)"),                                      self.addRule)
-		self.connect(self.ui.actionRemoveCurrentRule,          SIGNAL("triggered(bool)"),                                      self.removeCurrentRule)
-		self.connect(self.ui.actionRenameCurrentRule,          SIGNAL("triggered(bool)"),                                      self.renameCurrentRule)
-		self.connect(self.ui.actionExport,                     SIGNAL("triggered(bool)"),                                      self.exportRule)
-		self.connect(self.ui.actionGenerateCode,               SIGNAL("triggered(bool)"),                                      self.generateCode)
-		self.connect(self.ui.actionGenerateAGGLPlanner,        SIGNAL("triggered(bool)"),                                      self.generateAGGLPlannerCode)
-		self.connect(self.ui.actionExportAllRules,             SIGNAL("triggered(bool)"),                                      self.exportAll)
-		self.connect(self.ui.actionExportAllRulesPNG,          SIGNAL("triggered(bool)"),                                      self.exportAllPNG)
-		self.connect(self.ui.actionSaveAs,                     SIGNAL("triggered(bool)"),                                      self.saveAs)
-		self.connect(self.ui.actionSave,                       SIGNAL("triggered(bool)"),                                      self.save)
-		self.connect(self.ui.actionOpen,                       SIGNAL("triggered(bool)"),                                      self.open)
-		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),                                      self.appClose)
-		self.connect(self.ui.actionGraphmar,                   SIGNAL("triggered(bool)"),                                      self.about)
-		self.connect(self.ui.passiveCheckBox,                  SIGNAL("stateChanged(int)"),                                    self.changePassive)
-		self.connect(self.ui.cost,                             SIGNAL("valueChanged(int)"),                                    self.changeCost)
+		self.connect(self.timer,                               SIGNAL('timeout()'),                    self.draw)
+		self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),       self.selectTool)
+		self.connect(self.ui.rulesList,                        SIGNAL('currentRowChanged(int)'),       self.changeRule)
+		self.connect(self.ui.actionChangeAppearance,           SIGNAL("triggered(bool)"),              self.changeAppearance)
+		self.connect(self.ui.actionAddRule,                    SIGNAL("triggered(bool)"),              self.addRule)
+		self.connect(self.ui.actionRemoveCurrentRule,          SIGNAL("triggered(bool)"),              self.removeCurrentRule)
+		self.connect(self.ui.actionRenameCurrentRule,          SIGNAL("triggered(bool)"),              self.renameCurrentRule)
+		self.connect(self.ui.actionExport,                     SIGNAL("triggered(bool)"),              self.exportRule)
+		self.connect(self.ui.actionGenerateCode,               SIGNAL("triggered(bool)"),              self.generateCode)
+		self.connect(self.ui.actionGenerateAGGLPlanner,        SIGNAL("triggered(bool)"),              self.generateAGGLPlannerCode)
+		self.connect(self.ui.actionExportAllRules,             SIGNAL("triggered(bool)"),              self.exportAll)
+		self.connect(self.ui.actionExportAllRulesPNG,          SIGNAL("triggered(bool)"),              self.exportAllPNG)
+		self.connect(self.ui.actionSaveAs,                     SIGNAL("triggered(bool)"),              self.saveAs)
+		self.connect(self.ui.actionSave,                       SIGNAL("triggered(bool)"),              self.save)
+		self.connect(self.ui.actionOpen,                       SIGNAL("triggered(bool)"),              self.open)
+		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),              self.appClose)
+		self.connect(self.ui.actionGraphmar,                   SIGNAL("triggered(bool)"),              self.about)
+		self.connect(self.ui.actionAdvanced,                   SIGNAL("toggled(bool)"),                self.setAdvanced)
+		self.connect(self.ui.passiveCheckBox,                  SIGNAL("stateChanged(int)"),            self.changePassive)
+		self.connect(self.ui.cost,                             SIGNAL("valueChanged(int)"),            self.changeCost)
 		self.ui.actionSaveAs.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_S + Qt.Key_Shift))
 		self.ui.actionSave.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_S))
 		self.ui.actionOpen.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_O))
@@ -117,6 +118,8 @@ class AGMEditor(QMainWindow):
 		self.shortcutUp   = QShortcut(QKeySequence("PgUp"  ), self)
 		self.connect(self.shortcutDown, SIGNAL("activated()"), self.pgDown)
 		self.connect(self.shortcutUp,   SIGNAL("activated()"), self.pgUp)
+
+		self.setAdvanced(False)
 
 		# Get settings
 		settings = QSettings("AGM", "mainWindowGeometry")
@@ -183,6 +186,16 @@ class AGMEditor(QMainWindow):
 		self.font = self.fontDialog.currentFont()
 		self.connect(self.ui.actionChangeFont, SIGNAL("triggered(bool)"), self.changeFont)
 
+	def setAdvanced(self, show):
+		if show:
+			self.ui.tabWidget.insertTab(1, self.ui.tabPreconditions, "Additional preconditions")
+			self.ui.tabWidget.insertTab(2, self.ui.tabEffects, "Additional effects")
+			self.ui.tabWidget.setCurrentIndex(0)
+		else:
+			self.ui.tabWidget.removeTab(1)
+			self.ui.tabWidget.removeTab(1)
+			self.ui.tabWidget.setCurrentIndex(0)
+
 	def pgDown(self):
 		r = self.ui.rulesList.currentRow()+1
 		if r>=0 and r<self.ui.rulesList.count():
@@ -243,8 +256,16 @@ class AGMEditor(QMainWindow):
 		r = RuleRenamer(self.width()/2, self.height()/2, self.agmData.agm.rules[pos], self)
 		r.setFocus(Qt.OtherFocusReason)
 	def changeRule(self, ruleN):
-		self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
-		self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
+		if type(self.agmData.agm.rules[ruleN]) == AGMRule:
+			self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
+			self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
+		else:
+			d1 = dict()
+			d1['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...")
+			self.lhsPainter.graph = AGMGraph(d1, side='L')
+			d2 = dict()
+			d2['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...")
+			self.rhsPainter.graph = AGMGraph(d2, side='R')
 		self.disconnect(self.ui.passiveCheckBox,    SIGNAL("stateChanged(int)"), self.changePassive)
 		self.disconnect(self.ui.cost,               SIGNAL("valueChanged(int)"), self.changeCost)
 		if self.agmData.agm.rules[ruleN].passive:
@@ -358,11 +379,12 @@ class AGMEditor(QMainWindow):
 
 		self.ui.rulesList.clear()
 		for rule in self.agmData.agm.rules:
+			q = QListWidgetItem()
+			q.setText(rule.name)
+			self.ui.rulesList.addItem(q)
 			if type(rule) == AGMRule:
-				print rule.name
-				q = QListWidgetItem()
-				q.setText(rule.name)
-				self.ui.rulesList.addItem(q)
+				pass
+
 	def saveAs(self):
 		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
 		self.save(False, path)

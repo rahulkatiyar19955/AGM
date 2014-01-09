@@ -200,6 +200,7 @@ INSTALL(FILES AGMWorldModel.h DESTINATION /opt/robocomp/include/ )
 endif (ROBOCOMP_SUPPORT)
 
 INSTALL(PROGRAMS python/parseAGGL.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS python/parseQuantifiers.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS python/pddlAGGL.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS python/xmlModelParser.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS python/generateAGGLPlannerCode.py DESTINATION /opt/robocomp/share)

@@ -1,7 +1,9 @@
-from pyparsing import Word, alphas, alphanums, nums, OneOrMore, Literal, Combine, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
+from pyparsing import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn, Literal, Combine, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
 from AGGL import *
 from PySide.QtCore import *
 from PySide.QtGui import *
+import sys
+from parseQuantifiers import *
 
 class AGMGraphParsing:
 	@staticmethod
@@ -53,7 +55,14 @@ class AGMRuleParsing:
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
 			regular = AGMRule(i.name, LHS, RHS, passive, i.cost)
 			regular.mindepth = mindepth
-			#print regular.toString()
+			if len(i.conditions) > 0:
+				regular.conditions = str(i.conditions[0])
+			else:
+				regular.conditions = ''
+			if len(i.effects) > 0:
+				regular.effects = str(i.effects[0])
+			else:
+				regular.effects = ''
 			return regular
 		elif hasattr(i, 'atoms'): # We are dealing with a rule combo!
 			if len(i.atoms) == 0:
@@ -61,7 +70,7 @@ class AGMRuleParsing:
 				sys.exit(-1)
 			#print '  Combo'
 			# We are dealing with a rule combo!
-			print i.atoms
+			#print i.atoms
 			combo = AGMComboRule(i.name, passive, i.cost, i.atoms.asList(), i.equivalences.asList())
 			combo.mindepth = mindepth
 			#print combo.toString()
@@ -84,6 +93,9 @@ class AGMFileDataParsing:
 		# Define AGM's DSL meta-model
 		an = Word(srange("[a-zA-Z0-9_.]"))
 		ids = Word(srange("[a-zA-Z0-9_]"))
+		almostanything = CharsNotIn("{}")
+		conditions = Suppress("conditions")
+		effects = Suppress("effects")
 		plusorminus = Literal('+') | Literal('-')
 		number = Word(nums)
 		nu = Combine( Optional(plusorminus) + number )
@@ -115,7 +127,7 @@ class AGMFileDataParsing:
 		equiv = Group(equivElement.setResultsName("first") + OneOrMore(equivRhs).setResultsName("more"))
 		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + OneOrMore(atom).setResultsName("atoms") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
 		# NORMAL RULE
-		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + cl)
+		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Optional(conditions + op + almostanything + cl).setResultsName("conditions") + Optional(effects + op + almostanything + cl).setResultsName("effects") + cl)
 		# GENERAL RULE
 		rule = rule_nrm | rule_seq
 		# PROPERTY
@@ -126,7 +138,7 @@ class AGMFileDataParsing:
 
 		# Parse input file
 		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('#')])
-		result = agm.parseString(inputText)
+		result = agm.parseWithTabs().parseString(inputText)
 		if verbose: print "Result:\n",result
 
 		# Fill AGMFileData and AGM data
@@ -152,13 +164,40 @@ class AGMFileDataParsing:
 			print 'drats! no name'
 
 		verbose=True
-		verbose=False
+		#verbose=False
 		if verbose: print '\nRules:', len(result.rules)
 		number = 0
 		for i in result.rules:
 			if verbose: print '\nRule:('+str(number)+')'
 			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, verbose))
-			number += 1
+			#print 'Conditions:', i.conditions
+			print 'Effects:', i.effects
+		print 'Parsing these effects...'
+		effectTree = AGGLCodeParsing.parse(str(i.effects[0]))
+		print str(effectTree)
+		print "TREE"
+		AGMFileDataParsing.interpretEffect(effectTree[0])
 
+		sys.exit(1)
 		return agmFD
 		
+	@staticmethod
+	def interpretEffect(tree, pre=''):
+		#print tree
+		if tree.type == "not":
+			print pre+'not'
+			AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
+		elif tree.type == "or":
+			print pre+'or'
+			for i in tree.more:
+				AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
+		elif tree.type == "and":
+			print pre+'and'
+			for i in tree.more:
+				AGMFileDataParsing.interpretEffect(i, pre+"\t")
+		elif tree.type == "forall":
+			print pre+'forall'
+		elif tree.type == "when":
+			print pre+'when'
+		else:
+			print pre+"link <"+tree.type+"> between <"+tree.a+"> and <"+tree.b+">"

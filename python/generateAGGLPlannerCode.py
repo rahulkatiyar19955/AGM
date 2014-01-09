@@ -76,6 +76,9 @@ def ruleImplementation(rule):
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
 
+
+	AGGLCodeParsing.parse(rule.conditions)
+
 	if type(rule) == AGMRule:
 		ret = normalRuleImplementation(rule, ret, indent)
 	elif type(rule) == AGMComboRule:
@@ -103,7 +106,7 @@ def comboRuleImplementation(rule, r, indent):
 	ret += indent+"return self." + rule.name + "_trigger(snode, dict(), stack, equivalences)"
 	ret += indent
 	ret += "\n"
-
+	
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
 	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True, finish=''):"
@@ -168,6 +171,7 @@ def normalRuleImplementation(rule, ret, indent):
 	indent += "\t"
 	ret += indent + "stack        = copy.deepcopy(stackP)"
 	ret += indent + "equivalences = copy.deepcopy(equivalencesP)"
+	ret += indent + "symbol_nodes_copy = copy.deepcopy(snode.graph.nodes)"
 	ret += indent + "finishesCombo = ''"
 	#ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
 	if rule.mindepth > 0:
@@ -195,21 +199,19 @@ def normalRuleImplementation(rule, ret, indent):
 		ret += indent+"print '"+rule.name+"', me"
 	for n in rule.lhs.nodes:
 		ret += indent+"# Find equivalence for "+n
-		ret += indent+"symbol_"+n+"_nodes = copy.deepcopy(snode.graph.nodes)"
+		ret += indent+"symbol_"+n+"_nodes = symbol_nodes_copy"
 		ret += indent+"for equiv in equivalences:"
 		indent += "\t"
-		ret += indent+"if [me, '"+n+"'] in equiv[0]:"
-		indent += "\t"
-		ret += indent+"if equiv[1] != None:"
+		ret += indent+"if [me, '"+n+"'] in equiv[0] and equiv[1] != None:"
 		indent += "\t"
 		#ret += indent+"print 'got "+n+" from equivalences!!'"
 		ret += indent+"symbol_"+n+"_nodes = [equiv[1]]"
-		indent = indent[:-3]
+		indent = indent[:-2]
 	indent = indent[:-1]
 	ret += indent+"else:"
 	indent += "\t"
 	for n in rule.lhs.nodes:
-		ret += indent+"symbol_"+n+"_nodes = copy.deepcopy(snode.graph.nodes)"
+		ret += indent+"symbol_"+n+"_nodes = symbol_nodes_copy"
 	indent = indent[:-1]
 	ret += indent+"ret = []"
 	# Make a copy of the current graph node list
