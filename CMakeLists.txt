@@ -113,8 +113,19 @@ MACRO( WRAP_PYTHON_UI )
     ADD_CUSTOM_TARGET(ui_${input_file} ALL DEPENDS tools/ui/ui_${input_file}.py )
   ENDFOREACH( input_file )
 ENDMACRO( WRAP_PYTHON_UI )
-
+MACRO( WRAP_PYTHON_QRC )
+  FOREACH( input_file ${ARGN} )
+    ADD_CUSTOM_COMMAND (
+      OUTPUT tools/ui/${input_file}_rc.py
+      COMMAND pyside-rcc tools/ui/${input_file}.qrc -o tools/ui/${input_file}_rc.py
+      DEPENDS tools/ui/${input_file}.qrc
+      COMMENT "Generating tools/ui/${input_file}_rc.py from tools/ui/${input_file}.qrc"
+    )
+    ADD_CUSTOM_TARGET(${input_file}_rc ALL DEPENDS tools/ui/${input_file}_rc.py )
+  ENDFOREACH( input_file )
+ENDMACRO( WRAP_PYTHON_QRC )
 WRAP_PYTHON_UI( guiAGGLEditor guiGraphViewer appearance )
+WRAP_PYTHON_QRC( resource )
 
 
 # COMPILE FLEX AND BISON FILE FOR THE AGGL PARSER #
@@ -210,6 +221,7 @@ INSTALL(PROGRAMS python/AGGL.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS tools/ui/ui_guiAGGLEditor.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS tools/ui/ui_guiGraphViewer.py DESTINATION /opt/robocomp/share)
 INSTALL(PROGRAMS tools/ui/ui_appearance.py DESTINATION /opt/robocomp/share)
+INSTALL(PROGRAMS tools/ui/resource_rc.py DESTINATION /opt/robocomp/share)
 
 INSTALL(PROGRAMS tools/aggl_completion.bash DESTINATION /etc/bash_completion.d/ RENAME AGGLEditor)
 

@@ -172,18 +172,21 @@ class AGMFileDataParsing:
 			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, verbose))
 			#print 'Conditions:', i.conditions
 			print 'Effects:', i.effects
-		print 'Parsing these effects...'
-		effectTree = AGGLCodeParsing.parse(str(i.effects[0]))
-		#print str(effectTree)
-		#print "TREE"
-		AGMFileDataParsing.interpretEffect(effectTree[0])
+			print 'Parsing these effects...'
+			if len(i.effects) > 0:
+				effectTree = AGGLCodeParsing.parse(str(i.effects[0]))
+				AGMFileDataParsing.interpretEffect(effectTree[0])
+			print 'Conditions:', i.conditions
+			print 'Parsing these conditions...'
+			if len(i.conditions) > 0:
+				conditionsTree = AGGLCodeParsing.parse(str(i.conditions[0]))
+				AGMFileDataParsing.interpretConditions(conditionsTree[0])
 
-		sys.exit(1)
+		#sys.exit(1)
 		return agmFD
-		
+
 	@staticmethod
 	def interpretEffect(tree, pre=''):
-		#print tree
 		if tree.type == "not":
 			print pre+'not'
 			AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
@@ -210,3 +213,38 @@ class AGMFileDataParsing:
 			AGMFileDataParsing.interpretEffect(tree.then, pre+"\t\t")
 		else:
 			print pre+"link <"+tree.type+"> between <"+tree.a+"> and <"+tree.b+">"
+
+
+	@staticmethod
+	def interpretConditions(tree, pre=''):
+		if tree.type == "not":
+			print pre+'not'
+			AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
+		elif tree.type == "or":
+			print pre+'or'
+			for i in tree.more:
+				AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
+		elif tree.type == "and":
+			print pre+'and'
+			for i in tree.more:
+				AGMFileDataParsing.interpretEffect(i, pre+"\t")
+		elif tree.type == "forall":
+			print pre+'forall'
+			print pre+'\t',
+			for i in tree.vars:
+				print pre+str(i),
+			print ''
+			AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
+		elif tree.type == "when":
+			print pre+'when'
+			print pre+'\tif'
+			AGMFileDataParsing.interpretEffect(tree.iff, pre+"\t\t")
+			print pre+'\tthen'
+			AGMFileDataParsing.interpretEffect(tree.then, pre+"\t\t")
+		else:
+			print pre+"link <"+tree.type+"> between <"+tree.a+"> and <"+tree.b+">"
+
+
+
+
+

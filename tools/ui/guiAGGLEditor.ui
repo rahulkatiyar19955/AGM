@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>843</width>
-    <height>549</height>
+    <width>1080</width>
+    <height>809</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -16,20 +16,33 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_3">
     <item>
-     <widget class="QScrollArea" name="scrollArea">
-      <property name="widgetResizable">
+     <widget class="QSplitter" name="splitter">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>1</horstretch>
+        <verstretch>1</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>10</width>
+        <height>10</height>
+       </size>
+      </property>
+      <property name="autoFillBackground">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>823</width>
-         <height>504</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_4">
+      <property name="styleSheet">
+       <string notr="true">QSplitter::handle { background-image: url(:/p/splitter.png); }</string>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="handleWidth">
+       <number>6</number>
+      </property>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="layoutUp">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout">
           <item>
@@ -87,6 +100,10 @@
           </item>
          </layout>
         </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="layoutDown">
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
@@ -208,10 +225,6 @@
          </widget>
         </item>
        </layout>
-       <zorder></zorder>
-       <zorder></zorder>
-       <zorder></zorder>
-       <zorder>tabWidget</zorder>
       </widget>
      </widget>
     </item>
@@ -222,8 +235,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>843</width>
-     <height>25</height>
+     <width>1080</width>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -401,6 +414,8 @@
    </property>
   </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -74,6 +74,7 @@ class RuleSet(object):
 		mapping['humanMovesMugFromTableToBox'] = self.humanMovesMugFromTableToBox_trigger
 		mapping['setTableClean'] = self.setTableClean_trigger
 		return mapping
+
 	def setTableClean(self, snode):
 		ret = []
 		nodes = copy.deepcopy(snode.graph.nodes)

@@ -114,6 +114,10 @@ class AGMEditor(QMainWindow):
 		#self.ui.actionNextRule.setShortcut(QKeySequence(Qt.Key_PageDown))
 		#self.ui.actionPrevRule.setShortcut(QKeySequence(Qt.Key_PageUp))
 
+		#self.ui.splitter.setStyleSheet("QSplitter::handle { background-color: gray }");
+		
+		self.ui.splitter.setSizes([0.65*self.ui.splitter.height(), 0.35*self.ui.splitter.height()])
+
 		self.shortcutDown = QShortcut(QKeySequence("PgDown"), self)
 		self.shortcutUp   = QShortcut(QKeySequence("PgUp"  ), self)
 		self.connect(self.shortcutDown, SIGNAL("activated()"), self.pgDown)
@@ -127,7 +131,7 @@ class AGMEditor(QMainWindow):
 		if value != None:
 			self.restoreGeometry(value)
 
-		self.timer.start(100)
+		self.timer.start(150)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
 		self.ui.toolsList.setCurrentRow(4)
