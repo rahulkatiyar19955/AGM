@@ -36,7 +36,7 @@ class AGMGraphParsing:
 
 class AGMRuleParsing:
 	@staticmethod
-	def parseRuleFromAST(i, parameters, verbose=False):
+	def parseRuleFromAST(i, parameters, precondition, effect, verbose=False):
 		passive = False
 		if i.passive == 'passive':
 			passive = True
@@ -58,7 +58,7 @@ class AGMRuleParsing:
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 			if verbose: print '\t===>'
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-			regular = AGMRule(i.name, LHS, RHS, passive, i.cost, parameters)
+			regular = AGMRule(i.name, LHS, RHS, passive, i.cost, parameters, precondition, effect)
 			regular.mindepth = mindepth
 			if len(i.conditions) > 0:
 				regular.conditions = str(i.conditions[0])
@@ -190,7 +190,7 @@ class AGMFileDataParsing:
 			if len(i.effect) > 0:
 				effectTree = AGGLCodeParsing.parseFormula(str(i.effect[0]))
 				AGMFileDataParsing.interpretEffect(effectTree[0])
-			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, parametersList, verbose))
+			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, parametersList, preconditionTree, effectTree, verbose))
 		#sys.exit(1)
 		return agmFD
 
