@@ -318,7 +318,7 @@ class AGMGraph(object):
 		f.close()
 
 class AGMRule(object):
-	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, parameters=[]):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, parameters=[], precondition=None, effect=None):
 		object.__init__(self)
 		self.name = name
 		self.lhs = lhs
@@ -327,8 +327,13 @@ class AGMRule(object):
 		self.passive = passive
 		self.mindepth = 0
 		self.parameters = parameters
-		if self.parameters == None:
-			self.parameters = []
+		if self.parameters == None: self.parameters = []
+		print '-------------------------------------'
+		print type(precondition)
+		print precondition
+		print '-------------------------------------'
+		self.precondition = precondition
+		self.effect = effect
 		if lhs == None:
 			self.lhs = AGMGraph()
 		if rhs == None:
