@@ -50,9 +50,6 @@ class AGMRuleParsing:
 		except:
 			mindepth = 0
 		if hasattr(i, 'lhs') and (hasattr(i, 'lhs') and hasattr(i, 'lhs')): # We are dealing with a normal rule!
-			print 'parseRuleFromAST', parameters
-			print 'parseRuleFromAST', parameters
-			print 'parseRuleFromAST', parameters
 			# We are dealing with a normal rule!
 			if verbose: print '\nRule:', i.name
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
@@ -185,13 +182,12 @@ class AGMFileDataParsing:
 			print 'Precondition:', i.precondition
 			if len(i.precondition) > 0:
 				preconditionTree = AGGLCodeParsing.parseFormula(str(i.precondition[0]))
-				AGMFileDataParsing.interpretPrecondition(preconditionTree[0])
+				preconditionRec = AGMFileDataParsing.interpretPrecondition(preconditionTree[0])
 			print 'Effect:', i.effect
 			if len(i.effect) > 0:
 				effectTree = AGGLCodeParsing.parseFormula(str(i.effect[0]))
-				AGMFileDataParsing.interpretEffect(effectTree[0])
-			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, parametersList, preconditionTree, effectTree, verbose))
-		#sys.exit(1)
+				effectRec = AGMFileDataParsing.interpretEffect(effectTree[0])
+			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, parametersList, preconditionRec, effectRec, verbose))
 		return agmFD
 
 	@staticmethod

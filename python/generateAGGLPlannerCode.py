@@ -76,10 +76,6 @@ def ruleImplementation(rule):
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
 
-	#AGGLCodeParsing.parse(rule.conditions)
-	#AGGLCodeParsing.parseFormula(rule.conditions)
-	#AGGLCodeParsing.parseFormula(rule.conditions)
-
 	if type(rule) == AGMRule:
 		ret = normalRuleImplementation(rule, ret, indent)
 	elif type(rule) == AGMComboRule:
@@ -171,7 +167,9 @@ def normalRuleImplementation(rule, ret, indent):
 	nodesPlusParameters = rule.lhs.nodes
 	for i in rule.parameters:
 		nodesPlusParameters[i[0]] = AGMSymbol(i[0], i[1])
-
+	print 'normalRuleImplementation.parameters', rule.parameters
+	print 'normalRuleImplementation.precondition', rule.precondition
+	print 'normalRuleImplementation.effect', rule.effect
 	ret += indent+"def " + rule.name + "(self, snode, stackP=[], equivalencesP=[]):"
 	indent += "\t"
 	ret += indent + "stack        = copy.deepcopy(stackP)"
