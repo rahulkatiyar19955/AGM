@@ -76,8 +76,9 @@ def ruleImplementation(rule):
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
 
-
-	AGGLCodeParsing.parse(rule.conditions)
+	#AGGLCodeParsing.parse(rule.conditions)
+	#AGGLCodeParsing.parseFormula(rule.conditions)
+	#AGGLCodeParsing.parseFormula(rule.conditions)
 
 	if type(rule) == AGMRule:
 		ret = normalRuleImplementation(rule, ret, indent)
@@ -167,6 +168,10 @@ def comboRuleImplementation(rule, r, indent):
 	
 
 def normalRuleImplementation(rule, ret, indent):
+	nodesPlusParameters = rule.lhs.nodes
+	for i in rule.parameters:
+		nodesPlusParameters[i[0]] = AGMSymbol(i[0], i[1])
+
 	ret += indent+"def " + rule.name + "(self, snode, stackP=[], equivalencesP=[]):"
 	indent += "\t"
 	ret += indent + "stack        = copy.deepcopy(stackP)"
@@ -197,7 +202,7 @@ def normalRuleImplementation(rule, ret, indent):
 		ret += indent+"print stack"
 		ret += indent+"print equivalences"
 		ret += indent+"print '"+rule.name+"', me"
-	for n in rule.lhs.nodes:
+	for n in nodesPlusParameters:
 		ret += indent+"# Find equivalence for "+n
 		ret += indent+"symbol_"+n+"_nodes = symbol_nodes_copy"
 		ret += indent+"for equiv in equivalences:"
@@ -210,7 +215,7 @@ def normalRuleImplementation(rule, ret, indent):
 	indent = indent[:-1]
 	ret += indent+"else:"
 	indent += "\t"
-	for n in rule.lhs.nodes:
+	for n in nodesPlusParameters:
 		ret += indent+"symbol_"+n+"_nodes = symbol_nodes_copy"
 	indent = indent[:-1]
 	ret += indent+"ret = []"
@@ -232,9 +237,9 @@ def normalRuleImplementation(rule, ret, indent):
 	#ret += " ]"
 	# Compute the not-actually-optimal order TODO improve this!
 	counter = dict()
-	for n in rule.lhs.nodes:
+	for n in nodesPlusParameters:
 		counter[n] = 0
-	for n in rule.lhs.nodes:
+	for n in nodesPlusParameters:
 		for link in linkList:
 			if n == link[0]:
 				counter[n] = counter[n] + 2
@@ -254,7 +259,7 @@ def normalRuleImplementation(rule, ret, indent):
 		indent += "\t"
 		ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
 		ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
-		ret += indent+"if symbol_"+n+".sType == '"+rule.lhs.nodes[n].sType+"'"
+		ret += indent+"if symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + other + ".name"
 		conditions, number = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
@@ -327,7 +332,7 @@ def normalRuleImplementation(rule, ret, indent):
 	for n in optimal_node_list:
 		lelele += 1
 		ret += indent+"test_symbol_"+n+" = snode.graph.nodes[n2id['"+n+"']]"
-		ret += indent+"if not (test_symbol_"+n+".sType == '"+rule.lhs.nodes[n].sType+"'"
+		ret += indent+"if not (test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and test_symbol_"+n+".name!=test_symbol_" + other + ".name"
 		conditions, number = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)

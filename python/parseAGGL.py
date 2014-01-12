@@ -8,6 +8,8 @@ from parseQuantifiers import *
 class AGMGraphParsing:
 	@staticmethod
 	def parseGraphFromAST(i, verbose=False):
+		if type(i) == str:
+			return AGMGraph(dict(), [])
 		if verbose: print '\t{'
 		nodes = dict()
 		for t in i.nodes:
@@ -34,7 +36,7 @@ class AGMGraphParsing:
 
 class AGMRuleParsing:
 	@staticmethod
-	def parseRuleFromAST(i, verbose=False):
+	def parseRuleFromAST(i, parameters, verbose=False):
 		passive = False
 		if i.passive == 'passive':
 			passive = True
@@ -47,13 +49,16 @@ class AGMRuleParsing:
 			mindepth = int(i.depth.value)
 		except:
 			mindepth = 0
-		if hasattr(i, 'lhs') and (hasattr(i, 'lhs') and len(i.lhs)>0 and hasattr(i, 'lhs')): # We are dealing with a normal rule!
+		if hasattr(i, 'lhs') and (hasattr(i, 'lhs') and hasattr(i, 'lhs')): # We are dealing with a normal rule!
+			print 'parseRuleFromAST', parameters
+			print 'parseRuleFromAST', parameters
+			print 'parseRuleFromAST', parameters
 			# We are dealing with a normal rule!
 			if verbose: print '\nRule:', i.name
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 			if verbose: print '\t===>'
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-			regular = AGMRule(i.name, LHS, RHS, passive, i.cost)
+			regular = AGMRule(i.name, LHS, RHS, passive, i.cost, parameters)
 			regular.mindepth = mindepth
 			if len(i.conditions) > 0:
 				regular.conditions = str(i.conditions[0])
@@ -66,7 +71,7 @@ class AGMRuleParsing:
 			return regular
 		elif hasattr(i, 'atomss'): # We are dealing with a rule combo!
 			if len(i.atomss) == 0:
-				print '  Error rrrrrrrrr  32423 trgf 2'
+				print '  Error rrrrrrrrr  32423 trgf 2  Rule('+i.name+')'
 				sys.exit(-1)
 			#print '  Combo'
 			# We are dealing with a rule combo!
@@ -173,23 +178,33 @@ class AGMFileDataParsing:
 		number = 0
 		for i in result.rules:
 			if verbose: print '\nRule:('+str(number)+')'
-			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, verbose))
-			print 'Conditions:', i.conditions
-			print 'Parsing these conditions...'
-			if len(i.conditions) > 0:
-				conditionsTree = AGGLCodeParsing.parse(str(i.conditions[0]))
-				AGMFileDataParsing.interpretConditions(conditionsTree[0])
-			print 'Effects:', i.effects
-			print 'Parsing these effects...'
-			if len(i.effects) > 0:
-				effectTree = AGGLCodeParsing.parse(str(i.effects[0]))
-				#AGMFileDataParsing.interpretEffect(effectTree[0])
-
+			print 'Parameters:', i.parameters
+			if len(i.parameters) > 0:
+				parametersTree = AGGLCodeParsing.parseParameters(str(i.parameters[0]))
+				parametersList = AGMFileDataParsing.interpretParameters(parametersTree)
+			print 'Precondition:', i.precondition
+			if len(i.precondition) > 0:
+				preconditionTree = AGGLCodeParsing.parseFormula(str(i.precondition[0]))
+				AGMFileDataParsing.interpretPrecondition(preconditionTree[0])
+			print 'Effect:', i.effect
+			if len(i.effect) > 0:
+				effectTree = AGGLCodeParsing.parseFormula(str(i.effect[0]))
+				AGMFileDataParsing.interpretEffect(effectTree[0])
+			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, parametersList, verbose))
 		#sys.exit(1)
 		return agmFD
 
 	@staticmethod
-	def interpretEffect(tree, pre=''):
+	def interpretParameters(tree, pre=''):
+		r = []
+		for v in tree:
+			v2 = v[0].split(':')
+			#print v2
+			r.append(v2)
+		return r
+
+	@staticmethod
+	def interpretPrecondition(tree, pre=''):
 		if tree.type == "not":
 			print pre+'not'
 			AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
@@ -219,7 +234,7 @@ class AGMFileDataParsing:
 
 
 	@staticmethod
-	def interpretConditions(tree, pre=''):
+	def interpretEffect(tree, pre=''):
 		if tree.type == "not":
 			print pre+'not'
 			AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")

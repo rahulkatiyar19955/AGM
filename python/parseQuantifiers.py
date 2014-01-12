@@ -22,7 +22,17 @@ class AGGL_QuantifierLink:
 
 class AGGLCodeParsing:
 	@staticmethod
-	def parse(text, verbose=False):
+	def parseParameters(text, verbose=False):
+		#print '<<'+text+'>>'
+		ids     = Word(srange("[a-zA-Z0-9_]"))
+		varDec  = Group(Combine(ids.setResultsName("var")+Literal(':')+ids.setResultsName("t")))
+		params  = OneOrMore(varDec)
+		r = params.parseString(text)
+		#print r
+		return r
+
+	@staticmethod
+	def parseFormula(text, verbose=False):
 		if verbose: print 'Verbose:', verbose
 		# Basic elements
 		ids     = Word(srange("[a-zA-Z0-9_]"))
@@ -41,7 +51,6 @@ class AGGLCodeParsing:
 		retype_ = Word("retype")
 		# Identifiers
 		ids     = Word(srange("[a-zA-Z0-9_]"))
-		varDec  = ids+':'+ids
 		# List of identifiers
 		varList = OneOrMore(ids)
 		# Groups: complex elements, not, forall, when, create and the like
