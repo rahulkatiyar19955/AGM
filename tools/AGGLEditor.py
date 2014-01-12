@@ -115,8 +115,8 @@ class AGMEditor(QMainWindow):
 		#self.ui.actionPrevRule.setShortcut(QKeySequence(Qt.Key_PageUp))
 
 		#self.ui.splitter.setStyleSheet("QSplitter::handle { background-color: gray }");
-		
-		self.ui.splitter.setSizes([0.65*self.ui.splitter.height(), 0.35*self.ui.splitter.height()])
+
+
 
 		self.shortcutDown = QShortcut(QKeySequence("PgDown"), self)
 		self.shortcutUp   = QShortcut(QKeySequence("PgUp"  ), self)
@@ -189,7 +189,10 @@ class AGMEditor(QMainWindow):
 		self.fontDialog.setCurrentFont(font)
 		self.font = self.fontDialog.currentFont()
 		self.connect(self.ui.actionChangeFont, SIGNAL("triggered(bool)"), self.changeFont)
-
+		# Sizes
+		self.show()
+		sh = self.ui.centralwidget.height()
+		self.ui.splitter.setSizes([int(0.65*sh), int(0.35*sh)])
 	def setAdvanced(self, show):
 		if show:
 			self.ui.tabWidget.insertTab(1, self.ui.tabPreconditions, "Additional preconditions")

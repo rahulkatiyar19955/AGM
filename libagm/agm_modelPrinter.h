@@ -8,7 +8,7 @@
 #include <agm_modelEdge.h>
 #include <agm_modelSymbols.h>
 
-#ifdef ROBOCOMP_SUPPORT
+#if ROBOCOMP_SUPPORT == 1
 #include <AGMWorldModel.h>
 #endif
 
@@ -25,7 +25,7 @@ public:
 	static void printWorld(const AGMModel::SPtr &w);
 	/// Prints a model given a regular pointer to it.
 	static void printWorld(const AGMModel *w);
-#ifdef ROBOCOMP_SUPPORT
+#if ROBOCOMP_SUPPORT == 1
 	/// Prints a model given a RoboComp <em>RoboCompAGMWorldModel::World</em> model data type.
 	static void printWorld(const RoboCompAGMWorldModel::World &w);
 	/// Prints a model given a RoboComp <em>RoboCompAGMWorldModel::World</em> model data type, to a file.

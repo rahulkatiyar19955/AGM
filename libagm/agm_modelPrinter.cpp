@@ -27,7 +27,7 @@ void AGMModelPrinter::printWorld(const AGMModel *w)
 	}
 }
 
-#ifdef ROBOCOMP_SUPPORT
+#if ROBOCOMP_SUPPORT == 1
 void AGMModelPrinter::printWorld(const RoboCompAGMWorldModel::World &w)
 {
 	AGMModelPrinter::printWorld(stdout, w);

@@ -64,14 +64,14 @@ class AGMRuleParsing:
 			else:
 				regular.effects = ''
 			return regular
-		elif hasattr(i, 'atoms'): # We are dealing with a rule combo!
-			if len(i.atoms) == 0:
-				print '  Error rrrrrrrrr  32423'
+		elif hasattr(i, 'atomss'): # We are dealing with a rule combo!
+			if len(i.atomss) == 0:
+				print '  Error rrrrrrrrr  32423 trgf 2'
 				sys.exit(-1)
 			#print '  Combo'
 			# We are dealing with a rule combo!
 			#print i.atoms
-			combo = AGMComboRule(i.name, passive, i.cost, i.atoms.asList(), i.equivalences.asList())
+			combo = AGMComboRule(i.name, passive, i.cost, i.atomss.asList(), i.equivalences.asList())
 			combo.mindepth = mindepth
 			#print combo.toString()
 			return combo
@@ -94,8 +94,9 @@ class AGMFileDataParsing:
 		an = Word(srange("[a-zA-Z0-9_.]"))
 		ids = Word(srange("[a-zA-Z0-9_]"))
 		almostanything = CharsNotIn("{}")
-		conditions = Suppress("conditions")
-		effects = Suppress("effects")
+		parameters = Suppress("parameters")
+		precondition = Suppress("precondition")
+		effect = Suppress("effect")
 		plusorminus = Literal('+') | Literal('-')
 		number = Word(nums)
 		nu = Combine( Optional(plusorminus) + number )
@@ -125,9 +126,12 @@ class AGMFileDataParsing:
 		equivElement = Group(ids.setResultsName("rule") + pt + ids.setResultsName("variable"))
 		equivRhs = eq + equivElement
 		equiv = Group(equivElement.setResultsName("first") + OneOrMore(equivRhs).setResultsName("more"))
-		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + OneOrMore(atom).setResultsName("atoms") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
+		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + OneOrMore(atom).setResultsName("atomss") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
 		# NORMAL RULE
-		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Optional(conditions + op + almostanything + cl).setResultsName("conditions") + Optional(effects + op + almostanything + cl).setResultsName("effects") + cl)
+		Prm = Optional(parameters   + op + almostanything + cl).setResultsName("parameters")
+		Cnd = Optional(precondition + op + almostanything + cl).setResultsName("precondition")
+		Eft = Optional(effect       + op + almostanything + cl).setResultsName("effect")
+		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 		# GENERAL RULE
 		rule = rule_nrm | rule_seq
 		# PROPERTY
@@ -163,24 +167,23 @@ class AGMFileDataParsing:
 		if not gotName:
 			print 'drats! no name'
 
-		verbose=True
+		#verbose=True
 		#verbose=False
 		if verbose: print '\nRules:', len(result.rules)
 		number = 0
 		for i in result.rules:
 			if verbose: print '\nRule:('+str(number)+')'
 			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, verbose))
-			#print 'Conditions:', i.conditions
-			print 'Effects:', i.effects
-			print 'Parsing these effects...'
-			if len(i.effects) > 0:
-				effectTree = AGGLCodeParsing.parse(str(i.effects[0]))
-				AGMFileDataParsing.interpretEffect(effectTree[0])
 			print 'Conditions:', i.conditions
 			print 'Parsing these conditions...'
 			if len(i.conditions) > 0:
 				conditionsTree = AGGLCodeParsing.parse(str(i.conditions[0]))
 				AGMFileDataParsing.interpretConditions(conditionsTree[0])
+			print 'Effects:', i.effects
+			print 'Parsing these effects...'
+			if len(i.effects) > 0:
+				effectTree = AGGLCodeParsing.parse(str(i.effects[0]))
+				#AGMFileDataParsing.interpretEffect(effectTree[0])
 
 		#sys.exit(1)
 		return agmFD

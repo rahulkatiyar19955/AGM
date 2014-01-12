@@ -7,7 +7,7 @@
 #include <libxml2/libxml/parser.h>
 #include <libxml2/libxml/tree.h>
 
-#ifdef ROBOCOMP_SUPPORT
+#if ROBOCOMP_SUPPORT == 1
 void AGMModelConverter::fromInternalToIce(const AGMModel::SPtr &src, RoboCompAGMWorldModel::World &dst)
 {
 	dst.nodes.clear();

@@ -1,5 +1,0 @@
-void wqejtoerqwtjpqwejrtoawjweroitreowtjweroitjq()
-{
-	return;
-}
-

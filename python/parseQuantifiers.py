@@ -41,6 +41,7 @@ class AGGLCodeParsing:
 		retype_ = Word("retype")
 		# Identifiers
 		ids     = Word(srange("[a-zA-Z0-9_]"))
+		varDec  = ids+':'+ids
 		# List of identifiers
 		varList = OneOrMore(ids)
 		# Groups: complex elements, not, forall, when, create and the like

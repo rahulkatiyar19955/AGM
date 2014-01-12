@@ -5,7 +5,7 @@
 #include <agm_modelEdge.h>
 #include <agm_modelSymbols.h>
 
-#ifdef ROBOCOMP_SUPPORT
+#if ROBOCOMP_SUPPORT == 1
 #include <AGMWorldModel.h>
 #endif
 
@@ -19,7 +19,7 @@ class AGMModelConverter
 {
 public:
 
-#ifdef ROBOCOMP_SUPPORT
+#if ROBOCOMP_SUPPORT == 1
 	/// Converts an AGM world model from an AGMModel container to a RoboCompAGMWorldModel::World container.
 	static void fromInternalToIce(const AGMModel::SPtr &world, RoboCompAGMWorldModel::World &dst);
 	/// Converts an AGM world model from a RoboCompAGMWorldModel::World container to an AGMModel container.

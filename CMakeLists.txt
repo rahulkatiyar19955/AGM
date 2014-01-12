@@ -56,8 +56,10 @@ endif (PYTHON_BINDINGS)
 
 if (ROBOCOMP_SUPPORT)
 	MESSAGE(STATUS "ROBOCOMP SUPPORT:       YES")
+	SET(ROBOCOMP_SUPPORT_VAL "1")
 else (ROBOCOMP_SUPPORT)
 	MESSAGE(STATUS "ROBOCOMP SUPPORT:       NO")
+	SET(ROBOCOMP_SUPPORT_VAL "0")
 endif (ROBOCOMP_SUPPORT)
 
 MESSAGE(STATUS "\n\n")
@@ -186,7 +188,8 @@ endif(DOXYGEN_FOUND)
 
 #  fake project to execute command  #
 #####################################
-add_subdirectory(libagm/fake)
+# add_subdirectory(libagm/fake)
+configure_file ("libagm/agm_config.in.h" "libagm/agm_config.h")
 
 
 
