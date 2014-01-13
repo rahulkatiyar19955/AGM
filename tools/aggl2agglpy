@@ -26,18 +26,30 @@ try:
 			agmData.generateAGGLPlannerCode(outputFileFull, skipPassiveRules=False)
 			agmData.generateAGGLPlannerCode(outputFilePartial, skipPassiveRules=True)
 	elif len(sys.argv)==5:
-		if sys.argv[1] != '-x':
+		if sys.argv[1] == '-x':
+			if sys.argv[3] != '-o':
+				inputXML = sys.argv[2]
+				outputPY = sys.argv[4]
+				graph = graphFromXML(inputXML)
+				outputText = generateTarget(graph)
+				ofile = open(outputPY, 'w')
+				ofile.write(outputText)
+				ofile.close()
+			else:
+				ok = False
+		elif sys.argv[1] == '-i':
+			inputFile         = sys.argv[2]
+			agmData = AGMFileDataParsing.fromFile(inputFile)
+			if sys.argv[3] != '-a':
+				outputFileFull    = sys.argv[4]
+				agmData.generateAGGLPlannerCode(outputFileFull, skipPassiveRules=False)
+			if sys.argv[3] != '-f':
+				outputFilePartial = sys.argv[4]
+				agmData.generateAGGLPlannerCode(outputFilePartial, skipPassiveRules=True)
+			else:
+				ok = False
+		else:
 			ok = False
-		if sys.argv[3] != '-o':
-			ok = False
-		if ok:
-			inputXML = sys.argv[2]
-			outputPY = sys.argv[4]
-			graph = graphFromXML(inputXML)
-			outputText = generateTarget(graph)
-			ofile = open(outputPY, 'w')
-			ofile.write(outputText)
-			ofile.close()
 	else:
 		ok = False
 

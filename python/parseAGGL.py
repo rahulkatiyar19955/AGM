@@ -174,6 +174,9 @@ class AGMFileDataParsing:
 		if verbose: print '\nRules:', len(result.rules)
 		number = 0
 		for i in result.rules:
+			preconditionRec = None
+			parametersList = None
+			effectRec = None
 			if verbose: print '\nRule:('+str(number)+')'
 			print 'Parameters:', i.parameters
 			if len(i.parameters) > 0:

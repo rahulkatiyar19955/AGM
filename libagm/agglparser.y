@@ -19,9 +19,9 @@ void addLink(bool l, const char *a, const char *b, const char *label, int negate
 void addSymbol(bool l, const char *id, const char *type, int x, int y);
 void addSymbol(bool l, int id, const char *type, int x, int y);
 
-extern "C" int yylex();
-extern "C" int yyparse();
-extern "C" FILE *yyin;
+extern int yylex();
+extern int yyparse();
+extern FILE *yyin;
 extern int line_num;
 
 void yyerror(const char *s);

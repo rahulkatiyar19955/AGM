@@ -164,9 +164,12 @@ def comboRuleImplementation(rule, r, indent):
 	
 
 def normalRuleImplementation(rule, ret, indent):
+	# Quantifier-related code (PARAMETERS)
+	# <<<
 	nodesPlusParameters = rule.lhs.nodes
 	for i in rule.parameters:
 		nodesPlusParameters[i[0]] = AGMSymbol(i[0], i[1])
+	# >>>
 	print 'normalRuleImplementation.parameters', rule.parameters
 	print 'normalRuleImplementation.precondition', rule.precondition
 	print 'normalRuleImplementation.effect', rule.effect
@@ -265,6 +268,13 @@ def normalRuleImplementation(rule, ret, indent):
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"
+	# Quantifier-related code (PRECONDITION)
+	# <<<
+	if rule.precondition != None:
+		preconditionCode, indent, conditionId, stuff = normalRuleImplementation_PRECONDITION(rule.precondition, indent)
+		print 'acho', rule.name, rule.precondition
+		ret += preconditionCode
+	# >>>
 	# Code to call rule execution
 	ret += indent+"# At this point we meet all the conditions."
 	ret += indent+"# Insert additional conditions manually here if you want."
@@ -393,6 +403,52 @@ def normalRuleImplementation(rule, ret, indent):
 	return ret
 
 
+def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stuff={'availableid':1}):
+	# Split the list in its head and body
+	print 'WHOLE', precondition
+	preconditionType, preconditionBody = precondition[0], precondition[1:]
+	formulaId = stuff['availableid']
+	stuff['availableid'] += 1
+	ret = ''
+	print 'T', preconditionType
+	print 'B', preconditionBody
+
+	if preconditionType == "not":
+		if modifier == '':
+			text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody, indent, 'not', stuff)
+			ret += text
+			ret += indent+'if condition'+str(formulaIdRet)+' == False:'
+			ret += indent+'\tcondition'+str(formulaId)+'is TRUE! [because '+str(formulaIdRet)+' is False]'
+			ret += indent+'else:'
+			ret += indent+'\tcondition'+str(formulaId)+'is FALSE! [because '+str(formulaIdRet)+' is True]'
+		elif modifier == 'and':
+			raise Exception("I don't know yet how to 'not@and'... :-l")
+		elif modifier == 'or':
+			raise Exception("I don't know yet how to 'not@or'... :-l")
+		else:
+			raise Exception("Internal error: normalRuleImplementation_PRECONDITION: invalid modifier "+ modifier)
+	elif preconditionType == "or":
+		raise Exception("I don't know yet how to 'not'... :-l")
+	elif preconditionType == "and":
+		ret += indent+'condition'+str(formulaId)+' = True'
+		for part in preconditionBody[0]:
+			ret += indent+'if condition'+str(formulaId)+':'
+			text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(part, indent+'\t', 'and', stuff)
+			ret += text
+			ret += indent+'if condition'+str(formulaIdRet)+' == False:'
+			ret += indent+'\tcondition'+str(formulaId)+' = False'
+	elif preconditionType == "forall":
+		raise Exception("I don't know yet how to 'not'... :-l")
+	elif preconditionType == "when":
+		raise Exception("'when' quantifiers are forbidden in preconditions!")
+	else:
+		try:
+			ret += indent + 'condition' + str(formulaId) + ' = (' + preconditionType + ' ' + preconditionBody[0] + ' ' + preconditionBody[1] + ')'
+		except:
+			print 'ERROR IN', preconditionType
+			print 'ERROR IN', preconditionBody
+			traceback.print_exc()
+	return ret, indent, formulaId, stuff
 
 def generate(agm, skipPassiveRules):
 	text = ''

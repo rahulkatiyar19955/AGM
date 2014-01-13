@@ -3,7 +3,7 @@
 #include <iostream>
 #include "agglparser.hpp"
 using namespace std;
-#define YY_DECL extern "C" int yylex()
+#define YY_DECL extern int yylex()
 int line_num = 1;
 
 %}
