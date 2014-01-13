@@ -272,8 +272,9 @@ def normalRuleImplementation(rule, ret, indent):
 	# <<<
 	if rule.precondition != None:
 		preconditionCode, indent, conditionId, stuff = normalRuleImplementation_PRECONDITION(rule.precondition, indent)
-		print 'acho', rule.name, rule.precondition
 		ret += preconditionCode
+		ret += indent+'if condition'+str(conditionId)+':'
+		indent += '\t'
 	# >>>
 	# Code to call rule execution
 	ret += indent+"# At this point we meet all the conditions."
@@ -435,6 +436,7 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 			ret += indent+'if condition'+str(formulaId)+':'
 			text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(part, indent+'\t', 'and', stuff)
 			ret += text
+			print '@@'+indent+'@@'
 			ret += indent+'if condition'+str(formulaIdRet)+' == False:'
 			ret += indent+'\tcondition'+str(formulaId)+' = False'
 	elif preconditionType == "forall":
@@ -448,6 +450,7 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 			print 'ERROR IN', preconditionType
 			print 'ERROR IN', preconditionBody
 			traceback.print_exc()
+	print '^^'+indent+'^^'
 	return ret, indent, formulaId, stuff
 
 def generate(agm, skipPassiveRules):
