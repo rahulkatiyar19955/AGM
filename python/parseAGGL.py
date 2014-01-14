@@ -5,6 +5,9 @@ from PySide.QtGui import *
 import sys
 from parseQuantifiers import *
 
+debug = False
+debug = True
+
 class AGMGraphParsing:
 	@staticmethod
 	def parseGraphFromAST(i, verbose=False):
@@ -178,15 +181,15 @@ class AGMFileDataParsing:
 			parametersList = None
 			effectRec = None
 			if verbose: print '\nRule:('+str(number)+')'
-			print 'Parameters:', i.parameters
+			#print 'Parameters:', i.parameters
 			if len(i.parameters) > 0:
 				parametersTree = AGGLCodeParsing.parseParameters(str(i.parameters[0]))
 				parametersList = AGMFileDataParsing.interpretParameters(parametersTree)
-			print 'Precondition:', i.precondition
+			#print 'Precondition:', i.precondition
 			if len(i.precondition) > 0:
 				preconditionTree = AGGLCodeParsing.parseFormula(str(i.precondition[0]))
 				preconditionRec = AGMFileDataParsing.interpretPrecondition(preconditionTree[0])
-			print 'Effect:', i.effect
+			#print 'Effect:', i.effect
 			if len(i.effect) > 0:
 				effectTree = AGGLCodeParsing.parseFormula(str(i.effect[0]))
 				effectRec = AGMFileDataParsing.interpretEffect(effectTree[0])
@@ -205,76 +208,80 @@ class AGMFileDataParsing:
 	@staticmethod
 	def interpretPrecondition(tree, pre=''):
 		if tree.type == "not":
-			print pre+'not'
-			n = AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
+			if debug: print pre+'not'
+			n = AGMFileDataParsing.interpretPrecondition(tree.child, pre+"\t")
 			return ["not", n]
 		elif tree.type == "or":
-			print pre+'or'
+			if debug: print pre+'or'
 			r = []
 			for i in tree.more:
-				r.append(AGMFileDataParsing.interpretEffect(tree.child, pre+"\t"))
+				r.append(AGMFileDataParsing.interpretPrecondition(tree.child, pre+"\t"))
 			return ["or", r]
 		elif tree.type == "and":
-			print pre+'and'
+			if debug: print pre+'and'
 			r = []
 			for i in tree.more:
-				r.append(AGMFileDataParsing.interpretEffect(i, pre+"\t"))
+				r.append(AGMFileDataParsing.interpretPrecondition(i, pre+"\t"))
 			return ["and", r]
 		elif tree.type == "forall":
-			print pre+'forall'
-			print pre+'\t',
+			if debug: print pre+'forall'
+			if debug: print pre+'\t',
 			for i in tree.vars:
-				print pre+str(i),
-			print ''
-			effect = AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
-			return ["forall", tree.vars, effect]
+				if debug: print pre+str(i),
+			if debug: print ''
+			effect = AGMFileDataParsing.interpretPrecondition(tree.child, pre+"\t")
+			for v in tree.vars:
+				print v
+			ret = ["forall", [[x.var, x.t] for x in tree.vars], effect]
+			print 'RETORNO ESTOOOOOOOOOOOOO', ret
+			return ret
 		elif tree.type == "when":
-			print pre+'when'
-			print pre+'\tif'
-			iff = AGMFileDataParsing.interpretEffect(tree.iff, pre+"\t\t")
-			print pre+'\tthen'
-			then = AGMFileDataParsing.interpretEffect(tree.then, pre+"\t\t")
+			if debug: print pre+'when'
+			if debug: print pre+'\tif'
+			iff = AGMFileDataParsing.interpretPrecondition(tree.iff, pre+"\t\t")
+			if debug: print pre+'\tthen'
+			then = AGMFileDataParsing.interpretPrecondition(tree.then, pre+"\t\t")
 			return ["when", iff, then]
 		else:
-			print pre+"link <"+tree.type+"> between <"+tree.a+"> and <"+tree.b+">"
+			if debug: print pre+"link <"+tree.type+"> between <"+tree.a+"> and <"+tree.b+">"
 			return [tree.type, tree.a, tree.b]
 
 
 	@staticmethod
 	def interpretEffect(tree, pre=''):
 		if tree.type == "not":
-			print pre+'not'
+			if debug: print pre+'not'
 			n = AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
 			return ["not", n]
 		elif tree.type == "or":
-			print pre+'or'
+			if debug: print pre+'or'
 			r = []
 			for i in tree.more:
 				r.append(AGMFileDataParsing.interpretEffect(tree.child, pre+"\t"))
 			return ["or", r]
 		elif tree.type == "and":
-			print pre+'and'
+			if debug: print pre+'and'
 			r = []
 			for i in tree.more:
 				r.append(AGMFileDataParsing.interpretEffect(i, pre+"\t"))
 			return ["and", r]
 		elif tree.type == "forall":
-			print pre+'forall'
-			print pre+'\t',
+			if debug: print pre+'forall'
+			if debug: print pre+'\t',
 			for i in tree.vars:
-				print pre+str(i),
-			print ''
+				if debug: print pre+str(i),
+			if debug: print ''
 			effect = AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
 			return ["forall", tree.vars, effect]
 		elif tree.type == "when":
-			print pre+'when'
-			print pre+'\tif'
+			if debug: print pre+'when'
+			if debug: print pre+'\tif'
 			iff = AGMFileDataParsing.interpretEffect(tree.iff, pre+"\t\t")
-			print pre+'\tthen'
+			if debug: print pre+'\tthen'
 			then = AGMFileDataParsing.interpretEffect(tree.then, pre+"\t\t")
 			return ["when", iff, then]
 		else:
-			print pre+"link <"+tree.type+"> between <"+tree.a+"> and <"+tree.b+">"
+			if debug: print pre+"link <"+tree.type+"> between <"+tree.a+"> and <"+tree.b+">"
 			return [tree.type, tree.a, tree.b]
 
 

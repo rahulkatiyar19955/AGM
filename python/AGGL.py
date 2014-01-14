@@ -328,10 +328,6 @@ class AGMRule(object):
 		self.mindepth = 0
 		self.parameters = parameters
 		if self.parameters == None: self.parameters = []
-		print '-------------------------------------'
-		print type(precondition)
-		print precondition
-		print '-------------------------------------'
 		self.precondition = precondition
 		self.effect = effect
 		if lhs == None:

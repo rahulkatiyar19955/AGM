@@ -273,7 +273,7 @@ def normalRuleImplementation(rule, ret, indent):
 	if rule.precondition != None:
 		preconditionCode, indent, conditionId, stuff = normalRuleImplementation_PRECONDITION(rule.precondition, indent)
 		ret += preconditionCode
-		ret += indent+'if condition'+str(conditionId)+':'
+		ret += indent+'if precondition'+str(conditionId)+':'
 		indent += '\t'
 	# >>>
 	# Code to call rule execution
@@ -404,53 +404,51 @@ def normalRuleImplementation(rule, ret, indent):
 	return ret
 
 
-def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stuff={'availableid':1}):
+#
+# Here we define how preconditions are implemented in the generated code
+#
+def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stuff={'availableid':0}):
 	# Split the list in its head and body
-	print 'WHOLE', precondition
 	preconditionType, preconditionBody = precondition[0], precondition[1:]
 	formulaId = stuff['availableid']
 	stuff['availableid'] += 1
 	ret = ''
-	print 'T', preconditionType
-	print 'B', preconditionBody
 
 	if preconditionType == "not":
-		if modifier == '':
-			text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody, indent, 'not', stuff)
-			ret += text
-			ret += indent+'if condition'+str(formulaIdRet)+' == False:'
-			ret += indent+'\tcondition'+str(formulaId)+'is TRUE! [because '+str(formulaIdRet)+' is False]'
-			ret += indent+'else:'
-			ret += indent+'\tcondition'+str(formulaId)+'is FALSE! [because '+str(formulaIdRet)+' is True]'
-		elif modifier == 'and':
-			raise Exception("I don't know yet how to 'not@and'... :-l")
-		elif modifier == 'or':
-			raise Exception("I don't know yet how to 'not@or'... :-l")
-		else:
-			raise Exception("Internal error: normalRuleImplementation_PRECONDITION: invalid modifier "+ modifier)
+		text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody, indent, 'not', stuff)
+		ret += text
+		ret += indent+'if precondition'+str(formulaIdRet)+' == False:'
+		ret += indent+'\tprecondition'+str(formulaId)+'is TRUE! [because '+str(formulaIdRet)+' is False]'
+		ret += indent+'else:'
+		ret += indent+'\tprecondition'+str(formulaId)+'is FALSE! [because '+str(formulaIdRet)+' is True]'
 	elif preconditionType == "or":
-		raise Exception("I don't know yet how to 'not'... :-l")
-	elif preconditionType == "and":
-		ret += indent+'condition'+str(formulaId)+' = True'
+		ret += indent+'precondition'+str(formulaId)+' = False'
 		for part in preconditionBody[0]:
-			ret += indent+'if condition'+str(formulaId)+':'
+			text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(part, indent, 'or', stuff)
+			ret += text
+			ret += indent+'if precondition'+str(formulaIdRet)+' == True:'
+			ret += indent+'\tprecondition'+str(formulaId)+' = True'
+		ret += indent+'if precondition'+str(formulaId)+' == True:'
+	elif preconditionType == "and":
+		ret += indent+'precondition'+str(formulaId)+' = True'
+		for part in preconditionBody[0]:
+			ret += indent+'if precondition'+str(formulaId)+':'
 			text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(part, indent+'\t', 'and', stuff)
 			ret += text
-			print '@@'+indent+'@@'
-			ret += indent+'if condition'+str(formulaIdRet)+' == False:'
-			ret += indent+'\tcondition'+str(formulaId)+' = False'
+			ret += indent+'if precondition'+str(formulaIdRet)+' == False:'
+			ret += indent+'\tprecondition'+str(formulaId)+' = False'
 	elif preconditionType == "forall":
-		raise Exception("I don't know yet how to 'not'... :-l")
+		print 'forooollllllll'
+		ret += indent+'FORRRAAAAAAAAAAAAAAAAAAAAAAAAAAAAALL'
 	elif preconditionType == "when":
-		raise Exception("'when' quantifiers are forbidden in preconditions!")
+		raise Exception("I don't know yet how to 'when'... :-l")
 	else:
 		try:
-			ret += indent + 'condition' + str(formulaId) + ' = (' + preconditionType + ' ' + preconditionBody[0] + ' ' + preconditionBody[1] + ')'
+			ret += indent + 'precondition' + str(formulaId) + ' = [n2id["'+preconditionBody[0]+'"],n2id["'+preconditionBody[1]+'"],"'+preconditionType+'"] in snode.graph.links'
 		except:
 			print 'ERROR IN', preconditionType
 			print 'ERROR IN', preconditionBody
 			traceback.print_exc()
-	print '^^'+indent+'^^'
 	return ret, indent, formulaId, stuff
 
 def generate(agm, skipPassiveRules):
@@ -492,7 +490,7 @@ def CheckTarget(graph):"""
 				typesDict[t] = 1
 		ret += indent+"typesDict = dict()"
 		for t in typesDict:
-			ret += indent+"typesDict['"+t+"'] = "+str(typesDict[t])
+			ret += indent+"typesDict['"+t+"'] = " + str(typesDict[t])
 		ret += indent+"for n in graph.nodes:"
 		ret += indent+"	if graph.nodes[n].sType in typesDict:"
 		ret += indent+"		scoreA += 1"
