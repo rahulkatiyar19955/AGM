@@ -1,0 +1,229 @@
+spacePattern=3
+lineThickness=2
+fontName=Arial
+name=domain1
+vertexDiameter=40
+shortPattern=1
+nodeThickness=2
+fontSize=14
+longPattern=3
+===
+LOADTRUCK : active(3)
+{
+	{
+	}
+	=>
+	{
+	}
+	parameters
+	{
+		loc:LCTN
+		obj:OBJ
+		truck:TRCK
+	}
+	precondition
+	{
+		(and
+			(at truck loc)
+			(at obj loc)
+		)
+	}
+	effect
+	{
+		(and
+			(not (at obj loc))
+			(at  obj truck)
+		)
+	}
+}
+
+UNLOADTRUCK : active(3)
+{
+	{
+	}
+	=>
+	{
+	}
+	parameters
+	{
+		loc:LCTN
+		obj:OBJ
+		truck:TRCK
+	}
+	precondition
+	{
+		(and
+			(at truck loc)
+			(at obj truck)
+		)
+	}
+	effect
+	{
+		(and
+			(not (at obj truck))
+			(at  obj loc)
+		)
+	}
+}
+
+DRIVETRUCK : active(3)
+{
+	{
+	}
+	=>
+	{
+	}
+	parameters
+	{
+		lo2:LCTN ci:CITY lo1:LCTN tr:TRCK
+	}
+	precondition
+	{
+		(and
+			(at tr lo1)
+			(inCity lo1 ci)
+			(inCity lo2 ci)
+		)
+	}
+	effect
+	{
+		(and
+			(not (at tr lo1))
+			(at tr lo2)
+		)
+	}
+}
+
+TRANSPORTinTRUCK : active(1)
+{
+	LOADTRUCK as load
+	DRIVETRUCK as drive
+	UNLOADTRUCK as unload
+	where:
+	load.truck = drive.truck = unload.truck
+	load.loc = drive.lo1
+	unload.loc = drive.lo2
+	load.obj = unload.obj
+}
+
+LOADAIRPLANE : active(3)
+{
+	{
+	}
+	=>
+	{
+	}
+	parameters
+	{
+		loc:LCTN
+		obj:OBJ
+		ap:ARPL
+	}
+	precondition
+	{
+		(and
+			(at ap loc)
+			(at obj loc)
+		)
+	}
+	effect
+	{
+		(and
+			(at obj ap)
+			(not (at obj loc))
+		)
+	}
+}
+
+UNLOADAIRPLANE : active(3)
+{
+	{
+	}
+	=>
+	{
+	}
+	parameters
+	{
+		loc:LCTN
+		obj:OBJ
+		ap:ARPL
+	}
+	precondition
+	{
+		(and
+			(at ap loc)
+			(at obj ap)
+		)
+	}
+	effect
+	{
+		(and
+			(at obj loc)
+			(not (at obj ap))
+		)
+	}
+}
+
+FLYAIRPLANE : active(3)
+{
+	{
+	}
+	=>
+	{
+	}
+	parameters
+	{
+		lo2:LCTN
+		ap:ARPL
+		airport:ARPT
+		lo1:LCTN
+	}
+	precondition
+	{
+		(and
+			(at ap lo1)
+		)
+	}
+	effect
+	{
+		(and
+			(at ap lo2)
+			(not (at ap lo1))
+		)
+	}
+}
+
+TRANSPORTinAIRPLANE : active(1)
+{
+	LOADAIRPLANE as load
+	FLYAIRPLANE as fly
+	UNLOADAIRPLANE as unload
+	where:
+	load.ap = fly.ap = unload.ap
+	load.loc = fly.lo1
+	unload.loc = fly.lo2
+	load.obj = unload.obj
+}
+
+
+TRANSPORTinTAT : active(1)
+{
+	LOADTRUCK as loadtruck1
+	DRIVETRUCK as drivetruck1
+	UNLOADTRUCK as unloadtruck1
+	LOADAIRPLANE as loadairplane
+	FLYAIRPLANE as flyairplane
+	UNLOADAIRPLANE as unloadairplane
+	LOADTRUCK as loadtruck2
+	DRIVETRUCK as drivetruck2
+	UNLOADTRUCK as unloadtruck2
+	where:
+	loadairplane.ap = flyairplane.ap = unloadairplane.ap
+	loadtruck1.truck = drivetruck1.truck = unloadtruck1.truck
+	loadtruck2.truck = drivetruck2.truck = unloadtruck2.truck
+	loadtruck1.obj = unloadtruck1.obj = loadairplane.obj = unloadairplane.obj = loadtruck2.obj = unloadtruck2.obj
+	drivetruck1.loc2 = unloadtruck1.loc = loadairplane.loc = flyairplane.lo1
+	flyairplane.lo2 = unloadairplane.loc = loadtruck2.loc = drivetruck2.loc1
+}
+
+
