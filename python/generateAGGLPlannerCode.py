@@ -417,34 +417,50 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 	if preconditionType == "not":
 		text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody, indent, 'not', stuff)
 		ret += text
-		ret += indent+'if precondition'+str(formulaIdRet)+' == False:'
-		ret += indent+'\tprecondition'+str(formulaId)+'is TRUE! [because '+str(formulaIdRet)+' is False]'
-		ret += indent+'else:'
-		ret += indent+'\tprecondition'+str(formulaId)+'is FALSE! [because '+str(formulaIdRet)+' is True]'
+		ret += indent+'if precondition'+str(formulaIdRet)+' == False: # inside not'
+		ret += indent+'\tprecondition'+str(formulaId)+'is TRUE! [because '+str(formulaIdRet)+' is False] # not'
+		ret += indent+'else: # inside not is false'
+		ret += indent+'\tprecondition'+str(formulaId)+'is FALSE! [because '+str(formulaIdRet)+' is True] # not'
 	elif preconditionType == "or":
-		ret += indent+'precondition'+str(formulaId)+' = False'
+		ret += indent+'precondition'+str(formulaId)+' = False # or initialization'
 		for part in preconditionBody[0]:
 			text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(part, indent, 'or', stuff)
 			ret += text
-			ret += indent+'if precondition'+str(formulaIdRet)+' == True:'
-			ret += indent+'\tprecondition'+str(formulaId)+' = True'
-		ret += indent+'if precondition'+str(formulaId)+' == True:'
+			ret += indent+'if precondition'+str(formulaIdRet)+' == True: # inside OR'
+			ret += indent+'\tprecondition'+str(formulaId)+' = True # make OR true'
+		ret += indent+'if precondition'+str(formulaId)+' == True: # IF OR'
 	elif preconditionType == "and":
-		ret += indent+'precondition'+str(formulaId)+' = True'
+		ret += indent+'precondition'+str(formulaId)+' = True # AND initialization as true'
 		for part in preconditionBody[0]:
-			ret += indent+'if precondition'+str(formulaId)+':'
+			ret += indent+'if precondition'+str(formulaId)+': # if still true'
 			text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(part, indent+'\t', 'and', stuff)
 			ret += text
-			ret += indent+'if precondition'+str(formulaIdRet)+' == False:'
-			ret += indent+'\tprecondition'+str(formulaId)+' = False'
+			ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the and is false'
+			ret += indent+'\tprecondition'+str(formulaId)+' = False # make the and false'
 	elif preconditionType == "forall":
-		print 'forooollllllll'
-		ret += indent+'FORRRAAAAAAAAAAAAAAAAAAAAAAAAAAAAALL'
+		ret += indent+'precondition'+str(formulaId)+' = True # FORALL initialization as true'
+		for V in preconditionBody[0]:
+			ret += indent+'if precondition'+str(formulaId)+': # if it\'s still true'
+			n = V[0]
+			t = V[1]
+			ret += indent+"for symbol_"+n+"_name in nodes:"
+			indent += "\t"
+			ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
+			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+			ret += indent+"if symbol_"+n+".sType == '"+t+"' and precondition"+str(formulaId)+" == True:"
+			indent += "\t"
+		ret += indent+'if precondition'+str(formulaId)+': # if it\'s still true'
+		text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody[1], indent+'\t', 'forall', stuff)
+		ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the FORALL is false'
+		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the FORALL false'
 	elif preconditionType == "when":
 		raise Exception("I don't know yet how to 'when'... :-l")
 	else:
 		try:
-			ret += indent + 'precondition' + str(formulaId) + ' = [n2id["'+preconditionBody[0]+'"],n2id["'+preconditionBody[1]+'"],"'+preconditionType+'"] in snode.graph.links'
+			ret += indent+'precondition'+str(formulaId) + ' = ['
+			ret += 'n2id["'+preconditionBody[0]+'"],'
+			ret += 'n2id["'+preconditionBody[1]+' "],"'
+			ret += preconditionType + '"] in snode.graph.links # LINK VERIFICATION'
 		except:
 			print 'ERROR IN', preconditionType
 			print 'ERROR IN', preconditionBody

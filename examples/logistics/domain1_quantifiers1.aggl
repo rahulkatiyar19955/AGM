@@ -11,11 +11,9 @@ longPattern=3
 LOADTRUCK : active(3)
 {
 	{
-		loca:LCTN(0,0)
 	}
 	=>
 	{
-		loca:LCTN(0,0)
 	}
 	parameters
 	{
