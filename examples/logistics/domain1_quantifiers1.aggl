@@ -29,9 +29,12 @@ LOADTRUCK : active(3)
 			(forall
 				loc3:LCTN
 				loc4:LCTN
-				(and
-					(at truck loc3)
-					(at truck loc4)
+				(when
+					(and
+						(at truck loc3)
+						(at truck loc4)
+					)
+					(at loc3 loc4)
 				)
 			)
 		)
