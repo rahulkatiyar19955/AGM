@@ -495,7 +495,7 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 #
 # Here we define how effects are implemented in the generated code
 #
-def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availableid':0}):
+def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availableid':0, 'mode':'normal'}):
 	# Split the list in its head and body
 	effectType, effectBody = effect[0], effect[1:]
 	formulaId = stuff['availableid']
@@ -521,17 +521,21 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 			ret += indent+'\teffect'+str(formulaId)+' = True # make OR true'
 		ret += indent+'if effect'+str(formulaId)+' == True: # IF OR'
 	elif effectType == "and":
-		ret += indent+'effect'+str(formulaId)+' = True # AND initialization as true'
-		first = True
-		for part in effectBody[0]:
-			if first: first = False
-			else:
-				ret += indent+'if effect'+str(formulaId)+': # if still true'
-				indent += '\t'
-			text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(part, indent, 'and', stuff)
-			ret += text
-			ret += indent+'if effect'+str(formulaIdRet)+' == False: # if what\'s inside the AND is false'
-			ret += indent+'\teffect'+str(formulaId)+' = False # make the AND false'
+		if stuff['mode'] == "when":
+			ret += indent+'effect'+str(formulaId)+' = True # AND initialization as true'
+			first = True
+			for part in effectBody[0]:
+				if first: first = False
+				else:
+					ret += indent+'if effect'+str(formulaId)+': # if still true'
+					indent += '\t'
+				text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(part, indent, 'and', stuff)
+				ret += text
+				ret += indent+'if effect'+str(formulaIdRet)+' == False: # if what\'s inside the AND is false'
+				ret += indent+'\teffect'+str(formulaId)+' = False # make the AND false'
+		else:
+			for part in effectBody[0]:
+				text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(part, indent, 'and', stuff)
 	elif effectType == "forall":
 		ret += indent+'effect'+str(formulaId)+' = True # FORALL initialization as true'
 		for V in effectBody[0]:
