@@ -396,6 +396,7 @@ def normalRuleImplementation(rule, ret, indent):
 	# <<<
 	if rule.effect != None:
 		print rule.name, 'has effects!'
+		ret += indent+"# Textual effects"
 		effectCode, indent, effectId, stuff = normalRuleImplementation_EFFECT(rule.effect, indent)
 		ret += effectCode
 	# >>>
@@ -500,18 +501,25 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 	effectType, effectBody = effect[0], effect[1:]
 	formulaId = stuff['availableid']
 	stuff['availableid'] += 1
-	ret = ''
+	ret = '\n'+str(effectType)
 
+	print '---'
+	print effectType
+	print effectBody
 	print 'normalRuleImplementation EFFECT #'+str(effectType)+'# ', ' #'+str(effectBody)+'#'
 	if effectType == "not":
-		effectBody = effectBody[0]
-		print 'EFFECT inside not, the body is', effectBody
-		text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody, indent, 'not', stuff)
-		ret += text
-		ret += indent+'if effect'+str(formulaIdRet)+' == False: # inside not'
-		ret += indent+'\teffect'+str(formulaId)+'is TRUE! [because '+str(formulaIdRet)+' is False] # not'
-		ret += indent+'else: # inside not is false'
-		ret += indent+'\teffect'+str(formulaId)+'is FALSE! [because '+str(formulaIdRet)+' is True] # not'
+		if stuff['mode'] == 'condition':
+			#effectBody = effectBody[0]
+			print 'CONDITION NOT EFFECT inside not, the body is', effectBody
+			text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody, indent, 'not', stuff)
+			ret += text
+			ret += indent+'if effect'+str(formulaIdRet)+' == False: # inside not'
+			ret += indent+'\teffect'+str(formulaId)+'is TRUE! [because '+str(formulaIdRet)+' is False] # not'
+			ret += indent+'else: # inside not is false'
+			ret += indent+'\teffect'+str(formulaId)+'is FALSE! [because '+str(formulaIdRet)+' is True] # not'
+		else:
+			text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody, indent, 'not', stuff)
+			ret += text
 	elif effectType == "or":
 		ret += indent+'effect'+str(formulaId)+' = False # or initialization'
 		for part in effectBody[0]:
@@ -521,7 +529,7 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 			ret += indent+'\teffect'+str(formulaId)+' = True # make OR true'
 		ret += indent+'if effect'+str(formulaId)+' == True: # IF OR'
 	elif effectType == "and":
-		if stuff['mode'] == "when":
+		if stuff['mode'] == "condition":
 			ret += indent+'effect'+str(formulaId)+' = True # AND initialization as true'
 			first = True
 			for part in effectBody[0]:
@@ -536,6 +544,7 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 		else:
 			for part in effectBody[0]:
 				text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(part, indent, 'and', stuff)
+				ret += text
 	elif effectType == "forall":
 		ret += indent+'effect'+str(formulaId)+' = True # FORALL initialization as true'
 		for V in effectBody[0]:
@@ -565,14 +574,25 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 		ret += indent+'effect'+str(formulaId) + ' = (n2id["'+effectBody[0]+'"] == n2id["'+effectBody[1]+' "])'
 	else:
 		try:
-			ret += indent+'effect'+str(formulaId) + ' = ['
-			ret += 'n2id["'+effectBody[0]+'"],'
-			ret += 'n2id["'+effectBody[1]+' "],"'
-			ret += effectType + '"] in snode.graph.links # LINK'
+			if stuff['mode'] == "condition":
+				ret += indent+'effect'+str(formulaId) + ' = ['
+				ret += 'n2id["'+effectBody[0]+'"],'
+				ret += 'n2id["'+effectBody[1]+' "],"'
+				ret += effectType + '"] in snode.graph.links # LINK'
+			else:
+				print effectBody, '@@@@@@@@@@@@@@@@@@@@'
+				if modifier == 'not':
+					ret += indent+'if     [n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+' "], "' + effectType + '"] in newNode.graph.links:'
+					ret += indent+'\tnewNode.graph.links.remove([n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+' "], "' + effectType + '"])'
+				else:
+					ret += indent+'if not [n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+' "], "' + effectType + '"] in newNode.graph.links:'
+					ret += indent+'\tnewNode.graph.links.append([n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+' "], "' + effectType + '"])'
 		except:
 			print 'ERROR IN', effectType
 			print 'ERROR IN', effectBody
 			traceback.print_exc()
+			
+	ret += "end "+str(effectType)
 	return ret, indent, formulaId, stuff
 
 def generate(agm, skipPassiveRules):
