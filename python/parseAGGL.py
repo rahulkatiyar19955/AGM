@@ -233,7 +233,6 @@ class AGMFileDataParsing:
 			for v in tree.vars:
 				print v
 			ret = ["forall", [[x.var, x.t] for x in tree.vars], effect]
-			print 'RETORNO ESTOOOOOOOOOOOOO', ret
 			return ret
 		elif tree.type == "when":
 			if debug: print pre+'when'

@@ -431,36 +431,41 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 		ret += indent+'if precondition'+str(formulaId)+' == True: # IF OR'
 	elif preconditionType == "and":
 		ret += indent+'precondition'+str(formulaId)+' = True # AND initialization as true'
+		first = True
 		for part in preconditionBody[0]:
-			ret += indent+'if precondition'+str(formulaId)+': # if still true'
-			text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(part, indent+'\t', 'and', stuff)
+			if first: first = False
+			else:
+				ret += indent+'if precondition'+str(formulaId)+': # if still true'
+				indent += '\t'
+			text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(part, indent, 'and', stuff)
 			ret += text
-			ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the and is false'
-			ret += indent+'\tprecondition'+str(formulaId)+' = False # make the and false'
+			ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the AND is false'
+			ret += indent+'\tprecondition'+str(formulaId)+' = False # make the AND false'
 	elif preconditionType == "forall":
 		ret += indent+'precondition'+str(formulaId)+' = True # FORALL initialization as true'
 		for V in preconditionBody[0]:
-			ret += indent+'if precondition'+str(formulaId)+': # if it\'s still true'
 			n = V[0]
 			t = V[1]
 			ret += indent+"for symbol_"+n+"_name in nodes:"
 			indent += "\t"
+			ret += indent+"if precondition"+str(formulaId)+"==False: break"
 			ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
 			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
-			ret += indent+"if symbol_"+n+".sType == '"+t+"' and precondition"+str(formulaId)+" == True:"
-			indent += "\t"
-		ret += indent+'if precondition'+str(formulaId)+': # if it\'s still true'
+			ret += indent+"if symbol_"+n+".sType == '"+t+"':"
+		ret += indent+'# now the body of the FORALL'
 		text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody[1], indent+'\t', 'forall', stuff)
+		ret += text
 		ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the FORALL is false'
 		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the FORALL false'
 	elif preconditionType == "when":
-		raise Exception("I don't know yet how to 'when'... :-l")
+		ret += indent+'precondition'+str(formulaId)+' = True # WHEN initialization as true'
+		print 'WHEEEEN', precondition
 	else:
 		try:
 			ret += indent+'precondition'+str(formulaId) + ' = ['
 			ret += 'n2id["'+preconditionBody[0]+'"],'
 			ret += 'n2id["'+preconditionBody[1]+' "],"'
-			ret += preconditionType + '"] in snode.graph.links # LINK VERIFICATION'
+			ret += preconditionType + '"] in snode.graph.links # LINK'
 		except:
 			print 'ERROR IN', preconditionType
 			print 'ERROR IN', preconditionBody
