@@ -321,7 +321,6 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"\tfor n in derivsx: n.history.append(fina)"
 	ret += indent+"ret.extend(derivsx)"
 	indent = indent[:-2]
-
 	# Rule ending
 	indent = "\n\t\t"
 	if debug:
@@ -331,6 +330,9 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+""
 	ret += "\n"
 	indent = "\n\t"
+	
+	# TRIGGER
+	# TRIGGER
 	ret += indent+"# Rule " + rule.name
 	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True, finish=''):"
 	indent += "\t"
@@ -390,6 +392,14 @@ def normalRuleImplementation(rule, ret, indent):
 		ret += indent+"l = AGMLink(smap['"+newLink.a+"'], smap['"+newLink.b+"'], '"+newLink.linkType+"')"
 		ret += indent+"if not l in newNode.graph.links:"
 		ret += indent+"\tnewNode.graph.links.append(l)"
+	# Quantifier-related code (EFFECT)
+	# <<<
+	if rule.effect != None:
+		print rule.name, 'has effects!'
+		effectCode, indent, effectId, stuff = normalRuleImplementation_EFFECT(rule.effect, indent)
+		ret += effectCode
+	# >>>
+	# Misc stuff
 	ret += indent+"# Misc stuff"
 	ret += indent+"newNode.probability *= 1."
 	ret += indent+"if len(stack) == 0:"
@@ -415,6 +425,8 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 	ret = ''
 
 	if preconditionType == "not":
+		preconditionBody = preconditionBody[0]
+		print 'PRECONDITION inside not, the body is', preconditionBody
 		text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody, indent, 'not', stuff)
 		ret += text
 		ret += indent+'if precondition'+str(formulaIdRet)+' == False: # inside not'
@@ -459,7 +471,15 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the FORALL false'
 	elif preconditionType == "when":
 		ret += indent+'precondition'+str(formulaId)+' = True # WHEN initialization as true'
-		print 'WHEEEEN', precondition
+		text, indent, formulaIdRet1, stuff = normalRuleImplementation_PRECONDITION(preconditionBody[0], indent+'\t', 'whenA', stuff)
+		ret += text
+		ret += indent+'if precondition'+str(formulaIdRet1)+' == True: # if what\'s inside the WHEN(if) is True'
+		text, indent, formulaIdRet2, stuff = normalRuleImplementation_PRECONDITION(preconditionBody[1], indent+'\t', 'whenB', stuff)
+		ret += text
+		ret += indent+'if precondition'+str(formulaIdRet2)+' == False: # if what\'s inside the WHEN(then) is False'
+		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the WHEN false'
+	elif preconditionType == "=":
+		ret += indent+'precondition'+str(formulaId) + ' = (n2id["'+preconditionBody[0]+'"] == n2id["'+preconditionBody[1]+' "])'
 	else:
 		try:
 			ret += indent+'precondition'+str(formulaId) + ' = ['
@@ -469,6 +489,85 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 		except:
 			print 'ERROR IN', preconditionType
 			print 'ERROR IN', preconditionBody
+			traceback.print_exc()
+	return ret, indent, formulaId, stuff
+
+#
+# Here we define how effects are implemented in the generated code
+#
+def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availableid':0}):
+	# Split the list in its head and body
+	effectType, effectBody = effect[0], effect[1:]
+	formulaId = stuff['availableid']
+	stuff['availableid'] += 1
+	ret = ''
+
+	print 'normalRuleImplementation EFFECT #'+str(effectType)+'# ', ' #'+str(effectBody)+'#'
+	if effectType == "not":
+		effectBody = effectBody[0]
+		print 'EFFECT inside not, the body is', effectBody
+		text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody, indent, 'not', stuff)
+		ret += text
+		ret += indent+'if effect'+str(formulaIdRet)+' == False: # inside not'
+		ret += indent+'\teffect'+str(formulaId)+'is TRUE! [because '+str(formulaIdRet)+' is False] # not'
+		ret += indent+'else: # inside not is false'
+		ret += indent+'\teffect'+str(formulaId)+'is FALSE! [because '+str(formulaIdRet)+' is True] # not'
+	elif effectType == "or":
+		ret += indent+'effect'+str(formulaId)+' = False # or initialization'
+		for part in effectBody[0]:
+			text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(part, indent, 'or', stuff)
+			ret += text
+			ret += indent+'if effect'+str(formulaIdRet)+' == True: # inside OR'
+			ret += indent+'\teffect'+str(formulaId)+' = True # make OR true'
+		ret += indent+'if effect'+str(formulaId)+' == True: # IF OR'
+	elif effectType == "and":
+		ret += indent+'effect'+str(formulaId)+' = True # AND initialization as true'
+		first = True
+		for part in effectBody[0]:
+			if first: first = False
+			else:
+				ret += indent+'if effect'+str(formulaId)+': # if still true'
+				indent += '\t'
+			text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(part, indent, 'and', stuff)
+			ret += text
+			ret += indent+'if effect'+str(formulaIdRet)+' == False: # if what\'s inside the AND is false'
+			ret += indent+'\teffect'+str(formulaId)+' = False # make the AND false'
+	elif effectType == "forall":
+		ret += indent+'effect'+str(formulaId)+' = True # FORALL initialization as true'
+		for V in effectBody[0]:
+			n = V[0]
+			t = V[1]
+			ret += indent+"for symbol_"+n+"_name in nodes:"
+			indent += "\t"
+			ret += indent+"if effect"+str(formulaId)+"==False: break"
+			ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
+			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+			ret += indent+"if symbol_"+n+".sType == '"+t+"':"
+		ret += indent+'# now the body of the FORALL'
+		text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody[1], indent+'\t', 'forall', stuff)
+		ret += text
+		ret += indent+'if effect'+str(formulaIdRet)+' == False: # if what\'s inside the FORALL is false'
+		ret += indent+'\teffect'+str(formulaId)+' = False # make the FORALL false'
+	elif effectType == "when":
+		ret += indent+'effect'+str(formulaId)+' = True # WHEN initialization as true'
+		text, indent, formulaIdRet1, stuff = normalRuleImplementation_EFFECT(effectBody[0], indent+'\t', 'whenA', stuff)
+		ret += text
+		ret += indent+'if effect'+str(formulaIdRet1)+' == True: # if what\'s inside the WHEN(if) is True'
+		text, indent, formulaIdRet2, stuff = normalRuleImplementation_EFFECT(effectBody[1], indent+'\t', 'whenB', stuff)
+		ret += text
+		ret += indent+'if effect'+str(formulaIdRet2)+' == False: # if what\'s inside the WHEN(then) is False'
+		ret += indent+'\teffect'+str(formulaId)+' = False # make the WHEN false'
+	elif effectType == "=":
+		ret += indent+'effect'+str(formulaId) + ' = (n2id["'+effectBody[0]+'"] == n2id["'+effectBody[1]+' "])'
+	else:
+		try:
+			ret += indent+'effect'+str(formulaId) + ' = ['
+			ret += 'n2id["'+effectBody[0]+'"],'
+			ret += 'n2id["'+effectBody[1]+' "],"'
+			ret += effectType + '"] in snode.graph.links # LINK'
+		except:
+			print 'ERROR IN', effectType
+			print 'ERROR IN', effectBody
 			traceback.print_exc()
 	return ret, indent, formulaId, stuff
 

@@ -31,10 +31,11 @@ LOADTRUCK : active(3)
 				loc4:LCTN
 				(when
 					(and
+						(not (= truck loc3))
 						(at truck loc3)
 						(at truck loc4)
 					)
-					(at loc3 loc4)
+					(= loc3 loc4)
 				)
 			)
 		)

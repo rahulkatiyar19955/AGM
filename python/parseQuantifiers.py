@@ -23,12 +23,10 @@ class AGGL_QuantifierLink:
 class AGGLCodeParsing:
 	@staticmethod
 	def parseParameters(text, verbose=False):
-		#print '<<'+text+'>>'
 		ids     = Word(srange("[a-zA-Z0-9_]"))
 		varDec  = Group(Combine(ids.setResultsName("var")+Literal(':')+ids.setResultsName("t")))
 		params  = OneOrMore(varDec)
 		r = params.parseString(text)
-		#print r
 		return r
 
 	@staticmethod
@@ -40,6 +38,7 @@ class AGGLCodeParsing:
 		pc      = Suppress(")")
 		lt      = Suppress("<")
 		gt      = Suppress(">")
+		eq      = Word("=")
 		not_    = Word("not")
 		and_    = Word("and")
 		or_     = Word("or")
@@ -57,6 +56,7 @@ class AGGLCodeParsing:
 		# Groups: complex elements, not, forall, when, create and the like
 		formula = Forward()
 		link          = Group( po +     ids.setResultsName("type") +                ids.setResultsName("a") + ids.setResultsName("b") + pc )
+		equalFormula  = Group( po +      eq.setResultsName("type") +                ids.setResultsName("a") + ids.setResultsName("b") + pc )
 		notFormula    = Group( po +    not_.setResultsName("type") +                                  formula.setResultsName("child") + pc )
 		andFormula    = Group( po +    and_.setResultsName("type") +                        OneOrMore(formula).setResultsName("more") + pc )
 		orFormula     = Group( po +     or_.setResultsName("type") +                        OneOrMore(formula).setResultsName("more") + pc )
@@ -67,7 +67,7 @@ class AGGLCodeParsing:
 		delete        = Group( po + delete_.setResultsName("type") +                                       ids.setResultsName("name") + pc )
 		retype        = Group( po + retype_.setResultsName("type") +          ids.setResultsName("name") + ids.setResultsName("type") + pc )
 		# Parse call
-		formula << (notFormula | andFormula | link | orFormula | forallFormula | whenFormula | create | delete | retype | functionCall )
+		formula << (notFormula | andFormula | link | equalFormula | orFormula | forallFormula | whenFormula | create | delete | retype | functionCall )
 		return formula.parseWithTabs().parseString(text)
 
 

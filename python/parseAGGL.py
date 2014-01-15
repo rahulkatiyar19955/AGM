@@ -230,8 +230,6 @@ class AGMFileDataParsing:
 				if debug: print pre+str(i),
 			if debug: print ''
 			effect = AGMFileDataParsing.interpretPrecondition(tree.child, pre+"\t")
-			for v in tree.vars:
-				print v
 			ret = ["forall", [[x.var, x.t] for x in tree.vars], effect]
 			return ret
 		elif tree.type == "when":
@@ -241,6 +239,9 @@ class AGMFileDataParsing:
 			if debug: print pre+'\tthen'
 			then = AGMFileDataParsing.interpretPrecondition(tree.then, pre+"\t\t")
 			return ["when", iff, then]
+		elif tree.type == "=":
+			if debug: print pre+'='
+			return ["=", tree.a, tree.b]
 		else:
 			if debug: print pre+"link <"+tree.type+"> between <"+tree.a+"> and <"+tree.b+">"
 			return [tree.type, tree.a, tree.b]
@@ -279,6 +280,9 @@ class AGMFileDataParsing:
 			if debug: print pre+'\tthen'
 			then = AGMFileDataParsing.interpretEffect(tree.then, pre+"\t\t")
 			return ["when", iff, then]
+		elif tree.type == "=":
+			if debug: print pre+'='
+			return ["=", tree.a, tree.b]
 		else:
 			if debug: print pre+"link <"+tree.type+"> between <"+tree.a+"> and <"+tree.b+">"
 			return [tree.type, tree.a, tree.b]
