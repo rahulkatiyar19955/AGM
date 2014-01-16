@@ -170,9 +170,9 @@ def normalRuleImplementation(rule, ret, indent):
 	for i in rule.parameters:
 		nodesPlusParameters[i[0]] = AGMSymbol(i[0], i[1])
 	# >>>
-	print 'normalRuleImplementation.parameters', rule.parameters
-	print 'normalRuleImplementation.precondition', rule.precondition
-	print 'normalRuleImplementation.effect', rule.effect
+	#print 'normalRuleImplementation.parameters', rule.parameters
+	#print 'normalRuleImplementation.precondition', rule.precondition
+	#print 'normalRuleImplementation.effect', rule.effect
 	ret += indent+"def " + rule.name + "(self, snode, stackP=[], equivalencesP=[]):"
 	indent += "\t"
 	ret += indent + "stack        = copy.deepcopy(stackP)"
@@ -395,7 +395,7 @@ def normalRuleImplementation(rule, ret, indent):
 	# Quantifier-related code (EFFECT)
 	# <<<
 	if rule.effect != None:
-		print rule.name, 'has effects!'
+		#print rule.name, 'has effects!'
 		ret += indent+"# Textual effects"
 		effectCode, indent, effectId, stuff = normalRuleImplementation_EFFECT(rule.effect, indent)
 		ret += effectCode
@@ -503,7 +503,7 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 	stuff['availableid'] += 1
 	ret = ''
 
-	print 'normalRuleImplementation EFFECT #'+str(effectType)+'# ', ' #'+str(effectBody)+'#'
+	#print 'normalRuleImplementation EFFECT #'+str(effectType)+'# ', ' #'+str(effectBody)+'#'
 	if effectType == "not":
 		effectBody = effectBody[0]
 		if stuff['mode'] == 'condition':

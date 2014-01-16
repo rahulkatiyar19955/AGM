@@ -6,7 +6,7 @@ import sys
 from parseQuantifiers import *
 
 debug = False
-debug = True
+#debug = True
 
 class AGMGraphParsing:
 	@staticmethod
