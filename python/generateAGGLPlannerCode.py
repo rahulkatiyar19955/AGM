@@ -508,8 +508,8 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 	print effectBody
 	print 'normalRuleImplementation EFFECT #'+str(effectType)+'# ', ' #'+str(effectBody)+'#'
 	if effectType == "not":
+		effectBody = effectBody[0]
 		if stuff['mode'] == 'condition':
-			#effectBody = effectBody[0]
 			print 'CONDITION NOT EFFECT inside not, the body is', effectBody
 			text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody, indent, 'not', stuff)
 			ret += text
@@ -521,13 +521,8 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 			text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody, indent, 'not', stuff)
 			ret += text
 	elif effectType == "or":
-		ret += indent+'effect'+str(formulaId)+' = False # or initialization'
-		for part in effectBody[0]:
-			text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(part, indent, 'or', stuff)
-			ret += text
-			ret += indent+'if effect'+str(formulaIdRet)+' == True: # inside OR'
-			ret += indent+'\teffect'+str(formulaId)+' = True # make OR true'
-		ret += indent+'if effect'+str(formulaId)+' == True: # IF OR'
+		print 'OR statements are not allowed in effects'
+		sys.exit(1)
 	elif effectType == "and":
 		if stuff['mode'] == "condition":
 			ret += indent+'effect'+str(formulaId)+' = True # AND initialization as true'
