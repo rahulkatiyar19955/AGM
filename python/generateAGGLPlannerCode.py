@@ -501,11 +501,8 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 	effectType, effectBody = effect[0], effect[1:]
 	formulaId = stuff['availableid']
 	stuff['availableid'] += 1
-	ret = '\n'+str(effectType)
+	ret = ''
 
-	print '---'
-	print effectType
-	print effectBody
 	print 'normalRuleImplementation EFFECT #'+str(effectType)+'# ', ' #'+str(effectBody)+'#'
 	if effectType == "not":
 		effectBody = effectBody[0]
@@ -523,6 +520,7 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 	elif effectType == "or":
 		print 'OR statements are not allowed in effects'
 		sys.exit(1)
+# Partially done, the conditional mode is not tested 
 	elif effectType == "and":
 		if stuff['mode'] == "condition":
 			ret += indent+'effect'+str(formulaId)+' = True # AND initialization as true'
@@ -541,7 +539,6 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 				text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(part, indent, 'and', stuff)
 				ret += text
 	elif effectType == "forall":
-		ret += indent+'effect'+str(formulaId)+' = True # FORALL initialization as true'
 		for V in effectBody[0]:
 			n = V[0]
 			t = V[1]
@@ -554,19 +551,16 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 		ret += indent+'# now the body of the FORALL'
 		text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody[1], indent+'\t', 'forall', stuff)
 		ret += text
-		ret += indent+'if effect'+str(formulaIdRet)+' == False: # if what\'s inside the FORALL is false'
-		ret += indent+'\teffect'+str(formulaId)+' = False # make the FORALL false'
 	elif effectType == "when":
-		ret += indent+'effect'+str(formulaId)+' = True # WHEN initialization as true'
+		stuff['mode'] = 'condition'
 		text, indent, formulaIdRet1, stuff = normalRuleImplementation_EFFECT(effectBody[0], indent+'\t', 'whenA', stuff)
+		stuff['mode'] = 'normal'
 		ret += text
-		ret += indent+'if effect'+str(formulaIdRet1)+' == True: # if what\'s inside the WHEN(if) is True'
+		ret += indent+'if condition'+str(formulaIdRet1)+' == True: # if what\'s inside the WHEN(if) is True'
 		text, indent, formulaIdRet2, stuff = normalRuleImplementation_EFFECT(effectBody[1], indent+'\t', 'whenB', stuff)
-		ret += text
-		ret += indent+'if effect'+str(formulaIdRet2)+' == False: # if what\'s inside the WHEN(then) is False'
-		ret += indent+'\teffect'+str(formulaId)+' = False # make the WHEN false'
 	elif effectType == "=":
-		ret += indent+'effect'+str(formulaId) + ' = (n2id["'+effectBody[0]+'"] == n2id["'+effectBody[1]+' "])'
+		print '\'=\' statements are not allowed in effects'
+		sys.exit(1)
 	else:
 		try:
 			if stuff['mode'] == "condition":
@@ -575,7 +569,6 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 				ret += 'n2id["'+effectBody[1]+' "],"'
 				ret += effectType + '"] in snode.graph.links # LINK'
 			else:
-				print effectBody, '@@@@@@@@@@@@@@@@@@@@'
 				if modifier == 'not':
 					ret += indent+'if     [n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+' "], "' + effectType + '"] in newNode.graph.links:'
 					ret += indent+'\tnewNode.graph.links.remove([n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+' "], "' + effectType + '"])'
@@ -587,7 +580,7 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 			print 'ERROR IN', effectBody
 			traceback.print_exc()
 			
-	ret += "end "+str(effectType)
+	#ret += "end "+str(effectType)
 	return ret, indent, formulaId, stuff
 
 def generate(agm, skipPassiveRules):
