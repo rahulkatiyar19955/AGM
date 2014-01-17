@@ -60,6 +60,7 @@ class AGGLCodeParsing:
 		notFormula    = Group( po +    not_.setResultsName("type") +                                  formula.setResultsName("child") + pc )
 		andFormula    = Group( po +    and_.setResultsName("type") +                        OneOrMore(formula).setResultsName("more") + pc )
 		orFormula     = Group( po +     or_.setResultsName("type") +                        OneOrMore(formula).setResultsName("more") + pc )
+		existsFormula = Group( po + exists_.setResultsName("type") +  params.setResultsName("vars") + formula.setResultsName("child") + pc )
 		forallFormula = Group( po + forall_.setResultsName("type") +  params.setResultsName("vars") + formula.setResultsName("child") + pc )
 		whenFormula   = Group( po +   when_.setResultsName("type") +   formula.setResultsName("iff") + formula.setResultsName("then") + pc )
 		functionCall  = Group( lt +     ids.setResultsName("func") +                       OneOrMore(ids).setResultsName("arguments") + gt )
@@ -67,7 +68,7 @@ class AGGLCodeParsing:
 		delete        = Group( po + delete_.setResultsName("type") +                                       ids.setResultsName("name") + pc )
 		retype        = Group( po + retype_.setResultsName("type") +          ids.setResultsName("name") + ids.setResultsName("type") + pc )
 		# Parse call
-		formula << (notFormula | andFormula | link | equalFormula | orFormula | forallFormula | whenFormula | create | delete | retype | functionCall )
+		formula << (notFormula | andFormula | link | equalFormula | orFormula | existsFormula | forallFormula | whenFormula | create | delete | retype | functionCall )
 		return formula.parseWithTabs().parseString(text)
 
 

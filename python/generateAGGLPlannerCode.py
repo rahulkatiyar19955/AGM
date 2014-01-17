@@ -366,7 +366,7 @@ def normalRuleImplementation(rule, ret, indent):
 	if debug:
 		ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
 	# Create nodes
-	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs)
+	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs, rule.parameters)
 	ret += indent+"# Create nodes"
 	for newNode in newNodes:
 		ret += indent+"newName = str(getNewIdForSymbol(newNode))"
@@ -380,15 +380,17 @@ def normalRuleImplementation(rule, ret, indent):
 	# Remove nodes
 	for deleteNode in deleteNodes:
 		ret += indent+"del newNode.graph.nodes[smap['"+deleteNode.name+"']]"
-	ret += indent+"newNode.graph.removeDanglingEdges()"
+	if len(deleteNodes)>0:
+		ret += indent+"newNode.graph.removeDanglingEdges()"
 	# Remove links
 	newLinks, deleteLinks = rule.lhs.getLinkChanges(rule.rhs)
 	ret += indent+"# Remove links"
-	deleteLinks_str = ''
-	for l in range(len(deleteLinks)):
-		if l > 0: deleteLinks_str += ", "
-		deleteLinks_str += "[smap['" + deleteLinks[l].a + "'], smap['" + deleteLinks[l].b + "'], '" + deleteLinks[l].linkType + "']"
-	ret += indent+"newNode.graph.links = [x for x in newNode.graph.links if [x.a, x.b, x.linkType] not in [ "+deleteLinks_str+" ]]"
+	if len(deleteLinks)>0:
+		deleteLinks_str = ''
+		for l in range(len(deleteLinks)):
+			if l > 0: deleteLinks_str += ", "
+			deleteLinks_str += "[smap['" + deleteLinks[l].a + "'], smap['" + deleteLinks[l].b + "'], '" + deleteLinks[l].linkType + "']"
+		ret += indent+"newNode.graph.links = [x for x in newNode.graph.links if [x.a, x.b, x.linkType] not in [ "+deleteLinks_str+" ]]"
 	# Create links
 	ret += indent+"# Create links"
 	for newLink in newLinks:
@@ -487,8 +489,8 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 	else:
 		try:
 			ret += indent+'precondition'+str(formulaId) + ' = ['
-			ret += 'n2id["'+preconditionBody[0]+'"],'
-			ret += 'n2id["'+preconditionBody[1]+'"],"'
+			ret += 'n2id["'+preconditionBody[0]+'"], '
+			ret += 'n2id["'+preconditionBody[1]+'"], "'
 			ret += preconditionType + '"] in snode.graph.links # LINK'
 		except:
 			print 'ERROR IN', preconditionType
@@ -638,6 +640,8 @@ def CheckTarget(graph):"""
 	# Generate the loop that checks the actual model
 	symbols_in_stack = []
 	score = 0
+	ret += indent+"try:"
+	indent += "\t"
 	ret += indent+"# Hard score"
 	for n in graph.nodes:
 		ret += indent+"# "+n
@@ -675,6 +679,11 @@ def CheckTarget(graph):"""
 	ret += indent+"return score+scoreA, True"
 	# Rule ending
 	indent = "\n\t"
+	ret += indent+"except:"
+	ret += indent+"\tprint graph.nodes.keys()"
+	ret += indent+"\tprint 'ERROR'"
+	ret += indent+"\timport sys"
+	ret += indent+"\tsys.exit(1)"
 	ret += indent+"return score+scoreA, False"
 	ret += indent+""
 	ret += indent+""

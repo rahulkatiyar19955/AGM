@@ -204,19 +204,28 @@ class AGMGraph(object):
 					self.links[l].color = "green"
 			else:
 				self.links[l].color = "white"
-	def getNodeChanges(self, other):
+	def getNodeChanges(self, other, parameters):
+		# Generate temporal variables
+		parametersDict = dict()
+		for i in parameters:
+			parametersDict[i[0]] = AGMSymbol(i[0], i[1])
+		L = dict( self.nodes, **parametersDict)
+		R = dict(other.nodes, **parametersDict)
+		# Initialize return values
 		toCreate = []
 		toRemove = []
 		toRetype = []
-		for name in self.nodes.keys():
-			if not name in other.nodes.keys():
-					toRemove.append(self.nodes[name])
+		# Find symbols to create and retype
+		for name in L.keys():
+			if not name in R.keys():
+					toRemove.append(L[name])
 			else:
-				if self.nodes[name].sType != other.nodes[name].sType:
-					toRetype.append(self.nodes[name])
-		for name in other.nodes.keys():
-			if not name in self.nodes.keys():
-					toCreate.append(other.nodes[name])
+				if L[name].sType != R[name].sType:
+					toRetype.append(L[name])
+		# Find symbols to remove
+		for name in R.keys():
+			if not name in L.keys():
+					toCreate.append(R[name])
 		return toCreate, toRemove, toRetype
 	def getLinkChanges(self, other):
 		toCreate = []
