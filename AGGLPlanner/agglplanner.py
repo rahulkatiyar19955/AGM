@@ -268,7 +268,7 @@ class PyPlan(object):
 			if verbose > 0: print "----------------\nExplored", explored, "nodes"
 
 if __name__ == '__main__': # program domain problem result
-	#from pycallgraph import PyCallGraph
+	#from pycallgraph import *
 	#from pycallgraph.output import GraphvizOutput
 	#graphviz = GraphvizOutput()
 	#graphviz.output_file = 'basic.png'

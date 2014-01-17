@@ -46,14 +46,14 @@
 		<attribute key="alias" value="package1" />
 	</symbol>
 	<link src="19" dst="5" label="at" />
-	<symbol id="20" type="OBJ" x="-330" y="-230">
+<!--	<symbol id="20" type="OBJ" x="-330" y="-230">
 		<attribute key="alias" value="package2" />
 	</symbol>
 	<link src="20" dst="5" label="at" />
 	<symbol id="21" type="OBJ" x="-260" y="-230">
 		<attribute key="alias" value="package3" />
 	</symbol>
-	<link src="21" dst="5" label="at" />
+	<link src="21" dst="5" label="at" />-->
 
 
 

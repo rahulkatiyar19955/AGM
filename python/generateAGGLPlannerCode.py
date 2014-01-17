@@ -6,7 +6,7 @@ sys.path.append('/opt/robocomp/share')
 from AGGL import *
 from xmlModelParser import *
 
-
+COPY_OPTION = "deepcopy"
 #debug = True
 debug = False
 scorePerContition = 100
@@ -89,8 +89,8 @@ def comboRuleImplementation(rule, r, indent):
 	ret = ''
 	ret += indent+"def " + rule.name + "(self, snode, stackP=[], equivalencesP=[]):"
 	indent += "\t"
-	ret += indent+"stack        = copy.deepcopy(stackP)"
-	ret += indent+"equivalences = copy.deepcopy(equivalencesP)"
+	ret += indent+"stack        = copy."+COPY_OPTION+"(stackP)"
+	ret += indent+"equivalences = copy."+COPY_OPTION+"(equivalencesP)"
 	#if debug:
 		#ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
 	if rule.mindepth > 0:
@@ -110,8 +110,8 @@ def comboRuleImplementation(rule, r, indent):
 	indent += "\t"
 	ret += indent+"aliasDict = dict()"
 	ret += indent+"sid = str(len(stack)+"+str(len(rule.atoms))+")"
-	#ret += indent+"stack = copy.deepcopy(stack)"
-	#ret += indent+"equivalences = copy.deepcopy(equivalences)"
+	#ret += indent+"stack = copy."+COPY_OPTION+"(stack)"
+	#ret += indent+"equivalences = copy."+COPY_OPTION+"(equivalences)"
 	ret += indent+"for atom in ["
 	a_n = 0
 	for a in reversed(rule.atoms):
@@ -175,9 +175,9 @@ def normalRuleImplementation(rule, ret, indent):
 	#print 'normalRuleImplementation.effect', rule.effect
 	ret += indent+"def " + rule.name + "(self, snode, stackP=[], equivalencesP=[]):"
 	indent += "\t"
-	ret += indent + "stack        = copy.deepcopy(stackP)"
-	ret += indent + "equivalences = copy.deepcopy(equivalencesP)"
-	ret += indent + "symbol_nodes_copy = copy.deepcopy(snode.graph.nodes)"
+	ret += indent + "stack        = copy."+COPY_OPTION+"(stackP)"
+	ret += indent + "equivalences = copy."+COPY_OPTION+"(equivalencesP)"
+	ret += indent + "symbol_nodes_copy = copy."+COPY_OPTION+"(snode.graph.nodes)"
 	ret += indent + "finishesCombo = ''"
 	#ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
 	if rule.mindepth > 0:
@@ -185,16 +185,16 @@ def normalRuleImplementation(rule, ret, indent):
 		indent += '\t'
 		ret += indent + "return []"
 		indent = indent[:-1]
-	#ret += indent+"stack = copy.deepcopy(stack)"
-	#ret += indent+"equivalences = copy.deepcopy(equivalences)"
+	#ret += indent+"stack = copy."+COPY_OPTION+"(stack)"
+	#ret += indent+"equivalences = copy."+COPY_OPTION+"(equivalences)"
 	ret += indent+"if len(stack) > 0:"
 	indent += "\t"
 	ret += indent+"pop = stack.pop()"
 	ret += indent+"me = pop[0]"
 	ret += indent+"if len(pop)>2:"
-	ret += indent+"\tfinishesCombo = copy.deepcopy(pop[2])"
+	ret += indent+"\tfinishesCombo = copy."+COPY_OPTION+"(pop[2])"
 	#ret += indent+"\tsnode.history.append('<'+finishesCombo)"
-	ret += indent+"\tfina = copy.deepcopy(pop[2])"
+	ret += indent+"\tfina = copy."+COPY_OPTION+"(pop[2])"
 
 	if debug:
 		ret += indent+"print snode.nodeId, 'from', snode.parentId"
@@ -223,7 +223,7 @@ def normalRuleImplementation(rule, ret, indent):
 		indent = indent[:-1]
 	ret += indent+"ret = []"
 	# Make a copy of the current graph node list
-	ret += indent+"nodes = copy.deepcopy(snode.graph.nodes)"
+	ret += indent+"nodes = copy."+COPY_OPTION+"(snode.graph.nodes)"
 	ret += indent+"n2id = dict()"
 	## Generate Link list
 	linkList = []
@@ -283,10 +283,10 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"# Insert additional conditions manually here if you want."
 	ret += indent+"# (beware that the code could be regenerated and you might lose your changes)."
 	#ret += indent+"print 'Running rule "+rule.name+"'"
-	ret += indent+"stack2        = copy.deepcopy(stack)"
-	ret += indent+"equivalences2 = copy.deepcopy(equivalences)"
-	ret += indent+"r1 = self."+rule.name+"_trigger(snode, n2id, stack2, equivalences2, copy.deepcopy(finishesCombo))"
-	ret += indent+"c = copy.deepcopy(r1)"
+	ret += indent+"stack2        = copy."+COPY_OPTION+"(stack)"
+	ret += indent+"equivalences2 = copy."+COPY_OPTION+"(equivalences)"
+	ret += indent+"r1 = self."+rule.name+"_trigger(snode, n2id, stack2, equivalences2, copy."+COPY_OPTION+"(finishesCombo))"
+	ret += indent+"c = copy."+COPY_OPTION+"(r1)"
 	ret += indent+"if 'fina' in locals():"
 	ret += indent+"\tc.history.append(finishesCombo)"
 	ret += indent+"if len(stack2) > 0: c.stop = True"
@@ -294,7 +294,7 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"if len(stack2) > 0:"
 	indent += "\t"
 	#ret += indent+"print '"+rule.name+" with stack'"
-	#ret += indent+"equiv_deriv = copy.deepcopy(equivalences)"
+	#ret += indent+"equiv_deriv = copy."+COPY_OPTION+"(equivalences)"
 
 	for n in optimal_node_list:
 		ret += indent+"# Set symbol for "+n+"..."
@@ -357,7 +357,7 @@ def normalRuleImplementation(rule, ret, indent):
 			ret += indent+"raise WrongRuleExecution('"+rule.name+"_trigger"+str(lelele)+" ')"
 			indent = indent[:-1]
 		indent = indent[:-1]
-	ret += indent+"smap = copy.deepcopy(n2id)"
+	ret += indent+"smap = copy."+COPY_OPTION+"(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
