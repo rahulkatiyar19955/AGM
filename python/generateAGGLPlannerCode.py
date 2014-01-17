@@ -214,11 +214,13 @@ def normalRuleImplementation(rule, ret, indent):
 		ret += indent+"symbol_"+n+"_nodes = [equiv[1]]"
 		indent = indent[:-2]
 	indent = indent[:-1]
-	ret += indent+"else:"
-	indent += "\t"
-	for n in nodesPlusParameters:
-		ret += indent+"symbol_"+n+"_nodes = symbol_nodes_copy"
-	indent = indent[:-1]
+	if len(nodesPlusParameters)>0:
+		print rule.name, len(nodesPlusParameters)
+		ret += indent+"else:"
+		indent += "\t"
+		for n in nodesPlusParameters:
+			ret += indent+"symbol_"+n+"_nodes = symbol_nodes_copy"
+		indent = indent[:-1]
 	ret += indent+"ret = []"
 	# Make a copy of the current graph node list
 	ret += indent+"nodes = copy.deepcopy(snode.graph.nodes)"
@@ -336,24 +338,25 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"# Rule " + rule.name
 	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True, finish=''):"
 	indent += "\t"
-	ret += indent+"if not checked:"
-	indent += "\t"
-	lelele = 0
-	symbols_in_stack = []
-	for n in optimal_node_list:
-		lelele += 1
-		ret += indent+"test_symbol_"+n+" = snode.graph.nodes[n2id['"+n+"']]"
-		ret += indent+"if not (test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
-		for other in symbols_in_stack:
-			ret += " and test_symbol_"+n+".name!=test_symbol_" + other + ".name"
-		conditions, number = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
-		ret += conditions
-		ret += "):"
-		symbols_in_stack.append(n)
+	if len(optimal_node_list)>0:
+		ret += indent+"if not checked:"
 		indent += "\t"
-		ret += indent+"raise WrongRuleExecution('"+rule.name+"_trigger"+str(lelele)+" ')"
+		lelele = 0
+		symbols_in_stack = []
+		for n in optimal_node_list:
+			lelele += 1
+			ret += indent+"test_symbol_"+n+" = snode.graph.nodes[n2id['"+n+"']]"
+			ret += indent+"if not (test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
+			for other in symbols_in_stack:
+				ret += " and test_symbol_"+n+".name!=test_symbol_" + other + ".name"
+			conditions, number = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
+			ret += conditions
+			ret += "):"
+			symbols_in_stack.append(n)
+			indent += "\t"
+			ret += indent+"raise WrongRuleExecution('"+rule.name+"_trigger"+str(lelele)+" ')"
+			indent = indent[:-1]
 		indent = indent[:-1]
-	indent = indent[:-1]
 	ret += indent+"smap = copy.deepcopy(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
 	ret += indent+"global lastNodeId"
@@ -480,12 +483,12 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 		ret += indent+'if precondition'+str(formulaIdRet2)+' == False: # if what\'s inside the WHEN(then) is False'
 		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the WHEN false'
 	elif preconditionType == "=":
-		ret += indent+'precondition'+str(formulaId) + ' = (n2id["'+preconditionBody[0]+'"] == n2id["'+preconditionBody[1]+' "])'
+		ret += indent+'precondition'+str(formulaId) + ' = (n2id["'+preconditionBody[0]+'"] == n2id["'+preconditionBody[1]+'"])'
 	else:
 		try:
 			ret += indent+'precondition'+str(formulaId) + ' = ['
 			ret += 'n2id["'+preconditionBody[0]+'"],'
-			ret += 'n2id["'+preconditionBody[1]+' "],"'
+			ret += 'n2id["'+preconditionBody[1]+'"],"'
 			ret += preconditionType + '"] in snode.graph.links # LINK'
 		except:
 			print 'ERROR IN', preconditionType
@@ -566,15 +569,15 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 			if stuff['mode'] == "condition":
 				ret += indent+'effect'+str(formulaId) + ' = ['
 				ret += 'n2id["'+effectBody[0]+'"],'
-				ret += 'n2id["'+effectBody[1]+' "],"'
+				ret += 'n2id["'+effectBody[1]+'"],"'
 				ret += effectType + '"] in snode.graph.links # LINK'
 			else:
 				if modifier == 'not':
-					ret += indent+'if     [n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+' "], "' + effectType + '"] in newNode.graph.links:'
-					ret += indent+'\tnewNode.graph.links.remove([n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+' "], "' + effectType + '"])'
+					ret += indent+'if     [n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"] in newNode.graph.links:'
+					ret += indent+'\tnewNode.graph.links.remove([n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"])'
 				else:
-					ret += indent+'if not [n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+' "], "' + effectType + '"] in newNode.graph.links:'
-					ret += indent+'\tnewNode.graph.links.append([n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+' "], "' + effectType + '"])'
+					ret += indent+'if not [n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"] in newNode.graph.links:'
+					ret += indent+'\tnewNode.graph.links.append([n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"])'
 		except:
 			print 'ERROR IN', effectType
 			print 'ERROR IN', effectBody
