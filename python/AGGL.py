@@ -354,10 +354,12 @@ class AGMRule(object):
 		ret += self.lhs.toString() + '\n'
 		ret += '\t=>\n'
 		ret += self.rhs.toString() + '\n'
-		if len(self.conditions) > 0:
-			ret += '\tconditions\n\t{' + self.conditions + '}\n'
-		if len(self.effects) > 0:
-			ret += '\teffects\n\t{' + self.effects + '}\n'
+		if len(self.parameters) > 0:
+			ret += '\tparameters\n\t{' + self.parameters + '}\n'
+		if len(self.precondition) > 0:
+			ret += '\tprecondition\n\t{' + self.precondition + '}\n'
+		if len(self.effect) > 0:
+			ret += '\teffect\n\t{' + self.effect + '}\n'
 		ret += '}'
 		return ret
 	def forgetNodesList(self):

@@ -25,7 +25,7 @@ class AGGLCodeParsing:
 	def parseParameters(text, verbose=False):
 		ids     = Word(srange("[a-zA-Z0-9_]"))
 		varDec  = Group(Combine(ids.setResultsName("var")+Literal(':')+ids.setResultsName("t")))
-		params  = OneOrMore(varDec)
+		params  = ZeroOrMore(varDec)
 		r = params.parseString(text)
 		return r
 
@@ -69,6 +69,7 @@ class AGGLCodeParsing:
 		retype        = Group( po + retype_.setResultsName("type") +          ids.setResultsName("name") + ids.setResultsName("type") + pc )
 		# Parse call
 		formula << (notFormula | andFormula | link | equalFormula | orFormula | existsFormula | forallFormula | whenFormula | create | delete | retype | functionCall )
-		return formula.parseWithTabs().parseString(text)
+		formulaOpt = Optional(formula)
+		return formulaOpt.parseWithTabs().parseString(text)
 
 

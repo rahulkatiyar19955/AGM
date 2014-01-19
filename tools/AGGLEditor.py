@@ -116,6 +116,9 @@ class AGMEditor(QMainWindow):
 
 		#self.ui.splitter.setStyleSheet("QSplitter::handle { background-color: gray }");
 
+		self.connect(self.ui.textParameters,   SIGNAL("textChanged(int)"),  self.textParametersChanged)
+		self.connect(self.ui.textPrecondition, SIGNAL("textChanged(int)"),  self.textPreconditionChanged)
+		self.connect(self.ui.textEffect,       SIGNAL("textChanged(int)"),  self.textEffectChanged)
 
 
 		self.shortcutDown = QShortcut(QKeySequence("PgDown"), self)
@@ -123,7 +126,7 @@ class AGMEditor(QMainWindow):
 		self.connect(self.shortcutDown, SIGNAL("activated()"), self.pgDown)
 		self.connect(self.shortcutUp,   SIGNAL("activated()"), self.pgUp)
 
-		self.setAdvanced(False)
+		#self.setAdvanced(False)
 
 		# Get settings
 		settings = QSettings("AGM", "mainWindowGeometry")
@@ -195,11 +198,9 @@ class AGMEditor(QMainWindow):
 		self.ui.splitter.setSizes([int(0.65*sh), int(0.35*sh)])
 	def setAdvanced(self, show):
 		if show:
-			self.ui.tabWidget.insertTab(1, self.ui.tabPreconditions, "Additional preconditions")
-			self.ui.tabWidget.insertTab(2, self.ui.tabEffects, "Additional effects")
+			self.ui.tabWidget.insertTab(1, self.ui.tabParameters, "Textual code")
 			self.ui.tabWidget.setCurrentIndex(0)
 		else:
-			self.ui.tabWidget.removeTab(1)
 			self.ui.tabWidget.removeTab(1)
 			self.ui.tabWidget.setCurrentIndex(0)
 
@@ -266,6 +267,24 @@ class AGMEditor(QMainWindow):
 		if type(self.agmData.agm.rules[ruleN]) == AGMRule:
 			self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
 			self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
+			try:
+				self.ui.textParameters.setText(self.agmData.agm.rules[ruleN].parameters.replace("\n\t\t", "\n").lstrip())
+			except:
+				print 'uuuuuuuu self.ui.textParameters'
+				print traceback.format_exc()
+				print 'uuuuuuuu self.ui.textParameters'
+			try:
+				self.ui.textPrecondition.setText(self.agmData.agm.rules[ruleN].precondition.replace("\n\t\t", "\n").lstrip())
+			except:
+				print 'uuuuuuuu self.ui.textPrecondition'
+				print traceback.format_exc()
+				print 'uuuuuuuu self.ui.textPrecondition'
+			try:
+				self.ui.textEffect.setText(self.agmData.agm.rules[ruleN].effect.replace("\n\t\t", "\n").lstrip())
+			except:
+				print 'uuuuuuuu self.ui.textEffect'
+				print traceback.format_exc()
+				print 'uuuuuuuu self.ui.textEffect'
 		else:
 			d1 = dict()
 			d1['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...")
@@ -422,6 +441,13 @@ class AGMEditor(QMainWindow):
 	
 		self.agmData.toFile(path)
 		self.modified = False
+
+	def textParametersChanged(self):
+		self.agmData.agm.rules[self.ui.rulesList.currentRow()].parameters = str(self.ui.textParameters)
+	def textPreconditionChanged(self):
+		self.agmData.agm.rules[self.ui.rulesList.currentRow()].precondition = str(self.ui.textPrecondition)
+	def textEffectChanged(self):
+		self.agmData.agm.rules[self.ui.rulesList.currentRow()].effect = str(self.ui.textEffect)
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)

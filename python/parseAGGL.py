@@ -182,18 +182,30 @@ class AGMFileDataParsing:
 			effectRec = None
 			if verbose: print '\nRule:('+str(number)+')'
 			#print 'Parameters:', i.parameters
-			if len(i.parameters) > 0:
+			try:
 				parametersTree = AGGLCodeParsing.parseParameters(str(i.parameters[0]))
 				parametersList = AGMFileDataParsing.interpretParameters(parametersTree)
+			except:
+				parametersList = None
 			#print 'Precondition:', i.precondition
-			if len(i.precondition) > 0:
+			try:
 				preconditionTree = AGGLCodeParsing.parseFormula(str(i.precondition[0]))
 				preconditionRec = AGMFileDataParsing.interpretPrecondition(preconditionTree[0])
+			except:
+				preconditionRec = None
 			#print 'Effect:', i.effect
-			if len(i.effect) > 0:
+			try:
 				effectTree = AGGLCodeParsing.parseFormula(str(i.effect[0]))
 				effectRec = AGMFileDataParsing.interpretEffect(effectTree[0])
+			except:
+				effectRec = None
 			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, parametersList, preconditionRec, effectRec, verbose))
+			#print i.parameters[0]
+			#print i.precondition[0]
+			#print i.effect[0]
+			agmFD.agm.rules[-1].parameters   = str(i.parameters[0])
+			agmFD.agm.rules[-1].precondition = str(i.precondition[0])
+			agmFD.agm.rules[-1].effect       = str(i.effect[0])
 		return agmFD
 
 	@staticmethod

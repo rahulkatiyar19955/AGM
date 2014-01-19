@@ -148,7 +148,7 @@
         <item>
          <widget class="QTabWidget" name="tabWidget">
           <property name="currentIndex">
-           <number>2</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab">
            <attribute name="title">
@@ -202,23 +202,70 @@
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="tabPreconditions">
+          <widget class="QWidget" name="tabParameters">
            <attribute name="title">
-            <string>preconditions</string>
+            <string>Textual code</string>
            </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_6">
-            <item>
-             <widget class="QTextEdit" name="textPreconditions"/>
+           <layout class="QGridLayout" name="gridLayout">
+            <item row="1" column="0">
+             <widget class="QTextEdit" name="textParameters">
+              <property name="tabStopWidth">
+               <number>20</number>
+              </property>
+             </widget>
             </item>
-           </layout>
-          </widget>
-          <widget class="QWidget" name="tabEffects">
-           <attribute name="title">
-            <string>effects</string>
-           </attribute>
-           <layout class="QVBoxLayout" name="verticalLayout_5">
-            <item>
-             <widget class="QTextEdit" name="textEffects"/>
+            <item row="1" column="1">
+             <widget class="QTextEdit" name="textPrecondition">
+              <property name="tabStopWidth">
+               <number>20</number>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="2">
+             <widget class="QTextEdit" name="textEffect">
+              <property name="tabStopWidth">
+               <number>20</number>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Parameters</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_7">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Precondition</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_8">
+              <property name="font">
+               <font>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string>Effect</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
