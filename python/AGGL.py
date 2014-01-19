@@ -355,7 +355,7 @@ class AGMRule(object):
 		ret += '\t=>\n'
 		ret += self.rhs.toString() + '\n'
 		if len(self.parameters) > 0:
-			ret += '\tparameters\n\t{' + self.parameters + '}\n'
+			ret += '\tparameters\n\t{' + self.parameter + '}\n'
 		if len(self.precondition) > 0:
 			ret += '\tprecondition\n\t{' + self.precondition + '}\n'
 		if len(self.effect) > 0:
