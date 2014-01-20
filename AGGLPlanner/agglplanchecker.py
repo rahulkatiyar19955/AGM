@@ -66,21 +66,25 @@ class PyPlanChecker(object):
 				print 'result:'
 				print world
 				world.graph.toXML('after_plan_step'+str(line)+".xml")
+
+			# Get result
+			score, achieved = self.targetCode(world.graph)
+
+			if achieved:
+				print 'GOAL ACHIEVED'
+				for action in self.plan:
+					print action
+			else:
+				print 'Not achieved'
+
 		except WrongRuleExecution, e:
 			print 'Invalid rule execution', action
 			print 'Rule: ', e
 			print 'Line: ', line
-
-
-		# Get result
-		score, achieved = self.targetCode(world.graph)
-
-		if achieved:
-			print 'GOAL ACHIEVED'
-			for action in self.plan:
-				print action
-		else:
 			print 'Not achieved'
+		except:
+			print 'Not achieved'
+
 
 		if resultPath!='':
 			world.graph.toXML(resultPath)

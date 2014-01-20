@@ -212,7 +212,7 @@ class PyPlan(object):
 							if verbose>5: print '  ',k
 							prtd = True
 						explored += 1
-						if verbose > 2:
+						if verbose > 0:
 							if explored % 100 == 0:
 								print 'Explored nodes:', explored,
 								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
@@ -245,8 +245,9 @@ class PyPlan(object):
 						if not deriv in knownNodes and deriv.stop == False:
 							if len(deriv.graph.nodes.keys()) <= maxWorldSize:
 								knownNodes.append(head)
-								#heapq.heappush(openNodes, (-deriv.score, deriv)) # The more the better
-								heapq.heappush(openNodes, ( deriv.cost , deriv)) # The less the better
+								#heapq.heappush(openNodes, (-deriv.score, deriv)) # score... the more the better
+								heapq.heappush(openNodes, ( deriv.cost , deriv)) # cost...  the less the better
+								#heapq.heappush(openNodes, ( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUND COST AND SCORE
 								#heapq.heappush(openNodes, ( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUND COST AND SCORE
 		except IndexError, e:
 			if verbose > 0: print 'End: state space exhausted'
