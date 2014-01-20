@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env pypy
 
 # -*- coding: utf-8 -*-
 #
@@ -40,7 +40,7 @@ import inspect
 # C O N F I G U R A T I O N
 maxWorldIncrement = 40
 maxCost = 200
-stopWithFirstPlan = True
+stopWithFirstPlan = False
 verbose = 1
 
 
@@ -172,7 +172,7 @@ class PyPlan(object):
 		results = []
 		explored = 0
 
-		cheaperSolutionCost = -1
+		cheapsetSolutionCost = -1
 
 
 
@@ -182,11 +182,13 @@ class PyPlan(object):
 			self.initWorld.score, achieved = self.targetCode(self.initWorld.graph)
 			if achieved:
 				results.append(self.initWorld)
-				cheaperSolutionCost = results[0].cost
+				cheapsetSolutionCost = results[0].cost
 				for s in results:
-					if s.cost < cheaperSolutionCost: cheaperSolutionCost = s.cost
+					if s.cost < cheapsetSolutionCost: cheapsetSolutionCost = s.cost
+				# Check if we should stop because we are looking for the first solution
 				if stopWithFirstPlan:
 					raise GoalAchieved
+				
 			while True:
 				head = heapq.heappop(openNodes)[1]
 				if head.cost <= mincostOnList:
@@ -198,7 +200,7 @@ class PyPlan(object):
 							if n[1].cost < mincostOnList:
 								mincostOnList = n[1].cost
 				
-				if (len(results)>0 and head.cost>3*cheaperSolutionCost) or (head.cost > maxCost):
+				if (len(results)>0 and head.cost>3*cheapsetSolutionCost) or (head.cost > maxCost):
 					raise MaxCostReached(head.cost)
 				# Small test
 				if verbose>5: print 'Expanding'.ljust(5), head
@@ -210,7 +212,7 @@ class PyPlan(object):
 							if verbose>5: print '  ',k
 							prtd = True
 						explored += 1
-						if verbose > 0:
+						if verbose > 1:
 							if explored % 100 == 0:
 								print 'Explored nodes:', explored,
 								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
@@ -220,22 +222,30 @@ class PyPlan(object):
 						deriv.score, achieved = self.targetCode(deriv.graph)
 						if verbose>4: print deriv.score, achieved, deriv
 						if achieved:
+							print 'Found solution', deriv.cost
 							results.append(deriv)
-							cheaperSolutionCost = results[0].cost
-							for s in results:
-								if s.cost < cheaperSolutionCost: cheaperSolutionCost = s.cost
+							# Should we stop with the first plan?
 							if stopWithFirstPlan:
-								#print 'Goal ACHIEVED'
-								#printResult(deriv)
 								raise GoalAchieved
-							else:
-								print '+',
+							# Compute cheapest solution
+							cheapsetSolutionCost = results[0].cost
+							for s in results:
+								if s.cost < cheapsetSolutionCost:
+									cheapsetSolutionCost = s.cost
+							# Check if ws should stop because there are no cheaper possibilities
+							stopBecauseAllOpenNodesAreMoreExpensive = True
+							for c in openNodes:
+								if c[0] < cheapsetSolutionCost:
+									stopBecauseAllOpenNodesAreMoreExpensive = False
+									break
+							if stopBecauseAllOpenNodesAreMoreExpensive:
+								raise BestSolutionFound
 						if not deriv in knownNodes and deriv.stop == False:
 							if len(deriv.graph.nodes.keys()) <= maxWorldSize:
 								knownNodes.append(head)
 								#heapq.heappush(openNodes, (-deriv.score, deriv)) # The more the better
-								#heapq.heappush(openNodes, ( deriv.cost , deriv)) # The less the better
-								heapq.heappush(openNodes, ( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better
+								heapq.heappush(openNodes, ( deriv.cost , deriv)) # The less the better
+								#heapq.heappush(openNodes, ( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUND COST AND SCORE
 		except IndexError, e:
 			if verbose > 0: print 'End: state space exhausted'
 			pass

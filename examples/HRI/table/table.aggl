@@ -1011,12 +1011,6 @@ humanMovesMugFromTableToBox : active(1)
 		cs1->t(link)
 		s->c2(in)
 	}
-	parameters
-	{
-	}
-	precondition
-	{
-	}
 	effect
 	{
 		(forall
@@ -1064,21 +1058,15 @@ setTableClean : active(1)
 		s->m(link)
 		s->m(clean)
 	}
-	parameters
-	{
-	}
 	precondition
 	{
 		(forall
 			other:object
 			(when
 				(not (= o other))
-				(not (in other o)
+				(not (in other o))
 			)
 		)
-	}
-	effect
-	{
 	}
 }
 

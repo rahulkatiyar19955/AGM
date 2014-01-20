@@ -80,6 +80,7 @@ class PyPlanChecker(object):
 			for action in self.plan:
 				print action
 		if resultPath!='':
+			print 'Not achieved'
 			world.graph.toXML(resultPath)
 
 		

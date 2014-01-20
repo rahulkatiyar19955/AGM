@@ -23,10 +23,12 @@ class AGGL_QuantifierLink:
 class AGGLCodeParsing:
 	@staticmethod
 	def parseParameters(text, verbose=False):
+		t2 = text.strip("\n \t")
+		if len(t2)==0: return []
 		ids     = Word(srange("[a-zA-Z0-9_]"))
 		varDec  = Group(Combine(ids.setResultsName("var")+Literal(':')+ids.setResultsName("t")))
-		params  = ZeroOrMore(varDec)
-		r = params.parseString(text)
+		params  = OneOrMore(varDec)
+		r = params.parseString(t2)
 		return r
 
 	@staticmethod

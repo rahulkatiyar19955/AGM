@@ -180,32 +180,54 @@ class AGMFileDataParsing:
 			preconditionRec = None
 			parametersList = None
 			effectRec = None
-			if verbose: print '\nRule:('+str(number)+')'
-			#print 'Parameters:', i.parameters
-			try:
-				parametersTree = AGGLCodeParsing.parseParameters(str(i.parameters[0]))
-				parametersList = AGMFileDataParsing.interpretParameters(parametersTree)
-			except:
-				parametersList = None
-			#print 'Precondition:', i.precondition
-			try:
-				preconditionTree = AGGLCodeParsing.parseFormula(str(i.precondition[0]))
-				preconditionRec = AGMFileDataParsing.interpretPrecondition(preconditionTree[0])
-			except:
-				preconditionRec = None
-			#print 'Effect:', i.effect
-			try:
-				effectTree = AGGLCodeParsing.parseFormula(str(i.effect[0]))
-				effectRec = AGMFileDataParsing.interpretEffect(effectTree[0])
-			except:
-				effectRec = None
-			agmFD.addRule(AGMRuleParsing.parseRuleFromAST(i, parametersList, preconditionRec, effectRec, verbose))
+			# Read params
+			parametersStr = ''
+			parametersList = []
+			if i.parameters:
+				if len(str(i.parameters[0]).strip())>0:
+					#print 'Parameters: <'+str(i.parameters[0])+'>'
+					parametersStr = str(i.parameters[0])
+					parametersTree = AGGLCodeParsing.parseParameters(parametersStr)
+					parametersList = AGMFileDataParsing.interpretParameters(parametersTree)
+			# Read precond
+			preconditionStr = ''
+			preconditionTree = None
+			preconditionRec = None
+			if i.precondition:
+				if len(str(i.precondition[0]).strip())>0:
+					#print 'Precondition: <'+i.precondition[0]+'>'
+					preconditionStr = str(i.precondition[0])
+					preconditionTree = AGGLCodeParsing.parseFormula(preconditionStr)
+					if len(preconditionTree)>0: preconditionTree = preconditionTree[0]
+					preconditionRec = AGMFileDataParsing.interpretPrecondition(preconditionTree)
+			# Read effect
+			effectStr = ''
+			effectTree = None
+			effectRec = None
+			if i.effect:
+				if len(str(i.effect[0]).strip())>0:
+					#print 'Effect: <', str(i.effect[0])+'>'
+					effectStr = str(i.effect[0])
+					effectTree = AGGLCodeParsing.parseFormula(effectStr)
+					if len(effectTree)>0: effectTree = effectTree[0]
+					effectRec = AGMFileDataParsing.interpretEffect(effectTree)
+			# Build rule
+			rule = AGMRuleParsing.parseRuleFromAST(i, parametersList, preconditionRec, effectRec, verbose)
+			rule.parameters      = parametersStr
+			rule.parametersAST   = parametersList
+			rule.precondition    = preconditionStr
+			rule.preconditionAST = preconditionRec
+			rule.effect          = effectStr
+			rule.effectAST       = effectRec
+			#print rule.name
+			#print 'PARMS', rule.parametersAST
+			#print 'PRECN', rule.preconditionAST
+			#print 'EFFEC', rule.effectAST
+			agmFD.addRule(rule)
 			#print i.parameters[0]
 			#print i.precondition[0]
 			#print i.effect[0]
-			agmFD.agm.rules[-1].parameters   = str(i.parameters[0])
-			agmFD.agm.rules[-1].precondition = str(i.precondition[0])
-			agmFD.agm.rules[-1].effect       = str(i.effect[0])
+			number = number + 1
 		return agmFD
 
 	@staticmethod
@@ -242,7 +264,7 @@ class AGMFileDataParsing:
 				if debug: print pre+str(i),
 			if debug: print ''
 			effect = AGMFileDataParsing.interpretPrecondition(tree.child, pre+"\t")
-			ret = ["forall", [[x.var, x.t] for x in tree.vars], effect]
+			ret = ["forall", [[str(x.var), str(x.t)] for x in tree.vars], effect]
 			return ret
 		elif tree.type == "when":
 			if debug: print pre+'when'
@@ -284,7 +306,7 @@ class AGMFileDataParsing:
 				if debug: print pre+str(i),
 			if debug: print ''
 			effect = AGMFileDataParsing.interpretEffect(tree.child, pre+"\t")
-			return ["forall", tree.vars, effect]
+			return ["forall", [[str(x.var), str(x.t)] for x in tree.vars], effect]
 		elif tree.type == "when":
 			if debug: print pre+'when'
 			if debug: print pre+'\tif'

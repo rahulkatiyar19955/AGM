@@ -167,8 +167,9 @@ def normalRuleImplementation(rule, ret, indent):
 	# Quantifier-related code (PARAMETERS)
 	# <<<
 	nodesPlusParameters = rule.lhs.nodes
-	for i in rule.parameters:
-		nodesPlusParameters[i[0]] = AGMSymbol(i[0], i[1])
+	if len(rule.parameters.strip()) > 0:
+		for i in rule.parametersAST:
+			nodesPlusParameters[i[0]] = AGMSymbol(i[0], i[1])
 	# >>>
 	#print 'normalRuleImplementation.parameters', rule.parameters
 	#print 'normalRuleImplementation.precondition', rule.precondition
@@ -215,7 +216,7 @@ def normalRuleImplementation(rule, ret, indent):
 		indent = indent[:-2]
 	indent = indent[:-1]
 	if len(nodesPlusParameters)>0:
-		print rule.name, len(nodesPlusParameters)
+		#print rule.name, len(nodesPlusParameters)
 		ret += indent+"else:"
 		indent += "\t"
 		for n in nodesPlusParameters:
@@ -272,8 +273,8 @@ def normalRuleImplementation(rule, ret, indent):
 		indent += "\t"
 	# Quantifier-related code (PRECONDITION)
 	# <<<
-	if rule.precondition != None:
-		preconditionCode, indent, conditionId, stuff = normalRuleImplementation_PRECONDITION(rule.precondition, indent)
+	if rule.preconditionAST != None:
+		preconditionCode, indent, conditionId, stuff = normalRuleImplementation_PRECONDITION(rule.preconditionAST, indent)
 		ret += preconditionCode
 		ret += indent+'if precondition'+str(conditionId)+':'
 		indent += '\t'
@@ -354,7 +355,7 @@ def normalRuleImplementation(rule, ret, indent):
 			ret += "):"
 			symbols_in_stack.append(n)
 			indent += "\t"
-			ret += indent+"raise WrongRuleExecution('"+rule.name+"_trigger"+str(lelele)+" ')"
+			ret += indent+"raise WrongRuleExecution('"+rule.name+"_trigger"+str(lelele)+"')"
 			indent = indent[:-1]
 		indent = indent[:-1]
 	ret += indent+"smap = copy."+COPY_OPTION+"(n2id)"
@@ -366,7 +367,7 @@ def normalRuleImplementation(rule, ret, indent):
 	if debug:
 		ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
 	# Create nodes
-	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs, rule.parameters)
+	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs, rule.parametersAST)
 	ret += indent+"# Create nodes"
 	for newNode in newNodes:
 		ret += indent+"newName = str(getNewIdForSymbol(newNode))"
@@ -399,10 +400,10 @@ def normalRuleImplementation(rule, ret, indent):
 		ret += indent+"\tnewNode.graph.links.append(l)"
 	# Quantifier-related code (EFFECT)
 	# <<<
-	if rule.effect != None:
+	if rule.effectAST != None:
 		#print rule.name, 'has effects!'
 		ret += indent+"# Textual effects"
-		effectCode, indent, effectId, stuff = normalRuleImplementation_EFFECT(rule.effect, indent)
+		effectCode, indent, effectId, stuff = normalRuleImplementation_EFFECT(rule.effectAST, indent)
 		ret += effectCode
 	# >>>
 	# Misc stuff
@@ -424,6 +425,8 @@ def normalRuleImplementation(rule, ret, indent):
 # Here we define how preconditions are implemented in the generated code
 #
 def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stuff={'availableid':0}):
+	if len(precondition) == 0:
+		return '', indent, modifier, stuff
 	# Split the list in its head and body
 	preconditionType, preconditionBody = precondition[0], precondition[1:]
 	formulaId = stuff['availableid']
@@ -432,13 +435,13 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 
 	if preconditionType == "not":
 		preconditionBody = preconditionBody[0]
-		print 'PRECONDITION inside not, the body is', preconditionBody
+		ret += indent+'precondition'+str(formulaId)+' = True # init not'
 		text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody, indent, 'not', stuff)
 		ret += text
 		ret += indent+'if precondition'+str(formulaIdRet)+' == False: # inside not'
-		ret += indent+'\tprecondition'+str(formulaId)+'is TRUE! [because '+str(formulaIdRet)+' is False] # not'
+		ret += indent+'\tprecondition'+str(formulaId)+' == True  # [because '+str(formulaIdRet)+' is False] # not'
 		ret += indent+'else: # inside not is false'
-		ret += indent+'\tprecondition'+str(formulaId)+'is FALSE! [because '+str(formulaIdRet)+' is True] # not'
+		ret += indent+'\tprecondition'+str(formulaId)+' == False # [because '+str(formulaIdRet)+' is True] # not'
 	elif preconditionType == "or":
 		ret += indent+'precondition'+str(formulaId)+' = False # or initialization'
 		for part in preconditionBody[0]:
@@ -477,7 +480,7 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the FORALL false'
 	elif preconditionType == "when":
 		ret += indent+'precondition'+str(formulaId)+' = True # WHEN initialization as true'
-		text, indent, formulaIdRet1, stuff = normalRuleImplementation_PRECONDITION(preconditionBody[0], indent+'\t', 'whenA', stuff)
+		text, indent, formulaIdRet1, stuff = normalRuleImplementation_PRECONDITION(preconditionBody[0], indent, 'whenA', stuff)
 		ret += text
 		ret += indent+'if precondition'+str(formulaIdRet1)+' == True: # if what\'s inside the WHEN(if) is True'
 		text, indent, formulaIdRet2, stuff = normalRuleImplementation_PRECONDITION(preconditionBody[1], indent+'\t', 'whenB', stuff)
@@ -502,6 +505,8 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 # Here we define how effects are implemented in the generated code
 #
 def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availableid':0, 'mode':'normal'}):
+	if len(effect) == 0:
+		return '', indent, modifier, stuff
 	# Split the list in its head and body
 	effectType, effectBody = effect[0], effect[1:]
 	formulaId = stuff['availableid']
@@ -612,6 +617,7 @@ def CheckTarget(graph):"""
 		linkList.append([link.a, link.b, link.linkType])
 	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
 
+	ret += indent+"maxScore = 0"
 	ret += indent+"scoreA = 0"
 	ret += '\n'
 	easy = 1
@@ -663,7 +669,8 @@ def CheckTarget(graph):"""
 		symbols_in_stack.append(n)
 		indent += "\t"
 		score += scorePerContition
-		ret += indent + "if "+str(score)+" > score: score = " + str(score)
+		ret += indent + "score = " + str(score)
+		ret += indent + "if score > maxScore: maxScore = score"
 
 	allConditionsStr = ''
 	for c in conditionsListList:
@@ -674,9 +681,9 @@ def CheckTarget(graph):"""
 		if len(cond) > 1:
 			realCond += 1
 			ret += indent+"if " + cond + ": score += "+str(scorePerContition)+""
+	ret += indent+"if score > maxScore: maxScore = score"
 	ret += indent+"if score == " + str(score + realCond*scorePerContition) + ":"
-	indent +="\t"
-	ret += indent+"return score+scoreA, True"
+	ret += indent+"\treturn score+scoreA, True"
 	# Rule ending
 	indent = "\n\t"
 	ret += indent+"except:"

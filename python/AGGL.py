@@ -207,6 +207,7 @@ class AGMGraph(object):
 	def getNodeChanges(self, other, parameters):
 		# Generate temporal variables
 		parametersDict = dict()
+		#if len(parameters.strip()) > 0:
 		for i in parameters:
 			parametersDict[i[0]] = AGMSymbol(i[0], i[1])
 		L = dict( self.nodes, **parametersDict)
@@ -327,7 +328,7 @@ class AGMGraph(object):
 		f.close()
 
 class AGMRule(object):
-	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, parameters=[], precondition=None, effect=None):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, parameters='', precondition='', effect=''):
 		object.__init__(self)
 		self.name = name
 		self.lhs = lhs
@@ -336,7 +337,6 @@ class AGMRule(object):
 		self.passive = passive
 		self.mindepth = 0
 		self.parameters = parameters
-		if self.parameters == None: self.parameters = []
 		self.precondition = precondition
 		self.effect = effect
 		if lhs == None:
