@@ -436,13 +436,9 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 
 	if preconditionType == "not":
 		preconditionBody = preconditionBody[0]
-		ret += indent+'precondition'+str(formulaId)+' = True # init not'
 		text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody, indent, 'not', stuff)
 		ret += text
-		ret += indent+'if precondition'+str(formulaIdRet)+' == False: # inside not'
-		ret += indent+'\tprecondition'+str(formulaId)+' == True  # [because '+str(formulaIdRet)+' is False] # not'
-		ret += indent+'else: # inside not is false'
-		ret += indent+'\tprecondition'+str(formulaId)+' == False # [because '+str(formulaIdRet)+' is True] # not'
+		ret += indent+'precondition'+str(formulaId)+' = not precondition'+str(formulaIdRet)+' # this is a not'
 	elif preconditionType == "or":
 		ret += indent+'precondition'+str(formulaId)+' = False # or initialization'
 		for part in preconditionBody[0]:
@@ -465,6 +461,7 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 			ret += indent+'\tprecondition'+str(formulaId)+' = False # make the AND false'
 	elif preconditionType == "forall":
 		ret += indent+'precondition'+str(formulaId)+' = True # FORALL initialization as true'
+		indentA = indent
 		for V in preconditionBody[0]:
 			n = V[0]
 			t = V[1]
@@ -473,12 +470,13 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 			ret += indent+"if precondition"+str(formulaId)+"==False: break"
 			ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
 			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
-			ret += indent+"if symbol_"+n+".sType == '"+t+"':"
-		ret += indent+'# now the body of the FORALL'
-		text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody[1], indent+'\t', 'forall', stuff)
+			ret += indent+"if symbol_"+n+".sType == '"+t+"':  # now the body of the FORALL"
+			indent += "\t"
+		text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody[1], indent, 'forall', stuff)
 		ret += text
 		ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the FORALL is false'
 		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the FORALL false'
+		indent = indentA
 	elif preconditionType == "when":
 		ret += indent+'precondition'+str(formulaId)+' = True # WHEN initialization as true'
 		text, indent, formulaIdRet1, stuff = normalRuleImplementation_PRECONDITION(preconditionBody[0], indent, 'whenA', stuff)
@@ -557,8 +555,9 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 			indent += "\t"
 			ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
 			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
-			ret += indent+"if symbol_"+n+".sType == '"+t+"': # now the body of the FORALL"
-		text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody[1], indent+'\t', 'forall', stuff)
+			ret += indent+"if symbol_"+n+".sType == '"+t+"':  # now the body of the FORALL"
+			indent += "\t"
+		text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody[1], indent, 'forall', stuff)
 		ret += text
 	elif effectType == "when":
 		stuff['mode'] = 'condition'

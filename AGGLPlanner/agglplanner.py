@@ -78,15 +78,17 @@ class AGGLPlannerPlan(object):
 		if len(init)>0:
 			lines = open(init, 'r').readlines()
 			for line_i in range(len(lines)):
-				line = lines[line_i]
+				line = lines[line_i].strip()
 				while len(line)>0:
 					if line[-1]=='\n': line = line[:-1]
 					else: break
-				try:
-					self.data.append(AGGLPlannerAction(line))
-				except:
-					if len(line)>0:
-						print 'Error reading plan file', init+". Line", str(line_i)+": <<"+line+">>"
+				if len(line)>0:
+					if line[0] != '#':
+						try:
+							self.data.append(AGGLPlannerAction(line))
+						except:
+							if len(line)>0:
+								print 'Error reading plan file', init+". Line", str(line_i)+": <<"+line+">>"
 	def __iter__(self):
 		self.current = -1
 		return self
@@ -246,7 +248,7 @@ class PyPlan(object):
 							if len(deriv.graph.nodes.keys()) <= maxWorldSize:
 								knownNodes.append(head)
 								#heapq.heappush(openNodes, (-deriv.score, deriv)) # score... the more the better
-								heapq.heappush(openNodes, ( deriv.cost , deriv)) # cost...  the less the better
+								heapq.heappush(openNodes, ( deriv.cost, deriv)) # cost...  the less the better
 								#heapq.heappush(openNodes, ( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUND COST AND SCORE
 								#heapq.heappush(openNodes, ( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUND COST AND SCORE
 		except IndexError, e:

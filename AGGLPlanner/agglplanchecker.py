@@ -75,7 +75,7 @@ class PyPlanChecker(object):
 				for action in self.plan:
 					print action
 			else:
-				print 'Not achieved'
+				print 'Not achieved (didn\'t get to the goal)'
 
 		except WrongRuleExecution, e:
 			print 'Invalid rule execution', action
@@ -83,7 +83,7 @@ class PyPlanChecker(object):
 			print 'Line: ', line
 			print 'Not achieved'
 		except:
-			print 'Not achieved'
+			print 'Not achieved (error)'
 
 
 		if resultPath!='':
