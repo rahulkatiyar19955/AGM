@@ -401,12 +401,13 @@ def normalRuleImplementation(rule, ret, indent):
 	# Quantifier-related code (EFFECT)
 	# <<<
 	if rule.effectAST != None:
-		#print rule.name, 'has effects!'
 		ret += indent+"# Textual effects"
+		ret += indent+"nodes = copy."+COPY_OPTION+"(newNode.graph.nodes)"
 		effectCode, indent, effectId, stuff = normalRuleImplementation_EFFECT(rule.effectAST, indent)
 		ret += effectCode
 	# >>>
 	# Misc stuff
+	indent = '\n\t\t'
 	ret += indent+"# Misc stuff"
 	ret += indent+"newNode.probability *= 1."
 	ret += indent+"if len(stack) == 0:"
@@ -554,11 +555,9 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 			t = V[1]
 			ret += indent+"for symbol_"+n+"_name in nodes:"
 			indent += "\t"
-			ret += indent+"if effect"+str(formulaId)+"==False: break"
 			ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
 			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
-			ret += indent+"if symbol_"+n+".sType == '"+t+"':"
-		ret += indent+'# now the body of the FORALL'
+			ret += indent+"if symbol_"+n+".sType == '"+t+"': # now the body of the FORALL"
 		text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody[1], indent+'\t', 'forall', stuff)
 		ret += text
 	elif effectType == "when":
@@ -568,13 +567,14 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 		ret += text
 		ret += indent+'if condition'+str(formulaIdRet1)+' == True: # if what\'s inside the WHEN(if) is True'
 		text, indent, formulaIdRet2, stuff = normalRuleImplementation_EFFECT(effectBody[1], indent+'\t', 'whenB', stuff)
+		ret += text
 	elif effectType == "=":
 		print '\'=\' statements are not allowed in effects'
 		sys.exit(1)
 	else:
 		try:
 			if stuff['mode'] == "condition":
-				ret += indent+'effect'+str(formulaId) + ' = ['
+				ret += indent+'condition'+str(formulaId) + ' = ['
 				ret += 'n2id["'+effectBody[0]+'"],'
 				ret += 'n2id["'+effectBody[1]+'"],"'
 				ret += effectType + '"] in snode.graph.links # LINK'

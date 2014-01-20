@@ -212,7 +212,7 @@ class PyPlan(object):
 							if verbose>5: print '  ',k
 							prtd = True
 						explored += 1
-						if verbose > 1:
+						if verbose > 2:
 							if explored % 100 == 0:
 								print 'Explored nodes:', explored,
 								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
@@ -222,7 +222,7 @@ class PyPlan(object):
 						deriv.score, achieved = self.targetCode(deriv.graph)
 						if verbose>4: print deriv.score, achieved, deriv
 						if achieved:
-							print 'Found solution', deriv.cost
+							#print 'Found solution', deriv.cost
 							results.append(deriv)
 							# Should we stop with the first plan?
 							if stopWithFirstPlan:
@@ -240,6 +240,8 @@ class PyPlan(object):
 									break
 							if stopBecauseAllOpenNodesAreMoreExpensive:
 								raise BestSolutionFound
+							else:
+								print '+('+str(deriv.cost)+')'
 						if not deriv in knownNodes and deriv.stop == False:
 							if len(deriv.graph.nodes.keys()) <= maxWorldSize:
 								knownNodes.append(head)

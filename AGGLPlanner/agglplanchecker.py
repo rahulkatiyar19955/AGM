@@ -79,8 +79,10 @@ class PyPlanChecker(object):
 			print 'GOAL ACHIEVED'
 			for action in self.plan:
 				print action
-		if resultPath!='':
+		else:
 			print 'Not achieved'
+
+		if resultPath!='':
 			world.graph.toXML(resultPath)
 
 		
