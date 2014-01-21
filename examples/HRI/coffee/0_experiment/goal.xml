@@ -1,0 +1,11 @@
+<AGMModel>
+	<symbol id="6" type="status" />
+	<symbol id="10" type="table" />
+  	<link src="6" dst="10" label="clean" />
+
+  	<symbol id="boxObjject" type="object" />
+	<symbol id="boxStatus" type="status" />
+	<symbol id="boxType" type="box" />
+
+</AGMModel>
+
