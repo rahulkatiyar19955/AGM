@@ -52,7 +52,8 @@ class AGMRuleParsing:
 			mindepth = int(i.depth.value)
 		except:
 			mindepth = 0
-		if hasattr(i, 'lhs') and (hasattr(i, 'lhs') and hasattr(i, 'lhs')): # We are dealing with a normal rule!
+		if len(i.atomss)==0: # We are dealing with a normal rule!
+			#print 'Normal rule:', i.name
 			# We are dealing with a normal rule!
 			if verbose: print '\nRule:', i.name
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
@@ -69,20 +70,11 @@ class AGMRuleParsing:
 			else:
 				regular.effects = ''
 			return regular
-		elif hasattr(i, 'atomss'): # We are dealing with a rule combo!
-			if len(i.atomss) == 0:
-				print '  Error rrrrrrrrr  32423 trgf 2  Rule('+i.name+')'
-				sys.exit(-1)
-			#print '  Combo'
-			# We are dealing with a rule combo!
-			#print i.atoms
+		else: # We are dealing with a rule combo!
+			#print 'Combo rule:', i.name
 			combo = AGMComboRule(i.name, passive, i.cost, i.atomss.asList(), i.equivalences.asList())
 			combo.mindepth = mindepth
-			#print combo.toString()
 			return combo
-		else:
-			print '  Error rrrrrrrrr'
-			sys.exit(-1)
 		
 
 class AGMFileDataParsing:

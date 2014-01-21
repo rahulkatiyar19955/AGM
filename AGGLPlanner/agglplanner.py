@@ -28,7 +28,7 @@ import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 import sys, traceback, os, re, threading, time, string, math, copy
 import collections, imp, heapq
-
+import datetime
 sys.path.append('/opt/robocomp/share')
 
 import xmlModelParser
@@ -42,6 +42,7 @@ maxWorldIncrement = 40
 maxCost = 200
 stopWithFirstPlan = False
 verbose = 1
+maxTimeWait = 4.
 
 
 class GoalAchieved(Exception):
@@ -178,7 +179,7 @@ class PyPlan(object):
 
 
 
-
+		timeA = datetime.datetime.now()
 		# Main loop
 		try:
 			self.initWorld.score, achieved = self.targetCode(self.initWorld.graph)
@@ -192,6 +193,13 @@ class PyPlan(object):
 					raise GoalAchieved
 				
 			while True:
+				# Check if we should finish by time
+				timeB = datetime.datetime.now()
+				timeElapsed = (timeB-timeA).seconds + (timeB-timeA).microseconds/1e6
+				if timeElapsed > maxTimeWait:
+					if len(results)>0:
+						raise GoalAchieved
+				# Proceed
 				head = heapq.heappop(openNodes)[1]
 				if head.cost <= mincostOnList:
 					if len(openNodes)==0:
@@ -251,9 +259,9 @@ class PyPlan(object):
 								#heapq.heappush(openNodes, ( deriv.cost, deriv)) # cost...  the less the better
 								heapq.heappush(openNodes, ( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUND COST AND SCORE
 								#heapq.heappush(openNodes, ( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUND COST AND SCORE
-		except IndexError, e:
-			if verbose > 0: print 'End: state space exhausted'
-			pass
+		#except IndexError, e:
+			#if verbose > 0: print 'End: state space exhausted'
+			#pass
 		except MaxCostReached, e:
 			if verbose > 0: print 'End: max cost reached:', e.cost
 			pass
