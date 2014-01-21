@@ -165,7 +165,13 @@ class GraphDraw(QWidget):
 		painter.end()
 		painter = None
 
-
+	def setRandomly(self):
+		print 'setRandomly'
+		import random
+		for n in self.graph.nodes:
+			node = self.graph.nodes[n]
+			node.pos[0] = random.uniform(-1000,1000)
+			node.pos[1] = random.uniform(-1000,1000)
 
 	def iterateSpring(self):
 		# Constants
@@ -180,8 +186,14 @@ class GraphDraw(QWidget):
 		for node in self.graph.nodes:
 			if not node in self.velocities.keys():
 				self.velocities[node] = [0., 0.]
-			if type(self.graph.nodes[node].x) == str: self.graph.nodes[node].x = float(self.graph.nodes[node].x)
-			if type(self.graph.nodes[node].y) == str: self.graph.nodes[node].y = float(self.graph.nodes[node].y)
+			if type(self.graph.nodes[node].x) == str:
+				try:
+					self.graph.nodes[node].x = float(self.graph.nodes[node].x)
+				except:
+					print len(self.graph.nodes[node].x)
+					self.graph.nodes[node].x = 0.
+			if type(self.graph.nodes[node].y) == str:
+				self.graph.nodes[node].y = float(self.graph.nodes[node].y)
 		# Do the job
 		for n in self.graph.nodes:
 			node = self.graph.nodes[n]

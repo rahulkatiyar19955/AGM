@@ -186,9 +186,8 @@ if(DOXYGEN_FOUND)
 )
 endif(DOXYGEN_FOUND)
 
-#  fake project to execute command  #
-#####################################
-# add_subdirectory(libagm/fake)
+
+# Configure actual header with the proper options
 configure_file ("libagm/agm_config.in.h" "libagm/agm_config.h")
 
 

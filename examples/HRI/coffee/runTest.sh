@@ -1,7 +1,6 @@
 #!/usr/bin/env sh
 
-# tests="1_rule_findObjectVisually 2_findObject 3_findMug 4_cleanTable"
-tests="4_cleanTable"
+tests="0_experiment"
 
 for i in $tests;
 do
