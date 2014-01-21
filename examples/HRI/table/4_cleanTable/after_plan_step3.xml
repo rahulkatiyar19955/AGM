@@ -31,7 +31,7 @@
 	</symbol>
 	<symbol id="2" type="human">
 	</symbol>
-	<symbol id="5" type="notReach">
+	<symbol id="5" type="reach">
 	</symbol>
 	<symbol id="4" type="object">
 	</symbol>
@@ -43,17 +43,17 @@
 	</symbol>
 	<symbol id="8" type="position">
 	</symbol>
-	<symbol id="39" type="reachable">
+	<symbol id="13" type="reach">
 	</symbol>
-	<symbol id="38" type="status">
+	<symbol id="12" type="object">
 	</symbol>
 	<symbol id="11" type="classified">
 	</symbol>
 	<symbol id="10" type="table">
 	</symbol>
-	<symbol id="13" type="reach">
+	<symbol id="39" type="reachable">
 	</symbol>
-	<symbol id="12" type="object">
+	<symbol id="38" type="status">
 	</symbol>
 	<symbol id="15" type="reachable">
 	</symbol>
@@ -71,7 +71,7 @@
 	</symbol>
 	<symbol id="30" type="object">
 	</symbol>
-	<symbol id="37" type="notReach">
+	<symbol id="37" type="reach">
 	</symbol>
 	<symbol id="36" type="object">
 	</symbol>
@@ -109,7 +109,6 @@
 	<link src="22" dst="20" label="link" />
 	<link src="22" dst="24" label="link" />
 	<link src="14" dst="26" label="link" />
-	<link src="14" dst="4" label="in" />
 	<link src="2" dst="30" label="know" />
 	<link src="30" dst="32" label="has" />
 	<link src="32" dst="27" label="link" />
@@ -129,5 +128,7 @@
 	<link src="38" dst="39" label="link" />
 	<link src="38" dst="42" label="link" />
 	<link src="38" dst="4" label="in" />
+	<link src="14" dst="36" label="in" />
+	<link src="6" dst="10" label="clean" />
 </AGMModel>
 

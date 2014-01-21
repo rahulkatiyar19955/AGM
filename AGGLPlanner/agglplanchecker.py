@@ -34,6 +34,8 @@ import xmlModelParser
 from AGGL import *
 import inspect
 from agglplanner import *
+from parseAGGL import *
+from generateAGGLPlannerCode import *
 
 
 class PyPlanChecker(object):
@@ -90,23 +92,42 @@ class PyPlanChecker(object):
 			world.graph.toXML(resultPath)
 
 		
+def printUsage():
+	print 'Usage\n\t', sys.argv[0], ' domain.[py/aggl] init.xml plan.plan target.[py/xml]   [result.xml]'
+	sys.exit(0)
 
 if __name__ == '__main__': # program domain problem result
-	if len(sys.argv)!=6 and len(sys.argv)!=5:
-		print 'Usage\n\t', sys.argv[0], ' domain.py init.xml plan.plan target.aggl.py [result.xml]'
-		sys.exit(0)
-	elif len(sys.argv)==5:
-		domain = sys.argv[1]
-		init   = sys.argv[2]
-		plan   = sys.argv[3]
-		target = sys.argv[4]
-		result = ''
-	elif len(sys.argv)==6:
-		domain = sys.argv[1]
-		init   = sys.argv[2]
-		plan   = sys.argv[3]
-		target = sys.argv[4]
+	if len(sys.argv)<5 or len(sys.argv)>6:
+		printUsage()
+	domain = sys.argv[1]
+	init   = sys.argv[2]
+	plan   = sys.argv[3]
+	target = sys.argv[4]
+	if len(sys.argv)==6:
 		result = sys.argv[5]
+	else:
+		result = ''
+
+	if domain.endswith('.aggl'):
+		# Generate domain Python file
+		agmData = AGMFileDataParsing.fromFile(domain)
+		agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
+		domain = "/tmp/domain.py"
+	elif not domain.endswith('.py'):
+		printUsage()
+
+	if target.endswith('.xml'):
+		# Generate target Python file
+		graph = graphFromXML(target)
+		outputText = generateTarget(graph)
+		ofile = open("/tmp/target.py", 'w')
+		ofile.write(outputText)
+		ofile.close()
+		target = "/tmp/target.py"
+	elif not target.endswith('.py'):
+		printUsage()
+		
+
 
 	p = PyPlanChecker(domain, init, plan, target, result)
 
