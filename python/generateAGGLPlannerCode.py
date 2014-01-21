@@ -476,6 +476,8 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 		ret += text
 		ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the FORALL is false'
 		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the FORALL false'
+		for V in preconditionBody[0]:
+			ret += indentA+"del n2id['"+V[0]+"']"
 		indent = indentA
 	elif preconditionType == "when":
 		ret += indent+'precondition'+str(formulaId)+' = True # WHEN initialization as true'

@@ -1091,18 +1091,18 @@ MOVEtoCLEAN : active(1)
 	move.c1 = set.o = reachBox.o
 }
 
-#MOVIDA: active(1)
-#{
-#	findObjectVisually as findBox
-#	recognizeObjBox as realizeTheBoxIsABox
-#	setObjectReach as reachMug
-#	setObjectReach as reachTable
-#	setObjectReach as reachBox
-#	robotMovesMugFromTableToBox as move
-#	setTableClean as setClean
-#	where:
-#	realizeTheBoxIsABox.o = reachBox.o = move.c2
-#}
+MOVIDA: active(1)
+{
+	findObjectVisually as findBox
+	recognizeObjBox as realizeTheBoxIsABox
+	setObjectReach as reachMug
+	setObjectReach as reachTable
+	setObjectReach as reachBox
+	robotMovesMugFromTableToBox as move
+	setTableClean as setClean
+	where:
+	realizeTheBoxIsABox.o = reachBox.o = move.c2
+}
 
 
 TELLhumanInorderTOmove : active(1)
