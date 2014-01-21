@@ -1,12 +1,2 @@
-findObjectVisually@{'r': '@robot@'}
-recognizeObjFails@{'r': '@robot@', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', }
-tellHumanAboutUnknownObject@{'': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', }
-humanClassifiesMilk@{'': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', }
-humanTellsUsAboutMilk@{'': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', }
-
-
-where:
-findobject.r = recognizeObjFails.r = tellHumanAboutUnknownObject.r = humanClassifiesMilk.r
-recognizeObjFails.o = tellHumanAboutUnknownObject.o = humanClassifiesMilk.o
-recognizeObjFails.s = tellHumanAboutUnknownObject.sr = humanTellsUsAboutMilk.s
-tellHumanAboutUnknownObject.h = humanClassifiesMilk.h = humanTellsUsAboutMilk.h
+findObjectVisually@{'r': '2'}
+recognizeObjFails@{ 'r': '@robot@', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', }
