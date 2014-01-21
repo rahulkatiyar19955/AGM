@@ -1,0 +1,8 @@
+#findObjectVisually@{'r': '1'}
+#recognizeObjBox@{'c': '35', 'o': '36', 'other': '4', 's': '38', 'r': '1', 'po': '40', 'se': '41'}
+#setObjectReach@{'o': '12', 's': '14', 'r': '13', 'rb': '15'}
+#setObjectReach@{'o': '4', 's': '6', 'r': '5', 'rb': '7'}
+setObjectReach@{'o': '36', 's': '38', 'r': '37', 'rb': '39'}
+robotMovesMugFromTableToBox@{'r': '1', 'o': '12', 's': '14', 'r1': '13', 'm': '26', 'c1': '4', 'cs1': '6', 'rc1': '5', 't': '10', 'c2': '36', 'cs2': '38', 'rc2': '37', 'b': '42'}
+setTableClean@{'r': '1', 'o': '4', 's': '6', 'm': '10'}
+

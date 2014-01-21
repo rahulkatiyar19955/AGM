@@ -1,0 +1,19 @@
+<AGMModel>
+
+	<symbol id="1"  type="robot"  x="-300" y="0" />
+	<symbol id="2"  type="human"  x="300"  y="0" />
+	<link src="1" dst="2" label="interacting" />
+
+	<symbol id="myObject" type="object" x="-160" y="160" />
+	<symbol id="hisObject" type="object" x="+160" y="160"  />
+	<link src="myObject" dst="hisObject" label="eq" />
+
+	<link src="1" dst="myObject" label="know" />
+
+	<symbol id="objStatus" type="status" />
+	<symbol id="objType"   type="mug" />
+	<link src="myObject"  dst="objStatus" label="has" />
+	<link src="objStatus" dst="objType" label="link" />
+
+	
+</AGMModel>
