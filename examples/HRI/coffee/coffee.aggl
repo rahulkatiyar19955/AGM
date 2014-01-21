@@ -647,6 +647,7 @@ humanClassifiesMug : active(2)
 	}
 }
 
+
 humanClassifiesMilk : active(2)
 {
 	{
@@ -815,6 +816,62 @@ humanTellsUsAboutMug : active(3)
 		r:robot(-285,-75)
 		cont1:object(-125,170)
 		mr:mug(-215,250)
+		o_h:object(155,35)
+		o->o_h(eq)
+		r->h(interacting)
+		r->o(know)
+		h->o_h(know)
+		o_h->soh(has)
+		o->s(has)
+		s->f(link)
+		s->mr(link)
+		soh->mh(link)
+		soh->ch(link)
+		s->cont1(in)
+		soh->cont2(in)
+		cont1->cont2(eq)
+	}
+}
+
+humanTellsUsAboutMilk : active(3)
+{
+	{
+		ch:classified(80,255)
+		f:classifailed(-290,255)
+		h:human(155,-75)
+		cont2:object(30,80)
+		mh:milkPot(210,255)
+		o:object(-285,35)
+		s:status(-285,145)
+		r:robot(-285,-75)
+		cont1:object(-175,190)
+		soh:status(150,145)
+		o_h:object(155,35)
+		o->o_h(eq)
+		r->h(interacting)
+		r->o(know)
+		h->o_h(know)
+		o->s(has)
+		o_h->soh(has)
+		s->f(link)
+		soh->mh(link)
+		soh->ch(link)
+		soh->cont2(in)
+		cont1->cont2(eq)
+	}
+	=>
+	{
+		ch:classified(90,250)
+		f:classified(-340,250)
+		h:human(155,-75)
+		cont2:object(10,85)
+		soh:status(155,140)
+		mh:milkPot(220,250)
+		o:object(-285,35)
+		s:status(-280,140)
+		r:robot(-285,-75)
+		cont1:object(-125,170)
+		mr:milkPot(-215,250)
 		o_h:object(155,35)
 		o->o_h(eq)
 		r->h(interacting)
@@ -1157,4 +1214,28 @@ TELLhumanInorderTOmove : active(1)
 	tell.cont2 = humanmoves.c1
 	tell.h = humanmoves.r
 }
+
+
+FINDMILK: active(2)
+{
+	findObjectVisually as findobject
+	recognizeObjFails as wtf
+	tellHumanAboutUnknownObject as waaat
+	humanClassifiesMilk as itsjustmilk
+	humanTellsUsAboutMilk as tellme
+	where:
+	findobject.r = wtf.r = waaat.r = itsjustmilk.r
+	wtf.o = waaat.o = itsjustmilk.o
+	wtf.s = waaat.sr = tellme.s
+	waaat.h = itsjustmilk.h = tellme.h
+}
+
+
+
+
+
+
+
+
+
 

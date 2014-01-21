@@ -1,0 +1,9 @@
+<AGMModel>
+	<symbol  id="milkObject"    type="object" />
+	<symbol  id="milkStatus"    type="knows" />
+	<symbol  id="milkType"      type="milkPot" />
+
+	<link   src="milkObject"   dst="milkStatus"   label="has" />
+	<link   src="milkStatus"   dst="milkType"     label="link" />
+</AGMModel>
+
