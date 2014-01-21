@@ -1,0 +1,57 @@
+cmake_minimum_required( VERSION 2.8)
+
+
+SET(human             "1")
+SET(robot             "2")
+
+SET(HtableObject      "3")
+SET(HtableStatus      "4")
+SET(HtableReach       "5")
+SET(HtableType        "6")
+SET(HtableReachable   "7")
+SET(HtablePosition    "8")
+SET(HtableSee         "9")
+SET(HcoffeeObject     "10")
+SET(HcoffeeStatus     "11")
+SET(HcoffeeReach      "12")
+SET(HcoffeeType       "13")
+SET(HcoffeeReachable  "14")
+SET(HcoffeePosition   "15")
+SET(HcoffeeSee        "16")
+SET(HmugObject        "17")
+SET(HmugStatus        "18")
+SET(HmugReach         "19")
+SET(HmugType          "20")
+SET(HmugReachable     "21")
+SET(HmugPosition      "22")
+SET(HmugSee           "23")
+
+
+SET(RtableObject      "24")
+SET(RtableStatus      "25")
+SET(RtableReach       "26")
+SET(RtableType        "27")
+SET(RtableReachable   "28")
+SET(RtablePosition    "29")
+SET(RtableSee         "30")
+SET(RcoffeeObject     "31")
+SET(RcoffeeStatus     "32")
+SET(RcoffeeReach      "33")
+SET(RcoffeeType       "34")
+SET(RcoffeeReachable  "35")
+SET(RcoffeePosition   "36")
+SET(RcoffeeSee        "37")
+SET(RmugObject        "38")
+SET(RmugStatus        "39")
+SET(RmugReach         "40")
+SET(RmugType          "41")
+SET(RmugReachable     "42")
+SET(RmugPosition      "43")
+SET(RmugSee           "44")
+
+
+
+
+
+configure_file ("world.in.xml" "world.xml")
+INSTALL(FILES "world.xml" DESTINATION /tmp )

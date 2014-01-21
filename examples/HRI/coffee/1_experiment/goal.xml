@@ -1,0 +1,37 @@
+<AGMModel>
+	<!-- Human -->
+	<symbol id="human" type="human" />
+
+	<!-- Coffee -->
+	<symbol id="coffeeObject"  type="object" />
+	<symbol id="coffeeStatus"  type="knows" />
+	<symbol id="coffeeReach"   type="reach" />
+	<symbol id="coffeeType"    type="coffeePot" />
+	<link   src="coffeeObject" dst="coffeeStatus" label="has" />
+	<link   src="coffeeStatus" dst="coffeeReach"  label="link" />
+	<link   src="coffeeStatus" dst="coffeeType"   label="link" />
+	<!-- Mug -->
+	<symbol id="mugObject"     type="object" />
+	<symbol id="mugStatus"     type="knows" />
+	<symbol id="mugReach"      type="reach" />
+	<symbol id="mugType"       type="mug" />
+	<link   src="mugObject"    dst="mugStatus"    label="has" />
+	<link   src="mugStatus"    dst="mugReach"     label="link" />
+	<link   src="mugStatus"    dst="mugType"      label="link" />
+	<!-- Milk -->
+	<symbol id="milkObject"    type="object" />
+	<symbol id="milkStatus"    type="knows" />
+	<symbol id="milkReach"     type="reach" />
+	<symbol id="milkPot"       type="milkPot" />
+	<link   src="milkObject"   dst="milkStatus"   label="has" />
+	<link   src="milkStatus"   dst="milkReach"    label="link" />
+	<link   src="milkStatus"   dst="milkType"     label="link" />
+
+
+	<!-- Human and the objects he knows -->
+	<link src="human" dst="coffeeObject" label="know" />
+	<link src="human" dst="mugObject"    label="know" />
+	<link src="human" dst="milkObject"   label="know" />
+
+</AGMModel>
+

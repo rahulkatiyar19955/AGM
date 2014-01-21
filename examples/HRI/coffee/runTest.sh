@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 
-tests="0_experiment"
+tests="0_findMilk"
 
 for i in $tests;
 do
 	echo -n "\n\n\n\nRun next ($i)? "; read a
-	agglplan table.aggl          $i/world.xml $i/goal.xml
+	agglplan coffee.aggl $i/world.xml $i/goal.xml
 done;
 

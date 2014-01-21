@@ -647,6 +647,50 @@ humanClassifiesMug : active(2)
 	}
 }
 
+humanClassifiesMilk : active(2)
+{
+	{
+		cl:unclassified(45,245)
+		h:human(155,-75)
+		s:status(150,140)
+		o:object(-285,35)
+		p:position(255,250)
+		see:see(150,255)
+		r:robot(-285,-75)
+		cont2:object(15,110)
+		o_h:object(155,35)
+		o->o_h(eq)
+		r->h(interacting)
+		r->o(know)
+		h->o_h(know)
+		o_h->s(has)
+		s->cl(link)
+		s->see(link)
+		s->p(link)
+	}
+	=>
+	{
+		cl:milkPot(45,245)
+		h:human(155,-75)
+		s:status(150,140)
+		o:object(-285,35)
+		p:position(255,250)
+		see:see(150,255)
+		r:robot(-285,-75)
+		cont2:object(15,110)
+		o_h:object(155,35)
+		o->o_h(eq)
+		r->h(interacting)
+		r->o(know)
+		h->o_h(know)
+		o_h->s(has)
+		s->cl(link)
+		s->see(link)
+		s->p(link)
+		s->cont2(in)
+	}
+}
+
 humanClassifiesBox : active(2)
 {
 	{
