@@ -287,10 +287,10 @@ class AGMEditor(QMainWindow):
 				print 'uuuuuuuu self.ui.textEffect'
 		else:
 			d1 = dict()
-			d1['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...")
+			d1['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...\n\nTHE EDITOR DOESN'T CURRENTLY SUPPORT THEM")
 			self.lhsPainter.graph = AGMGraph(d1, side='L')
 			d2 = dict()
-			d2['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...")
+			d2['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...\n\nTHE EDITOR DOESN'T CURRENTLY SUPPORT THEM")
 			self.rhsPainter.graph = AGMGraph(d2, side='R')
 		self.disconnect(self.ui.passiveCheckBox,    SIGNAL("stateChanged(int)"), self.changePassive)
 		self.disconnect(self.ui.cost,               SIGNAL("valueChanged(int)"), self.changeCost)
