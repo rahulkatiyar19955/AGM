@@ -119,7 +119,8 @@
 	<link src="@RmugObject@" dst="@HmugObject@" label="eq" />
 	<link src="@RtableObject@" dst="@HtableObject@" label="eq" />
 	
-	
+	<!-- Interacting -->
+	<link src="@robot@" dst="@human@" label="interacting" />
 	
 </AGMModel>
 

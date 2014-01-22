@@ -86,6 +86,7 @@ class PyPlanChecker(object):
 			print 'Not achieved'
 		except:
 			print 'Not achieved (error)'
+			traceback.print_exc()
 
 
 		if resultPath!='':

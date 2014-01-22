@@ -1,2 +1,4 @@
 findObjectVisually@{'r': '2'}
-recognizeObjFails@{ 'r': '@robot@', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', }
+recognizeObjFails@{ 'r': '2', 'o': '46', 's': '48', 'se': '51', 'po': '50', 'c': '45'}
+#tellHumanAboutUnknownObject@{'r': '2', 'h': '1', 'o': '46', 'sr': '48', 'c': '45', 'p': '50'}
+#humanClassifiesMilk@{'r': '2', 'h': '1', 'o': '46', 'o_h': '53', 's': '54', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', '': '', }
