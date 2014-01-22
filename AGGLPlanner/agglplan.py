@@ -42,6 +42,8 @@ if __name__ == '__main__': # program domain problem result
 		result = None
 		if len(sys.argv)>4:
 			result = sys.argv[4]
+			
+		print 'Generating search code...',
 
 		# Generate domain Python file
 		agmData = AGMFileDataParsing.fromFile(domainFile)
@@ -56,6 +58,7 @@ if __name__ == '__main__': # program domain problem result
 
 		# Run planner
 		import time
+		print 'done\nRunning the planner...'
 		start = time.time()
 		if result:
 			subprocess.call(["agglplanner", "/tmp/domain.py", worldFile, "/tmp/target.py", result])

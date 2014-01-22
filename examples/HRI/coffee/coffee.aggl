@@ -1230,13 +1230,12 @@ TELLhumanInorderTOmove : active(1)
 
 FINDMILK: active(2)
 {
-	findObjectVisually as findobject
 	recognizeObjFails as wtf
 	tellHumanAboutUnknownObject as waaat
 	humanClassifiesMilk as itsjustmilk
 	humanTellsUsAboutMilk as tellme
 	where:
-	findobject.r = wtf.r = waaat.r = itsjustmilk.r
+	wtf.r = waaat.r = itsjustmilk.r
 	wtf.o = waaat.o = itsjustmilk.o
 	wtf.s = waaat.sr = tellme.s
 	waaat.h = itsjustmilk.h = tellme.h

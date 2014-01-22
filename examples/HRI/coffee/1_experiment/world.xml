@@ -119,7 +119,8 @@
 	<link src="38" dst="17" label="eq" />
 	<link src="24" dst="3" label="eq" />
 	
-	
+	<!-- Interacting -->
+	<link src="2" dst="1" label="interacting" />
 	
 </AGMModel>
 
