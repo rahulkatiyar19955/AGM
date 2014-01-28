@@ -478,8 +478,40 @@ bool AGMModel::removeSymbol(int32_t id)
 		symbols.erase(symbols.begin() + index);
 		return true;
 	}
+	removeEdgesRelatedToSymbol(id);
 	return false;
 }
+
+bool AGMModel::removeDanglingEdges()
+{
+	std::vector<AGMModelEdge>::iterator it = edges.begin();
+	bool any = false;
+	while (it!=edges.end())
+	{
+		bool found=false;
+		const int32_t symbolsN = numberOfSymbols();
+		for (int32_t symbolNumber=0; symbolNumber<symbolsN; symbolNumber++)
+		{
+			const int32_t id = symbols[symbolNumber]->identifier;
+			if (it->symbolPair.first  == id or it->symbolPair.second == id)
+			{
+				found = true;
+				any = true;
+				break;
+			}
+		}
+		if (not found)
+		{
+			it = edges.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+	return any;
+}
+
 
 int32_t AGMModel::replaceIdentifierInEdges(int32_t a, int32_t b)
 {
