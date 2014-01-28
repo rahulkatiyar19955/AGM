@@ -72,20 +72,24 @@ MESSAGE(STATUS "\n\n")
 if (PYTHON_BINDINGS)
 	# Add bindings source code file
 	SET(SOURCES ${SOURCES} libagm/agm_python.cpp)
-	# Linking and wrapping stuff
-	# (boost)me lo he inventado o l
-	set(Boost_USE_STATIC_LIBS   OFF)
-	set(Boost_USE_MULTITHREADED ON)
-	find_package(Boost COMPONENTS system thread python REQUIRED)
-	include_directories(${Boost_INCLUDE_DIRS})
-	link_directories(${Boost_LIBRARY_DIRS})
-	# (libpython)
-	find_package(PythonLibs REQUIRED)
-	MESSAGE(STATUS "PYTHON BINDINGS: DIRS ${PYTHON_INCLUDE_DIRS}")
-	MESSAGE(STATUS "PYTHON BINDINGS: LIBS ${PYTHON_LIBRARIES}")
-	include_directories(${PYTHON_INCLUDE_DIRS})
-	link_directories(${PYTHON_LIBRARIES})
 endif (PYTHON_BINDINGS)
+
+#  Boost library  #
+set(Boost_USE_STATIC_LIBS   OFF)
+set(Boost_USE_MULTITHREADED ON)
+if (PYTHON_BINDINGS)
+	find_package(Boost COMPONENTS system thread python REQUIRED)
+else (PYTHON_BINDINGS)
+	find_package(Boost COMPONENTS system thread REQUIRED)
+endif (PYTHON_BINDINGS)
+include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
+# (libpython)
+find_package(PythonLibs REQUIRED)
+MESSAGE(STATUS "PYTHON BINDINGS: DIRS ${PYTHON_INCLUDE_DIRS}")
+MESSAGE(STATUS "PYTHON BINDINGS: LIBS ${PYTHON_LIBRARIES}")
+include_directories(${PYTHON_INCLUDE_DIRS})
+link_directories(${PYTHON_LIBRARIES})
 
 # RoboComp support
 if (ROBOCOMP_SUPPORT)
