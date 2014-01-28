@@ -476,9 +476,9 @@ bool AGMModel::removeSymbol(int32_t id)
 	if (index >= 0)
 	{
 		symbols.erase(symbols.begin() + index);
+		removeEdgesRelatedToSymbol(id);
 		return true;
 	}
-	removeEdgesRelatedToSymbol(id);
 	return false;
 }
 
@@ -496,13 +496,13 @@ bool AGMModel::removeDanglingEdges()
 			if (it->symbolPair.first  == id or it->symbolPair.second == id)
 			{
 				found = true;
-				any = true;
 				break;
 			}
 		}
 		if (not found)
 		{
 			it = edges.erase(it);
+			any = true;
 		}
 		else
 		{
