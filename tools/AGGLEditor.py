@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  -----------------------
-#  -----  AGGLEditor  -----
-#  -----------------------
+#    ------------------------
+#    -----  AGGLEditor  -----
+#    ------------------------
 #
-#  A free/libre graph grammar drawing tool.
+#    A free/libre open-source graph grammar drawing tool.
 #
-#    Copyright (C) 2012-2013 by Luis J. Manso
+#    Copyright (C) 2012-2014 by Luis J. Manso
 #
 #    Graphmar is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ import numpy as np
 
 from inspect import currentframe, getframeinfo
 
-sys.path.append('/opt/robocomp/share')
+sys.path.append('/usr/local/share/agm')
 from ui_guiAGGLEditor import Ui_MainWindow
 from ui_appearance import Ui_Appearance
 from parseAGGL import *
@@ -185,9 +185,8 @@ class AGMEditor(QMainWindow):
 		self.appearance.ui.radius.setValue(vertexDiameter)
 
 		# Font
-		font = QFont(fontName, fontSize)
-		font.setItalic(False)
-		font.setItalic(False)
+		font = QFont(fontName, fontSize, weight=0, italic=False)
+		font.setStyle(QFont.StyleNormal)
 		self.fontDialog = QFontDialog(font, self)
 		self.fontDialog.setCurrentFont(font)
 		self.font = self.fontDialog.currentFont()
@@ -270,21 +269,15 @@ class AGMEditor(QMainWindow):
 			try:
 				self.ui.textParameters.setText(self.agmData.agm.rules[ruleN].parameters.replace("\n\t\t", "\n").lstrip())
 			except:
-				print 'uuuuuuuu self.ui.textParameters'
 				print traceback.format_exc()
-				print 'uuuuuuuu self.ui.textParameters'
 			try:
 				self.ui.textPrecondition.setText(self.agmData.agm.rules[ruleN].precondition.replace("\n\t\t", "\n").lstrip())
 			except:
-				print 'uuuuuuuu self.ui.textPrecondition'
 				print traceback.format_exc()
-				print 'uuuuuuuu self.ui.textPrecondition'
 			try:
 				self.ui.textEffect.setText(self.agmData.agm.rules[ruleN].effect.replace("\n\t\t", "\n").lstrip())
 			except:
-				print 'uuuuuuuu self.ui.textEffect'
 				print traceback.format_exc()
-				print 'uuuuuuuu self.ui.textEffect'
 		else:
 			d1 = dict()
 			d1['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...\n\nTHE EDITOR DOESN'T CURRENTLY SUPPORT THEM")

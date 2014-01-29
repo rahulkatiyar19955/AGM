@@ -280,7 +280,13 @@ class GraphDraw(QWidget):
 		painter.setPen(pen)
 		brush = QBrush(QLinearGradient())
 		painter.setBrush(brush)
-		painter.setFont(self.main.fontDialog.currentFont())
+		font = self.main.fontDialog.currentFont()
+		#print 'XXX:'
+		#print 'a', font
+		font.setBold(False)
+		#print 'b', font
+		#print font.style()
+		painter.setFont(font)
 		for w in self.graph.nodes:
 			v = self.graph.nodes[w]
 			grid = 5
@@ -381,7 +387,7 @@ class GraphDraw(QWidget):
 				align = Qt.AlignLeft
 				rect = painter.boundingRect(QRectF(float(lpos[0]), float(lpos[1]), 1, 1), align, str(e.linkType))
 				rect.translate(-rect.width()/2, -rect.height()/2) # Right now it will be centered on the link's center
-				linkHeight = rect.height()+5
+				linkHeight = rect.height()+3
 				linkGroupBase = (-linkGroupCount+1)*linkHeight/2
 				rect.translate(0, linkHeight*pos + linkGroupBase) # Right now it will be centered on the link's center
 
