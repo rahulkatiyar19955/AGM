@@ -29,7 +29,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 import sys, traceback, os, re, threading, time, string, math, copy
 import collections, imp, heapq
 import datetime
-sys.path.append('/opt/robocomp/share')
+sys.path.append('/usr/local/share/agm/')
 
 import xmlModelParser
 from AGGL import *

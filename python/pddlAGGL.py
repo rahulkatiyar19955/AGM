@@ -27,24 +27,17 @@ class AGMPDDL:
 		writeString += '\t)\n\n'
 		writeString += '\t(:functions\n\t\t(total-cost)\n\t)\n\n'
 		for r in agm.rules:
-			writeString += AGMRulePDDL.toPDDL(r, skipPassive=skipPassive) + '\n'
+			if hasattr(r, 'newNodesList'):
+				writeString += AGMRulePDDL.toPDDL(r, skipPassive=skipPassive) + '\n'
 		writeString += ')\n'
-		return writeString
-	@staticmethod
-	def typePredicatesPDDL(agm):
-		writeString = ''
-		typeSet = set()
-		for r in agm.rules:
-			typeSet = typeSet.union(r.nodeTypes())
-		for t in typeSet:
-			writeString += '\t\t(IS'+t+' ?n)\n'
 		return writeString
 	@staticmethod
 	def linkPredicatesPDDL(agm):
 		writeString = ''
 		linkSet = set()
 		for r in agm.rules:
-			linkSet = linkSet.union(r.linkTypes())
+			if hasattr(r, 'nodeTypes'):
+				linkSet = linkSet.union(r.linkTypes())
 		writeString += '\n'
 		for t in linkSet:
 			writeString += '\t\t('+t+' ?u ?v)\n'
@@ -56,11 +49,8 @@ class AGMPDDL:
 		for r in agm.rules:
 			if hasattr(r, 'nodeTypes'):
 				typeSet = typeSet.union(r.nodeTypes())
-			else:
-				print 'Sorry, but aggl2pddl does not support COMBO rules.'
-				print 'exiting...'
-				import sys
-				sys.exit(-348)
+			#else:
+				#raise Exception("Combo rule")
 		for t in typeSet:
 			writeString += '\t\t(IS'+t+' ?n)\n'
 		return writeString

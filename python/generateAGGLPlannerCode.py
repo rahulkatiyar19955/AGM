@@ -1,7 +1,7 @@
 from operator import *
 import collections, sys
 
-sys.path.append('/opt/robocomp/share')
+sys.path.append('/usr/local/share/agm/')
 
 from AGGL import *
 from xmlModelParser import *
@@ -13,7 +13,7 @@ scorePerContition = 100
 
 def constantHeader():
 	return """import copy, sys
-sys.path.append('/opt/robocomp/share')
+sys.path.append('/usr/local/share/agm/')
 from AGGL import *
 from agglplanner import *
 
@@ -606,7 +606,7 @@ def generate(agm, skipPassiveRules):
 
 def generateTarget(graph):
 	ret = """import copy, sys
-sys.path.append('/opt/robocomp/share')\nfrom AGGL import *\nfrom agglplanner import *
+sys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import *
 def CheckTarget(graph):"""
 	indent = "\n\t"
 	# Make a copy of the current graph node list

@@ -26,7 +26,7 @@
 
 import sys, traceback, subprocess
 
-sys.path.append('/opt/robocomp/share')
+sys.path.append('/usr/local/share/agm/')
 from AGGL import *
 from parseAGGL import *
 from generateAGGLPlannerCode import *

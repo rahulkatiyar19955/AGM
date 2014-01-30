@@ -39,7 +39,7 @@ import numpy as np
 
 from inspect import currentframe, getframeinfo
 
-sys.path.append('/opt/robocomp/share')
+sys.path.append('/usr/local/share/agm/')
 from ui_guiGraphViewer import Ui_MainWindow
 from ui_appearance import Ui_Appearance
 from parseAGGL import *

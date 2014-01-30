@@ -1,6 +1,6 @@
 import xmllib, string, sys
 
-sys.path.append('/opt/robocomp/share')
+sys.path.append('/usr/local/share/agm/')
 from AGGL import *
 
 class AGMWorldModelParser(xmllib.XMLParser):
