@@ -4,47 +4,41 @@
 
 	<!-- Table -->
 	<symbol id="3" type="object" />
-	<symbol id="4" type="status" />
 	<symbol id="5" type="reach" />
 	<symbol id="6" type="table" />
-	<symbol id="7" type="reachable" />
-	<symbol id="8" type="position" />
+	<symbol id="7" type="reach" />
+	<symbol id="8" type="pose" />
 	<symbol id="9" type="see" />
-	<link src="3" dst="4" label="has" />
-	<link src="4" dst="5" label="link" />
-	<link src="4" dst="6" label="link" />
-	<link src="4" dst="7" label="link" />
-	<link src="4" dst="8" label="link" />
-	<link src="4" dst="9" label="link" />
+	<link src="3" dst="5" label="prop" />
+	<link src="3" dst="6" label="prop" />
+	<link src="3" dst="7" label="prop" />
+	<link src="3" dst="8" label="prop" />
+	<link src="3" dst="9" label="prop" />
 	
 	<!-- Coffee -->
 	<symbol id="10" type="object" />
-	<symbol id="11" type="status" />
 	<symbol id="12" type="reach" />
 	<symbol id="13" type="coffeePot" />
-	<symbol id="14" type="reachable" />
-	<symbol id="15" type="position" />
+	<symbol id="14" type="reach" />
+	<symbol id="15" type="pose" />
 	<symbol id="16" type="see" />
-	<link src="10" dst="11" label="has" />
-	<link src="11" dst="12" label="link" />
-	<link src="11" dst="13" label="link" />
-	<link src="11" dst="14" label="link" />
-	<link src="11" dst="15" label="link" />
-	<link src="11" dst="16" label="link" />
+	<link src="10" dst="12" label="prop" />
+	<link src="10" dst="13" label="prop" />
+	<link src="10" dst="14" label="prop" />
+	<link src="10" dst="15" label="prop" />
+	<link src="10" dst="16" label="prop" />
 	<!-- Mug -->
 	<symbol id="17" type="object" />
-	<symbol id="18" type="status" />
 	<symbol id="19" type="reach" />
 	<symbol id="20" type="mug" />
-	<symbol id="21" type="reachable" />
-	<symbol id="22" type="position" />
+	<symbol id="21" type="reach" />
+	<symbol id="22" type="pose" />
 	<symbol id="23" type="see" />
-	<link src="17" dst="18" label="has" />
-	<link src="18" dst="19" label="link" />
-	<link src="18" dst="20" label="link" />
-	<link src="18" dst="21" label="link" />
-	<link src="18" dst="22" label="link" />
-	<link src="18" dst="23" label="link" />
+	<link src="17" dst="19" label="prop" />
+	<link src="17" dst="20" label="prop" />
+	<link src="17" dst="21" label="prop" />
+	<link src="17" dst="22" label="prop" />
+	<link src="17" dst="23" label="prop" />
 
 
 	<!-- Human and the objects he knows -->
@@ -52,8 +46,8 @@
 	<link src="1" dst="17" label="know" />
 	<link src="1" dst="3" label="know" />
 	<!-- INs -->
-	<link src="18" dst="3" label="in" />
-	<link src="11" dst="3" label="in" />
+	<link src="17" dst="3" label="in" />
+	<link src="10" dst="3" label="in" />
 
 
 	
@@ -62,56 +56,50 @@
 
 	<!-- Table -->
 	<symbol id="24" type="object" />
-	<symbol id="25" type="status" />
 	<symbol id="26" type="reach" />
 	<symbol id="27" type="table" />
-	<symbol id="28" type="reachable" />
-	<symbol id="29" type="position" />
+	<symbol id="28" type="reach" />
+	<symbol id="29" type="pose" />
 	<symbol id="30" type="see" />
-	<link src="24" dst="25" label="has" />
-	<link src="25" dst="26" label="link" />
-	<link src="25" dst="27" label="link" />
-	<link src="25" dst="28" label="link" />
-	<link src="25" dst="29" label="link" />
-	<link src="25" dst="30" label="link" />
+	<link src="24" dst="26" label="prop" />
+	<link src="24" dst="27" label="prop" />
+	<link src="24" dst="28" label="prop" />
+	<link src="24" dst="29" label="prop" />
+	<link src="24" dst="30" label="prop" />
 	
 	<!-- Coffee -->
 	<symbol id="31" type="object" />
-	<symbol id="32" type="status" />
 	<symbol id="33" type="reach" />
 	<symbol id="34" type="coffeePot" />
-	<symbol id="35" type="reachable" />
-	<symbol id="36" type="position" />
+	<symbol id="35" type="reach" />
+	<symbol id="36" type="pose" />
 	<symbol id="37" type="see" />
-	<link src="31" dst="32" label="has" />
-	<link src="32" dst="33" label="link" />
-	<link src="32" dst="34" label="link" />
-	<link src="32" dst="35" label="link" />
-	<link src="32" dst="36" label="link" />
-	<link src="32" dst="37" label="link" />
+	<link src="31" dst="33" label="prop" />
+	<link src="31" dst="34" label="prop" />
+	<link src="31" dst="35" label="prop" />
+	<link src="31" dst="36" label="prop" />
+	<link src="31" dst="37" label="prop" />
 
 	<!-- Mug -->
 	<symbol id="38" type="object" />
-	<symbol id="39" type="status" />
 	<symbol id="40" type="reach" />
 	<symbol id="41" type="mug" />
-	<symbol id="42" type="reachable" />
-	<symbol id="43" type="position" />
+	<symbol id="42" type="reach" />
+	<symbol id="43" type="pose" />
 	<symbol id="44" type="see" />
-	<link src="38" dst="39" label="has" />
-	<link src="39" dst="40" label="link" />
-	<link src="39" dst="41" label="link" />
-	<link src="39" dst="42" label="link" />
-	<link src="39" dst="43" label="link" />
-	<link src="39" dst="44" label="link" />
+	<link src="38" dst="40" label="prop" />
+	<link src="38" dst="41" label="prop" />
+	<link src="38" dst="42" label="prop" />
+	<link src="38" dst="43" label="prop" />
+	<link src="38" dst="44" label="prop" />
 
 	<!-- Robot and the objects he knows -->
 	<link src="2" dst="31" label="know" />
 	<link src="2" dst="38" label="know" />
 	<link src="2" dst="24" label="know" />
 	<!-- INs -->
-	<link src="39" dst="24" label="in" />
-	<link src="32" dst="24" label="in" />
+	<link src="38" dst="24" label="in" />
+	<link src="31" dst="24" label="in" />
 
 
 	<!-- Equivalences -->
@@ -120,7 +108,7 @@
 	<link src="24" dst="3" label="eq" />
 	
 	<!-- Interacting -->
-	<link src="2" dst="1" label="interacting" />
+	<link src="2" dst="1" label="interact" />
 	
 </AGMModel>
 

@@ -4,28 +4,22 @@
 
 	<!-- Coffee -->
 	<symbol  id="coffeeObject"  type="object" />
-	<symbol  id="coffeeStatus"  type="knows" />
 	<symbol  id="coffeeReach"   type="reach" />
 	<symbol  id="coffeeType"    type="coffeePot" />
-	<link   src="coffeeObject"  dst="coffeeStatus" label="has" />
-	<link   src="coffeeStatus"  dst="coffeeReach"  label="link" />
-	<link   src="coffeeStatus"  dst="coffeeType"   label="link" />
+	<link   src="coffeeObject"  dst="coffeeReach"  label="prop" />
+	<link   src="coffeeObject"  dst="coffeeType"   label="prop" />
 	<!-- Mug -->
 	<symbol  id="mugObject"     type="object" />
-	<symbol  id="mugStatus"     type="knows" />
 	<symbol  id="mugReach"      type="reach" />
 	<symbol  id="mugType"       type="mug" />
-	<link   src="mugObject"     dst="mugStatus"    label="has" />
-	<link   src="mugStatus"     dst="mugReach"     label="link" />
-	<link   src="mugStatus"     dst="mugType"      label="link" />
+	<link   src="mugObject"     dst="mugReach"     label="prop" />
+	<link   src="mugObject"     dst="mugType"      label="prop" />
 	<!-- Milk -->
 	<symbol  id="milkObject"    type="object" />
-	<symbol  id="milkStatus"    type="knows" />
 	<symbol  id="milkReach"     type="reach" />
 	<symbol  id="milkType"      type="milkPot" />
-	<link   src="milkObject"    dst="milkStatus"   label="has" />
-	<link   src="milkStatus"    dst="milkReach"    label="link" />
-	<link   src="milkStatus"    dst="milkType"     label="link" />
+	<link   src="milkObject"    dst="milkReach"    label="prop" />
+	<link   src="milkObject"    dst="milkType"     label="prop" />
 
 
 	<!-- Human and the objects he knows -->

@@ -2,17 +2,13 @@
 
 	<symbol id="1" type="human" />
 	<symbol  id="HmilkObject"    type="object" />
-	<symbol  id="HmilkStatus"    type="status" />
 	<symbol  id="HmilkType"      type="milkPot" />
-	<link   src="HmilkObject"   dst="HmilkStatus"   label="has" />
-	<link   src="HmilkStatus"   dst="HmilkType"     label="link" />
+	<link   src="HmilkObject"    dst="HmilkType"     label="prop" />
 
 	<symbol id="2" type="robot" />
 	<symbol  id="RmilkObject"    type="object" />
-	<symbol  id="RmilkStatus"    type="status" />
 	<symbol  id="RmilkType"      type="milkPot" />
-	<link   src="RmilkObject"   dst="RmilkStatus"   label="has" />
-	<link   src="RmilkStatus"   dst="RmilkType"     label="link" />
+	<link   src="RmilkObject"    dst="RmilkType"     label="prop" />
 
 	<link src="HmilkObject" dst="RmilkObject" label="eq" />
 
