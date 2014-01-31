@@ -1,5 +1,5 @@
 findObjectVisually@{'r': '2'}
-recognizeObjFails@{ 'r': '2', 'o': '46', 's': '48', 'se': '51', 'po': '50', 'c': '45'}
-tellHumanAboutUnknownObject@{'r': '2', 'h': '1', 'o': '46', 'sr': '48', 'c': '45', 'p': '50'}
-humanClassifiesMilk@{'r': '2', 'h': '1', 'o': '46', 'o_h': '53', 's': '55', 'cont2': '3', 'cl': '52', 'see': '56', 'p': '58'}
-humanTellsUsAboutMilk@{'r': '2', 'h': '1', 'o': '46', 's': '48', 'f': '45', 'cont1': '24', 'o_h': '53', 'soh': '55', 'ch': '52', 'mh': '59', 'cont2': '3',}
+recognizeObjFails@{ 'r': '2', 'o': '49', 'se': '46', 'po': '48', 'c': '47'}
+tellHumanAboutUnknownObject@{'r': '2', 'h': '1', 'o': '49', 'c': '47', 'p': '48'}
+humanClassifiesMilk@{'r': '2', 'h': '1', 'o': '49', 'o_h': '51', 'cont2': '3', 'cl': '50', 'see': '53', 'p': '54'}
+humanTellsUsAboutMilk@{'r': '2', 'h': '1', 'o': '49', 'f': '47', 'cont1': '24', 'o_h': '51', 'ch': '50', 'mh': '55', 'cont2': '3'}

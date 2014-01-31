@@ -59,6 +59,7 @@ class PyPlanChecker(object):
 			print world
 			line = 0
 			for action in self.plan:
+				print 'Executing action', line 
 				line += 1
 				print action
 				for p in action.parameters.keys():
@@ -69,8 +70,12 @@ class PyPlanChecker(object):
 				print world
 				world.graph.toXML('after_plan_step'+str(line)+".xml")
 
+			print 'Done executing actions. Let\'s see what we\'ve got (computing score and checking if the goal was achieved).'
+
+			print targetPath
 			# Get result
 			score, achieved = self.targetCode(world.graph)
+			
 
 			if achieved:
 				print 'GOAL ACHIEVED'
@@ -84,6 +89,8 @@ class PyPlanChecker(object):
 			print 'Rule: ', e
 			print 'Line: ', line
 			print 'Not achieved'
+			traceback.print_exc()
+		
 		except:
 			print 'Not achieved (error)'
 			traceback.print_exc()
@@ -119,11 +126,20 @@ if __name__ == '__main__': # program domain problem result
 
 	if target.endswith('.xml'):
 		# Generate target Python file
-		graph = graphFromXML(target)
-		outputText = generateTarget(graph)
-		ofile = open("/tmp/target.py", 'w')
-		ofile.write(outputText)
-		ofile.close()
+		if False:
+			print 'TARGET WRITING IS DISABLED WARNING!!'
+			print 'TARGET WRITING IS DISABLED WARNING!!'
+			print 'TARGET WRITING IS DISABLED WARNING!!'
+			print 'TARGET WRITING IS DISABLED WARNING!!'
+			print 'TARGET WRITING IS DISABLED WARNING!!'
+			print 'TARGET WRITING IS DISABLED WARNING!!'
+			print 'TARGET WRITING IS DISABLED WARNING!!'
+		else:
+			graph = graphFromXML(target)
+			outputText = generateTarget(graph)
+			ofile = open("/tmp/target.py", 'w')
+			ofile.write(outputText)
+			ofile.close()
 		target = "/tmp/target.py"
 	elif not target.endswith('.py'):
 		printUsage()

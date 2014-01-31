@@ -6,12 +6,10 @@
 	<symbol id="3" type="object" />
 	<symbol id="5" type="reach" />
 	<symbol id="6" type="table" />
-	<symbol id="7" type="reach" />
 	<symbol id="8" type="pose" />
 	<symbol id="9" type="see" />
 	<link src="3" dst="5" label="prop" />
 	<link src="3" dst="6" label="prop" />
-	<link src="3" dst="7" label="prop" />
 	<link src="3" dst="8" label="prop" />
 	<link src="3" dst="9" label="prop" />
 	
@@ -19,24 +17,20 @@
 	<symbol id="10" type="object" />
 	<symbol id="12" type="reach" />
 	<symbol id="13" type="coffeePot" />
-	<symbol id="14" type="reach" />
 	<symbol id="15" type="pose" />
 	<symbol id="16" type="see" />
 	<link src="10" dst="12" label="prop" />
 	<link src="10" dst="13" label="prop" />
-	<link src="10" dst="14" label="prop" />
 	<link src="10" dst="15" label="prop" />
 	<link src="10" dst="16" label="prop" />
 	<!-- Mug -->
 	<symbol id="17" type="object" />
 	<symbol id="19" type="reach" />
 	<symbol id="20" type="mug" />
-	<symbol id="21" type="reach" />
 	<symbol id="22" type="pose" />
 	<symbol id="23" type="see" />
 	<link src="17" dst="19" label="prop" />
 	<link src="17" dst="20" label="prop" />
-	<link src="17" dst="21" label="prop" />
 	<link src="17" dst="22" label="prop" />
 	<link src="17" dst="23" label="prop" />
 
@@ -58,12 +52,10 @@
 	<symbol id="24" type="object" />
 	<symbol id="26" type="reach" />
 	<symbol id="27" type="table" />
-	<symbol id="28" type="reach" />
 	<symbol id="29" type="pose" />
 	<symbol id="30" type="see" />
 	<link src="24" dst="26" label="prop" />
 	<link src="24" dst="27" label="prop" />
-	<link src="24" dst="28" label="prop" />
 	<link src="24" dst="29" label="prop" />
 	<link src="24" dst="30" label="prop" />
 	
@@ -71,12 +63,10 @@
 	<symbol id="31" type="object" />
 	<symbol id="33" type="reach" />
 	<symbol id="34" type="coffeePot" />
-	<symbol id="35" type="reach" />
 	<symbol id="36" type="pose" />
 	<symbol id="37" type="see" />
 	<link src="31" dst="33" label="prop" />
 	<link src="31" dst="34" label="prop" />
-	<link src="31" dst="35" label="prop" />
 	<link src="31" dst="36" label="prop" />
 	<link src="31" dst="37" label="prop" />
 
@@ -84,12 +74,10 @@
 	<symbol id="38" type="object" />
 	<symbol id="40" type="reach" />
 	<symbol id="41" type="mug" />
-	<symbol id="42" type="reach" />
 	<symbol id="43" type="pose" />
 	<symbol id="44" type="see" />
 	<link src="38" dst="40" label="prop" />
 	<link src="38" dst="41" label="prop" />
-	<link src="38" dst="42" label="prop" />
 	<link src="38" dst="43" label="prop" />
 	<link src="38" dst="44" label="prop" />
 

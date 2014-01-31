@@ -1,8 +1,8 @@
 from pyparsing import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn, Literal, Combine
 from pyparsing import Suppress, ZeroOrMore, Group, StringEnd, srange, Forward, Optional, Or
 from AGGL import *
-from PySide.QtCore import *
-from PySide.QtGui import *
+#from PySide.QtCore import *
+#from PySide.QtGui import *
 
 class AGGL_QuantifierCondition:
 	def __init__(self, condType):

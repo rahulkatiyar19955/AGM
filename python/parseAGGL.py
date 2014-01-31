@@ -1,7 +1,7 @@
 from pyparsing import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn, Literal, Combine, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
 from AGGL import *
-from PySide.QtCore import *
-from PySide.QtGui import *
+#from PySide.QtCore import *
+#from PySide.QtGui import *
 import sys
 from parseQuantifiers import *
 

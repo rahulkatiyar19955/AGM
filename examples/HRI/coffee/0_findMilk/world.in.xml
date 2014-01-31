@@ -6,12 +6,10 @@
 	<symbol id="@HtableObject@" type="object" />
 	<symbol id="@HtableReach@" type="reach" />
 	<symbol id="@HtableType@" type="table" />
-	<symbol id="@HtableReachable@" type="reach" />
 	<symbol id="@HtablePosition@" type="pose" />
 	<symbol id="@HtableSee@" type="see" />
 	<link src="@HtableObject@" dst="@HtableReach@" label="prop" />
 	<link src="@HtableObject@" dst="@HtableType@" label="prop" />
-	<link src="@HtableObject@" dst="@HtableReachable@" label="prop" />
 	<link src="@HtableObject@" dst="@HtablePosition@" label="prop" />
 	<link src="@HtableObject@" dst="@HtableSee@" label="prop" />
 	
@@ -19,24 +17,20 @@
 	<symbol id="@HcoffeeObject@" type="object" />
 	<symbol id="@HcoffeeReach@" type="reach" />
 	<symbol id="@HcoffeeType@" type="coffeePot" />
-	<symbol id="@HcoffeeReachable@" type="reach" />
 	<symbol id="@HcoffeePosition@" type="pose" />
 	<symbol id="@HcoffeeSee@" type="see" />
 	<link src="@HcoffeeObject@" dst="@HcoffeeReach@" label="prop" />
 	<link src="@HcoffeeObject@" dst="@HcoffeeType@" label="prop" />
-	<link src="@HcoffeeObject@" dst="@HcoffeeReachable@" label="prop" />
 	<link src="@HcoffeeObject@" dst="@HcoffeePosition@" label="prop" />
 	<link src="@HcoffeeObject@" dst="@HcoffeeSee@" label="prop" />
 	<!-- Mug -->
 	<symbol id="@HmugObject@" type="object" />
 	<symbol id="@HmugReach@" type="reach" />
 	<symbol id="@HmugType@" type="mug" />
-	<symbol id="@HmugReachable@" type="reach" />
 	<symbol id="@HmugPosition@" type="pose" />
 	<symbol id="@HmugSee@" type="see" />
 	<link src="@HmugObject@" dst="@HmugReach@" label="prop" />
 	<link src="@HmugObject@" dst="@HmugType@" label="prop" />
-	<link src="@HmugObject@" dst="@HmugReachable@" label="prop" />
 	<link src="@HmugObject@" dst="@HmugPosition@" label="prop" />
 	<link src="@HmugObject@" dst="@HmugSee@" label="prop" />
 
@@ -58,12 +52,10 @@
 	<symbol id="@RtableObject@" type="object" />
 	<symbol id="@RtableReach@" type="reach" />
 	<symbol id="@RtableType@" type="table" />
-	<symbol id="@RtableReachable@" type="reach" />
 	<symbol id="@RtablePosition@" type="pose" />
 	<symbol id="@RtableSee@" type="see" />
 	<link src="@RtableObject@" dst="@RtableReach@" label="prop" />
 	<link src="@RtableObject@" dst="@RtableType@" label="prop" />
-	<link src="@RtableObject@" dst="@RtableReachable@" label="prop" />
 	<link src="@RtableObject@" dst="@RtablePosition@" label="prop" />
 	<link src="@RtableObject@" dst="@RtableSee@" label="prop" />
 	
@@ -71,12 +63,10 @@
 	<symbol id="@RcoffeeObject@" type="object" />
 	<symbol id="@RcoffeeReach@" type="reach" />
 	<symbol id="@RcoffeeType@" type="coffeePot" />
-	<symbol id="@RcoffeeReachable@" type="reach" />
 	<symbol id="@RcoffeePosition@" type="pose" />
 	<symbol id="@RcoffeeSee@" type="see" />
 	<link src="@RcoffeeObject@" dst="@RcoffeeReach@" label="prop" />
 	<link src="@RcoffeeObject@" dst="@RcoffeeType@" label="prop" />
-	<link src="@RcoffeeObject@" dst="@RcoffeeReachable@" label="prop" />
 	<link src="@RcoffeeObject@" dst="@RcoffeePosition@" label="prop" />
 	<link src="@RcoffeeObject@" dst="@RcoffeeSee@" label="prop" />
 
@@ -84,12 +74,10 @@
 	<symbol id="@RmugObject@" type="object" />
 	<symbol id="@RmugReach@" type="reach" />
 	<symbol id="@RmugType@" type="mug" />
-	<symbol id="@RmugReachable@" type="reach" />
 	<symbol id="@RmugPosition@" type="pose" />
 	<symbol id="@RmugSee@" type="see" />
 	<link src="@RmugObject@" dst="@RmugReach@" label="prop" />
 	<link src="@RmugObject@" dst="@RmugType@" label="prop" />
-	<link src="@RmugObject@" dst="@RmugReachable@" label="prop" />
 	<link src="@RmugObject@" dst="@RmugPosition@" label="prop" />
 	<link src="@RmugObject@" dst="@RmugSee@" label="prop" />
 
