@@ -945,70 +945,70 @@ humanMovesMugFromTableToBox : active(1)
 	}
 }
 
-setTableClean : active(1)
-{
-	{
-		r:robot(-130,-200)
-		m:table(275,65)
-		o:object(-130,-75)
-		r->o(know)
-		o->m(prop)
-		o->m(clean)*
-	}
-	=>
-	{
-		r:robot(-130,-200)
-		m:table(275,65)
-		o:object(-130,-75)
-		r->o(know)
-		o->m(prop)
-		o->m(clean)
-	}
-	precondition
-	{
-		(forall
-			other:status
-			t:mug
-			(when
-				(prop other t)
-				(not (in other o))
-			)
-		)
-	}
-}
+#setTableClean : active(1)
+#{
+#	{
+#		r:robot(-130,-200)
+#		m:table(275,65)
+#		o:object(-130,-75)
+#		r->o(know)
+#		o->m(prop)
+#		o->m(clean)*
+#	}
+#	=>
+#	{
+#		r:robot(-130,-200)
+#		m:table(275,65)
+#		o:object(-130,-75)
+#		r->o(know)
+#		o->m(prop)
+#		o->m(clean)
+#	}
+#	precondition
+#	{
+#		(forall
+#			other:status
+#			t:mug
+#			(when
+#				(prop other t)
+#				(not (in other o))
+#			)
+#		)
+#	}
+#}
 
 
 
-MOVEtoCLEAN : active(1)
-{
-	setObjectReach as reachMug
-	setObjectReach as reachBox
-	setObjectReach as reachTable
-	robotMovesMugFromTableToBox as move
-	setTableClean as set
-	where:
-	reachMug.s = move.s
-	reachBox.s = move.cs2
-	reachMug.o = move.o
-	reachTable.o = move.c2
-	move.cs1 = set.s = reachTable.s
-	move.r = set.r
-	move.t = set.m
-	move.c1 = set.o = reachBox.o
-}
+#MOVEtoCLEAN : active(1)
+#{
+#	setObjectReach as reachMug
+#	setObjectReach as reachBox
+#	setObjectReach as reachTable
+#	robotMovesMugFromTableToBox as move
+#	setTableClean as set
+#	where:
+#	reachMug.s = move.s
+#	reachBox.s = move.cs2
+#	reachMug.o = move.o
+#	reachTable.o = move.c2
+#	move.cs1 = set.s = reachTable.s
+#	move.r = set.r
+#	move.t = set.m
+#	move.c1 = set.o = reachBox.o
+#}
 
-MOVIDA: active(1)
-{
-	findObjectVisually as findBox
-	recognizeObjBox as realizeTheBoxIsABox
-	setObjectReach as reachMug
-	setObjectReach as reachTable
-	setObjectReach as reachBox
-	robotMovesMugFromTableToBox as move
-	setTableClean as setClean
-	where:
-	realizeTheBoxIsABox.o = reachBox.o = move.c2
-}
+#MOVIDA: active(1)
+#{
+#	findObjectVisually as findBox
+#	recognizeObjBox as realizeTheBoxIsABox
+#	setObjectReach as reachMug
+#	setObjectReach as reachTable
+#	setObjectReach as reachBox
+#	robotMovesMugFromTableToBox as move
+#	setTableClean as setClean
+#	where:
+#	realizeTheBoxIsABox.o = reachBox.o = move.c2
+#}
 
 
 TELLhumanInorderTOmove : active(1)

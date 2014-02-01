@@ -32,10 +32,10 @@ AGM::AGM(const AGM::SPtr &src)
 AGM::AGM(std::string agglfile, std::string pddlFileFull_, std::string pddlFilePartial_)
 {
 	printf("Reading from %s\n", agglfile.c_str());
-	if (not parseAGGL(agglfile.c_str(), this, &rules))
-	{
-		throw std::string("Error reading AGGL file <")+agglfile+std::string(">");
-	}
+// 	if (not parseAGGL(agglfile.c_str(), this, &rules))
+// 	{
+// 		throw std::string("Error reading AGGL file <")+agglfile+std::string(">");
+// 	}
 
 	pddlFileFull = pddlFileFull_;
 	pddlFilePartial = pddlFilePartial_;

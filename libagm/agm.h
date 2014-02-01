@@ -9,7 +9,7 @@
 #include <agm_rule.h>
 
 
-bool parseAGGL(const char *path, AGM *agm, std::vector <AGGLRule> *rules);
+// bool parseAGGL(const char *path, AGM *agm, std::vector <AGGLRule> *rules);
 
 class AGM
 {

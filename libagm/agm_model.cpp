@@ -202,7 +202,7 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 	for (uint32_t s=0; s<target->symbols.size(); ++s)
 	{
 		bool found = false;
-		for (std::list< std::string>::iterator it=originalObjects.begin(); it!=originalObjects.end(); ++it)
+		for (std::list<std::string>::iterator it=originalObjects.begin(); it!=originalObjects.end(); ++it)
 		{
 			if (*it == target->symbols[s]->toString())
 			{
