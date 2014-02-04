@@ -665,7 +665,7 @@ def CheckTarget(graph):"""
 		conditions, number = extractNewLinkConditionsFromList(graph.links, n, symbols_in_stack)
 		conditions = conditions.replace("snode.graph", "graph")
 		conditionsListList.append( [conditions, number] )
-		#ret += conditions
+		ret += conditions
 		ret += ":"
 		symbols_in_stack.append(n)
 		indent += "\t"

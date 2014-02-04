@@ -223,7 +223,7 @@ class PyPlan(object):
 							prtd = True
 						explored += 1
 						if verbose > 0:
-							if explored % 100 == 0:
+							if explored % 10 == 0:
 								print 'Explored nodes:', explored,
 								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
 								#print head
