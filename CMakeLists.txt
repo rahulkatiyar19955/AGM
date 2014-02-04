@@ -134,27 +134,27 @@ WRAP_PYTHON_UI( guiAGGLEditor guiGraphViewer appearance )
 WRAP_PYTHON_QRC( resource )
 
 
-# COMPILE FLEX AND BISON FILE FOR THE AGGL PARSER #
-###################################################
-# Create target for the parser
-ADD_CUSTOM_TARGET(AGGLParser echo "Creating agglparser.cpp")
-ADD_CUSTOM_COMMAND(
-  SOURCE libagm/aggllexer.l
-  COMMAND flex
-  ARGS --outfile=libagm/aggllexer.cpp libagm/aggllexer.l
-  OUTPUT libagm/aggllexer.cpp
-)
- ADD_CUSTOM_COMMAND(
-   SOURCE libagm/agglparser.y
-   COMMAND bison
-   ARGS -d -y libagm/agglparser.y -o libagm/agglparser.cpp
-   DEPENDS libagm/aggllexer.cpp
-   OUTPUT libagm/agglparser.cpp libagm/agglparser.hpp
-)
-SET_SOURCE_FILES_PROPERTIES(libagm/agglparser.cpp GENERATED) 
-SET_SOURCE_FILES_PROPERTIES(libagm/aggllexer.cpp GENERATED) 
-SET(AGM_CODE ${AGM_CODE} libagm/aggllexer.cpp libagm/agglparser.cpp)
-SET(LIBS ${LIBS} -lfl )
+# # COMPILE FLEX AND BISON FILE FOR THE AGGL PARSER #
+# ###################################################
+# # Create target for the parser
+# ADD_CUSTOM_TARGET(AGGLParser echo "Creating agglparser.cpp")
+# ADD_CUSTOM_COMMAND(
+#   SOURCE libagm/aggllexer.l
+#   COMMAND flex
+#   ARGS --outfile=libagm/aggllexer.cpp libagm/aggllexer.l
+#   OUTPUT libagm/aggllexer.cpp
+# )
+#  ADD_CUSTOM_COMMAND(
+#    SOURCE libagm/agglparser.y
+#    COMMAND bison
+#    ARGS -d -y libagm/agglparser.y -o libagm/agglparser.cpp
+#    DEPENDS libagm/aggllexer.cpp
+#    OUTPUT libagm/agglparser.cpp libagm/agglparser.hpp
+# )
+# SET_SOURCE_FILES_PROPERTIES(libagm/agglparser.cpp GENERATED) 
+# SET_SOURCE_FILES_PROPERTIES(libagm/aggllexer.cpp GENERATED) 
+# SET(AGM_CODE ${AGM_CODE} libagm/aggllexer.cpp libagm/agglparser.cpp)
+# SET(LIBS ${LIBS} -lfl )
 
 
 #  Library building  #

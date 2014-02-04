@@ -946,7 +946,6 @@ humanMovesMugFromTableToBox : active(1)
 }
 
 
-
 TELLhumanInorderTOmove : active(1)
 {
 	tellHumanAboutMug as tell

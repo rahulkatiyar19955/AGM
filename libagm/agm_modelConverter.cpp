@@ -116,6 +116,35 @@ bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMW
 
 #endif
 
+int32_t getIdFromString(char *sid, int32_t &lastVariableId, std::map <std::string, int32_t> &identifierMap)
+{
+	int32_t id;
+	if ((sid[0] >= 'a' and sid[0] <= 'z') or (sid[0] >= 'A' and sid[0] <= 'Z'))
+	{
+		std::map <std::string, int32_t>::iterator iter = identifierMap.find(std::string(sid));
+		if (iter == identifierMap.end())
+		{
+			lastVariableId++;
+			id = lastVariableId;
+			identifierMap[std::string(sid)] = id;
+		}
+		else
+		{
+			id = identifierMap[std::string(sid)];
+		}
+	}
+	else
+	{
+		id = atoi((char *)sid);
+	}
+	if (id<0)
+	{
+		fprintf(stderr, "AGMModels can't have negative identifiers (type: %s).\n", (char *)sid);
+		exit(-1);
+	}
+
+	return id;
+}
 
 void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr &dst)
 {
@@ -144,8 +173,10 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 	}
 
 
+	int32_t lastVariableId=1000;
+	std::map <std::string, int32_t> identifierMap;
 
-	for(cur=cur->xmlChildrenNode; cur!=NULL; cur=cur->next)
+	for (cur=cur->xmlChildrenNode; cur!=NULL; cur=cur->next)
 	{
 		if ((xmlStrcmp(cur->name, (const xmlChar *)"text")))
 		{
@@ -154,12 +185,7 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 				// Read ID and type
 				xmlChar *stype = xmlGetProp(cur, (const xmlChar *)"type");
 				xmlChar *sid = xmlGetProp(cur, (const xmlChar *)"id");
-				int32_t id = atoi((char *)sid);
-				if (id<0)
-				{
-					fprintf(stderr, "AGMModels can't have negative identifiers (type: %s).\n", (char *)stype);
-					exit(-1);
-				}
+				int32_t id = getIdFromString((char *)sid, lastVariableId, identifierMap);
 
 				// Read attributes
 				std::map<std::string, std::string> attrMap;
@@ -196,7 +222,9 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 				xmlChar *label = xmlGetProp(cur, (const xmlChar *)"label");
 				if (label == NULL) { printf("Link %s lacks of attribute 'label'.\n", (char *)cur->name); exit(-1); }
 				
-				AGMModelEdge edge(atoi((char *)srcn), atoi((char *)dstn), (char *)label);
+				int32_t srcN = getIdFromString((char *)srcn, lastVariableId, identifierMap);
+				int32_t dstN = getIdFromString((char *)dstn, lastVariableId, identifierMap);
+				AGMModelEdge edge(srcN, dstN, (char *)label);
 				if (edge.symbolPair.first == -1 or edge.symbolPair.second == -1)
 				{
 					fprintf(stderr, "Can't create models with invalid identifiers (type: %s).\n", edge.linking.c_str());
