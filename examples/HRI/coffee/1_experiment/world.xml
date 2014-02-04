@@ -23,6 +23,7 @@
 	<link src="10" dst="13" label="prop" />
 	<link src="10" dst="15" label="prop" />
 	<link src="10" dst="16" label="prop" />
+
 	<!-- Mug -->
 	<symbol id="17" type="object" />
 	<symbol id="19" type="reach" />
