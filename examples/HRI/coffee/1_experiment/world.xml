@@ -24,7 +24,7 @@
 	<link src="10" dst="15" label="prop" />
 	<link src="10" dst="16" label="prop" />
 
-	<!-- Mug -->
+	<!-- Mug 
 	<symbol id="17" type="object" />
 	<symbol id="19" type="reach" />
 	<symbol id="20" type="mug" />
@@ -34,14 +34,14 @@
 	<link src="17" dst="20" label="prop" />
 	<link src="17" dst="22" label="prop" />
 	<link src="17" dst="23" label="prop" />
-
+-->
 
 	<!-- Human and the objects he knows -->
 	<link src="1" dst="10" label="know" />
-	<link src="1" dst="17" label="know" />
+<!-- 	<link src="1" dst="17" label="know" /> -->
 	<link src="1" dst="3" label="know" />
 	<!-- INs -->
-	<link src="17" dst="3" label="in" />
+<!-- 	<link src="17" dst="3" label="in" /> -->
 	<link src="10" dst="3" label="in" />
 
 
@@ -71,7 +71,7 @@
 	<link src="31" dst="36" label="prop" />
 	<link src="31" dst="37" label="prop" />
 
-	<!-- Mug -->
+	<!-- Mug
 	<symbol id="38" type="object" />
 	<symbol id="40" type="reach" />
 	<symbol id="41" type="mug" />
@@ -81,19 +81,20 @@
 	<link src="38" dst="41" label="prop" />
 	<link src="38" dst="43" label="prop" />
 	<link src="38" dst="44" label="prop" />
+-->
 
 	<!-- Robot and the objects he knows -->
 	<link src="2" dst="31" label="know" />
-	<link src="2" dst="38" label="know" />
+<!-- 	<link src="2" dst="38" label="know" /> -->
 	<link src="2" dst="24" label="know" />
 	<!-- INs -->
-	<link src="38" dst="24" label="in" />
+<!-- 	<link src="38" dst="24" label="in" /> -->
 	<link src="31" dst="24" label="in" />
 
 
 	<!-- Equivalences -->
 	<link src="31" dst="10" label="eq" />
-	<link src="38" dst="17" label="eq" />
+<!-- 	<link src="38" dst="17" label="eq" /> -->
 	<link src="24" dst="3" label="eq" />
 	
 	<!-- Interacting -->

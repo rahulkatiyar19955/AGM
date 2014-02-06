@@ -647,8 +647,8 @@ def CheckTarget(graph):"""
 	# Generate the loop that checks the actual model
 	symbols_in_stack = []
 	score = 0
-	ret += indent+"try:"
-	indent += "\t"
+	#ret += indent+"try:"
+	#indent += "\t"
 	ret += indent+"# Hard score"
 	for n in graph.nodes:
 		ret += indent+"# "+n
@@ -687,11 +687,11 @@ def CheckTarget(graph):"""
 	ret += indent+"\treturn score+scoreA, True"
 	# Rule ending
 	indent = "\n\t"
-	ret += indent+"except:"
-	ret += indent+"\tprint graph.nodes.keys()"
-	ret += indent+"\tprint 'ERROR'"
-	ret += indent+"\timport sys"
-	ret += indent+"\tsys.exit(1)"
+	#ret += indent+"except:"
+	#ret += indent+"\tprint graph.nodes.keys()"
+	#ret += indent+"\tprint 'ERROR'"
+	#ret += indent+"\timport sys"
+	#ret += indent+"\tsys.exit(1)"
 	ret += indent+"return score+scoreA, False"
 	ret += indent+""
 	ret += indent+""

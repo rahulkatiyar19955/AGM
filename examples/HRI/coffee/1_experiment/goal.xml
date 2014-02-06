@@ -10,11 +10,11 @@
 	<link  src="10"  dst="13"   label="prop" />
 
 	<!-- Mug -->
-	<symbol id="17"  type="object" />
-	<symbol id="19"  type="reach" />
-	<symbol id="20"  type="mug" />
-	<link  src="17"  dst="19"  label="prop" />
-	<link  src="17"  dst="20"   label="prop" />
+	<symbol id="mugObject"  type="object" />
+	<symbol id="mugReach"  type="reach" />
+	<symbol id="mugType"  type="mug" />
+	<link  src="mugObject"  dst="mugReach"  label="prop" />
+	<link  src="mugObject"  dst="mugType"   label="prop" />
 
 	<!-- Milk -->
 	<symbol id="milkObject"  type="object" />
@@ -27,12 +27,12 @@
 	<symbol id="3" type="object" />
 
 	<!-- Human and the objects he knows -->
-	<link src="1"         dst="10"  label="know" />
-	<link src="1"         dst="17"     label="know" />
-	<link src="1"         dst="milkObject"    label="know" />
-	<link src="milkObject"    dst="3"         label="in" />
-	<link src="17"     dst="3"         label="in" />
-	<link src="10"  dst="3"         label="in" />
+	<link src="1"          dst="10"         label="know" />
+	<link src="1"          dst="mugObject"  label="know" />
+	<link src="1"          dst="milkObject" label="know" />
+	<link src="milkObject" dst="3"          label="in" />
+	<link src="mugObject"  dst="3"          label="in" />
+	<link src="10"         dst="3"          label="in" />
 
 </AGMModel>
 
