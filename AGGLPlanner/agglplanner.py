@@ -42,7 +42,8 @@ maxWorldIncrement = 40
 maxCost = 200
 stopWithFirstPlan = True
 verbose = 1
-maxTimeWait = 4.
+maxTimeWaitAchieved = 10.
+maxTimeWaitLimit = 1000.
 
 
 class GoalAchieved(Exception):
@@ -196,7 +197,10 @@ class PyPlan(object):
 				# Check if we should finish by time
 				timeB = datetime.datetime.now()
 				timeElapsed = (timeB-timeA).seconds + (timeB-timeA).microseconds/1e6
-				if timeElapsed > maxTimeWait:
+				if timeElapsed > maxTimeWaitLimit:
+					if len(results)>0: raise GoalAchieved
+					else: raise TimeLimit
+				elif timeElapsed > maxTimeWaitAchieved:
 					if len(results)>0:
 						raise GoalAchieved
 				# Proceed
