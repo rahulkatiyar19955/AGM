@@ -1,9 +1,14 @@
 #include "graphModelViewer.h"
 
+
+#include <osgGA/TrackballManipulator>
+
 SymbolNode::SymbolNode(std::string _id, std::string _stype) : osg::Group()
 {
 	id = _id;
 	stype = _stype;
+	vel = osg::Vec3(0,0,0);
+	pos = osg::Vec3(0,0,0);
 
 	billboard = new osg::Billboard();
 	addChild(billboard);
@@ -36,24 +41,24 @@ SymbolNode::SymbolNode(std::string _id, std::string _stype) : osg::Group()
 	cursor = osg::Vec3(0,-RADIUS,0.52*RADIUS);
 	textId = new osgText::Text;
 	textId->setFont(font);
-	textId->setCharacterSize(90);
+	textId->setCharacterSize(120);
 	textId->setAxisAlignment(osgText::TextBase::XZ_PLANE);
 	textId->setPosition(cursor);
 	textId->setColor(fontSizeColor);
 	textId->setAlignment(osgText::Text::CENTER_CENTER);
-	//text->setFontResolution(100,100);
+	textId->setFontResolution(1000,1000);
 	textId->setText(id);
 
 	cursor = osg::Vec3(0,-RADIUS,-0.35*RADIUS);
 	billboard->addDrawable(textId);
 	textType = new osgText::Text;
 	textType->setFont(font);
-	textType->setCharacterSize(90);
+	textType->setCharacterSize(120);
 	textType->setAxisAlignment(osgText::TextBase::XZ_PLANE);
 	textType->setPosition(cursor);
 	textType->setColor(fontSizeColor);
 	textType->setAlignment(osgText::Text::CENTER_CENTER);
-	//text->setFontResolution(100,100);
+	textType->setFontResolution(10,10);
 	textType->setText(stype);
 	billboard->addDrawable(textType);
 }
@@ -67,18 +72,16 @@ void SymbolNode::setType(std::string str)
 	textType->setText(str);
 }
 
-void SymbolNode::setPosition(float _x, float _y, float _z)
+void SymbolNode::setPosition(osg::Vec3 np)
 {
-	x = _x;
-	y = _y;
-	z = _z;
-	billboard->setPosition(0, osg::Vec3(x, y, z));
-	billboard->setPosition(1, osg::Vec3(x, y, z));
-	billboard->setPosition(2, osg::Vec3(x, y, z));
+	pos = np;
+	billboard->setPosition(0, pos);
+	billboard->setPosition(1, pos);
+	billboard->setPosition(2, pos);
 }
 
 
-GraphModelEdge::GraphModelEdge(std::string _src, std::string _dst, std::string _label, std::map<std::string, SymbolNode *> *_nodeMapId) : osg::Group()
+GraphModelEdge::GraphModelEdge(std::string _src, std::string _dst, std::string _label, std::map<std::string, SymbolNode *> *_nodeMapId) : osg::Geode()
 {
 	src   = _src;
 	dst   = _dst;
@@ -86,9 +89,9 @@ GraphModelEdge::GraphModelEdge(std::string _src, std::string _dst, std::string _
 	nodeMapId = _nodeMapId;
 
 	SymbolNode *s1 = (*nodeMapId)[src];
-	osg::Vec3 p1 = osg::Vec3(s1->x, s1->y, s1->z);
+	osg::Vec3 p1 = s1->pos;
 	SymbolNode *s2 = (*nodeMapId)[dst];
-	osg::Vec3 p2 = osg::Vec3(s2->x, s2->y, s2->z);
+	osg::Vec3 p2 = s2->pos;
 
 	osg::Vec3 pInc = p2-p1;
 	osg::Vec3 pIncNorm = pInc;
@@ -101,52 +104,153 @@ GraphModelEdge::GraphModelEdge(std::string _src, std::string _dst, std::string _
 	osg::Quat quat = quaternionFromInitFinalVector(osg::Vec3(0, 0, 1), p2-p1);
 	if (length <= 0.000001)
 		throw "1";
+
 	float effectiveLength = length-TIPSIZE;
 	printf("length:%f  RADIUS:%f    effective:%f\n", length, RADIUS, effectiveLength);
 	osg::Cylinder *line = new osg::Cylinder(((p1+p2)/2.f)-(pIncNorm*TIPSIZE), RADIUS/7, effectiveLength);
 	line->setRotation(quat);
 	osg::ShapeDrawable* lineDrawable = new osg::ShapeDrawable( line );
 	lineDrawable->setColor(osg::Vec4(0.7, 0.7, 0.7, 1));
-	osg::Geode* shapeGeode = new osg::Geode();
-	shapeGeode->addDrawable( lineDrawable );
+	addDrawable(lineDrawable);
 
 	osg::Cone* tip = new osg::Cone(p2-pIncNorm*(TIPSIZE+4), 2.*RADIUS/9., 1.6*TIPSIZE);
 	tip->setRotation(quat);
 	osg::ShapeDrawable* tipDrawable = new osg::ShapeDrawable(tip);
 	lineDrawable->setColor(osg::Vec4(0.7, 0.7, 0.7, 1));
-	shapeGeode->addDrawable( tipDrawable );
-
-	addChild(shapeGeode);
+	addDrawable(tipDrawable);
 }
 	
 
 	
 	
-GraphModelViewer::GraphModelViewer() : osg::Group()
+GraphModelViewer::GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadingModel, bool autoUpdate) : QWidget()
 {
+	setThreadingModel(threadingModel);
+
+	// disable the default setting of viewer.done() by pressing Escape.
+	setKeyEventSetsDone(0);
+
+	group = new osg::Group();
+
+	QWidget* widget1 = addViewWidget( createGraphicsWindow(0,0,100,100), group );
+	QGridLayout* grid = new QGridLayout;
+	grid->addWidget(widget1, 0, 0 );
+	setLayout(grid);
+
+	connect( &_timer, SIGNAL(timeout()), this, SLOT(update()) );
+	if (autoUpdate)
+		connect( &_timer, SIGNAL(timeout()), this, SLOT(animateStep()) );
+	_timer.start( 10 );
+
 }
 
 void GraphModelViewer::addNode(std::string id, std::string stype)
 {
 	SymbolNode *s;
 	s = new SymbolNode(id, stype);
-// 	s->setPosition(2*RADIUS, 2*RADIUS, 2*RADIUS);
-	addChild(s);
+	s->setPosition(0., 0., 0.);
+
+	group->addChild(s);
 
 	nodeMapId[id] = s;
 	nodeVector.push_back(s);
 }
 
-void GraphModelViewer::setNodePosition(std::string id, float x, float y, float z)
+void GraphModelViewer::setNodePosition(std::string id, osg::Vec3 np)
 {
-	nodeMapId[id]->setPosition(x, y, z);
+	nodeMapId[id]->setPosition(np);
 }
 
 void GraphModelViewer::addEdge(std::string src, std::string dst, std::string label)
 {
-	GraphModelEdge *edge = new GraphModelEdge(src, dst, label, &nodeMapId);
-	addChild(edge);
+	printf ("(%s)---[%s]--->(%s)\n", src.c_str(), dst.c_str(), label.c_str());
+	GraphModelEdge *edge;
+	edge = new GraphModelEdge(src, dst, label, &nodeMapId);
+	group->addChild(edge);
 	edges.push_back(edge);
+}
+
+
+
+QWidget *GraphModelViewer::addViewWidget(osgQt::GraphicsWindowQt* gw, osg::Node* scene )
+{
+	osgViewer::View* view = new osgViewer::View;
+	addView( view );
+
+	osg::Camera* camera = view->getCamera();
+	camera->setGraphicsContext(gw);
+
+	const osg::GraphicsContext::Traits* traits = gw->getTraits();
+
+	camera->setClearColor( osg::Vec4(0.2, 0.2, 0.6, 1.0) );
+	camera->setViewport( new osg::Viewport(0, 0, traits->width, traits->height) );
+	camera->setProjectionMatrixAsPerspective(30.0f, static_cast<double>(traits->width)/static_cast<double>(traits->height), 1.0f, 10000.0f );
+
+	view->setSceneData( scene );
+	view->addEventHandler( new osgViewer::StatsHandler );
+	view->setCameraManipulator( new osgGA::TrackballManipulator );
+
+	return gw->getGLWidget();
+}
+
+osgQt::GraphicsWindowQt *GraphModelViewer::createGraphicsWindow(int x, int y, int w, int h, const std::string& name, bool windowDecoration)
+{
+	osg::DisplaySettings* ds = osg::DisplaySettings::instance().get();
+	osg::ref_ptr<osg::GraphicsContext::Traits> traits = new osg::GraphicsContext::Traits;
+	traits->windowName = name;
+	traits->windowDecoration = windowDecoration;
+	traits->x = x;
+	traits->y = y;
+	traits->width = w;
+	traits->height = h;
+	traits->doubleBuffer = true;
+	traits->alpha = ds->getMinimumNumAlphaBits();
+	traits->stencil = ds->getMinimumNumStencilBits();
+	traits->sampleBuffers = ds->getMultiSamples();
+	traits->samples = ds->getNumMultiSamples();
+
+	return new osgQt::GraphicsWindowQt(traits.get());
+}
+
+void GraphModelViewer::paintEvent( QPaintEvent* event )
+{
+	frame();
+}
+
+
+void GraphModelViewer::animateStep()
+{
+	const float T = 0.03;
+	for (uint32_t symbol1=0; symbol1<nodeVector.size(); symbol1++)
+	{
+		osg::Vec3 force(0,0,0);
+		for (uint32_t symbol2=0; symbol2<nodeVector.size(); symbol2++)
+		{
+			osg::Vec3 inc = nodeVector[symbol2]->pos - nodeVector[symbol1]->pos;
+			osg::Vec3 incNorm = inc;
+			incNorm.normalize();
+			const float dist = inc.length();
+			if (symbol1 == symbol2)
+			{
+				continue;
+			}
+			
+			/// Repulsion
+// 			force += -0.001 / incNorm*dist*dist;
+			/// Spring
+			if (dist>8.*RADIUS)
+			{
+				force += incNorm*dist*0.001;
+			}
+			
+			nodeVector[symbol1]->vel += force * T;
+		}
+	}
+
+	for (uint32_t symbol1=0; symbol1<nodeVector.size(); symbol1++)
+	{
+		nodeVector[symbol1]->setPosition(nodeVector[symbol1]->pos + nodeVector[symbol1]->vel*T);
+	}
 }
 
 

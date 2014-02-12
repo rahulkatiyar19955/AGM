@@ -1,16 +1,20 @@
+#include <QtGui>
+#include <QtOpenGL/QGLWidget>
+
+#include <osgQt/GraphicsWindowQt>
+#include <osgViewer/CompositeViewer>
+#include <osgViewer/ViewerEventHandlers>
+#include <osgGA/TrackballManipulator>
+
 #include <osg/Geode>
 #include <osg/ShapeDrawable>
 #include <osg/Material>
 #include <osg/Texture2D>
 #include <osgUtil/ShaderGen>
-
 #include <osgViewer/Viewer>
-
 #include <osgDB/ReadFile>
 #include <osgDB/WriteFile>
-
 #include <osg/Math>
-
 #include <osgText/Font3D>
 #include <osgText/Text>
 #include <osgText/Text3D>
@@ -27,6 +31,7 @@ class GraphModelEdge;
 class SymbolNode : public osg::Group
 {
 friend GraphModelEdge;
+friend GraphModelViewer;
 
 public:
 	SymbolNode(std::string _id, std::string _stype);
@@ -34,10 +39,11 @@ public:
 	void setId(std::string str);
 	void setType(std::string str);
 
-	void setPosition(float x, float y, float z);
+	void setPosition(float x, float y, float z) { setPosition(osg::Vec3(x,y,z)); }
+	void setPosition(osg::Vec3 np);
 
 private:
-	float x, y, z;
+	osg::Vec3 pos, vel;
 	std::string stype;
 	std::string id;
 
@@ -45,10 +51,11 @@ private:
 	osgText::Text *textType;
 	osg::Billboard *billboard;
 	osg::Drawable *sphere;
+
 };
 
 
-class GraphModelEdge : public osg::Group
+class GraphModelEdge : public osg::Geode
 {
 public:
 	GraphModelEdge(std::string _src, std::string _dst, std::string _label, std::map<std::string, SymbolNode *> *_nodeMapId);
@@ -78,20 +85,33 @@ private:
 };
 
 
-class GraphModelViewer : public osg::Group
+class GraphModelViewer : public QWidget, public osgViewer::CompositeViewer
 {
 friend GraphModelEdge;
 public:
-	GraphModelViewer();
+	GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadingModel=osgViewer::CompositeViewer::SingleThreaded, bool autoUpdate=false);
 
 	void addNode(std::string id, std::string stype);
-	void setNodePosition(std::string id, float x, float y, float z);
+	void setNodePosition(std::string id, osg::Vec3 np);
 	void addEdge(std::string src, std::string dst, std::string label);
+	void animateStep();
 
 private:
+	osg::Group *group;
+	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> gw;
+
 	std::map<std::string, SymbolNode *> nodeMapId;
 	std::vector<SymbolNode *> nodeVector;
 
 	std::vector<GraphModelEdge *> edges;
+	
+	
+	QWidget *addViewWidget(osgQt::GraphicsWindowQt *gw, osg::Node *scene);
+	osgQt::GraphicsWindowQt *createGraphicsWindow(int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false);
+	virtual void paintEvent(QPaintEvent* event);
+
+protected:
+
+    QTimer _timer;
 };
 
