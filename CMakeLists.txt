@@ -25,6 +25,7 @@ SET (AGM_CODE
   libagm/agm_search.cpp
   libagm/agm_searchPath.cpp
   libagm/agm_rule.cpp
+  libagm/graphModelViewer.cpp
 )
 
 
@@ -41,6 +42,7 @@ SET (HEADERS
   libagm/agm_search.h
   libagm/agm_rule.h
   libagm/agm_config.h
+  libagm/graphModelViewer.h
 )
 
 
@@ -106,6 +108,16 @@ FIND_PACKAGE(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 set(LIBS ${LIBS} ${LIBXML2_LIBRARIES} )
 
+# OSG
+FIND_PACKAGE(OpenThreads)
+FIND_PACKAGE(osg)
+FIND_PACKAGE(osgDB)
+FIND_PACKAGE(osgViewer)
+FIND_PACKAGE(osgText)
+INCLUDE_DIRECTORIES(${OPENTHREADS_INCLUDE_DIR} ${OSG_INCLUDE_DIR}) 
+LINK_DIRECTORIES(${OSG_LIB_DIR}) 
+
+
 #  Macro for compiling UI files and wrap command  #
 ###################################################
 MACRO( WRAP_PYTHON_UI )
@@ -164,7 +176,7 @@ if (ROBOCOMP_SUPPORT)
 endif (ROBOCOMP_SUPPORT)
 
 add_library(agm SHARED ${AGM_CODE} )
-target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES})
+target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES} ${OSG_LIBRARY} ${OSGUTIL_LIBRARY} ${OSGDB_LIBRARY} ${OSGVIEWER_LIBRARY} ${OPENTHREADS_LIBRARY} ${OSGTEXT_LIBRARY} )
 add_dependencies(agm agmdummy)
 
 add_executable ( testagm tools/testagm.cpp )
@@ -173,6 +185,10 @@ add_dependencies(testagm agm)
 
 add_executable ( agm_xml2pddlProblem tools/agm_xml2pddlProblem.cpp )
 target_link_libraries ( agm_xml2pddlProblem agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+add_dependencies(testagm agm)
+
+add_executable ( agm_xmlViewer3D tools/agm_xmlViewer3D.cpp )
+target_link_libraries ( agm_xmlViewer3D agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
 
