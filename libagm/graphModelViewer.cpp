@@ -137,10 +137,10 @@ GraphModelViewer::GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadi
 	grid->addWidget(widget1, 0, 0 );
 	setLayout(grid);
 
-	connect( &_timer, SIGNAL(timeout()), this, SLOT(update()) );
+	connect(&timer, SIGNAL(timeout()), this, SLOT(update()));
 	if (autoUpdate)
-		connect( &_timer, SIGNAL(timeout()), this, SLOT(animateStep()) );
-	_timer.start( 10 );
+		connect(&timer, SIGNAL(timeout()), this, SLOT(animateStep()));
+	timer.start(10);
 
 }
 
@@ -220,10 +220,15 @@ void GraphModelViewer::paintEvent( QPaintEvent* event )
 
 void GraphModelViewer::animateStep()
 {
-	const float T = 0.03;
+	const float T = 0.5;
+	
+	// Update repulsion-induced force
+	// For each symbol
 	for (uint32_t symbol1=0; symbol1<nodeVector.size(); symbol1++)
 	{
+		// Initialize forces
 		osg::Vec3 force(0,0,0);
+		// Compute force sum
 		for (uint32_t symbol2=0; symbol2<nodeVector.size(); symbol2++)
 		{
 			osg::Vec3 inc = nodeVector[symbol2]->pos - nodeVector[symbol1]->pos;
@@ -234,21 +239,40 @@ void GraphModelViewer::animateStep()
 			{
 				continue;
 			}
-			
 			/// Repulsion
-// 			force += -0.001 / incNorm*dist*dist;
-			/// Spring
-			if (dist>8.*RADIUS)
-			{
-				force += incNorm*dist*0.001;
-			}
-			
-			nodeVector[symbol1]->vel += force * T;
+			force -= incNorm*(1./(dist*dist))*(1000000);
+		}
+		// Integrate
+		nodeVector[symbol1]->vel += force * T;
+	}
+
+	// Update link-induced forces
+	// For each link
+	for (uint32_t edgeIdx=0; edgeIdx<edges.size(); edgeIdx++)
+	{
+		osg::Vec3 inc = nodeMapId[edges[edgeIdx]->dst]->pos - nodeMapId[edges[edgeIdx]->src]->pos;
+		osg::Vec3 incNorm = inc;
+		incNorm.normalize();
+		const float dist = inc.length();
+		if (edges[edgeIdx]->dst == edges[edgeIdx]->src)
+		{
+			continue;
+		}
+
+		/// Spring
+		if (dist>10.*RADIUS)
+		{
+			nodeMapId[edges[edgeIdx]->src]->vel += incNorm*dist*(0.001) * T;
+			nodeMapId[edges[edgeIdx]->dst]->vel -= incNorm*dist*(0.001) * T;
 		}
 	}
 
+	// Update the velocity and position of the nodes
 	for (uint32_t symbol1=0; symbol1<nodeVector.size(); symbol1++)
 	{
+		// Friction
+		nodeVector[symbol1]->vel *=  0.993;
+		// Update position
 		nodeVector[symbol1]->setPosition(nodeVector[symbol1]->pos + nodeVector[symbol1]->vel*T);
 	}
 }

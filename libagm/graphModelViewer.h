@@ -87,6 +87,7 @@ private:
 
 class GraphModelViewer : public QWidget, public osgViewer::CompositeViewer
 {
+Q_OBJECT
 friend GraphModelEdge;
 public:
 	GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadingModel=osgViewer::CompositeViewer::SingleThreaded, bool autoUpdate=false);
@@ -94,6 +95,8 @@ public:
 	void addNode(std::string id, std::string stype);
 	void setNodePosition(std::string id, osg::Vec3 np);
 	void addEdge(std::string src, std::string dst, std::string label);
+
+public slots:
 	void animateStep();
 
 private:
@@ -112,6 +115,6 @@ private:
 
 protected:
 
-    QTimer _timer;
+	QTimer timer;
 };
 

@@ -114,6 +114,7 @@ FIND_PACKAGE( Qt4 )
 SET( QT_USE_QTGUI TRUE )
 SET( QT_USE_QTOPENGL TRUE )
 INCLUDE( ${QT_USE_FILE} )
+QT4_WRAP_CPP(XMLVIEWER3D_MOCS libagm/graphModelViewer.h )
 
 # OSG
 FIND_PACKAGE(OpenThreads)
@@ -184,7 +185,7 @@ if (ROBOCOMP_SUPPORT)
    add_library(agmdummy SHARED AGMWorldModel.cpp )
 endif (ROBOCOMP_SUPPORT)
 
-add_library(agm SHARED ${AGM_CODE} )
+add_library(agm SHARED ${AGM_CODE} ${XMLVIEWER3D_MOCS} )
 target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES} ${OSG_LIBS} ${QT_LIBRARIES} )
 add_dependencies(agm agmdummy)
 
