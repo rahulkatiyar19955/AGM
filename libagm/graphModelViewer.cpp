@@ -21,7 +21,7 @@ SymbolNode::SymbolNode(std::string _id, std::string _stype) : osg::Group()
 		osg::Texture2D* texture = new osg::Texture2D;
 		texture->setImage(image);
 		texture->setFilter(osg::Texture::MIN_FILTER, osg::Texture::LINEAR);
-		stateset->setTextureAttributeAndModes(0,texture, osg::StateAttribute::ON);
+		stateset->setTextureAttributeAndModes(0, texture, osg::StateAttribute::ON);
 	}
 
 	stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
@@ -31,14 +31,14 @@ SymbolNode::SymbolNode(std::string _id, std::string _stype) : osg::Group()
 	osg::TessellationHints* hints = new osg::TessellationHints;
 	hints->setDetailRatio(0.6f);
 
-	sphere = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f),RADIUS), hints);
+	sphere = new osg::ShapeDrawable(new osg::Sphere(osg::Vec3(0.0f,0.0f,0.0f), RADIUS), hints);
 	billboard->addDrawable(sphere);
 
 	osgText::Font *font = osgText::readFontFile("fonts/arial.ttf");
-	osg::Vec4 fontSizeColor(0.0f,0.0f,0.0f,100.0f);
+	osg::Vec4 fontSizeColor(0.0f, 0.0f, 0.0f, 100.0f);
 	osg::Vec3 cursor;
 
-	cursor = osg::Vec3(0,-RADIUS,0.52*RADIUS);
+	cursor = osg::Vec3(0, -RADIUS, 0.52*RADIUS);
 	textId = new osgText::Text;
 	textId->setFont(font);
 	textId->setCharacterSize(120);
@@ -46,10 +46,10 @@ SymbolNode::SymbolNode(std::string _id, std::string _stype) : osg::Group()
 	textId->setPosition(cursor);
 	textId->setColor(fontSizeColor);
 	textId->setAlignment(osgText::Text::CENTER_CENTER);
-	textId->setFontResolution(1000,1000);
+	textId->setFontResolution(1000, 1000);
 	textId->setText(id);
 
-	cursor = osg::Vec3(0,-RADIUS,-0.35*RADIUS);
+	cursor = osg::Vec3(0, -RADIUS, -0.35*RADIUS);
 	billboard->addDrawable(textId);
 	textType = new osgText::Text;
 	textType->setFont(font);
@@ -81,11 +81,13 @@ void SymbolNode::setPosition(osg::Vec3 np)
 }
 
 
-GraphModelEdge::GraphModelEdge(std::string _src, std::string _dst, std::string _label, std::map<std::string, SymbolNode *> *_nodeMapId) : osg::Geode()
+GraphModelEdge::GraphModelEdge(std::string _src, std::string _dst, std::string _label, std::map<std::string, SymbolNode *> *_nodeMapId) : osg::Group()
 {
 	src   = _src;
 	dst   = _dst;
 	label = _label;
+	geode = new osg::Geode;
+	addChild(geode);
 	nodeMapId = _nodeMapId;
 
 	SymbolNode *s1 = (*nodeMapId)[src];
@@ -106,18 +108,18 @@ GraphModelEdge::GraphModelEdge(std::string _src, std::string _dst, std::string _
 		throw "1";
 
 	float effectiveLength = length-TIPSIZE;
-	printf("length:%f  RADIUS:%f    effective:%f\n", length, RADIUS, effectiveLength);
-	osg::Cylinder *line = new osg::Cylinder(((p1+p2)/2.f)-(pIncNorm*TIPSIZE), RADIUS/7, effectiveLength);
+	osg::Cylinder *line = new osg::Cylinder(((p1+p2)/2.f)-(pIncNorm*TIPSIZE), RADIUS*100, effectiveLength);
 	line->setRotation(quat);
-	osg::ShapeDrawable* lineDrawable = new osg::ShapeDrawable( line );
+	osg::ShapeDrawable* lineDrawable = new osg::ShapeDrawable(line);
 	lineDrawable->setColor(osg::Vec4(0.7, 0.7, 0.7, 1));
-	addDrawable(lineDrawable);
+	geode->addDrawable(lineDrawable);
 
 	osg::Cone* tip = new osg::Cone(p2-pIncNorm*(TIPSIZE+4), 2.*RADIUS/9., 1.6*TIPSIZE);
 	tip->setRotation(quat);
 	osg::ShapeDrawable* tipDrawable = new osg::ShapeDrawable(tip);
 	lineDrawable->setColor(osg::Vec4(0.7, 0.7, 0.7, 1));
-	addDrawable(tipDrawable);
+	geode->addDrawable(tipDrawable);
+	
 }
 	
 
@@ -138,10 +140,9 @@ GraphModelViewer::GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadi
 	setLayout(grid);
 
 	connect(&timer, SIGNAL(timeout()), this, SLOT(update()));
-	if (autoUpdate)
-		connect(&timer, SIGNAL(timeout()), this, SLOT(animateStep()));
+// 	if (autoUpdate)
+// 		connect(&timer, SIGNAL(timeout()), this, SLOT(animateStep()));
 	timer.start(10);
-
 }
 
 void GraphModelViewer::addNode(std::string id, std::string stype)

@@ -55,7 +55,7 @@ private:
 };
 
 
-class GraphModelEdge : public osg::Geode
+class GraphModelEdge : public osg::Group
 {
 public:
 	GraphModelEdge(std::string _src, std::string _dst, std::string _label, std::map<std::string, SymbolNode *> *_nodeMapId);
@@ -66,6 +66,7 @@ public:
 	std::map<std::string, SymbolNode *> *nodeMapId;
 
 private:
+	osg::Geode *geode;
 	GraphModelViewer *viewer;
 	osg::Quat quaternionFromInitFinalVector(const osg::Vec3 &initV, const osg::Vec3 &destV) const
 	{
@@ -83,6 +84,7 @@ private:
 		}
 	}
 };
+
 
 
 class GraphModelViewer : public QWidget, public osgViewer::CompositeViewer
