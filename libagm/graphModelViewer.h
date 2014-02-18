@@ -20,7 +20,7 @@
 #include <osgText/Text3D>
 
 #define RADIUS 100.
-#define TIPSIZE 40.
+#define TIPSIZE 60.
 
 
 #include "agm.h"
@@ -57,6 +57,7 @@ private:
 
 class GraphModelEdge : public osg::Group
 {
+friend GraphModelViewer;
 public:
 	GraphModelEdge(std::string _src, std::string _dst, std::string _label, std::map<std::string, SymbolNode *> *_nodeMapId);
 
@@ -83,6 +84,10 @@ private:
 			return osg::Quat(-aQuat+M_PIl/2., osg::Vec3(0, 1, 0));
 		}
 	}
+	
+	osg::Cylinder *line;
+	osg::Cone* tip;
+	void relocate();
 };
 
 
@@ -109,11 +114,13 @@ private:
 	std::vector<SymbolNode *> nodeVector;
 
 	std::vector<GraphModelEdge *> edges;
-	
-	
+
+
 	QWidget *addViewWidget(osgQt::GraphicsWindowQt *gw, osg::Node *scene);
 	osgQt::GraphicsWindowQt *createGraphicsWindow(int x, int y, int w, int h, const std::string& name="", bool windowDecoration=false);
 	virtual void paintEvent(QPaintEvent* event);
+
+	void relocateEdges() { for (uint32_t i=0; i<edges.size(); i++) { edges[i]->relocate(); } }
 
 protected:
 

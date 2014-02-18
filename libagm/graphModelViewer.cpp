@@ -27,7 +27,6 @@ SymbolNode::SymbolNode(std::string _id, std::string _stype) : osg::Group()
 	stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
 	setStateSet(stateset);
 
-
 	osg::TessellationHints* hints = new osg::TessellationHints;
 	hints->setDetailRatio(0.6f);
 
@@ -67,6 +66,7 @@ void SymbolNode::setId(std::string str)
 {
 	textId->setText(str);
 }
+
 void SymbolNode::setType(std::string str)
 {
 	textType->setText(str);
@@ -95,6 +95,10 @@ GraphModelEdge::GraphModelEdge(std::string _src, std::string _dst, std::string _
 	SymbolNode *s2 = (*nodeMapId)[dst];
 	osg::Vec3 p2 = s2->pos;
 
+	osg::StateSet* stateset = new osg::StateSet();
+	stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
+	setStateSet(stateset);
+
 	osg::Vec3 pInc = p2-p1;
 	osg::Vec3 pIncNorm = pInc;
 	pIncNorm.normalize();
@@ -103,28 +107,64 @@ GraphModelEdge::GraphModelEdge(std::string _src, std::string _dst, std::string _
 	pInc = p2-p1;
 	float length = pInc.length();
 
-	osg::Quat quat = quaternionFromInitFinalVector(osg::Vec3(0, 0, 1), p2-p1);
-	if (length <= 0.000001)
-		throw "1";
+	osg::Vec3 ii = p2-p1;
+	ii.normalize();
 
+	osg::Quat quat = quaternionFromInitFinalVector(osg::Vec3(0, 0, 1), ii);
+	if (length <= 0.000001)
+	{
+		printf("hiuhwhuhhuwfqw\n");
+		exit(1);
+	}
 	float effectiveLength = length-TIPSIZE;
-	osg::Cylinder *line = new osg::Cylinder(((p1+p2)/2.f)-(pIncNorm*TIPSIZE), RADIUS*100, effectiveLength);
+	osg::Vec3 position(((p1+p2)/2.f)-(pIncNorm*TIPSIZE));
+	line = new osg::Cylinder(position, RADIUS*0.2, effectiveLength);
 	line->setRotation(quat);
 	osg::ShapeDrawable* lineDrawable = new osg::ShapeDrawable(line);
 	lineDrawable->setColor(osg::Vec4(0.7, 0.7, 0.7, 1));
 	geode->addDrawable(lineDrawable);
-
-	osg::Cone* tip = new osg::Cone(p2-pIncNorm*(TIPSIZE+4), 2.*RADIUS/9., 1.6*TIPSIZE);
+	tip = new osg::Cone(p2-pIncNorm*(TIPSIZE+4), 2.*RADIUS/3., 3 *TIPSIZE);
 	tip->setRotation(quat);
 	osg::ShapeDrawable* tipDrawable = new osg::ShapeDrawable(tip);
 	lineDrawable->setColor(osg::Vec4(0.7, 0.7, 0.7, 1));
 	geode->addDrawable(tipDrawable);
-	
+}
+
+void GraphModelEdge::relocate()
+{
+	printf("--\n");
+	SymbolNode *s1 = (*nodeMapId)[src];
+	osg::Vec3 p1 = s1->pos;
+	SymbolNode *s2 = (*nodeMapId)[dst];
+	osg::Vec3 p2 = s2->pos;
+
+	osg::Vec3 pInc = p2-p1;
+	osg::Vec3 pIncNorm = pInc;
+	pIncNorm.normalize();
+	p1 = p1 + pIncNorm*RADIUS;
+	p2 = p2 - pIncNorm*RADIUS;
+	pInc = p2-p1;
+	float length = pInc.length();
+
+	osg::Vec3 ii = p2-p1;
+	ii.normalize();
+
+	osg::Quat quat = quaternionFromInitFinalVector(osg::Vec3(0, 0, 1), ii);
+	if (length <= 0.000001)
+	{
+		printf("hiuhwhuhhuwfqw\n");
+		exit(1);
+	}
+	float effectiveLength = length-TIPSIZE;
+	osg::Vec3 position(((p1+p2)/2.f)-(pIncNorm*TIPSIZE));
+	line->setCenter(position);
+	line->setRotation(quat);
+	tip->setCenter(p2-pIncNorm*(TIPSIZE+4));
+	tip->setRotation(quat);
 }
 	
 
-	
-	
+
 GraphModelViewer::GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadingModel, bool autoUpdate) : QWidget()
 {
 	setThreadingModel(threadingModel);
@@ -140,8 +180,8 @@ GraphModelViewer::GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadi
 	setLayout(grid);
 
 	connect(&timer, SIGNAL(timeout()), this, SLOT(update()));
-// 	if (autoUpdate)
-// 		connect(&timer, SIGNAL(timeout()), this, SLOT(animateStep()));
+	if (autoUpdate)
+		connect(&timer, SIGNAL(timeout()), this, SLOT(animateStep()));
 	timer.start(10);
 }
 
@@ -150,9 +190,7 @@ void GraphModelViewer::addNode(std::string id, std::string stype)
 	SymbolNode *s;
 	s = new SymbolNode(id, stype);
 	s->setPosition(0., 0., 0.);
-
 	group->addChild(s);
-
 	nodeMapId[id] = s;
 	nodeVector.push_back(s);
 }
@@ -165,6 +203,7 @@ void GraphModelViewer::setNodePosition(std::string id, osg::Vec3 np)
 void GraphModelViewer::addEdge(std::string src, std::string dst, std::string label)
 {
 	printf ("(%s)---[%s]--->(%s)\n", src.c_str(), dst.c_str(), label.c_str());
+
 	GraphModelEdge *edge;
 	edge = new GraphModelEdge(src, dst, label, &nodeMapId);
 	group->addChild(edge);
@@ -275,6 +314,9 @@ void GraphModelViewer::animateStep()
 		// Update position
 		nodeVector[symbol1]->setPosition(nodeVector[symbol1]->pos + nodeVector[symbol1]->vel*T);
 	}
+	
+	// Relocate edges
+	relocateEdges();
 }
 
 
