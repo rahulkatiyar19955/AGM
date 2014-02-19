@@ -89,6 +89,8 @@ private:
 	osg::Cone *tip;
 	osg::ShapeDrawable *lineDrawable;
 	osg::ShapeDrawable *tipDrawable;
+	osgText::Text *labelText;
+	osg::Billboard *billboard;
 	void relocate();
 };
 

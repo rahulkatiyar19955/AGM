@@ -34,7 +34,7 @@ SymbolNode::SymbolNode(std::string _id, std::string _stype) : osg::Group()
 	billboard->addDrawable(sphere);
 
 	osgText::Font *font = osgText::readFontFile("fonts/arial.ttf");
-	osg::Vec4 fontSizeColor(0.0f, 0.0f, 0.0f, 100.0f);
+	osg::Vec4 fontSizeColor(0.6f, 0.0f, 0.0f, 100.0f);
 	osg::Vec3 cursor;
 
 	cursor = osg::Vec3(0, -RADIUS, 0.52*RADIUS);
@@ -47,9 +47,9 @@ SymbolNode::SymbolNode(std::string _id, std::string _stype) : osg::Group()
 	textId->setAlignment(osgText::Text::CENTER_CENTER);
 	textId->setFontResolution(1000, 1000);
 	textId->setText(id);
+	billboard->addDrawable(textId);
 
 	cursor = osg::Vec3(0, -RADIUS, -0.35*RADIUS);
-	billboard->addDrawable(textId);
 	textType = new osgText::Text;
 	textType->setFont(font);
 	textType->setCharacterSize(120);
@@ -89,27 +89,22 @@ GraphModelEdge::GraphModelEdge(std::string _src, std::string _dst, std::string _
 	geode = new osg::Geode;
 	addChild(geode);
 	nodeMapId = _nodeMapId;
-
 	SymbolNode *s1 = (*nodeMapId)[src];
 	osg::Vec3 p1 = s1->pos;
 	SymbolNode *s2 = (*nodeMapId)[dst];
 	osg::Vec3 p2 = s2->pos;
-
 	osg::StateSet* stateset = new osg::StateSet();
 	stateset->setMode(GL_LIGHTING, osg::StateAttribute::ON);
 	setStateSet(stateset);
-
 	osg::Vec3 pInc = p2-p1;
 	osg::Vec3 pIncNorm = pInc;
 	pIncNorm.normalize();
 	p1 = p1 + pIncNorm*RADIUS;
 	p2 = p2 - pIncNorm*RADIUS;
-	pInc = p2-p1;
+	pInc = p2 - p1;
 	float length = pInc.length();
-
 	osg::Vec3 ii = p2-p1;
 	ii.normalize();
-
 	osg::Quat quat = quaternionFromInitFinalVector(osg::Vec3(0, 0, 1), ii);
 	if (length <= 0.000001)
 	{
@@ -128,6 +123,25 @@ GraphModelEdge::GraphModelEdge(std::string _src, std::string _dst, std::string _
 	tipDrawable = new osg::ShapeDrawable(tip);
 	lineDrawable->setColor(osg::Vec4(0.7, 0.7, 0.7, 1));
 	geode->addDrawable(tipDrawable);
+
+
+	billboard = new osg::Billboard();
+	addChild(billboard);
+	billboard->setMode(osg::Billboard::POINT_ROT_EYE);
+	osg::Vec3 cursor = osg::Vec3(0, -RADIUS, 0.52*RADIUS);
+	labelText = new osgText::Text;
+	osgText::Font *font = osgText::readFontFile("fonts/arial.ttf");
+	osg::Vec4 fontSizeColor(0.2f, 0.0f, 0.0f, 100.0f);
+	labelText->setFont(font);
+	labelText->setCharacterSize(120);
+	labelText->setAxisAlignment(osgText::TextBase::XZ_PLANE);
+	labelText->setPosition(cursor);
+	labelText->setColor(fontSizeColor);
+	labelText->setAlignment(osgText::Text::CENTER_CENTER);
+	labelText->setFontResolution(1000, 1000);
+	labelText->setText(label);
+	billboard->addDrawable(labelText);
+
 }
 
 void GraphModelEdge::relocate()
@@ -141,9 +155,9 @@ void GraphModelEdge::relocate()
 	pIncNorm.normalize();
 	p1 = p1 + pIncNorm*RADIUS;
 	p2 = p2 - pIncNorm*RADIUS;
-	pInc = p2-p1;
+	pInc = p2 - p1;
 	float length = pInc.length();
-	osg::Vec3 ii = p2-p1;
+	osg::Vec3 ii = p2 - p1;
 	ii.normalize();
 	osg::Quat quat = quaternionFromInitFinalVector(osg::Vec3(0, 0, 1), ii);
 	if (length <= 0.000001)
@@ -161,16 +175,8 @@ void GraphModelEdge::relocate()
 	tip->set(p2-pIncNorm*(TIPSIZE+4), 2.*RADIUS/3., 3 *TIPSIZE);
 	tip->setRotation(quat);
 	tipDrawable->dirtyDisplayList();
-
-// 	lineDrawable
-// 	tipDrawable
-
-// 	printf("A (%f,  %f,  %f)\n", p1.x(), p1.y(), p1.z());
-// 	printf("B (%f,  %f,  %f)\n", p2.x(), p2.y(), p2.z());
-// 	printf("relocate %s---[%s]--->%s    (%f,  %f,  %f)\n", src.c_str(), label.c_str(), dst.c_str(), position.x(), position.y(), position.z());
-// 	printf("length = %f\n", effectiveLength);
-// 	printf("valid %d\n", line->valid());
-
+	
+	billboard->setPosition(0, (p1+p2)/2.f);
 }
 
 
