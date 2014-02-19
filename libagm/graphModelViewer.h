@@ -86,7 +86,9 @@ private:
 	}
 	
 	osg::Cylinder *line;
-	osg::Cone* tip;
+	osg::Cone *tip;
+	osg::ShapeDrawable *lineDrawable;
+	osg::ShapeDrawable *tipDrawable;
 	void relocate();
 };
 

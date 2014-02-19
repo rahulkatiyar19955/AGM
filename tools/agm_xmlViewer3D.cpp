@@ -54,6 +54,15 @@ int main(int argc, char **argv)
 				xmlChar *stype = xmlGetProp(cur, (const xmlChar *)"type");
 				xmlChar *sid = xmlGetProp(cur, (const xmlChar *)"id");
 				graphViewer->addNode((char *)sid, (char *)stype);
+/*
+				static uint32_t xpos = 0;
+				static uint32_t ypos = 0;
+				static uint32_t zpos = 0;
+				graphViewer->setNodePosition((char *)sid, osg::Vec3(xpos, ypos, zpos));
+				xpos += 800;
+				ypos += 0;
+				zpos += 0;
+*/
 				graphViewer->setNodePosition((char *)sid, osg::Vec3(qrand()%int(50*RADIUS), qrand()%int(50*RADIUS), qrand()%int(50*RADIUS)));
 				xmlFree(sid);
 				xmlFree(stype);
