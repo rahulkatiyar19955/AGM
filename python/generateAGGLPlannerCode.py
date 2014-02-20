@@ -490,6 +490,15 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the WHEN false'
 	elif preconditionType == "=":
 		ret += indent+'precondition'+str(formulaId) + ' = (n2id["'+preconditionBody[0]+'"] == n2id["'+preconditionBody[1]+'"])'
+	elif preconditionType == "create":
+		print '\'create\' statements are not allowed in preconditions'
+		sys.exit(1)
+	elif preconditionType == "delete":
+		print '\'delete\' statements are not allowed in preconditions'
+		sys.exit(1)
+	elif preconditionType == "retype":
+		print '\'retype\' statements are not allowed in preconditions'
+		sys.exit(1)
 	else:
 		try:
 			ret += indent+'precondition'+str(formulaId) + ' = ['
@@ -572,6 +581,15 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availab
 	elif effectType == "=":
 		print '\'=\' statements are not allowed in effects'
 		sys.exit(1)
+	elif effectType == "create":
+		ret += indent+"newName = str(getNewIdForSymbol(newNode))"
+		ret += indent+"smap['"+effectBody[0]+"'] = newName"
+		ret += indent+"newNode.graph.nodes[newName] = AGMSymbol(newName, '"+effectBody[1]+"')"
+	elif effectType == "delete":
+		ret += indent+"del newNode.graph.nodes[smap['"+effectBody[0]+"']]"
+		ret += indent+"newNode.graph.removeDanglingEdges()"
+	elif effectType == "retype":
+		ret += indent+"newNode.graph.nodes[n2id['"+effectBody[0]+"']].sType = '"+effectBody[1]+"'"
 	else:
 		try:
 			if stuff['mode'] == "condition":

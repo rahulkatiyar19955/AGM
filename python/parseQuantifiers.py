@@ -66,9 +66,9 @@ class AGGLCodeParsing:
 		forallFormula = Group( po + forall_.setResultsName("type") +  params.setResultsName("vars") + formula.setResultsName("child") + pc )
 		whenFormula   = Group( po +   when_.setResultsName("type") +   formula.setResultsName("iff") + formula.setResultsName("then") + pc )
 		functionCall  = Group( lt +     ids.setResultsName("func") +                       OneOrMore(ids).setResultsName("arguments") + gt )
-		create        = Group( po + create_.setResultsName("type") +          ids.setResultsName("name") + ids.setResultsName("type") + pc )
+		create        = Group( po + create_.setResultsName("type") +         ids.setResultsName("name") + ids.setResultsName("stype") + pc )
 		delete        = Group( po + delete_.setResultsName("type") +                                       ids.setResultsName("name") + pc )
-		retype        = Group( po + retype_.setResultsName("type") +          ids.setResultsName("name") + ids.setResultsName("type") + pc )
+		retype        = Group( po + retype_.setResultsName("type") +         ids.setResultsName("name") + ids.setResultsName("stype") + pc )
 		# Parse call
 		formula << (notFormula | andFormula | link | equalFormula | orFormula | existsFormula | forallFormula | whenFormula | create | delete | retype | functionCall )
 		formulaOpt = Optional(formula)
