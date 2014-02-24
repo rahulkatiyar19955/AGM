@@ -390,6 +390,7 @@ class AGMComboRule(object):
 		self.atoms = ats
 		self.cost = cost
 		self.equivalences = []
+		self.text = ''
 		for eq in eqs:
 			#print eq
 			eqResult = list()

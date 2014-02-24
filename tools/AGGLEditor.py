@@ -119,6 +119,7 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.textParameters,   SIGNAL("textChanged(int)"),  self.textParametersChanged)
 		self.connect(self.ui.textPrecondition, SIGNAL("textChanged(int)"),  self.textPreconditionChanged)
 		self.connect(self.ui.textEffect,       SIGNAL("textChanged(int)"),  self.textEffectChanged)
+		self.connect(self.ui.plainTextEdit,    SIGNAL("textChanged()"),  self.comboTextChanged)
 
 
 		self.shortcutDown = QShortcut(QKeySequence("PgDown"), self)
@@ -212,6 +213,8 @@ class AGMEditor(QMainWindow):
 		if r>=0 and r<self.ui.rulesList.count():
 			self.ui.rulesList.setCurrentRow(r)
 
+	def comboTextChanged(self):
+		print '-->', self.ui.plainTextEdit.toPlainText()
 	def appClose(self):
 		#if self.modified:
 			#self.close()
@@ -264,6 +267,18 @@ class AGMEditor(QMainWindow):
 		r.setFocus(Qt.OtherFocusReason)
 	def changeRule(self, ruleN):
 		if type(self.agmData.agm.rules[ruleN]) == AGMRule:
+			self.ui.label.show()
+			self.ui.label_2.show()
+			self.ui.spacee.show()
+			self.ui.lhsParentWidget.show()
+			self.ui.rhsParentWidget.show()
+			self.ui.cost.show()
+			self.ui.label_3.show()
+			self.ui.passiveCheckBox.show()
+			self.ui.plainTextEdit.hide()
+			self.ui.tabWidget.setTabEnabled(1, True)
+			self.ui.label_5.show()
+			self.ui.toolsList.show()
 			self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
 			self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
 			try:
@@ -279,12 +294,19 @@ class AGMEditor(QMainWindow):
 			except:
 				print traceback.format_exc()
 		else:
-			d1 = dict()
-			d1['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...\n\nTHE EDITOR DOESN'T CURRENTLY SUPPORT THEM")
-			self.lhsPainter.graph = AGMGraph(d1, side='L')
-			d2 = dict()
-			d2['a'] = AGMSymbol(self.agmData.agm.rules[ruleN].name, "THIS IS A COMBO RULE... NO GRAPHS...\n\nTHE EDITOR DOESN'T CURRENTLY SUPPORT THEM")
-			self.rhsPainter.graph = AGMGraph(d2, side='R')
+			self.ui.label.hide()
+			self.ui.label_2.hide()
+			self.ui.spacee.hide()
+			self.ui.lhsParentWidget.hide()
+			self.ui.rhsParentWidget.hide()
+			self.ui.cost.hide()
+			self.ui.label_3.hide()
+			self.ui.passiveCheckBox.hide()
+			self.ui.plainTextEdit.show()
+			self.ui.label_5.hide()
+			self.ui.toolsList.hide()
+			self.ui.tabWidget.setTabEnabled(1, False)
+			self.ui.plainTextEdit.setPlainText(self.agmData.agm.rules[ruleN].text)
 		self.disconnect(self.ui.passiveCheckBox,    SIGNAL("stateChanged(int)"), self.changePassive)
 		self.disconnect(self.ui.cost,               SIGNAL("valueChanged(int)"), self.changeCost)
 		if self.agmData.agm.rules[ruleN].passive:
