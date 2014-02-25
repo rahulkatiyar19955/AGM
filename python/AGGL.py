@@ -390,18 +390,15 @@ class AGMComboRule(object):
 		self.atoms = ats
 		self.cost = cost
 		self.equivalences = []
-		self.text = ''
 		for eq in eqs:
 			#print eq
 			eqResult = list()
 			for element in eq:
 				eqResult.append([element[0], element[1]])
 			self.equivalences.append(eqResult)
-	def toString(self):
-		#print self.equivalences
-		passiveStr = "active"
-		if self.passive: passiveStr = "passive"
-		ret = self.name + ' : ' + passiveStr + '('+ str(self.cost) +')\n{\n'
+		self.text = self.generateTextFromCombo()
+	def generateTextFromCombo(self):
+		ret = ''
 		for a in self.atoms:
 			ret += '\t' + a[0] + ' as ' + a[1] + '\n'
 		ret += '\twhere:\n'
@@ -414,6 +411,29 @@ class AGMComboRule(object):
 				else:
 					ret += ' = ' + element[0] + '.' + element[1]
 			ret += '\n'
+		return ret
+
+	def toString(self):
+		passiveStr = "active"
+		if self.passive: passiveStr = "passive"
+		ret = self.name + ' : ' + passiveStr + '('+ str(self.cost) +')\n{\n'
+	
+		if len(self.text) > 0:
+			ret += self.text
+		else:
+			for a in self.atoms:
+				ret += '\t' + a[0] + ' as ' + a[1] + '\n'
+			ret += '\twhere:\n'
+			for e in self.equivalences:
+				first = True
+				for element in e:
+					if first:
+						first = False
+						ret += '\t'  + element[0] + '.' + element[1]
+					else:
+						ret += ' = ' + element[0] + '.' + element[1]
+				ret += '\n'
+
 		ret += '}\n'
 		return ret
 

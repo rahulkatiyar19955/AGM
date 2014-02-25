@@ -214,14 +214,19 @@ class AGMEditor(QMainWindow):
 			self.ui.rulesList.setCurrentRow(r)
 
 	def comboTextChanged(self):
-		print '-->', self.ui.plainTextEdit.toPlainText()
+		#print '-->', self.ui.plainTextEdit.toPlainText()
+		ruleN = self.ui.rulesList.currentRow()
+		if type(self.agmData.agm.rules[ruleN]) != AGMRule:
+			self.agmData.agm.rules[ruleN].text = self.ui.plainTextEdit.toPlainText()
+	
 	def appClose(self):
-		#if self.modified:
-			#self.close()
-		#else:
-			#self.close()
+		if self.modified:
+			self.close()
+		else:
+			self.close()
 		self.close()
 	# Manages close events
+
 	def closeEvent(self, closeevent):
 		settings = QSettings("AGM", "mainWindowGeometry");
 		g = self.saveGeometry()
