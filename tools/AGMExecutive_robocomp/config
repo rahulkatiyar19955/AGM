@@ -6,7 +6,7 @@ AGMAgentTopic.Endpoints=tcp -p 12198
 
 # R E M O T E    P R O X I E S
 PlanningProxy          = planning:tcp              -h localhost -p 10195
-SpeechProxy            = speech:tcp                -h localhost -p 10021
+#SpeechProxy            = speech:tcp                -h localhost -p 10021
 IceStormProxy          = IceStorm/TopicManager:tcp -p 9999
 
 # A G M   -   F i l e   p a t h s

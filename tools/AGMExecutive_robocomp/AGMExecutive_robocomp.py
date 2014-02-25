@@ -1,0 +1,144 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+#    Copyright (C) 2014 by Luis J. Manso
+#
+#    This file is part of AGM
+#
+#    AGM is free software: you can redistribute it and/or modify it
+#    under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    AGM is distributed in the hope that it will be useful, but
+#    WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See
+#    the GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with AGM.  If not, see <http://www.gnu.org/licenses/>.
+#
+
+import sys, traceback, Ice, subprocess, threading, time, Queue, os
+import IceStorm
+
+
+# Check that RoboComp has been correctly detected
+ROBOCOMP = ''
+try:
+	ROBOCOMP = os.environ['ROBOCOMP']
+except:
+	pass
+if len(ROBOCOMP)<1:
+	print 'ROBOCOMP environment variable not set! Exiting.'
+	sys.exit()
+
+
+preStr = "-I"+ROBOCOMP+"/Interfaces/ --all "+ROBOCOMP+"/Interfaces/"
+Ice.loadSlice(preStr+"AGMCommonBehavior.ice")
+Ice.loadSlice(preStr+"AGMAgent.ice")
+Ice.loadSlice(preStr+"AGMExecutive.ice")
+Ice.loadSlice(preStr+"AGMWorldModel.ice")
+Ice.loadSlice(preStr+"Speech.ice")
+import RoboCompAGMCommonBehavior
+import RoboCompAGMAgent
+import RoboCompAGMExecutive
+import RoboCompAGMWorldModel
+import RoboCompSpeech
+
+
+class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
+	def __init__(self, _handler):
+		self.handler = _handler
+
+class AGMCommonBehaviorI (RoboCompAGMCommonBehavior.AGMCommonBehavior):
+	def __init__(self, _handler):
+		self.handler = _handler
+
+class Executive(threading.Thread):
+	def __init__(self):
+		threading.Thread.__init__(self)
+		print 'a'
+
+class Server (Ice.Application):
+	def run (self, argv):
+		status = 0;
+		try:
+			self.shutdownOnInterrupt()
+			executive = Executive()
+			executiveI = ExecutiveI(executive)
+			agmcommonbehaviorI = AGMCommonBehaviorI(executive)
+
+			# Get a proxy for the Speech
+			proxy = self.communicator().getProperties().getProperty( "SpeechProxy" )
+			if len(proxy)<1:
+				print 'SpeechProxy variable is empty, check the configuration file if speech output is desired.'
+			else:
+				speechPrx = RoboCompSpeech.SpeechPrx.checkedCast(self.communicator().stringToProxy(proxy))
+
+			# AGMExecutive server
+			adapterExecutive = self.communicator().createObjectAdapter('AGMExecutive')
+			adapterExecutive.add(executiveI, self.communicator().stringToIdentity('agmexecutive'))
+			adapterExecutive.activate()
+
+			# AGMCommonBehavior
+			adapterAGMCommonBehavior = self.communicator().createObjectAdapter('AGMCommonBehavior')
+			adapterAGMCommonBehavior.add(agmcommonbehaviorI, self.communicator().stringToIdentity('agmcommonbehavior'))
+			adapterAGMCommonBehavior.activate()
+
+			# Subscribe to AGMExecutiveTopic
+			proxy = self.communicator().getProperties().getProperty("IceStormProxy")
+			obj = self.communicator().stringToProxy(proxy)
+			topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
+			try:
+				topic = False
+				topic = topicManager.retrieve("AGMExecutiveTopic")
+			except:
+				pass
+			while not topic:
+				try:
+					topic = topicManager.retrieve("AGMExecutiveTopic")
+				except IceStorm.NoSuchTopic:
+					try:
+						topic = topicManager.create("AGMExecutiveTopic")
+					except:
+						print 'Another client created the AGMExecutiveTopic topic... ok'
+			pub = topic.getPublisher().ice_oneway()
+			executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
+
+			# Subscribe to AGMExecutiveVisualizationTopic
+			proxy = self.communicator().getProperties().getProperty("IceStormProxy");
+			obj = self.communicator().stringToProxy(proxy)
+			topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
+			try:
+				topic = False
+				topic = topicManager.retrieve("AGMExecutiveVisualizationTopic")
+			except:
+				pass
+			while not topic:
+				try:
+					topic = topicManager.retrieve("AGMExecutiveVisualizationTopic")
+				except IceStorm.NoSuchTopic:
+					try:
+						topic = topicManager.create("AGMExecutiveVisualizationTopic")
+					except:
+						print 'Another client created the AGMExecutiveVisualizationTopic topic... ok'
+			pub = topic.getPublisher().ice_oneway()
+			executiveVisualizationTopic = RoboCompAGMExecutive.AGMExecutiveVisualizationTopicPrx.uncheckedCast(pub)
+
+			print 'AGMExecutive initialization ok'
+
+			executive.start()
+			self.communicator().waitForShutdown()
+		except:
+			traceback.print_exc()
+			status = 1
+
+		if self.communicator():
+			try:
+				self.communicator().destroy()
+			except:
+				traceback.print_exc()
+				status = 1
+
+Server( ).main(sys.argv)
