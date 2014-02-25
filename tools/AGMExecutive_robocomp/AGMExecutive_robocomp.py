@@ -55,10 +55,19 @@ class AGMCommonBehaviorI (RoboCompAGMCommonBehavior.AGMCommonBehavior):
 	def __init__(self, _handler):
 		self.handler = _handler
 
+class AGMAgentTopicI (RoboCompAGMAgent.AGMAgentTopic):
+	def __init__(self, _handler):
+		self.handler = _handler
+
+
 class Executive(threading.Thread):
 	def __init__(self):
 		threading.Thread.__init__(self)
 		print 'a'
+		self.agents = dict()
+	def setAgent(self, name, proxy):
+		self.agents[name] = proxy
+
 
 class Server (Ice.Application):
 	def run (self, argv):
@@ -74,7 +83,7 @@ class Server (Ice.Application):
 			if len(proxy)<1:
 				print 'SpeechProxy variable is empty, check the configuration file if speech output is desired.'
 			else:
-				speechPrx = RoboCompSpeech.SpeechPrx.checkedCast(self.communicator().stringToProxy(proxy))
+				executive.speech = RoboCompSpeech.SpeechPrx.checkedCast(self.communicator().stringToProxy(proxy))
 
 			# AGMExecutive server
 			adapterExecutive = self.communicator().createObjectAdapter('AGMExecutive')
@@ -86,7 +95,7 @@ class Server (Ice.Application):
 			adapterAGMCommonBehavior.add(agmcommonbehaviorI, self.communicator().stringToIdentity('agmcommonbehavior'))
 			adapterAGMCommonBehavior.activate()
 
-			# Subscribe to AGMExecutiveTopic
+			# Proxy to publish AGMExecutiveTopic
 			proxy = self.communicator().getProperties().getProperty("IceStormProxy")
 			obj = self.communicator().stringToProxy(proxy)
 			topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
@@ -104,9 +113,10 @@ class Server (Ice.Application):
 					except:
 						print 'Another client created the AGMExecutiveTopic topic... ok'
 			pub = topic.getPublisher().ice_oneway()
-			executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
+			executive.executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
 
-			# Subscribe to AGMExecutiveVisualizationTopic
+
+			# Proxy to publish AGMExecutiveVisualizationTopic
 			proxy = self.communicator().getProperties().getProperty("IceStormProxy");
 			obj = self.communicator().stringToProxy(proxy)
 			topicManager = IceStorm.TopicManagerPrx.checkedCast(obj)
@@ -124,7 +134,44 @@ class Server (Ice.Application):
 					except:
 						print 'Another client created the AGMExecutiveVisualizationTopic topic... ok'
 			pub = topic.getPublisher().ice_oneway()
-			executiveVisualizationTopic = RoboCompAGMExecutive.AGMExecutiveVisualizationTopicPrx.uncheckedCast(pub)
+			executive.executiveVisualizationTopic = RoboCompAGMExecutive.AGMExecutiveVisualizationTopicPrx.uncheckedCast(pub)
+
+
+			# Read config parameters
+			executive.agglPath = self.communicator().getProperties().getProperty( "AGGLPath" )
+			executive.initialModelXML = self.communicator().getProperties().getProperty( "InitalModelPath" )
+
+
+			# Read agent's configurations and create the correspoding proxies
+			agentConfigs = self.communicator().getProperties().getProperty( "AGENTS" ).split(',')
+			for agent in agentConfigs:
+				proxy = self.communicator().getProperties().getProperty(agent)
+				behavior_proxy = RoboCompAGMCommonBehavior.AGMCommonBehaviorPrx.uncheckedCast(self.communicator().stringToProxy(proxy))
+				if not behavior_proxy:
+					print parameters.agents[i].c_str()
+					print parameters.agents[i].c_str()
+					print "Error loading behavior proxy!"
+					sys.exit(1)
+				executive.setAgent(agent,  behavior_proxy)
+				print "Agent" , agent, "initialized ok"
+
+
+			# Subscribe to AGMAgentTopic
+			proxy = self.communicator().getProperties().getProperty( "IceStormProxy")
+			obj = self.communicator().stringToProxy(proxy)
+			topicManager = IceStorm.TopicManagerPrx.checkedCast(obj);
+			adapterT = self.communicator().createObjectAdapter("AGMAgentTopic")
+			agentTopic = AGMAgentTopicI(executive)
+			proxyT = adapterT.addWithUUID(agentTopic).ice_oneway()
+			try:
+				topic = topicManager.retrieve("AGMAgentTopic")
+				qos = IceStorm.QoS()
+				topic.subscribeAndGetPublisher(qos, proxyT)
+			except IceStorm.NoSuchTopic:
+				print "Error! No topic found!"
+			adapterT.activate()
+
+
 
 			print 'AGMExecutive initialization ok'
 
