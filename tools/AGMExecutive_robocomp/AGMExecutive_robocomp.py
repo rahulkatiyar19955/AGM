@@ -22,6 +22,10 @@
 import sys, traceback, Ice, subprocess, threading, time, Queue, os
 import IceStorm
 
+# Ctrl+c handling
+import signal
+signal.signal(signal.SIGINT, signal.SIG_DFL)
+
 
 # Check that RoboComp has been correctly detected
 ROBOCOMP = ''
@@ -50,6 +54,8 @@ import RoboCompSpeech
 class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 	def __init__(self, _handler):
 		self.handler = _handler
+	def broadcastModel(self, current=None):
+		self.handler.broadcastModel()
 
 class AGMCommonBehaviorI (RoboCompAGMCommonBehavior.AGMCommonBehavior):
 	def __init__(self, _handler):
@@ -67,7 +73,10 @@ class Executive(threading.Thread):
 		self.agents = dict()
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
-
+	def broadcastModel(self):
+		print 'broadcastinnn'
+		ev = RoboCompAGMWorldModel.Event()
+		self.executiveTopic.modelModified(ev)
 
 class Server (Ice.Application):
 	def run (self, argv):
@@ -165,8 +174,8 @@ class Server (Ice.Application):
 			proxyT = adapterT.addWithUUID(agentTopic).ice_oneway()
 			try:
 				topic = topicManager.retrieve("AGMAgentTopic")
-				qos = IceStorm.QoS()
-				topic.subscribeAndGetPublisher(qos, proxyT)
+				#qos = IceStorm.theQoS()
+				topic.subscribeAndGetPublisher(None, proxyT)
 			except IceStorm.NoSuchTopic:
 				print "Error! No topic found!"
 			adapterT.activate()
