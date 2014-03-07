@@ -57,7 +57,7 @@ private:
 
 class GraphModelEdge : public osg::Group
 {
-friend GraphModelViewer;
+friend class GraphModelViewer;
 public:
 	GraphModelEdge(std::string _src, std::string _dst, std::string _label, std::map<std::string, SymbolNode *> *_nodeMapId);
 
