@@ -30,8 +30,8 @@ class GraphModelEdge;
 
 class SymbolNode : public osg::Group
 {
-friend GraphModelEdge;
-friend GraphModelViewer;
+friend class GraphModelEdge;
+friend class GraphModelViewer;
 
 public:
 	SymbolNode(std::string _id, std::string _stype);
@@ -99,7 +99,7 @@ private:
 class GraphModelViewer : public QWidget, public osgViewer::CompositeViewer
 {
 Q_OBJECT
-friend GraphModelEdge;
+friend class GraphModelEdge;
 public:
 	GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadingModel=osgViewer::CompositeViewer::SingleThreaded, bool autoUpdate=false);
 

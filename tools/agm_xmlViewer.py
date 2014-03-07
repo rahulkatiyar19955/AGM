@@ -127,8 +127,8 @@ class GraphViewer(QMainWindow):
 		self.automatic = True
 	def setManualLayout(self):
 		self.automatic = False
-		for fil in range(len(self.drawers)):
-			self.drawers[fil].setRandomly()
+		#for fil in range(len(self.drawers)):
+			#self.drawers[fil].setRandomly()
 	# Manages close events
 	def closeEvent(self, closeevent):
 		settings = QSettings("AGM", "mainWindowGeometry");
