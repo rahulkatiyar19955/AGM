@@ -68,7 +68,7 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 		pass
 	def setMission(self, target, current=None):
 		self.handler.setMission(target)
-	def getData(self, current=None)
+	def getData(self, current=None):
 		pass
 		return world, target, plan
 
@@ -192,8 +192,11 @@ class Server (Ice.Application):
 
 
 			print 'AGMExecutive initialization ok'
-
 			executive.start()
+			print '-------------------------------------------------------------'
+			print '----     R u n     A G M E x e c u t i v e,     r u n   -----'
+			print '-------------------------------------------------------------'
+			executive.updatePlan()
 			self.communicator().waitForShutdown()
 		except:
 			traceback.print_exc()
