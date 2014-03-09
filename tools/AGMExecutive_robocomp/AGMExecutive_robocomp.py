@@ -25,6 +25,8 @@ import IceStorm
 # Ctrl+c handling
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
+# AGM
+sys.path.append('/usr/local/share/agm')
 
 
 # Check that RoboComp has been correctly detected
@@ -56,6 +58,19 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 		self.handler = _handler
 	def broadcastModel(self, current=None):
 		self.handler.broadcastModel()
+	def activate(self, current=None):
+		pass
+	def deactivate(self, current=None):
+		pass
+	def reset(self, current=None):
+		self.handler.reset()
+	def modificationProposal(self, modification, current=None):
+		pass
+	def setMission(self, target, current=None):
+		self.handler.setMission(target)
+	def getData(self, current=None)
+		pass
+		return world, target, plan
 
 class AGMCommonBehaviorI (RoboCompAGMCommonBehavior.AGMCommonBehavior):
 	def __init__(self, _handler):
@@ -65,25 +80,19 @@ class AGMAgentTopicI (RoboCompAGMAgent.AGMAgentTopic):
 	def __init__(self, _handler):
 		self.handler = _handler
 
+from AGMExecutive_core import Executive
 
-class Executive(threading.Thread):
-	def __init__(self):
-		threading.Thread.__init__(self)
-		print 'a'
-		self.agents = dict()
-	def setAgent(self, name, proxy):
-		self.agents[name] = proxy
-	def broadcastModel(self):
-		print 'broadcastinnn'
-		ev = RoboCompAGMWorldModel.Event()
-		self.executiveTopic.modelModified(ev)
 
 class Server (Ice.Application):
 	def run (self, argv):
 		status = 0;
 		try:
 			self.shutdownOnInterrupt()
-			executive = Executive()
+			initialModelPath =   self.communicator().getProperties().getProperty( "InitialModelPath" )
+			agglPath =           self.communicator().getProperties().getProperty( "AGGLPath" )
+			initialMissionPath = self.communicator().getProperties().getProperty( "InitialMissionPath" )
+
+			executive = Executive(agglPath, initialModelPath, initialMissionPath)
 			executiveI = ExecutiveI(executive)
 			agmcommonbehaviorI = AGMCommonBehaviorI(executive)
 
@@ -148,7 +157,7 @@ class Server (Ice.Application):
 
 			# Read config parameters
 			executive.agglPath = self.communicator().getProperties().getProperty( "AGGLPath" )
-			executive.initialModelXML = self.communicator().getProperties().getProperty( "InitalModelPath" )
+			executive.initialModelXML = self.communicator().getProperties().getProperty( "InitialModelPath" )
 
 
 			# Read agent's configurations and create the correspoding proxies

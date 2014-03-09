@@ -6,13 +6,13 @@ def distance(x1, y1, x2, y2):
 	return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
 
 class AGMSymbol(object):
-	def __init__(self, name, sType, pos=[0,0]):
+	def __init__(self, name, sType, pos=[0,0], attributes=dict()):
 		object.__init__(self)
 		self.name = name
 		self.sType = sType
 		self.pos = pos
 		self.color = 'white'
-		self.attributes = dict()
+		self.attributes = attributes
 	def __str__(self):
 		return self.toString()
 	def __repr__(self):
@@ -258,9 +258,9 @@ class AGMGraph(object):
 			raise BasicException("")
 
 
-	def addNode(self, x, y, name, stype):
+	def addNode(self, x, y, name, stype, attributes=dict()):
 		if not name in self.nodes.keys():
-			self.nodes[name] = AGMSymbol(name, stype, [x,y])
+			self.nodes[name] = AGMSymbol(name, stype, [x,y], attributes)
 	def removeNode(self, x, y, diameter):
 		name, found = self.getName(x, y, diameter)
 		if found:
