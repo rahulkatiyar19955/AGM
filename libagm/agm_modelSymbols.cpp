@@ -2,12 +2,35 @@
 #include "agm_modelEdge.h"
 #include "agm_model.h"
 
-AGMModelSymbol::AGMModelSymbol(AGMModel *model, std::string typ, int32_t id) { init(model, typ, id); }
-AGMModelSymbol::AGMModelSymbol(AGMModel *model, int32_t identifier, std::string typ) { init(model, identifier, typ); }
-AGMModelSymbol::AGMModelSymbol(AGMModel *model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr) { init(model, identifier, typ, atr); }
-AGMModelSymbol::AGMModelSymbol(AGMModel::SPtr model, std::string typ, int32_t id) { init(model.get(), typ, id); }
-AGMModelSymbol::AGMModelSymbol(AGMModel::SPtr model, int32_t identifier, std::string typ) { init(model.get(), identifier, typ); }
-AGMModelSymbol::AGMModelSymbol(AGMModel::SPtr model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr) { init(model.get(), identifier, typ, atr); }
+AGMModelSymbol::AGMModelSymbol(AGMModel *model, std::string typ, int32_t id)
+{
+	init(model, typ, id);
+}
+
+AGMModelSymbol::AGMModelSymbol(AGMModel *model, int32_t identifier, std::string typ)
+{
+	init(model, identifier, typ);
+}
+
+AGMModelSymbol::AGMModelSymbol(AGMModel *model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr)
+{
+	init(model, identifier, typ, atr);
+}
+
+AGMModelSymbol::AGMModelSymbol(AGMModel::SPtr model, std::string typ, int32_t id)
+{
+	init(model.get(), typ, id);
+}
+
+AGMModelSymbol::AGMModelSymbol(AGMModel::SPtr model, int32_t identifier, std::string typ)
+{
+	init(model.get(), identifier, typ);
+}
+
+AGMModelSymbol::AGMModelSymbol(AGMModel::SPtr model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr)
+{
+	init(model.get(), identifier, typ, atr);
+}
 
 void AGMModelSymbol::init(AGMModel *model, std::string typ, int32_t id)
 {
@@ -21,6 +44,7 @@ void AGMModelSymbol::init(AGMModel *model, std::string typ, int32_t id)
 	if (id==-1)
 	{
 		identifier = model->getNewId();
+		printf("Got new ID from pool: %d\n", identifier);
 	}
 	else
 		identifier = id;
@@ -38,7 +62,14 @@ void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ)
 		exit(-1);
 	}
 
-	identifier = id;
+	if (id==-1)
+	{
+		identifier = model->getNewId();
+		printf("Got new ID from pool: %d\n", identifier);
+	}
+	else
+		identifier = id;
+
 	symbolType = typ;
 
 	model->insertSymbol(this);

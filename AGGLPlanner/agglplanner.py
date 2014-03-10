@@ -204,6 +204,8 @@ class PyPlan(object):
 					if len(results)>0:
 						raise GoalAchieved
 				# Proceed
+				if len(openNodes) == 0:
+					break
 				head = heapq.heappop(openNodes)[1]
 				if head.cost <= mincostOnList:
 					if len(openNodes)==0:

@@ -3,6 +3,7 @@
 
 #include <agm_modelConverter.h>
 #include <agm_modelEdge.h>
+#include <agm_modelPrinter.h>
 
 #include <libxml2/libxml/parser.h>
 #include <libxml2/libxml/tree.h>
@@ -19,6 +20,7 @@ void AGMModelConverter::fromInternalToIce(const AGMModel::SPtr &src, RoboCompAGM
 		if (node.nodeIdentifier == -1)
 		{
 			fprintf(stderr, "Can't transform models containing nodes with invalid identifiers (type: %s).\n", node.nodeType.c_str());
+			AGMModelPrinter::printWorld(src);
 			exit(-1);
 		}
 		node.attributes = src->symbols[i]->attributes;
@@ -34,12 +36,14 @@ void AGMModelConverter::fromInternalToIce(const AGMModel::SPtr &src, RoboCompAGM
 		if (edge.a == -1)
 		{
 			fprintf(stderr, "Can't transform models containing edges linking invalid identifiers (type: %s).\n", edge.edgeType.c_str());
+			AGMModelPrinter::printWorld(src);
 			exit(-1);
 		}
 		edge.b = src->edges[i].symbolPair.second;
 		if (edge.b == -1)
 		{
 			fprintf(stderr, "Can't transform models containing edges linking invalid identifiers (type: %s).\n", edge.edgeType.c_str());
+			AGMModelPrinter::printWorld(src);
 			exit(-1);
 		}
 		dst.edges.push_back(edge);

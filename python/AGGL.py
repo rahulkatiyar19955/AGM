@@ -84,14 +84,14 @@ class AGMLink(object):
 			else:
 				nhis+=str(True)
 		else:
-			nhis = other.linkType+" "+other.a+" "+other.b+" "+str(other.enabled)
+			nhis = str(other.linkType) + " " + str(other.a) + " " + str(other.b) + " " + str(other.enabled)
 		if this == nhis:
 			return False
 		return True
 	def __hash__(self):
 		return len(self.a+self.b+self.linkType+str(self.enabled))
 	def __str__(self):
-		ret = '('+self.a+')--['+self.linkType+']--('+self.b+') '
+		ret = '('+str(self.a)+')--['+str(self.linkType)+']--('+str(self.b)+') '
 		if not self.enabled:
 			ret += '*'
 		return ret

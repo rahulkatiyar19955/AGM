@@ -1,12 +1,13 @@
 import sys, traceback, Ice, subprocess, threading, time, Queue, os
 import IceStorm
 
+# AGM
+sys.path.append('/usr/local/share/agm')
+
 from parseAGGL import *
 from generateAGGLPlannerCode import *
 import xmlModelParser
 
-# AGM
-sys.path.append('/usr/local/share/agm')
 
 # Check that RoboComp has been correctly detected
 ROBOCOMP = ''
@@ -58,7 +59,11 @@ class Executive(threading.Thread):
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
 	def broadcastModel(self):
-		print 'broadcastinnn'
+		#print '<<<broadcastinnn'
+		#print '<<<broadcastinnn'
+		#print self.currentModel
+		#print 'broadcastinnn>>>'
+		#print 'broadcastinnn>>>'
 		ev = RoboCompAGMWorldModel.Event()
 		ev.backModel = AGMModelConversion.fromInternalToIce(self.currentModel)
 		ev.newModel = AGMModelConversion.fromInternalToIce(self.currentModel)
@@ -91,13 +96,17 @@ class Executive(threading.Thread):
 		lines = ofile.readlines()
 		ofile.close()
 		plan = []
-		if len(lines) > 0:
-			line = lines[0]
-			parts = line.split("@")
-			action = parts[0]
-			parameterMap = eval(parts[1])
-			print 'action: <'+action+'>  parameters:  <'+str(parameterMap)+'>' 
-			plan.append([action, parameterMap])
+		if len(lines) == 0:
+			print 'No solutions found!'
+			print 'No solutions found!'
+			print 'No solutions found!'
+			return
+		line = lines[0]
+		parts = line.split("@")
+		action = parts[0]
+		parameterMap = eval(parts[1])
+		print 'action: <'+action+'>  parameters:  <'+str(parameterMap)+'>' 
+		plan.append([action, parameterMap])
 		# Prepare parameters
 		params = dict()
 		params['action'] = RoboCompAGMCommonBehavior.Parameter()
@@ -113,7 +122,7 @@ class Executive(threading.Thread):
 			params[p].editable = False
 			params[p].value = parameterMap[p]
 			params[p].type = 'string'
-		print params
+		#print params
 		# Send plan
 		print 'Send plan to'
 		for agent in self.agents:
@@ -121,12 +130,23 @@ class Executive(threading.Thread):
 			self.agents[agent].activateAgent(params)
 
 		# Publish new information using the executiveVisualizationTopic
-		try
-			self.executiveVisualizationTopic.update(self.worldModelICE, self.targetModelICE, self.currentSolution)
-		except:
-			print "can't publish executiveVisualizationTopic.update"
+		#try
+			#self.executiveVisualizationTopic.update(self.worldModelICE, self.targetModelICE, self.currentSolution)
+		#except:
+			#print "can't publish executiveVisualizationTopic.update"
 
-		def modificationProposal(self, modification):
-			self.worldModelICE = 
+	def modificationProposal(self, modification):
+		print 'modificationProposal core'
+		#
+		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
+		#
+		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
+		#
+		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
+		#
+		self.worldModelICE = modification.newModel
+		self.setModel(AGMModelConversion.fromIceToInternal_model(self.worldModelICE))
+		self.updatePlan()
+
 
 

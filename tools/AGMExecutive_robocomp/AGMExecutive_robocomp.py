@@ -64,8 +64,6 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 		pass
 	def reset(self, current=None):
 		self.handler.reset()
-	def modificationProposal(self, modification, current=None):
-		self.handler.modificationProposal(modification)
 	def setMission(self, target, current=None):
 		self.handler.setMission(target)
 	def getData(self, current=None):
@@ -79,6 +77,9 @@ class AGMCommonBehaviorI (RoboCompAGMCommonBehavior.AGMCommonBehavior):
 class AGMAgentTopicI (RoboCompAGMAgent.AGMAgentTopic):
 	def __init__(self, _handler):
 		self.handler = _handler
+	def modificationProposal(self, modification, current=None):
+		print 'modificationProposal I'
+		self.handler.modificationProposal(modification)
 
 from AGMExecutive_core import Executive
 
@@ -88,6 +89,8 @@ class Server (Ice.Application):
 		status = 0;
 		try:
 			self.shutdownOnInterrupt()
+			
+			# Get component's parameters from config file
 			initialModelPath =   self.communicator().getProperties().getProperty( "InitialModelPath" )
 			agglPath =           self.communicator().getProperties().getProperty( "AGGLPath" )
 			initialMissionPath = self.communicator().getProperties().getProperty( "InitialMissionPath" )
@@ -141,11 +144,7 @@ class Server (Ice.Application):
 			pub = topic.getPublisher().ice_oneway()
 			executiveVisualizationTopic = RoboCompAGMExecutive.AGMExecutiveVisualizationTopicPrx.uncheckedCast(pub)
 
-
-			## Read config parameters
-			#executive.agglPath = self.communicator().getProperties().getProperty( "AGGLPath" )
-			#executive.initialModelXML = self.communicator().getProperties().getProperty( "InitialModelPath" )
-
+			# Create the executive
 			executive = Executive(agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech)
 			executiveI = ExecutiveI(executive)
 			agmcommonbehaviorI = AGMCommonBehaviorI(executive)
@@ -177,27 +176,28 @@ class Server (Ice.Application):
 
 			# Subscribe to AGMAgentTopic
 			proxy = self.communicator().getProperties().getProperty( "IceStormProxy")
-			obj = self.communicator().stringToProxy(proxy)
-			topicManager = IceStorm.TopicManagerPrx.checkedCast(obj);
+			topicManager = IceStorm.TopicManagerPrx.checkedCast(self.communicator().stringToProxy(proxy))
 			adapterT = self.communicator().createObjectAdapter("AGMAgentTopic")
 			agentTopic = AGMAgentTopicI(executive)
 			proxyT = adapterT.addWithUUID(agentTopic).ice_oneway()
 			try:
 				topic = topicManager.retrieve("AGMAgentTopic")
-				#qos = IceStorm.theQoS()
-				topic.subscribeAndGetPublisher(None, proxyT)
+				qos = {}
+				topic.subscribeAndGetPublisher(qos, proxyT)
 			except IceStorm.NoSuchTopic:
 				print "Error! No topic found!"
+				sys.exit(1)
 			adapterT.activate()
 
-
-
+			# Run executive thread
 			print 'AGMExecutive initialization ok'
 			executive.start()
+
 			print '-------------------------------------------------------------'
 			print '----     R u n     A G M E x e c u t i v e,     r u n   -----'
 			print '-------------------------------------------------------------'
 			executive.updatePlan()
+			self.shutdownOnInterrupt()
 			self.communicator().waitForShutdown()
 		except:
 			traceback.print_exc()

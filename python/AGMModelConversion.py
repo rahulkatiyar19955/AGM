@@ -1,5 +1,4 @@
 import sys, os, Ice
-
 # Check that RoboComp has been correctly detected
 ROBOCOMP = ''
 try:
@@ -14,8 +13,14 @@ preStr = "-I"+ROBOCOMP+"/Interfaces/ --all "+ROBOCOMP+"/Interfaces/"
 Ice.loadSlice(preStr+"AGMWorldModel.ice")
 import RoboCompAGMWorldModel
 
+# AGM
+sys.path.append('/usr/local/share/agm')
+from AGGL import *
+
 def fromInternalToIce(src):
+	# Create new model
 	dst = RoboCompAGMWorldModel.World([], [])
+	# Copy indices
 	for nodeSrc in src.nodes.values():
 		nodeDst = RoboCompAGMWorldModel.Node()
 		nodeDst.nodeType = nodeSrc.sType
@@ -25,7 +30,7 @@ def fromInternalToIce(src):
 			sys.exit(-1)
 		nodeDst.attributes = nodeSrc.attributes
 		dst.nodes.append(nodeDst)
-
+	# Copy links
 	for srcLink in src.links:
 		dstLink = RoboCompAGMWorldModel.Edge()
 		dstLink.edgeType = srcLink.linkType
@@ -38,10 +43,10 @@ def fromInternalToIce(src):
 			print "Can't transform models containing edges linking invalid identifiers (type: "+dstLink.edgeType+").\n"
 			sys.exit(-1)
 		dst.edges.append(dstLink)
-		return dst
+	return dst
 
 
-def fromIceToInternal(src):
+def fromIceToInternal_model(src):
 	dst = AGMGraph()
 	
 	for srcNode in src.nodes:
@@ -50,17 +55,17 @@ def fromIceToInternal(src):
 			print "Can't transform models containing nodes with invalid identifiers (type: "+src.nodes[i].nodeType+").\n"
 			sys.exit(-1)
 
-	for srcLink in src.links:
-		edge = AGMModelEdge(srcLink.a, srcLink.b, srcLink.edgeType)
-		dst.edges.append(edge)
+	for srcLink in src.edges:
+		edge = AGMLink(srcLink.a, srcLink.b, srcLink.edgeType)
+		dst.links.append(edge)
 		if srcLink.a == -1 or srcLink.b == -1:
 			print "Can't transform models containing nodes with invalid identifiers (type: "+src.edges[i].edgeType+").\n"
 			sys.exit(-1)
 	
 	return dst
 
-def fromIceToInternal(node):
-	return AGMModelSymbol(node.nodeIdentifier, node.nodeType, [0,0], node.attributes)
+def fromIceToInternal_node(node):
+	return AGMSymbol(node.nodeIdentifier, node.nodeType, [0,0], node.attributes)
 
 
 #bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMWorldModel::Node &node, AGMModel::SPtr &world)
