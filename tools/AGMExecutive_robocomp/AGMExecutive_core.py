@@ -32,9 +32,14 @@ import RoboCompSpeech
 import AGMModelConversion
 
 class Executive(threading.Thread):
-	def __init__(self, agglPath, initialModelPath, initialMissionPath):
+	def __init__(self, agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech):
 		threading.Thread.__init__(self)
 		self.agents = dict()
+
+		# Set proxies
+		self.executiveTopic = executiveTopic
+		self.executiveVisualizationTopic = executiveVisualizationTopic
+		self.speech = speech
 
 		self.agglPath = agglPath
 		print 'read agmfiledataparsing'
@@ -46,7 +51,7 @@ class Executive(threading.Thread):
 		print 'read initialmodelpath'
 		self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
 		print 'read initialmodelpath'
-		self.currentModel = xmlModelParser.graphFromXML(initialModelPath)
+		self.setModel(xmlModelParser.graphFromXML(initialModelPath))
 		print 'setmission'		
 		self.setMission(xmlModelParser.graphFromXML(initialMissionPath))
 
@@ -61,6 +66,9 @@ class Executive(threading.Thread):
 	def reset(self):
 		self.currentModel = xmlModelParser.graphFromXML(path)
 		self.updatePlan()
+	def setModel(self, model):
+		self.currentModel = model
+		self.broadcastModel()
 	def setMission(self, target):
 		self.target = target
 		targetText = generateTarget(self.target)
@@ -83,25 +91,42 @@ class Executive(threading.Thread):
 		lines = ofile.readlines()
 		ofile.close()
 		plan = []
-		for line in lines:
+		if len(lines) > 0:
+			line = lines[0]
 			parts = line.split("@")
 			action = parts[0]
 			parameterMap = eval(parts[1])
-			print 'action: <'+action+'>  parameters:  <'+str(parameterMap)+'> ('+str(type(parameterMap))+')' 
+			print 'action: <'+action+'>  parameters:  <'+str(parameterMap)+'>' 
 			plan.append([action, parameterMap])
+		# Prepare parameters
+		params = dict()
+		params['action'] = RoboCompAGMCommonBehavior.Parameter()
+		params['action'].editable = False
+		params['action'].value = action
+		params['action'].type = 'string'
+		params['plan'] = RoboCompAGMCommonBehavior.Parameter()
+		params['plan'].editable = False
+		params['plan'].value = '\n'.join(lines)
+		params['plan'].type = 'string'
+		for p in parameterMap.keys():
+			params[p] = RoboCompAGMCommonBehavior.Parameter()
+			params[p].editable = False
+			params[p].value = parameterMap[p]
+			params[p].type = 'string'
+		print params
 		# Send plan
 		print 'Send plan to'
 		for agent in self.agents:
 			print '\t', agent
-			
-			
-		#try
-		#{
-			#prms.executiveVisualizationTopic->update(worldModelICE, targetModelICE, currentSolution);
-		#}
-		#catch (...)
-		#{
-			#printf("can't publish executiveVisualizationTopic->update\n");
-		#}
+			self.agents[agent].activateAgent(params)
+
+		# Publish new information using the executiveVisualizationTopic
+		try
+			self.executiveVisualizationTopic.update(self.worldModelICE, self.targetModelICE, self.currentSolution)
+		except:
+			print "can't publish executiveVisualizationTopic.update"
+
+		def modificationProposal(self, modification):
+			self.worldModelICE = 
 
 

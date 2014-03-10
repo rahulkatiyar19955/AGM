@@ -15,9 +15,9 @@ InitialModelPath = /home/robocomp/cajasvacias1/Files/initialModel.xml
 InitialMissionPath = /home/robocomp/cajasvacias1/Files/targetModel.xml
 
 # A G E N T S
-AGENTS = ballTracker,handApproacher
-ballTracker    = agmcommonbehavior:tcp -h localhost -p 10240
-handApproacher = agmcommonbehavior:tcp -h localhost -p 10120 
+AGENTS = navegacion,rompellaves
+navegacion  = agmcommonbehavior:tcp -h localhost -p 10333
+rompellaves = agmcommonbehavior:tcp -h localhost -p 10334 
 
 Ice.Warn.Connections=0
 Ice.Trace.Network=0

@@ -65,7 +65,7 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 	def reset(self, current=None):
 		self.handler.reset()
 	def modificationProposal(self, modification, current=None):
-		pass
+		self.handler.modificationProposal(modification)
 	def setMission(self, target, current=None):
 		self.handler.setMission(target)
 	def getData(self, current=None):
@@ -92,26 +92,13 @@ class Server (Ice.Application):
 			agglPath =           self.communicator().getProperties().getProperty( "AGGLPath" )
 			initialMissionPath = self.communicator().getProperties().getProperty( "InitialMissionPath" )
 
-			executive = Executive(agglPath, initialModelPath, initialMissionPath)
-			executiveI = ExecutiveI(executive)
-			agmcommonbehaviorI = AGMCommonBehaviorI(executive)
-
 			# Get a proxy for the Speech
 			proxy = self.communicator().getProperties().getProperty( "SpeechProxy" )
 			if len(proxy)<1:
 				print 'SpeechProxy variable is empty, check the configuration file if speech output is desired.'
+				speech = None
 			else:
-				executive.speech = RoboCompSpeech.SpeechPrx.checkedCast(self.communicator().stringToProxy(proxy))
-
-			# AGMExecutive server
-			adapterExecutive = self.communicator().createObjectAdapter('AGMExecutive')
-			adapterExecutive.add(executiveI, self.communicator().stringToIdentity('agmexecutive'))
-			adapterExecutive.activate()
-
-			# AGMCommonBehavior
-			adapterAGMCommonBehavior = self.communicator().createObjectAdapter('AGMCommonBehavior')
-			adapterAGMCommonBehavior.add(agmcommonbehaviorI, self.communicator().stringToIdentity('agmcommonbehavior'))
-			adapterAGMCommonBehavior.activate()
+				speech = RoboCompSpeech.SpeechPrx.checkedCast(self.communicator().stringToProxy(proxy))
 
 			# Proxy to publish AGMExecutiveTopic
 			proxy = self.communicator().getProperties().getProperty("IceStormProxy")
@@ -131,7 +118,7 @@ class Server (Ice.Application):
 					except:
 						print 'Another client created the AGMExecutiveTopic topic... ok'
 			pub = topic.getPublisher().ice_oneway()
-			executive.executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
+			executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
 
 
 			# Proxy to publish AGMExecutiveVisualizationTopic
@@ -152,12 +139,26 @@ class Server (Ice.Application):
 					except:
 						print 'Another client created the AGMExecutiveVisualizationTopic topic... ok'
 			pub = topic.getPublisher().ice_oneway()
-			executive.executiveVisualizationTopic = RoboCompAGMExecutive.AGMExecutiveVisualizationTopicPrx.uncheckedCast(pub)
+			executiveVisualizationTopic = RoboCompAGMExecutive.AGMExecutiveVisualizationTopicPrx.uncheckedCast(pub)
 
 
-			# Read config parameters
-			executive.agglPath = self.communicator().getProperties().getProperty( "AGGLPath" )
-			executive.initialModelXML = self.communicator().getProperties().getProperty( "InitialModelPath" )
+			## Read config parameters
+			#executive.agglPath = self.communicator().getProperties().getProperty( "AGGLPath" )
+			#executive.initialModelXML = self.communicator().getProperties().getProperty( "InitialModelPath" )
+
+			executive = Executive(agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech)
+			executiveI = ExecutiveI(executive)
+			agmcommonbehaviorI = AGMCommonBehaviorI(executive)
+
+			# AGMExecutive server
+			adapterExecutive = self.communicator().createObjectAdapter('AGMExecutive')
+			adapterExecutive.add(executiveI, self.communicator().stringToIdentity('agmexecutive'))
+			adapterExecutive.activate()
+
+			# AGMCommonBehavior
+			adapterAGMCommonBehavior = self.communicator().createObjectAdapter('AGMCommonBehavior')
+			adapterAGMCommonBehavior.add(agmcommonbehaviorI, self.communicator().stringToIdentity('agmcommonbehavior'))
+			adapterAGMCommonBehavior.activate()
 
 
 			# Read agent's configurations and create the correspoding proxies
