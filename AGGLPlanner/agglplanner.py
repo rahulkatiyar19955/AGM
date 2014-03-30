@@ -48,6 +48,8 @@ maxTimeWaitLimit = 1000.
 
 class GoalAchieved(Exception):
 	pass
+class TimeLimit(Exception):
+	pass
 class MaxCostReached(Exception):
 	def __init__(self, cost):
 		self.cost = cost
