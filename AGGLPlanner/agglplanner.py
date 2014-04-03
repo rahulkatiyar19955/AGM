@@ -137,13 +137,7 @@ class WorldStateHistory(object):
 	def __hash__(self):
 		return self.graph.__hash__()
 	def __eq__(self, other):
-		#print '\n__eq__'
-		#print '    ', self.graph
-		#print '  vs  '
-		#print '    ', other.graph
-		ret = self.graph.__eq__(other.graph)
-		#print '  ', ret
-		return ret
+		return self.graph.__eq__(other.graph)
 	def __repr__(self):
 		return self.graph.__repr__()
 	def __str__(self):
@@ -276,8 +270,8 @@ class PyPlan(object):
 									break
 							if stopBecauseAllOpenNodesAreMoreExpensive:
 								raise BestSolutionFound
-							else:
-								print '+('+str(deriv.cost)+')'
+							#else:
+								#print '+('+str(deriv.cost)+')'
 						if not deriv in knownNodes:
 							if deriv.stop == False:
 								if len(deriv.graph.nodes.keys()) <= maxWorldSize:
