@@ -17,6 +17,14 @@ class AGMSymbol(object):
 		return self.toString()
 	def __repr__(self):
 		return self.toString()
+	def __eq__(self, other):
+		#print '__EQ__ sym'
+		if self.sType == other.sType and self.name == other.name:
+			return True
+		else:
+			return False
+	def __cmp__(self):
+		return object.__cmp__(self)
 	def toString(self):
 		return str(self.name)+':'+str(self.sType)
 	@property
@@ -137,6 +145,7 @@ class AGMGraph(object):
 		#print '__hash__'
 		return (len(self.nodes), len(self.links))
 	def __eq__(self, other):
+		#print '__EQ__'
 		try:
 			# Basic: number of nodes
 			if len(self.nodes) != len(other.nodes):
@@ -146,18 +155,11 @@ class AGMGraph(object):
 				return False
 			# Exhaustive nodes
 			for l in self.nodes:
-				if not l in other.nodes:
+				if not self.nodes[l].__eq__(other.nodes[l]):
 					return False
-			#for l in other.nodes:                       SINCE WE HAVE THE SAME NUMBER OF NODES (checked above) ITS
-				#if not l in self.nodes:                  NOT NECESSARY TO PERFORM THE CHECK IN BOTH WAYS
-					#return False
-			# Exhaustive links
 			for l in range(len(self.links)):
 				if not self.links[l] in other.links:
 					return False
-			#for l in range(len(other.links)):           SINCE WE HAVE THE SAME NUMBER OF LINKS (checked above) ITS
-				#if not other.links[l] in self.links:     NOT NECESSARY TO PERFORM THE CHECK IN BOTH WAYS
-					#return False
 			return True
 		except:
 			return False

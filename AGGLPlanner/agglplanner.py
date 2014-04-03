@@ -40,7 +40,7 @@ import inspect
 # C O N F I G U R A T I O N
 maxWorldIncrement = 40
 maxCost = 200
-stopWithFirstPlan = True
+stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 10.
 maxTimeWaitLimit = 1000.
@@ -132,11 +132,18 @@ class WorldStateHistory(object):
 			print type(self)
 			sys.exit(1)
 	def __cmp__(self, other):
+		#print '__cmp__'
 		return self.graph.__cmp__(other.graph)
 	def __hash__(self):
 		return self.graph.__hash__()
 	def __eq__(self, other):
-		return self.graph == other.graph
+		#print '\n__eq__'
+		#print '    ', self.graph
+		#print '  vs  '
+		#print '    ', other.graph
+		ret = self.graph.__eq__(other.graph)
+		#print '  ', ret
+		return ret
 	def __repr__(self):
 		return self.graph.__repr__()
 	def __str__(self):
@@ -152,6 +159,14 @@ def printResult(result):
 		print 'Actions\n----------------'
 	for action in result.history:
 		print action
+
+
+def CheckSymbolInGraph(graph, symbol):
+	for cacho_n in graph.nodes:
+		cacho = graph.nodes[cacho_n]
+		if cacho.sType == symbol:
+			return True
+	return False
 
 class PyPlan(object):
 	def __init__(self, domainPath, init, targetPath, resultFile):
@@ -178,7 +193,7 @@ class PyPlan(object):
 		results = []
 		explored = 0
 
-		cheapsetSolutionCost = -1
+		cheapestSolutionCost = -1
 
 
 
@@ -188,27 +203,33 @@ class PyPlan(object):
 			self.initWorld.score, achieved = self.targetCode(self.initWorld.graph)
 			if achieved:
 				results.append(self.initWorld)
-				cheapsetSolutionCost = results[0].cost
+				cheapestSolutionCost = results[0].cost
 				for s in results:
-					if s.cost < cheapsetSolutionCost: cheapsetSolutionCost = s.cost
+					if s.cost < cheapestSolutionCost: cheapestSolutionCost = s.cost
 				# Check if we should stop because we are looking for the first solution
 				if stopWithFirstPlan:
 					raise GoalAchieved
 				
 			while True:
-				# Check if we should finish by time
 				timeB = datetime.datetime.now()
 				timeElapsed = (timeB-timeA).seconds + (timeB-timeA).microseconds/1e6
+				# Check if we should give up because it already took too much time
 				if timeElapsed > maxTimeWaitLimit:
 					if len(results)>0: raise GoalAchieved
 					else: raise TimeLimit
-				elif timeElapsed > maxTimeWaitAchieved:
-					if len(results)>0:
-						raise GoalAchieved
-				# Proceed
+				# Check if we should stop looking because it's taking quite a long time and we already have a solution
+				elif timeElapsed > maxTimeWaitAchieved and len(results)>0:
+					raise GoalAchieved
+				# Else, proceed...
 				if len(openNodes) == 0:
 					break
-				head = heapq.heappop(openNodes)[1]
+				# Pop a node from the queue
+				head = heapq.heappop(openNodes)[1] # P O P   POP   p o p   pop
+				
+				#if CheckSymbolInGraph(head.graph, "reach"):
+					#print 'REACH HEAD'
+
+				# Update 'mincostOnList', so we can stop when the minimum cost in the queue is bigger than one in the results
 				if head.cost <= mincostOnList:
 					if len(openNodes)==0:
 						mincostOnList = 0
@@ -217,9 +238,11 @@ class PyPlan(object):
 						for n in openNodes:
 							if n[1].cost < mincostOnList:
 								mincostOnList = n[1].cost
-				
-				if (len(results)>0 and head.cost>3*cheapsetSolutionCost) or (head.cost > maxCost):
+				# Check if we got to the maximum cost or to three times the minimi
+				if head.cost > maxCost:
 					raise MaxCostReached(head.cost)
+				elif len(results)>0 and head.cost>3*cheapestSolutionCost:
+					raise GoalAchieved
 				# Small test
 				if verbose>5: print 'Expanding'.ljust(5), head
 				for k in self.ruleMap:
@@ -227,15 +250,15 @@ class PyPlan(object):
 					# Iterate over rules and generate derivates
 					for deriv in self.ruleMap[k](head):
 						if not prtd:
-							if verbose>5: print '  ',k
+							if verbose>5: print '  ', k
 							prtd = True
 						explored += 1
 						if verbose > 0:
-							if explored % 10 == 0:
+							if explored % 300 == 0:
 								print 'Explored nodes:', explored,
 								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
 								#print head
-								print 'First(cost:'+str(openNodes[0][1].cost) +', score:'+str(openNodes[0][1].score) +', depth:'+str(openNodes[0][1].depth)+')'
+								print 'First(cost:'+str(openNodes[ 0][1].cost)+', score:'+str(openNodes[ 0][1].score)+', depth:'+str(openNodes[ 0][1].depth)+')'
 								print  'Last(cost:'+str(openNodes[-1][1].cost)+', score:'+str(openNodes[-1][1].score)+', depth:'+str(openNodes[-1][1].depth)+')'
 						deriv.score, achieved = self.targetCode(deriv.graph)
 						if verbose>4: print deriv.score, achieved, deriv
@@ -246,27 +269,58 @@ class PyPlan(object):
 							if stopWithFirstPlan:
 								raise GoalAchieved
 							# Compute cheapest solution
-							cheapsetSolutionCost = results[0].cost
+							cheapestSolutionCost = results[0].cost
 							for s in results:
-								if s.cost < cheapsetSolutionCost:
-									cheapsetSolutionCost = s.cost
+								if s.cost < cheapestSolutionCost:
+									cheapestSolutionCost = s.cost
 							# Check if ws should stop because there are no cheaper possibilities
 							stopBecauseAllOpenNodesAreMoreExpensive = True
 							for c in openNodes:
-								if c[0] < cheapsetSolutionCost:
+								if c[0] < cheapestSolutionCost:
 									stopBecauseAllOpenNodesAreMoreExpensive = False
 									break
 							if stopBecauseAllOpenNodesAreMoreExpensive:
 								raise BestSolutionFound
 							else:
 								print '+('+str(deriv.cost)+')'
-						if not deriv in knownNodes and deriv.stop == False:
-							if len(deriv.graph.nodes.keys()) <= maxWorldSize:
-								knownNodes.append(head)
-								#heapq.heappush(openNodes, (-deriv.score, deriv)) # score... the more the better
-								#heapq.heappush(openNodes, ( deriv.cost, deriv)) # cost...  the less the better
-								heapq.heappush(openNodes, ( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUND COST AND SCORE
-								#heapq.heappush(openNodes, ( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUND COST AND SCORE
+						#if CheckSymbolInGraph(deriv.graph, "grasp"):
+							#print 'GRASP deriv'
+						#print "##################################################################################"
+						#print "##################################################################################"
+						#print "##################################################################################"
+						#print "##################################################################################"
+						#if CheckSymbolInGraph(deriv.graph, "reach"):
+							#print 'REACH deriv'
+						#print str(type(deriv))
+						#for i in knownNodes:
+							#print '   ', str(type(i)), deriv.__eq__(i)
+						#print "##################################################################################"
+						if not deriv in knownNodes:
+							#if CheckSymbolInGraph(deriv.graph, "reach"):
+								#print 'REACH deriv not yet added'
+							if deriv.stop == False:
+								if len(deriv.graph.nodes.keys()) <= maxWorldSize:
+									knownNodes.append(head)
+									#heapq.heappush(openNodes, (-deriv.score, deriv)) # score... the more the better
+									#heapq.heappush(openNodes, ( deriv.cost, deriv)) # cost...  the less the better
+									heapq.heappush(openNodes, ( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+									#if CheckSymbolInGraph(deriv.graph, "reach"):
+										#print 'REACH deriv ADDED'
+									#heapq.heappush(openNodes, ( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+								#else:
+									#print 'fairy'
+									#sys.exit(-1)
+						#else:
+							#if CheckSymbolInGraph(deriv.graph, "reach"):
+								#print str(type(deriv))
+								#print '\n\n\nTHIS ONE'
+								#print deriv.graph
+								#print '\n\n\nKNOWN'
+								#for dd in knownNodes:
+									#print dd.graph
+								#print 'fairiyyyyyyyyy'
+								#sys.exit(-2)
+
 		#except IndexError, e:
 			#if verbose > 0: print 'End: state space exhausted'
 			#pass
