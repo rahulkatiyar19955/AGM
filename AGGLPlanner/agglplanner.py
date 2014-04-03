@@ -225,10 +225,6 @@ class PyPlan(object):
 					break
 				# Pop a node from the queue
 				head = heapq.heappop(openNodes)[1] # P O P   POP   p o p   pop
-				
-				#if CheckSymbolInGraph(head.graph, "reach"):
-					#print 'REACH HEAD'
-
 				# Update 'mincostOnList', so we can stop when the minimum cost in the queue is bigger than one in the results
 				if head.cost <= mincostOnList:
 					if len(openNodes)==0:
@@ -257,7 +253,6 @@ class PyPlan(object):
 							if explored % 300 == 0:
 								print 'Explored nodes:', explored,
 								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-								#print head
 								print 'First(cost:'+str(openNodes[ 0][1].cost)+', score:'+str(openNodes[ 0][1].score)+', depth:'+str(openNodes[ 0][1].depth)+')'
 								print  'Last(cost:'+str(openNodes[-1][1].cost)+', score:'+str(openNodes[-1][1].score)+', depth:'+str(openNodes[-1][1].depth)+')'
 						deriv.score, achieved = self.targetCode(deriv.graph)
@@ -283,47 +278,18 @@ class PyPlan(object):
 								raise BestSolutionFound
 							else:
 								print '+('+str(deriv.cost)+')'
-						#if CheckSymbolInGraph(deriv.graph, "grasp"):
-							#print 'GRASP deriv'
-						#print "##################################################################################"
-						#print "##################################################################################"
-						#print "##################################################################################"
-						#print "##################################################################################"
-						#if CheckSymbolInGraph(deriv.graph, "reach"):
-							#print 'REACH deriv'
-						#print str(type(deriv))
-						#for i in knownNodes:
-							#print '   ', str(type(i)), deriv.__eq__(i)
-						#print "##################################################################################"
 						if not deriv in knownNodes:
-							#if CheckSymbolInGraph(deriv.graph, "reach"):
-								#print 'REACH deriv not yet added'
 							if deriv.stop == False:
 								if len(deriv.graph.nodes.keys()) <= maxWorldSize:
 									knownNodes.append(head)
 									#heapq.heappush(openNodes, (-deriv.score, deriv)) # score... the more the better
 									#heapq.heappush(openNodes, ( deriv.cost, deriv)) # cost...  the less the better
 									heapq.heappush(openNodes, ( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
-									#if CheckSymbolInGraph(deriv.graph, "reach"):
-										#print 'REACH deriv ADDED'
 									#heapq.heappush(openNodes, ( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
-								#else:
-									#print 'fairy'
-									#sys.exit(-1)
-						#else:
-							#if CheckSymbolInGraph(deriv.graph, "reach"):
-								#print str(type(deriv))
-								#print '\n\n\nTHIS ONE'
-								#print deriv.graph
-								#print '\n\n\nKNOWN'
-								#for dd in knownNodes:
-									#print dd.graph
-								#print 'fairiyyyyyyyyy'
-								#sys.exit(-2)
 
-		#except IndexError, e:
-			#if verbose > 0: print 'End: state space exhausted'
-			#pass
+		except IndexError, e:
+			if verbose > 0: print 'End: state space exhausted'
+			pass
 		except MaxCostReached, e:
 			if verbose > 0: print 'End: max cost reached:', e.cost
 			pass
