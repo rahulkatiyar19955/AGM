@@ -81,6 +81,13 @@ class Executive(threading.Thread):
 		ofile.write(targetText)
 		ofile.close()
 		self.updatePlan()
+	def ignoreCommentsInPlan(self, plan):
+		ret = []
+		for i in plan:
+			if len(i) > 0:
+				if i[0] != '#':
+					ret.append(i)
+		return ret
 	def updatePlan(self):
 		# Save world
 		self.currentModel.toXML("/tmp/lastWorld.xml")
@@ -93,7 +100,7 @@ class Executive(threading.Thread):
 		print 'It took', end - start, 'seconds'
 		# Get the output
 		ofile = open("/tmp/result.txt", 'r')
-		lines = ofile.readlines()
+		lines = self.ignoreCommentsInPlan(ofile.readlines())
 		ofile.close()
 		plan = []
 		if len(lines) == 0:
@@ -124,10 +131,16 @@ class Executive(threading.Thread):
 			params[p].type = 'string'
 		#print params
 		# Send plan
+		print '<<<<<<<<<<<<<<<<<'
+		print params
+		print '>>>>>>>>>>>>>>>>>'
 		print 'Send plan to'
 		for agent in self.agents:
-			print '\t', agent
-			self.agents[agent].activateAgent(params)
+			try:
+				print '\t', agent
+				self.agents[agent].activateAgent(params)
+			except:
+				print 'Can\'t connect to', agent
 
 		# Publish new information using the executiveVisualizationTopic
 		#try
