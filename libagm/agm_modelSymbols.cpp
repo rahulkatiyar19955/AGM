@@ -44,7 +44,7 @@ void AGMModelSymbol::init(AGMModel *model, std::string typ, int32_t id)
 	if (id==-1)
 	{
 		identifier = model->getNewId();
-		printf("Got new ID from pool: %d\n", identifier);
+// 		printf("Got new ID from pool: %d\n", identifier);
 	}
 	else
 		identifier = id;
@@ -65,7 +65,7 @@ void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ)
 	if (id==-1)
 	{
 		identifier = model->getNewId();
-		printf("Got new ID from pool: %d\n", identifier);
+// 		printf("Got new ID from pool: %d\n", identifier);
 	}
 	else
 		identifier = id;
