@@ -30,32 +30,30 @@ friend class AGMModelConverter;
 friend class AGMModelSymbol;
 public:
 	/*!
-		* @brief Iterator class for accessing the symbols in an AGMModel object.
-		*
-		* 
-		* 
-		*/
+	 *  @brief Iterator class for accessing the symbols in an AGMModel object.
+	 * 
+	 */
 	class iterator
 	{
 	public:
-		/// Default constructor
-		iterator() { modelRef = NULL; }
 		/// Constructor
-		iterator(AGMModel *m);
+		iterator();
 		/// Copy constructor
 		iterator(iterator &iter);
+		iterator(const iterator &iter);
 		/// Access to the begin of the list.
 		static iterator begin(AGMModel *m);
+		static iterator begin(boost::shared_ptr<AGMModel> m);
 		/// Access to an unaccessible element of the list.
 		static iterator end(AGMModel *m);
+		static iterator end(boost::shared_ptr<AGMModel> m);
 		/// Comparison operator
 		bool operator==(const iterator &rhs);
 		/// Not-equal operator
 		bool operator!=(const iterator &rhs);
 		/// Increment
 		iterator operator++();
-		/// Parametrized increment
-		iterator operator++(int32_t times);
+		iterator operator++(int32_t);
 		/// Returns the referenced symbol.
 		AGMModelSymbol::SPtr operator*();
 		/// Returns the referenced symbol.
@@ -83,6 +81,15 @@ public:
 	//! Assignment operator.
 	AGMModel& operator=(const AGMModel &src);
 
+	iterator begin()
+	{
+		return AGMModel::iterator::begin(this);
+	}
+
+	iterator end()
+	{
+		return AGMModel::iterator::end(this);
+	}
 
 	/// Empties the model.
 	void clear();
@@ -225,6 +232,7 @@ public:
 
 	/// Vector of the symbols that the model holds.
 	std::vector<AGMModelSymbol::SPtr> symbols;
+	int32_t size() { return symbols.size(); }
 	/// Vector of the edges that the model holds.
 	std::vector<AGMModelEdge> edges;
 private:

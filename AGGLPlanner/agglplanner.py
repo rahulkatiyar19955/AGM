@@ -40,7 +40,7 @@ import inspect
 # C O N F I G U R A T I O N
 maxWorldIncrement = 40
 maxCost = 200
-stopWithFirstPlan = False
+stopWithFirstPlan = True
 verbose = 1
 maxTimeWaitAchieved = 10.
 maxTimeWaitLimit = 1000.

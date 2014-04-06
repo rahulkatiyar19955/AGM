@@ -640,10 +640,10 @@ AGMModelSymbol::SPtr AGMModel::newSymbol(int32_t identifier, std::string typ, st
 
 
 
-AGMModel::iterator::iterator(AGMModel *m)
+AGMModel::iterator::iterator()
 {
 	index = -1;
-	modelRef = m;
+	modelRef = NULL;
 }
 
 AGMModel::iterator::iterator(iterator &iter)
@@ -652,18 +652,37 @@ AGMModel::iterator::iterator(iterator &iter)
 	modelRef = iter.modelRef;
 }
 
+AGMModel::iterator::iterator(const iterator &iter)
+{
+	index = iter.index;
+	modelRef = iter.modelRef;
+}
+
 AGMModel::iterator AGMModel::iterator::begin(AGMModel *m)
 {
-	iterator iter(m);
-	iter.index = -1; // -1 is a special case which makes the iterator start over
+	iterator iter;
+	iter.modelRef = m;
+	iter.index = -1;
+	iter++;
 	return iter;
+}
+
+AGMModel::iterator AGMModel::iterator::begin(boost::shared_ptr<AGMModel> m)
+{
+	return AGMModel::iterator::begin(m.get());
 }
 
 AGMModel::iterator AGMModel::iterator::end(AGMModel *m)
 {
-	iterator iter(m);
+	iterator iter;
+	iter.modelRef = m;
 	iter.index = -10;
 	return iter;
+}
+
+AGMModel::iterator AGMModel::iterator::end(boost::shared_ptr<AGMModel> m)
+{
+	return AGMModel::iterator::end(m.get());
 }
 
 bool AGMModel::iterator::operator==(const iterator &rhs)
@@ -682,16 +701,19 @@ AGMModel::iterator AGMModel::iterator::operator++()
 
 	// The end can't be incremented
 	if (index == -10)
-		return *this;
-
-	index++;
-
-	if (index < (int32_t)modelRef->symbols.size())
 	{
+		return *this;
+	}
+
+// 	printf("++\n");
+	if (index+1 < (int32_t)modelRef->symbols.size())
+	{
+// 		printf("++ normal\n");
 		index++;
 	}
 	else
 	{
+// 		printf("++ ends!!\n");
 		index = -10;
 	}
 	return *this;
@@ -699,22 +721,29 @@ AGMModel::iterator AGMModel::iterator::operator++()
 
 AGMModel::iterator AGMModel::iterator::operator++(int32_t times)
 {
-	while (times > 0)
-	{
-		operator++();
-		times--;
-	}
-	return *this;
+	AGMModel::iterator it = *this;
+	operator++();
+	return it;
 }
 
 AGMModelSymbol::SPtr AGMModel::iterator::operator*()
 {
+	if (index<0)
+	{
+		throw "invalid iterator";
+	}
+
 	if (modelRef == NULL) AGMMODELEXCEPTION(std::string("Attempting to use uninitialized iterator!"));
 	return modelRef->symbols[index];
 }
 
 AGMModelSymbol::SPtr AGMModel::iterator::operator->()
 {
+	if (index<0)
+	{
+		throw "invalid iterator";
+	}
+
 	if (modelRef == NULL) AGMMODELEXCEPTION(std::string("Attempting to use uninitialized iterator!"));
 	return modelRef->symbols[index];
 }
