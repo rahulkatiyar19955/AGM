@@ -52,6 +52,7 @@ import RoboCompAGMExecutive
 import RoboCompAGMWorldModel
 import RoboCompSpeech
 
+from AGGL import *
 
 class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 	def __init__(self, _handler):
@@ -65,10 +66,18 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 	def reset(self, current=None):
 		self.handler.reset()
 	def setMission(self, target, current=None):
-		self.handler.setMission(target)
+		targetAGM = self.world2agmgraph(target)
+		self.handler.setMission(targetAGM)
 	def getData(self, current=None):
 		pass
 		return world, target, plan
+	def world2agmgraph(self, target):
+		ret = AGMGraph()
+		for node in target.nodes:
+			ret.addNode(0,0, node.nodeIdentifier, node.nodeType, attributes=node.attributes)
+		for edge in target.edges:
+			ret.addEdge(edge.a, edge.b, edge.edgeType)
+		return ret
 
 class AGMCommonBehaviorI (RoboCompAGMCommonBehavior.AGMCommonBehavior):
 	def __init__(self, _handler):

@@ -6,8 +6,8 @@ float str2float(const std::string &s)
 {
 	if (s.size()<=0)
 	{
-		printf("dkeiodeji\n");
-		AGMMODELEXCEPTION("dekiehdiwohffhew 3423\n");
+		printf("libagm: Error parsing float <empty>\n");
+		AGMMODELEXCEPTION("libagm: Error parsing float <empty>\n");
 	}
 
 	float ret;
@@ -23,8 +23,8 @@ int32_t str2int(const std::string &s)
 {
 	if (s.size()<=0)
 	{
-		printf("dkeiodeji\n");
-		AGMMODELEXCEPTION("dekiehdiwohffhew 3423\n");
+		printf("libagm: Error parsing int <empty>\n");
+		AGMMODELEXCEPTION("libagm: Error parsing int <empty>\n");
 	}
 
 	int32_t ret;
@@ -35,3 +35,22 @@ int32_t str2int(const std::string &s)
 	istr >> ret;
 	return ret;
 }
+
+
+std::string float2str(const float &f)
+{
+	std::ostringstream ostr;
+	ostr.imbue(std::locale("C"));
+	ostr << f;
+	return ostr.str();
+}
+
+std::string int2str(const int32_t &i)
+{
+	std::ostringstream ostr;
+	ostr.imbue(std::locale("C"));
+	ostr << i;
+	return ostr.str();
+}
+
+
