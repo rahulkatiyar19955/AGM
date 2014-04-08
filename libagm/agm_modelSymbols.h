@@ -36,8 +36,8 @@ public:
 	{
 	public:
 		/// Default constructor
-		iterator() { modelRef = NULL; }
-		/// Constructor
+		iterator() { modelRef = NULL; symRef = NULL; index = -1; }
+		iterator(const AGMModelSymbol::iterator &o) { index=o.index; modelRef=o.modelRef; symRef=o.symRef; }
 		iterator(AGMModel *m, AGMModelSymbol *s);
 		/// Copy constructor
 		iterator(iterator &iter);
@@ -57,7 +57,7 @@ public:
 		AGMModelEdge operator*();
 		/// Get referenced edge.
 		AGMModelEdge operator->();
-	private:
+// 	private:
 		int32_t index;
 		AGMModel *modelRef;
 		AGMModelSymbol *symRef;
@@ -87,8 +87,22 @@ public:
 	void setAttribute(std::string a, std::string v);
 	std::string getAttribute(std::string a);
 
-// 	iterator edgesBegin(AGMModel *m) { return iterator::begin(m, this); }
-// 	iterator edgesEnd(AGMModel *m) { return iterator::end(m, this); }
+	AGMModelSymbol::iterator edgesBegin(AGMModel *m)
+	{
+		return AGMModelSymbol::iterator::begin(m, this);
+	}
+	AGMModelSymbol::iterator edgesBegin(boost::shared_ptr<AGMModel> m)
+	{
+		return edgesBegin(m.get());
+	}
+	AGMModelSymbol::iterator edgesEnd(AGMModel *m)
+	{
+		return AGMModelSymbol::iterator::end(m, this);
+	}
+	AGMModelSymbol::iterator edgesEnd(boost::shared_ptr<AGMModel> m)
+	{
+		return edgesEnd(m.get());
+	}
 
 	bool operator==(const AGMModelSymbol &p) const;
 

@@ -58,7 +58,7 @@ public:
 		AGMModelSymbol::SPtr operator*();
 		/// Returns the referenced symbol.
 		AGMModelSymbol::SPtr operator->();
-	private:
+// 	private:
 		int32_t index;
 		AGMModel *modelRef;
 	};

@@ -166,6 +166,7 @@ AGMModelSymbol::iterator AGMModelSymbol::iterator::begin(AGMModel *m, AGMModelSy
 {
 	iterator iter(m, s);
 	iter.index = -1; // -1 is a special case which makes the iterator start over
+	iter++;
 	return iter;
 }
 
@@ -193,8 +194,6 @@ AGMModelSymbol::iterator AGMModelSymbol::iterator::operator++()
 	// The end can't be incremented
 	if (index == -10)
 		return *this;
-	// Otherwise, increment the index
-	index++;
 
 	// Now, increment until we reach a related edge
 	const int32_t t=modelRef->edges.size();
@@ -213,12 +212,9 @@ AGMModelSymbol::iterator AGMModelSymbol::iterator::operator++()
 
 AGMModelSymbol::iterator AGMModelSymbol::iterator::operator++(int32_t times)
 {
-	while (times > 0)
-	{
-		operator++();
-		times--;
-	}
-	return *this;
+	AGMModelSymbol::iterator it = *this;
+	operator++();
+	return it;
 }
 
 AGMModelEdge AGMModelSymbol::iterator::operator*()
