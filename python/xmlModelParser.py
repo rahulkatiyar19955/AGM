@@ -35,7 +35,7 @@ class AGMWorldModelParser(xmllib.XMLParser):
 			sys.exit(-1)
 
 	def start_symbol(self, attrs):
-		ids = attrs['id']
+		ids = str(attrs['id'])
 		self.currentSymbol = ids
 		x = ''
 		if 'x' in attrs: x = attrs['x']

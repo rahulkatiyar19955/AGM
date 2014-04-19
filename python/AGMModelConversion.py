@@ -24,7 +24,7 @@ def fromInternalToIce(src):
 	for nodeSrc in src.nodes.values():
 		nodeDst = RoboCompAGMWorldModel.Node()
 		nodeDst.nodeType = nodeSrc.sType
-		nodeDst.nodeIdentifier = nodeSrc.name
+		nodeDst.nodeIdentifier = int(nodeSrc.name)
 		if nodeDst.nodeIdentifier == -1:
 			print "Can't transform models containing nodes with invalid identifiers (type: " + nodeDst.nodeType + ").\n"
 			sys.exit(-1)
@@ -34,11 +34,11 @@ def fromInternalToIce(src):
 	for srcLink in src.links:
 		dstLink = RoboCompAGMWorldModel.Edge()
 		dstLink.edgeType = srcLink.linkType
-		dstLink.a = srcLink.a
+		dstLink.a = int(srcLink.a)
 		if dstLink.a == -1:
 			print "Can't transform models containing edges linking invalid identifiers (type: "+dstLink.edgeType+").\n"
 			sys.exit(-1)
-		dstLink.b = srcLink.b
+		dstLink.b = int(srcLink.b)
 		if dstLink.b == -1:
 			print "Can't transform models containing edges linking invalid identifiers (type: "+dstLink.edgeType+").\n"
 			sys.exit(-1)
@@ -50,13 +50,13 @@ def fromIceToInternal_model(src):
 	dst = AGMGraph()
 	
 	for srcNode in src.nodes:
-		dst.addNode(0,0, srcNode.nodeIdentifier, srcNode.nodeType, srcNode.attributes)
+		dst.addNode(0,0, str(srcNode.nodeIdentifier), srcNode.nodeType, srcNode.attributes)
 		if srcNode.nodeIdentifier == -1:
 			print "Can't transform models containing nodes with invalid identifiers (type: "+src.nodes[i].nodeType+").\n"
 			sys.exit(-1)
 
 	for srcLink in src.edges:
-		edge = AGMLink(srcLink.a, srcLink.b, srcLink.edgeType)
+		edge = AGMLink(str(srcLink.a), str(srcLink.b), srcLink.edgeType)
 		dst.links.append(edge)
 		if srcLink.a == -1 or srcLink.b == -1:
 			print "Can't transform models containing nodes with invalid identifiers (type: "+src.edges[i].edgeType+").\n"
@@ -65,7 +65,7 @@ def fromIceToInternal_model(src):
 	return dst
 
 def fromIceToInternal_node(node):
-	return AGMSymbol(node.nodeIdentifier, node.nodeType, [0,0], node.attributes)
+	return AGMSymbol(str(node.nodeIdentifier), node.nodeType, [0,0], node.attributes)
 
 
 #bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMWorldModel::Node &node, AGMModel::SPtr &world)

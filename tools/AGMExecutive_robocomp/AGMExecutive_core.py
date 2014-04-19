@@ -53,23 +53,27 @@ class Executive(threading.Thread):
 		self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
 		print 'read initialmodelpath'
 		self.setModel(xmlModelParser.graphFromXML(initialModelPath))
-		print 'setmission'		
+		print 'setmission'
 		self.setMission(xmlModelParser.graphFromXML(initialMissionPath))
 
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
 	def broadcastModel(self):
-		#print '<<<broadcastinnn'
-		#print '<<<broadcastinnn'
-		#print self.currentModel
-		#print 'broadcastinnn>>>'
-		#print 'broadcastinnn>>>'
-		ev = RoboCompAGMWorldModel.Event()
-		ev.backModel = AGMModelConversion.fromInternalToIce(self.currentModel)
-		ev.newModel = AGMModelConversion.fromInternalToIce(self.currentModel)
-		self.executiveTopic.modelModified(ev)
+		try:
+			print '<<<broadcastinnn'
+			print '<<<broadcastinnn'
+			print self.currentModel
+			ev = RoboCompAGMWorldModel.Event()
+			ev.backModel = AGMModelConversion.fromInternalToIce(self.currentModel)
+			ev.newModel = AGMModelConversion.fromInternalToIce(self.currentModel)
+			self.executiveTopic.modelModified(ev)
+			print 'broadcastinnn>>>'
+			print 'broadcastinnn>>>'
+		except:
+			print 'There was some problem broadcasting'
+			sys.exit(1)
 	def reset(self):
-		self.currentModel = xmlModelParser.graphFromXML(path)
+		self.currentModel = xmlModelParser.graphFromXML(self.initialModel)
 		self.updatePlan()
 	def setModel(self, model):
 		self.currentModel = model

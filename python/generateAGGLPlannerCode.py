@@ -61,11 +61,11 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere):
 				pre += 'not '
 			if newSymbol == link.a:
 				if link.b in alreadyThere:
-					ret += pre + '[n2id["'+link.a + '"],n2id["'+ link.b + '"],"'+link.linkType+'"] in snode.graph.links'
+					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
 					number += 1
 			elif newSymbol == link.b:
 				if link.a in alreadyThere:
-					ret += pre + '[n2id["'+link.a + '"],n2id["'+ link.b + '"],"'+link.linkType+'"] in snode.graph.links'
+					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
 					number += 1
 	return ret, number
 
@@ -265,7 +265,7 @@ def normalRuleImplementation(rule, ret, indent):
 		ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 		ret += indent+"if symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
 		for other in symbols_in_stack:
-			ret += " and symbol_"+n+".name!=symbol_" + other + ".name"
+			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
 		conditions, number = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
 		ret += conditions
 		ret += ":"
@@ -349,7 +349,7 @@ def normalRuleImplementation(rule, ret, indent):
 			ret += indent+"test_symbol_"+n+" = snode.graph.nodes[n2id['"+n+"']]"
 			ret += indent+"if not (test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
 			for other in symbols_in_stack:
-				ret += " and test_symbol_"+n+".name!=test_symbol_" + other + ".name"
+				ret += " and test_symbol_"+n+".name!=test_symbol_" + str(other) + ".name"
 			conditions, number = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
 			ret += conditions
 			ret += "):"
@@ -668,24 +668,26 @@ def CheckTarget(graph):"""
 	#ret += indent+"try:"
 	#indent += "\t"
 	ret += indent+"# Hard score"
-	for n in graph.nodes:
+	for n_n in graph.nodes:
+		n = str(n_n)
+		#print nm 
 		ret += indent+"# "+n
-		if n[0] in "0123456789":
+		if n[0] in "0123456789": # This checks the node is already in the model
 			ret += indent+"symbol_"+n+"_name = '" + n + "'"
-		else:
+		else: # otherwise, we're talking about a variable!
 			ret += indent+"for symbol_"+n+"_name in graph.nodes:"
 			indent += "\t"
 		ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
 		ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
-		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n].sType+"'"
+		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n_n].sType+"'"
 		for other in symbols_in_stack:
-			ret += " and symbol_"+n+".name!=symbol_" + other + ".name"
-		conditions, number = extractNewLinkConditionsFromList(graph.links, n, symbols_in_stack)
+			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
+		conditions, number = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack)
 		conditions = conditions.replace("snode.graph", "graph")
 		conditionsListList.append( [conditions, number] )
 		ret += conditions
 		ret += ":"
-		symbols_in_stack.append(n)
+		symbols_in_stack.append(n_n)
 		indent += "\t"
 		score += scorePerContition
 		ret += indent + "score = " + str(score)

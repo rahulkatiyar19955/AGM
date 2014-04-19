@@ -190,21 +190,28 @@ bool AGMModelSymbol::iterator::operator!=(const iterator &rhs)
 AGMModelSymbol::iterator AGMModelSymbol::iterator::operator++()
 {
 	if (modelRef == NULL) AGMMODELEXCEPTION(std::string("Attempting to use uninitialized iterator!"));
-
+// printf("AGMModelSymbol::iterator +++++++++++ %d (there are %d)\n", index, (int)modelRef->edges.size());
 	// The end can't be incremented
 	if (index == -10)
 		return *this;
 
 	// Now, increment until we reach a related edge
 	const int32_t t=modelRef->edges.size();
-	while (index < t)
+	while (index < t-1)
 	{
 		index++;
+// 		printf("++   (%d)----->(%d)\n", modelRef->edges[index].symbolPair.first, modelRef->edges[index].symbolPair.second);
 		if (modelRef->edges[index].symbolPair.first == symRef->identifier or modelRef->edges[index].symbolPair.second == symRef->identifier)
 		{
+// 			printf("yes\n");
 			return *this;
 		}
+		else
+		{
+// 			printf("nope\n");
+		}
 	}
+// 	printf("wooooooooooooooooo %d   (there are %d)\n", index, (int)modelRef->edges.size());
 	// Didn't find any edge
 	index = -10;
 	return *this;

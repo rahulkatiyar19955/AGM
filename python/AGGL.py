@@ -8,8 +8,8 @@ def distance(x1, y1, x2, y2):
 class AGMSymbol(object):
 	def __init__(self, name, sType, pos=[0,0], attributes=dict()):
 		object.__init__(self)
-		self.name = name
-		self.sType = sType
+		self.name = str(name)
+		self.sType = str(sType)
 		self.pos = pos
 		self.color = 'white'
 		self.attributes = attributes
@@ -262,7 +262,7 @@ class AGMGraph(object):
 
 	def addNode(self, x, y, name, stype, attributes=dict()):
 		if not name in self.nodes.keys():
-			self.nodes[name] = AGMSymbol(name, stype, [x,y], attributes)
+			self.nodes[name] = AGMSymbol(str(name), str(stype), [x,y], attributes)
 	def removeNode(self, x, y, diameter):
 		name, found = self.getName(x, y, diameter)
 		if found:
