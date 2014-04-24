@@ -24,11 +24,13 @@ Ice.loadSlice(preStr+"AGMAgent.ice")
 Ice.loadSlice(preStr+"AGMExecutive.ice")
 Ice.loadSlice(preStr+"AGMWorldModel.ice")
 Ice.loadSlice(preStr+"Speech.ice")
+Ice.loadSlice(preStr+"Planning.ice")
 import RoboCompAGMCommonBehavior
 import RoboCompAGMAgent
 import RoboCompAGMExecutive
 import RoboCompAGMWorldModel
 import RoboCompSpeech
+import RoboCompPlanning
 
 import AGMModelConversion
 
@@ -147,10 +149,27 @@ class Executive(threading.Thread):
 				print 'Can\'t connect to', agent
 
 		# Publish new information using the executiveVisualizationTopic
-		#try
-			#self.executiveVisualizationTopic.update(self.worldModelICE, self.targetModelICE, self.currentSolution)
-		#except:
-			#print "can't publish executiveVisualizationTopic.update"
+		try:
+			planPDDL = RoboCompPlanning.Plan() # Generate a PDDL-like version of the current plan for visualization
+			planPDDL.cost = -2.
+			try:
+				planPDDL.cost = -1.
+				planPDDL.actions = []
+				for step in plan:
+					action = RoboCompPlanning.Action()
+					action.name = step[0]
+					action.symbols = []
+					for ii in step[1]:
+						action.symbols.append(ii+':'+step[1][ii])
+				planPDDL.actions.append(action)
+			except:
+				traceback.print_exc()
+				print 'Error generating PDDL-like version of the current plan'
+			#self.executiveVisualizationTopic.update(AGMModelConversion.fromInternalToIce(self.target), AGMModelConversion.fromInternalToIce(self.target), planPDDL)
+			self.executiveVisualizationTopic.update(self.worldModelICE, AGMModelConversion.fromInternalToIce(self.target), planPDDL)
+		except:
+			traceback.print_exc()
+			print "can't publish executiveVisualizationTopic.update"
 
 	def modificationProposal(self, modification):
 		print 'modificationProposal core'
