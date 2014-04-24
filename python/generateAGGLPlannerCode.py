@@ -672,7 +672,7 @@ def CheckTarget(graph):"""
 		n = str(n_n)
 		#print nm 
 		ret += indent+"# "+n
-		if n[0] in "0123456789": # This checks the node is already in the model
+		if (n[0] in "0123456789") and n in graph.nodes: # This checks the node is already in the model
 			ret += indent+"symbol_"+n+"_name = '" + n + "'"
 		else: # otherwise, we're talking about a variable!
 			ret += indent+"for symbol_"+n+"_name in graph.nodes:"
