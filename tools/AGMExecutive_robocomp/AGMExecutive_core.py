@@ -6,6 +6,9 @@ sys.path.append('/usr/local/share/agm')
 
 from parseAGGL import *
 from generateAGGLPlannerCode import *
+from agglplanner import *
+from agglplanchecker import *
+
 import xmlModelParser
 
 
@@ -38,7 +41,7 @@ class Executive(threading.Thread):
 	def __init__(self, agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech):
 		threading.Thread.__init__(self)
 		self.agents = dict()
-
+		self.plan = None
 		# Set proxies
 		self.executiveTopic = executiveTopic
 		self.executiveVisualizationTopic = executiveVisualizationTopic
@@ -53,7 +56,7 @@ class Executive(threading.Thread):
 		self.agmData.generateAGGLPlannerCode("/tmp/domainPasive.py", skipPassiveRules=True)
 		print 'read initialmodelpath'
 		self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
-		print 'read initialmodelpath'
+		print 'set mission'
 		self.setModel(xmlModelParser.graphFromXML(initialModelPath))
 		print 'setmission'
 		self.setMission(xmlModelParser.graphFromXML(initialMissionPath))
@@ -97,6 +100,24 @@ class Executive(threading.Thread):
 	def updatePlan(self):
 		# Save world
 		self.currentModel.toXML("/tmp/lastWorld.xml")
+
+		# First, try with the current plan
+		if self.plan != None:
+			currentPlanObj = AGGLPlannerPlan(self.plan)
+			forwardPlanObj = currentPlanObj.removeFirstAction()
+			domain = '/tmp/domainActive.py'
+			init   = '/tmp/lastWorld.xml'
+			target = '/tmp/target.py'
+			# First of all, check without the first action of the current plan
+			p = PyPlanChecker(domain, init, forwardPlanObj, target, '')
+			if p.valid:
+				print 'LA VERSION FORWARD FUNCA'
+			# If the forward version does not succeed, check with the current plan
+			else:
+				p = PyPlanChecker(domain, init, currentPlanObj, target, '')
+				if p.valid:
+					print 'LA VERSION ACTUAL FUNCA'
+
 		# Run planner
 		import time
 		print 'done\nRunning the planner...'
@@ -108,8 +129,9 @@ class Executive(threading.Thread):
 		ofile = open("/tmp/result.txt", 'r')
 		lines = self.ignoreCommentsInPlan(ofile.readlines())
 		ofile.close()
-		plan = []
+		self.plan = []
 		if len(lines) == 0:
+			self.plan = None
 			print 'No solutions found!'
 			print 'No solutions found!'
 			print 'No solutions found!'
@@ -119,7 +141,7 @@ class Executive(threading.Thread):
 		action = parts[0]
 		parameterMap = eval(parts[1])
 		print 'action: <'+action+'>  parameters:  <'+str(parameterMap)+'>' 
-		plan.append([action, parameterMap])
+		self.plan.append([action, parameterMap])
 		# Prepare parameters
 		params = dict()
 		params['action'] = RoboCompAGMCommonBehavior.Parameter()
@@ -135,11 +157,7 @@ class Executive(threading.Thread):
 			params[p].editable = False
 			params[p].value = parameterMap[p]
 			params[p].type = 'string'
-		#print params
 		# Send plan
-		print '<<<<<<<<<<<<<<<<<'
-		print params
-		print '>>>>>>>>>>>>>>>>>'
 		print 'Send plan to'
 		for agent in self.agents:
 			try:
@@ -155,7 +173,7 @@ class Executive(threading.Thread):
 			try:
 				planPDDL.cost = -1.
 				planPDDL.actions = []
-				for step in plan:
+				for step in self.plan:
 					action = RoboCompPlanning.Action()
 					action.name = step[0]
 					action.symbols = []

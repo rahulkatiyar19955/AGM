@@ -7,7 +7,7 @@
 #
 #  Almost a free/libre AI planner.
 #
-#  Copyright (C) 2013 by Luis J. Manso
+#  Copyright (C) 2013-2014 by Luis J. Manso
 #
 #  AGGLPlanChecker is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -44,10 +44,12 @@ class PyPlanChecker(object):
 		# Get initial world mdoel
 		self.initWorld  = WorldStateHistory(xmlModelParser.graphFromXML(init))
 		# Get graph rewriting rules
+		print 'domainPath:', domainPath
 		domain = imp.load_source('domain', domainPath)
 		self.domain     = domain.RuleSet()
 		# Get goal-checking code
 		if len(targetPath) > 0:
+			print 'targetPath:', targetPath
 			target = imp.load_source('target', targetPath)
 			self.targetCode = target.CheckTarget
 		# Get plan
@@ -75,6 +77,7 @@ class PyPlanChecker(object):
 			print targetPath
 			# Get result
 			score, achieved = self.targetCode(world.graph)
+			self.valid = achieved
 			
 
 			if achieved:

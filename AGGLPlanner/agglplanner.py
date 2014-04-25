@@ -79,20 +79,35 @@ class AGGLPlannerPlan(object):
 	def __init__(self, init=''):
 		object.__init__(self)
 		self.data = []
-		if len(init)>0:
-			lines = open(init, 'r').readlines()
-			for line_i in range(len(lines)):
-				line = lines[line_i].strip()
-				while len(line)>0:
-					if line[-1]=='\n': line = line[:-1]
-					else: break
-				if len(line)>0:
-					if line[0] != '#':
-						try:
-							self.data.append(AGGLPlannerAction(line))
-						except:
-							if len(line)>0:
-								print 'Error reading plan file', init+". Line", str(line_i)+": <<"+line+">>"
+		
+		if type(init) == type(''): # Read plan from file (assuming we've got a file path)
+				if len(init)>0:
+					lines = open(init, 'r').readlines()
+					for line_i in range(len(lines)):
+						line = lines[line_i].strip()
+						while len(line)>0:
+							if line[-1]=='\n': line = line[:-1]
+							else: break
+						if len(line)>0:
+							if line[0] != '#':
+								try:
+									self.data.append(AGGLPlannerAction(line))
+								except:
+									if len(line)>0:
+										print 'Error reading plan file', init+". Line", str(line_i)+": <<"+line+">>"
+		elif type(init) == type([]):
+			for action in init:
+				self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
+		elif type(init) == type(AGGLPlannerPlan()):
+			self.data = copy.deepcopy(init.data)
+		else:
+			print 'Unknown plan type ('+str(type(init))+')! (internal error)'
+			sys.exit(-321)
+	def removeFirstAction(self):
+		c = AGGLPlannerPlan()
+		for action in self.data[1:]:
+			c.data.append(copy.deepcopy(action))
+		return c
 	def __iter__(self):
 		self.current = -1
 		return self
