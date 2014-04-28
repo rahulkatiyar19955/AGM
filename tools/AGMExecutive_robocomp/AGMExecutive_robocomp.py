@@ -87,8 +87,9 @@ class AGMAgentTopicI (RoboCompAGMAgent.AGMAgentTopic):
 	def __init__(self, _handler):
 		self.handler = _handler
 	def modificationProposal(self, modification, current=None):
-		print 'modificationProposal I'
 		self.handler.modificationProposal(modification)
+	def update(self, nodeModification, current=None):
+		self.handler.updateNode(nodeModification)
 
 from AGMExecutive_core import Executive
 

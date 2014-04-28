@@ -67,13 +67,11 @@ class Executive(threading.Thread):
 	def broadcastModel(self):
 		try:
 			print '<<<broadcastinnn'
-			print '<<<broadcastinnn'
 			print self.currentModel
 			ev = RoboCompAGMWorldModel.Event()
 			ev.backModel = AGMModelConversion.fromInternalToIce(self.currentModel)
 			ev.newModel = AGMModelConversion.fromInternalToIce(self.currentModel)
 			self.executiveTopic.modelModified(ev)
-			print 'broadcastinnn>>>'
 			print 'broadcastinnn>>>'
 		except:
 			print 'There was some problem broadcasting'
@@ -86,6 +84,7 @@ class Executive(threading.Thread):
 		self.broadcastModel()
 	def setMission(self, target):
 		self.target = target
+		self.target.toXML("/tmp/target.xml")
 		targetText = generateTarget(self.target)
 		ofile = open("/tmp/target.py", 'w')
 		ofile.write(targetText)
@@ -107,23 +106,37 @@ class Executive(threading.Thread):
 		if self.plan != None:
 			try:
 				print 'Habia plan previo'
+				print '--'
+				print self.plan
+				print '--'
 				currentPlanObj = AGGLPlannerPlan(self.plan)
 				print '1'
 				forwardPlanObj = currentPlanObj.removeFirstAction()
 				domain = '/tmp/domainActive.py'
 				init   = '/tmp/lastWorld.xml'
 				target = '/tmp/target.py'
-				# First of all, check without the first action of the current plan
-				print '2'
+				print '=============='
+				print 'INITIAL WORLD'
+				print ''.join(open(init).readlines())
+				print '=============='
+				print 'TARGET WORLD'
+				print ''.join(open("/tmp/target.xml").readlines())
+				print '=============='
+				print "First of all, check without the first action of the current plan"
+				print '<<forwardPlanObj<<'
+				print forwardPlanObj
+				print '>>forwardPlanObj>>'
 				p = PyPlanChecker(domain, init, forwardPlanObj, target, '')
 				print '3'
 				if p.valid:
 					stored = True
 					plan = forwardPlanObj
 					print 'LA VERSION FORWARD FUNCA'
-				# If the forward version does not succeed, check with the current plan
 				else:
-					print '4'
+					print "If the forward version does not succeed, check with the current plan"
+					print '<<currentPlanObj<<'
+					print currentPlanObj
+					print '>>currentPlanObj>>'
 					p = PyPlanChecker(domain, init, currentPlanObj, target, '')
 					print '5'
 					if p.valid:
@@ -132,6 +145,8 @@ class Executive(threading.Thread):
 						print 'LA VERSION ACTUAL FUNCA'
 			except:
 				stored = False
+		else:
+			print 'No habia plan previo'
 
 		if stored == False:
 			# Run planner
@@ -153,14 +168,31 @@ class Executive(threading.Thread):
 				print 'No solutions found!'
 				return
 		else:
-			lines = str(plan)
+			print 'Got plan from monitorization'
+			self.plan = str(plan)
+			lines = self.plan
+			print 'Got plan from monitorization'
 
-		line = lines[0]
-		parts = line.split("@")
-		action = parts[0]
-		parameterMap = eval(parts[1])
+		print 'LINES'
+		for a in lines:
+			print a
+			parts = a.split("@")
+			print parts
+			action = parts[0]
+			parameterMap = eval(parts[1])
+			self.plan.append([action, parameterMap])
+
+		print "<<", lines, ">>"
+		if len(lines) > 0:
+			line = lines[0]
+			parts = line.split("@")
+			action = parts[0]
+			parameterMap = eval(parts[1])
+		else:
+			action = "none"
+			parameterMap = dict()
+			
 		print 'action: <'+action+'>  parameters:  <'+str(parameterMap)+'>' 
-		self.plan.append([action, parameterMap])
 		# Prepare parameters
 		params = dict()
 		params['action'] = RoboCompAGMCommonBehavior.Parameter()
@@ -208,6 +240,9 @@ class Executive(threading.Thread):
 			print "can't publish executiveVisualizationTopic.update"
 
 	def modificationProposal(self, modification):
+		print ''
+		print ''
+		print 'modificationProposal core'
 		print 'modificationProposal core'
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
@@ -220,5 +255,10 @@ class Executive(threading.Thread):
 		self.setModel(AGMModelConversion.fromIceToInternal_model(self.worldModelICE))
 		self.updatePlan()
 
-
-
+	def update(self, nodeModification):
+		print ''
+		print ''
+		print 'node update core'
+		print 'node update core'
+		internal = AGMModelConversion.fromIceToInternal_node(nodeModification)
+		self.currentModel[internal.identifier] = copy.deepcopy(internal)
