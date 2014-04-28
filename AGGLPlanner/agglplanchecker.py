@@ -56,10 +56,14 @@ class PyPlanChecker(object):
 		self.plan = AGGLPlannerPlan(planPath)
 		
 		# Apply plan
+		print "PyPlanChecker applying plan"
 		try:
 			world = copy.deepcopy(self.initWorld)
 			print world
 			line = 0
+			print '<<plan'
+			print self.plan
+			print 'plan>>'
 			for action in self.plan:
 				print 'Executing action', line 
 				line += 1
@@ -73,27 +77,23 @@ class PyPlanChecker(object):
 				world.graph.toXML('after_plan_step'+str(line)+".xml")
 
 			print 'Done executing actions. Let\'s see what we\'ve got (computing score and checking if the goal was achieved).'
-
 			print targetPath
 			# Get result
 			score, achieved = self.targetCode(world.graph)
 			self.valid = achieved
-			
-
 			if achieved:
 				print 'GOAL ACHIEVED'
 				for action in self.plan:
 					print action
 			else:
 				print 'Not achieved (didn\'t get to the goal)'
-
+				print world
 		except WrongRuleExecution, e:
 			print 'Invalid rule execution', action
 			print 'Rule: ', e
 			print 'Line: ', line
 			print 'Not achieved'
 			traceback.print_exc()
-		
 		except:
 			print 'Not achieved (error)'
 			traceback.print_exc()

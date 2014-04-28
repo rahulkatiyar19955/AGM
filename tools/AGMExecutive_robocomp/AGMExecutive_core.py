@@ -58,6 +58,7 @@ class Executive(threading.Thread):
 		self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
 		print 'set mission'
 		self.setModel(xmlModelParser.graphFromXML(initialModelPath))
+		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 		print 'setmission'
 		self.setMission(xmlModelParser.graphFromXML(initialMissionPath))
 
@@ -102,40 +103,58 @@ class Executive(threading.Thread):
 		self.currentModel.toXML("/tmp/lastWorld.xml")
 
 		# First, try with the current plan
+		stored = False
 		if self.plan != None:
-			currentPlanObj = AGGLPlannerPlan(self.plan)
-			forwardPlanObj = currentPlanObj.removeFirstAction()
-			domain = '/tmp/domainActive.py'
-			init   = '/tmp/lastWorld.xml'
-			target = '/tmp/target.py'
-			# First of all, check without the first action of the current plan
-			p = PyPlanChecker(domain, init, forwardPlanObj, target, '')
-			if p.valid:
-				print 'LA VERSION FORWARD FUNCA'
-			# If the forward version does not succeed, check with the current plan
-			else:
-				p = PyPlanChecker(domain, init, currentPlanObj, target, '')
+			try:
+				print 'Habia plan previo'
+				currentPlanObj = AGGLPlannerPlan(self.plan)
+				print '1'
+				forwardPlanObj = currentPlanObj.removeFirstAction()
+				domain = '/tmp/domainActive.py'
+				init   = '/tmp/lastWorld.xml'
+				target = '/tmp/target.py'
+				# First of all, check without the first action of the current plan
+				print '2'
+				p = PyPlanChecker(domain, init, forwardPlanObj, target, '')
+				print '3'
 				if p.valid:
-					print 'LA VERSION ACTUAL FUNCA'
+					stored = True
+					plan = forwardPlanObj
+					print 'LA VERSION FORWARD FUNCA'
+				# If the forward version does not succeed, check with the current plan
+				else:
+					print '4'
+					p = PyPlanChecker(domain, init, currentPlanObj, target, '')
+					print '5'
+					if p.valid:
+						stored = True
+						plan = currentPlanObj
+						print 'LA VERSION ACTUAL FUNCA'
+			except:
+				stored = False
 
-		# Run planner
-		import time
-		print 'done\nRunning the planner...'
-		start = time.time()
-		subprocess.call(["agglplanner", "/tmp/domainActive.py", "/tmp/lastWorld.xml", "/tmp/target.py", "/tmp/result.txt"])
-		end = time.time()
-		print 'It took', end - start, 'seconds'
-		# Get the output
-		ofile = open("/tmp/result.txt", 'r')
-		lines = self.ignoreCommentsInPlan(ofile.readlines())
-		ofile.close()
-		self.plan = []
-		if len(lines) == 0:
-			self.plan = None
-			print 'No solutions found!'
-			print 'No solutions found!'
-			print 'No solutions found!'
-			return
+		if stored == False:
+			# Run planner
+			import time
+			print 'done\nRunning the planner...'
+			start = time.time()
+			subprocess.call(["agglplanner", "/tmp/domainActive.py", "/tmp/lastWorld.xml", "/tmp/target.py", "/tmp/result.txt"])
+			end = time.time()
+			print 'It took', end - start, 'seconds'
+			# Get the output
+			ofile = open("/tmp/result.txt", 'r')
+			lines = self.ignoreCommentsInPlan(ofile.readlines())
+			ofile.close()
+			self.plan = []
+			if len(lines) == 0:
+				self.plan = None
+				print 'No solutions found!'
+				print 'No solutions found!'
+				print 'No solutions found!'
+				return
+		else:
+			lines = str(plan)
+
 		line = lines[0]
 		parts = line.split("@")
 		action = parts[0]
@@ -183,7 +202,6 @@ class Executive(threading.Thread):
 			except:
 				traceback.print_exc()
 				print 'Error generating PDDL-like version of the current plan'
-			#self.executiveVisualizationTopic.update(AGMModelConversion.fromInternalToIce(self.target), AGMModelConversion.fromInternalToIce(self.target), planPDDL)
 			self.executiveVisualizationTopic.update(self.worldModelICE, AGMModelConversion.fromInternalToIce(self.target), planPDDL)
 		except:
 			traceback.print_exc()

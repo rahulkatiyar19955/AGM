@@ -82,6 +82,7 @@ class AGGLPlannerPlan(object):
 		
 		if type(init) == type(''): # Read plan from file (assuming we've got a file path)
 				if len(init)>0:
+					print 'AGGLPlannerPlan("FROM FILE")'
 					lines = open(init, 'r').readlines()
 					for line_i in range(len(lines)):
 						line = lines[line_i].strip()
@@ -95,15 +96,21 @@ class AGGLPlannerPlan(object):
 								except:
 									if len(line)>0:
 										print 'Error reading plan file', init+". Line", str(line_i)+": <<"+line+">>"
+				else:
+					print 'AGGLPlannerPlan("EMPTY")'
 		elif type(init) == type([]):
+			print 'AGGLPlannerPlan("COPY []")'
 			for action in init:
 				self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
 		elif type(init) == type(AGGLPlannerPlan()):
+			print 'AGGLPlannerPlan("COPY class")'
 			self.data = copy.deepcopy(init.data)
 		else:
 			print 'Unknown plan type ('+str(type(init))+')! (internal error)'
 			sys.exit(-321)
 	def removeFirstAction(self):
+		print 'Removing first action from a plan of ', len(self.data), 'actions'
+		print 'create temporary empty plan'
 		c = AGGLPlannerPlan()
 		for action in self.data[1:]:
 			c.data.append(copy.deepcopy(action))
@@ -117,7 +124,14 @@ class AGGLPlannerPlan(object):
 			raise StopIteration
 		else:
 			return self.data[self.current]
-	
+	def __repr__(self):
+		return self.graph.__str__()
+	def __str__(self):
+		ret = ''
+		for a in self.data:
+			ret += a.__str__()
+		return ret
+
 class WorldStateHistory(object):
 	def __init__(self, init):
 		object.__init__(self)
