@@ -129,7 +129,7 @@ class AGGLPlannerPlan(object):
 	def __str__(self):
 		ret = ''
 		for a in self.data:
-			ret += a.__str__()
+			ret += a.__str__() + '\n'
 		return ret
 
 class WorldStateHistory(object):

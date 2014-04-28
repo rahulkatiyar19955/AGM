@@ -59,6 +59,7 @@ class Executive(threading.Thread):
 		print 'set mission'
 		self.setModel(xmlModelParser.graphFromXML(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
+		self.backModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 		print 'setmission'
 		self.setMission(xmlModelParser.graphFromXML(initialMissionPath))
 
@@ -69,9 +70,10 @@ class Executive(threading.Thread):
 			print '<<<broadcastinnn'
 			print self.currentModel
 			ev = RoboCompAGMWorldModel.Event()
-			ev.backModel = AGMModelConversion.fromInternalToIce(self.currentModel)
+			ev.backModel = self.backModelICE
 			ev.newModel = AGMModelConversion.fromInternalToIce(self.currentModel)
 			self.executiveTopic.modelModified(ev)
+			self.backModel = AGMModelConversion.fromInternalToIce(self.currentModel)
 			print 'broadcastinnn>>>'
 		except:
 			print 'There was some problem broadcasting'
@@ -169,7 +171,7 @@ class Executive(threading.Thread):
 				return
 		else:
 			print 'Got plan from monitorization'
-			self.plan = str(plan)
+			self.plan = str(plan).split("\n")
 			lines = self.plan
 			print 'Got plan from monitorization'
 
