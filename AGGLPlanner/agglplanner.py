@@ -76,14 +76,18 @@ class AGGLPlannerAction(object):
 		return self.name+'@'+str(self.parameters)
 
 class AGGLPlannerPlan(object):
-	def __init__(self, init=''):
+	def __init__(self, init='', direct=False):
 		object.__init__(self)
 		self.data = []
 		
 		if type(init) == type(''): # Read plan from file (assuming we've got a file path)
 				if len(init)>0:
-					print 'AGGLPlannerPlan("FROM FILE")'
-					lines = open(init, 'r').readlines()
+					if direct:
+						print 'AGGLPlannerPlan("FROM STRING")'
+						lines = init.split("\n")
+					else:
+						print 'AGGLPlannerPlan("FROM FILE")'
+						lines = open(init, 'r').readlines()
 					for line_i in range(len(lines)):
 						line = lines[line_i].strip()
 						while len(line)>0:
@@ -131,6 +135,8 @@ class AGGLPlannerPlan(object):
 		for a in self.data:
 			ret += a.__str__() + '\n'
 		return ret
+	def __len__(self):
+		return len(self.data)
 
 class WorldStateHistory(object):
 	def __init__(self, init):

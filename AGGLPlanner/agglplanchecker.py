@@ -93,10 +93,10 @@ class PyPlanChecker(object):
 			print 'Rule: ', e
 			print 'Line: ', line
 			print 'Not achieved'
-			traceback.print_exc()
+			#traceback.print_exc()
 		except:
 			print 'Not achieved (error)'
-			traceback.print_exc()
+			#traceback.print_exc()
 
 
 		if resultPath!='':

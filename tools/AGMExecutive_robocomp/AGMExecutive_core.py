@@ -37,9 +37,31 @@ import RoboCompPlanning
 
 import AGMModelConversion
 
+#ret, stepsFwd, planMonitoring = 
+def AGMExecutiveMonitoring(domain, init, target, plan, stepsFwd=0):
+	currentPlan = AGGLPlannerPlan(self.plan)
+	forwardPlan = currentPlan.removeFirstAction()
+
+	ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domain, init, target, forwardPlan, stepsFwd+1)
+	if ret2:
+		return ret2, stepsFwd2, planMonitoring2
+	else:
+		try:
+			p = PyPlanChecker(domain, init, currentPlan, target, '')
+			if p.valid:
+				print 'GOT PLAN FROM MONITORING!!!'
+				print currentPlan
+				return True, stepsFwd, currentPlan
+		except:
+			return False, 0, None
+
+
+
+
 class Executive(threading.Thread):
 	def __init__(self, agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech):
 		threading.Thread.__init__(self)
+		self.mutex = threading.RLock()
 		self.agents = dict()
 		self.plan = None
 		# Set proxies
@@ -66,7 +88,7 @@ class Executive(threading.Thread):
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
 	def broadcastModel(self):
-		#try:
+		try:
 			print '<<<broadcastinnn'
 			print self.currentModel
 			ev = RoboCompAGMWorldModel.Event()
@@ -78,9 +100,9 @@ class Executive(threading.Thread):
 			self.executiveTopic.modelModified(ev)
 			self.backModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 			print 'broadcastinnn>>>'
-		#except:
-			#print 'There was some problem broadcasting'
-			#sys.exit(1)
+		except:
+			print 'There was some problem broadcasting'
+			sys.exit(1)
 	def reset(self):
 		self.currentModel = xmlModelParser.graphFromXML(self.initialModel)
 		self.updatePlan()
@@ -110,44 +132,14 @@ class Executive(threading.Thread):
 		stored = False
 		if self.plan != None:
 			try:
-				print 'Habia plan previo'
-				print '--'
-				print self.plan
-				print '--'
-				currentPlanObj = AGGLPlannerPlan(self.plan)
-				print '1'
-				forwardPlanObj = currentPlanObj.removeFirstAction()
 				domain = '/tmp/domainActive.py'
 				init   = '/tmp/lastWorld.xml'
 				target = '/tmp/target.py'
-				print '=============='
-				print 'INITIAL WORLD'
-				print ''.join(open(init).readlines())
-				print '=============='
-				print 'TARGET WORLD'
-				print ''.join(open("/tmp/target.xml").readlines())
-				print '=============='
-				print "First of all, check without the first action of the current plan"
-				print '<<forwardPlanObj<<'
-				print forwardPlanObj
-				print '>>forwardPlanObj>>'
-				p = PyPlanChecker(domain, init, forwardPlanObj, target, '')
-				print '3'
-				if p.valid:
+				ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(domain, init, target, AGGLPlannerPlan(self.plan))
+				if ret:
+					print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
 					stored = True
-					plan = forwardPlanObj
-					print 'LA VERSION FORWARD FUNCA'
-				else:
-					print "If the forward version does not succeed, check with the current plan"
-					print '<<currentPlanObj<<'
-					print currentPlanObj
-					print '>>currentPlanObj>>'
-					p = PyPlanChecker(domain, init, currentPlanObj, target, '')
-					print '5'
-					if p.valid:
-						stored = True
-						plan = currentPlanObj
-						print 'LA VERSION ACTUAL FUNCA'
+					self.plan = planMonitoring
 			except:
 				stored = False
 		else:
@@ -165,7 +157,7 @@ class Executive(threading.Thread):
 			ofile = open("/tmp/result.txt", 'r')
 			lines = self.ignoreCommentsInPlan(ofile.readlines())
 			ofile.close()
-			self.plan = []
+			self.plan = AGGLPlannerPlan('\n'.join(lines), direct=True)
 			if len(lines) == 0:
 				self.plan = None
 				print 'No solutions found!'
@@ -174,28 +166,17 @@ class Executive(threading.Thread):
 				return
 		else:
 			print 'Got plan from monitorization'
-			self.plan = str(plan).split("\n")
-			lines = self.plan
+			print 'plan'
+			print self.plan
+			print 'plan'
 			print 'Got plan from monitorization'
 
-		print 'LINES'
-		for a in lines:
-			print a
-			parts = a.split("@")
-			print parts
-			action = parts[0]
-			parameterMap = eval(parts[1])
-			self.plan.append([action, parameterMap])
-
-		print "<<", lines, ">>"
-		if len(lines) > 0:
-			line = lines[0]
-			parts = line.split("@")
-			action = parts[0]
-			parameterMap = eval(parts[1])
-		else:
-			action = "none"
-			parameterMap = dict()
+		# Extract first action
+		action = "none"
+		parameterMap = dict()
+		if len(self.plan) > 0:
+			action = self.plan.data[0].name
+			parameterMap = self.plan.data[0].parameters
 			
 		print 'action: <'+action+'>  parameters:  <'+str(parameterMap)+'>' 
 		# Prepare parameters
@@ -206,7 +187,7 @@ class Executive(threading.Thread):
 		params['action'].type = 'string'
 		params['plan'] = RoboCompAGMCommonBehavior.Parameter()
 		params['plan'].editable = False
-		params['plan'].value = '\n'.join(lines)
+		params['plan'].value = str(self.plan)
 		params['plan'].type = 'string'
 		for p in parameterMap.keys():
 			params[p] = RoboCompAGMCommonBehavior.Parameter()
@@ -224,6 +205,7 @@ class Executive(threading.Thread):
 
 		# Publish new information using the executiveVisualizationTopic
 		try:
+			print self.plan
 			planPDDL = RoboCompPlanning.Plan() # Generate a PDDL-like version of the current plan for visualization
 			planPDDL.cost = -2.
 			try:
@@ -231,11 +213,9 @@ class Executive(threading.Thread):
 				planPDDL.actions = []
 				for step in self.plan:
 					action = RoboCompPlanning.Action()
-					action.name = step[0]
-					action.symbols = []
-					for ii in step[1]:
-						action.symbols.append(ii+':'+step[1][ii])
-				planPDDL.actions.append(action)
+					action.name = step.name
+					action.symbols = str(step.parameters).translate(None, '{}').split(',')
+					planPDDL.actions.append(action)
 			except:
 				traceback.print_exc()
 				print 'Error generating PDDL-like version of the current plan'
