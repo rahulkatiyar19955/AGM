@@ -39,65 +39,64 @@ from generateAGGLPlannerCode import *
 
 
 class PyPlanChecker(object):
-	def __init__(self, domainPath, init, planPath, targetPath, resultPath=''):
+	def __init__(self, domainPath, init, planPath, targetPath, resultPath='', verbose=True):
 		object.__init__(self)
 		# Get initial world mdoel
 		self.initWorld  = WorldStateHistory(xmlModelParser.graphFromXML(init))
 		# Get graph rewriting rules
-		print 'domainPath:', domainPath
+		if verbose: print 'domainPath:', domainPath
 		domain = imp.load_source('domain', domainPath)
 		self.domain     = domain.RuleSet()
 		# Get goal-checking code
 		if len(targetPath) > 0:
-			print 'targetPath:', targetPath
+			if verbose: print 'targetPath:', targetPath
 			target = imp.load_source('target', targetPath)
 			self.targetCode = target.CheckTarget
 		# Get plan
 		self.plan = AGGLPlannerPlan(planPath)
 		
 		# Apply plan
-		print "PyPlanChecker applying plan"
+		if verbose: print "PyPlanChecker applying plan"
 		try:
 			world = copy.deepcopy(self.initWorld)
-			print world
+			if verbose: print world
 			line = 0
-			print '<<plan'
-			print self.plan
-			print 'plan>>'
+			if verbose: print '<<plan'
+			if verbose: print self.plan
+			if verbose: print 'plan>>'
 			for action in self.plan:
-				print 'Executing action', line 
+				if verbose: print 'Executing action', line 
 				line += 1
-				print action
+				if verbose: print action
 				for p in action.parameters.keys():
 					if not action.parameters[p] in world.graph.nodes.keys():
 						raise WrongRuleExecution("Parameter '"+action.parameters[p]+"' (variable '"+p+"') doesn't exists in the current world model.")
 				world = self.domain.getTriggers()[action.name](world, action.parameters, checked=False)
-				print 'result:'
-				print world
+				if verbose: print 'result:'
+				if verbose: print world
 				world.graph.toXML('after_plan_step'+str(line)+".xml")
 
-			print 'Done executing actions. Let\'s see what we\'ve got (computing score and checking if the goal was achieved).'
-			print targetPath
+			if verbose: print 'Done executing actions. Let\'s see what we\'ve got (computing score and checking if the goal was achieved).'
+			if verbose: print targetPath
 			# Get result
 			score, achieved = self.targetCode(world.graph)
 			self.valid = achieved
 			if achieved:
-				print 'GOAL ACHIEVED'
+				if verbose: print 'GOAL ACHIEVED'
 				for action in self.plan:
-					print action
+					if verbose: print action
 			else:
-				print 'Not achieved (didn\'t get to the goal)'
-				print world
+				if verbose: print 'Not achieved (didn\'t get to the goal)'
+				if verbose: print world
 		except WrongRuleExecution, e:
-			print 'Invalid rule execution', action
-			print 'Rule: ', e
-			print 'Line: ', line
-			print 'Not achieved'
+			if verbose: print 'Invalid rule execution', action
+			if verbose: print 'Rule: ', e
+			if verbose: print 'Line: ', line
+			if verbose: print 'Not achieved'
 			#traceback.print_exc()
 		except:
-			print 'Not achieved (error)'
+			if verbose: print 'Not achieved (error)'
 			#traceback.print_exc()
-
 
 		if resultPath!='':
 			world.graph.toXML(resultPath)

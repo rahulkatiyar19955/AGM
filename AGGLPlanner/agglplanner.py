@@ -83,10 +83,10 @@ class AGGLPlannerPlan(object):
 		if type(init) == type(''): # Read plan from file (assuming we've got a file path)
 				if len(init)>0:
 					if direct:
-						print 'AGGLPlannerPlan("FROM STRING")'
+						#print 'AGGLPlannerPlan("FROM STRING")'
 						lines = init.split("\n")
 					else:
-						print 'AGGLPlannerPlan("FROM FILE")'
+						#print 'AGGLPlannerPlan("FROM FILE")'
 						lines = open(init, 'r').readlines()
 					for line_i in range(len(lines)):
 						line = lines[line_i].strip()
@@ -101,20 +101,19 @@ class AGGLPlannerPlan(object):
 									if len(line)>0:
 										print 'Error reading plan file', init+". Line", str(line_i)+": <<"+line+">>"
 				else:
-					print 'AGGLPlannerPlan("EMPTY")'
+					pass
+					#print 'AGGLPlannerPlan("EMPTY")'
 		elif type(init) == type([]):
-			print 'AGGLPlannerPlan("COPY []")'
+			#print 'AGGLPlannerPlan("COPY []")'
 			for action in init:
 				self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
 		elif type(init) == type(AGGLPlannerPlan()):
-			print 'AGGLPlannerPlan("COPY class")'
+			#print 'AGGLPlannerPlan("COPY class")'
 			self.data = copy.deepcopy(init.data)
 		else:
 			print 'Unknown plan type ('+str(type(init))+')! (internal error)'
 			sys.exit(-321)
 	def removeFirstAction(self):
-		print 'Removing first action from a plan of ', len(self.data), 'actions'
-		print 'create temporary empty plan'
 		c = AGGLPlannerPlan()
 		for action in self.data[1:]:
 			c.data.append(copy.deepcopy(action))

@@ -39,22 +39,39 @@ import AGMModelConversion
 
 #ret, stepsFwd, planMonitoring = 
 def AGMExecutiveMonitoring(domain, init, target, plan, stepsFwd=0):
-	currentPlan = AGGLPlannerPlan(self.plan)
-	forwardPlan = currentPlan.removeFirstAction()
+	try:
+		currentPlan = AGGLPlannerPlan(plan)
+	except:
+		traceback.print_exc()
+		sys.exit(134)
 
-	ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domain, init, target, forwardPlan, stepsFwd+1)
-	if ret2:
-		return ret2, stepsFwd2, planMonitoring2
-	else:
-		try:
-			p = PyPlanChecker(domain, init, currentPlan, target, '')
-			if p.valid:
-				print 'GOT PLAN FROM MONITORING!!!'
-				print currentPlan
-				return True, stepsFwd, currentPlan
-		except:
-			return False, 0, None
-
+	try:
+		ret2 = False
+		if len(currentPlan)>0:
+			try:
+				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domain, init, target, currentPlan.removeFirstAction(), stepsFwd+1)
+			except:
+				traceback.print_exc()
+				ret2 = False
+		if ret2:
+			#print 'ok'
+			return ret2, stepsFwd2, planMonitoring2
+		else:
+			try:
+				#print 'try with', stepsFwd
+				p = PyPlanChecker(domain, init, currentPlan, target, '', verbose=False)
+				if p.valid:
+					print 'GOT PLAN FROM MONITORING!!!'
+					print currentPlan
+					return True, stepsFwd, currentPlan
+				else:
+					#print stepsFwd, 'doesn\'t work'
+					return False, 0, None
+			except:
+				return False, 0, None
+	except:
+		sys.exit(4991)
+	sys.exit(692)
 
 
 
@@ -131,15 +148,23 @@ class Executive(threading.Thread):
 		# First, try with the current plan
 		stored = False
 		if self.plan != None:
+			print 'Trying with the last steps of the current plan...'
+			domain = '/tmp/domainActive.py'
+			init   = '/tmp/lastWorld.xml'
+			target = '/tmp/target.py'
 			try:
-				domain = '/tmp/domainActive.py'
-				init   = '/tmp/lastWorld.xml'
-				target = '/tmp/target.py'
+				print '<<<Call Monitoring'
+				print '<<<Call Monitoring'
+				print self.plan
+				print '   Call Monitoring>>>'
+				print '   Call Monitoring>>>'
 				ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(domain, init, target, AGGLPlannerPlan(self.plan))
 				if ret:
 					print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
 					stored = True
 					self.plan = planMonitoring
+				else:
+					print 'No modified version of the current plan satisfies the goal. Replanning is necessary.'
 			except:
 				stored = False
 		else:
@@ -148,7 +173,7 @@ class Executive(threading.Thread):
 		if stored == False:
 			# Run planner
 			import time
-			print 'done\nRunning the planner...'
+			print 'Running the planner...'
 			start = time.time()
 			subprocess.call(["agglplanner", "/tmp/domainActive.py", "/tmp/lastWorld.xml", "/tmp/target.py", "/tmp/result.txt"])
 			end = time.time()
@@ -225,10 +250,6 @@ class Executive(threading.Thread):
 			print "can't publish executiveVisualizationTopic.update"
 
 	def modificationProposal(self, modification):
-		print ''
-		print ''
-		print 'modificationProposal core'
-		print 'modificationProposal core'
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
@@ -240,10 +261,7 @@ class Executive(threading.Thread):
 		self.setModel(AGMModelConversion.fromIceToInternal_model(self.worldModelICE))
 		self.updatePlan()
 
-	def update(self, nodeModification):
-		print ''
-		print ''
-		print 'node update core'
-		print 'node update core'
+	def updateNode(self, nodeModification):
 		internal = AGMModelConversion.fromIceToInternal_node(nodeModification)
-		self.currentModel[internal.identifier] = copy.deepcopy(internal)
+		self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
+		self.executiveTopic.modelUpdated(nodeModification)		
