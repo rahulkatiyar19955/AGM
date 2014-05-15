@@ -40,7 +40,7 @@ if len(ROBOCOMP)<1:
 	sys.exit()
 
 
-preStr = "-I"+ROBOCOMP+"/Interfaces/ --all "+ROBOCOMP+"/Interfaces/"
+preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
 Ice.loadSlice(preStr+"AGMCommonBehavior.ice")
 Ice.loadSlice(preStr+"AGMAgent.ice")
 Ice.loadSlice(preStr+"AGMExecutive.ice")

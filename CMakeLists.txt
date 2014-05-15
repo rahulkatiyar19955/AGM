@@ -96,7 +96,7 @@ link_directories(${PYTHON_LIBRARIES})
 # RoboComp support
 if (ROBOCOMP_SUPPORT)
 	MESSAGE(STATUS "ROBOCOMP PATH:        $ENV{ROBOCOMP}")
-	INCLUDE( $ENV{ROBOCOMP}/CMake/robocomp.cmake )
+	INCLUDE( $ENV{ROBOCOMP}/cmake/robocomp.cmake )
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 	SET(ICE_LIBS -lIce)
 	ROBOCOMP_WRAP_ICE( AGMWorldModel )
