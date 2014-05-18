@@ -185,14 +185,18 @@ class Server (Ice.Application):
 			agentConfigs = self.communicator().getProperties().getProperty( "AGENTS" ).split(',')
 			for agent in agentConfigs:
 				proxy = self.communicator().getProperties().getProperty(agent)
-				behavior_proxy = RoboCompAGMCommonBehavior.AGMCommonBehaviorPrx.uncheckedCast(self.communicator().stringToProxy(proxy))
-				if not behavior_proxy:
-					print parameters.agents[i].c_str()
-					print parameters.agents[i].c_str()
-					print "Error loading behavior proxy!"
-					sys.exit(1)
-				executive.setAgent(agent,  behavior_proxy)
-				print "Agent" , agent, "initialized ok"
+				if len(proxy)==0:
+					behavior_proxy = RoboCompAGMCommonBehavior.AGMCommonBehaviorPrx.uncheckedCast(self.communicator().stringToProxy(proxy))
+					if not behavior_proxy:
+						print agentConfigs
+						print parameters.agents[i].c_str()
+						print parameters.agents[i].c_str()
+						print "Error loading behavior proxy!"
+						sys.exit(1)
+					executive.setAgent(agent,  behavior_proxy)
+					print "Agent" , agent, "initialized ok"
+				else:
+					print 'Agent', agent, 'was not properly configured. Check config file'
 
 
 			# Subscribe to AGMAgentTopic
