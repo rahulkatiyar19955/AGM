@@ -156,48 +156,26 @@ WRAP_PYTHON_UI( guiAGGLEditor guiGraphViewer appearance )
 WRAP_PYTHON_QRC( resource )
 
 
-# # COMPILE FLEX AND BISON FILE FOR THE AGGL PARSER #
-# ###################################################
-# # Create target for the parser
-# ADD_CUSTOM_TARGET(AGGLParser echo "Creating agglparser.cpp")
-# ADD_CUSTOM_COMMAND(
-#   SOURCE libagm/aggllexer.l
-#   COMMAND flex
-#   ARGS --outfile=libagm/aggllexer.cpp libagm/aggllexer.l
-#   OUTPUT libagm/aggllexer.cpp
-# )
-#  ADD_CUSTOM_COMMAND(
-#    SOURCE libagm/agglparser.y
-#    COMMAND bison
-#    ARGS -d -y libagm/agglparser.y -o libagm/agglparser.cpp
-#    DEPENDS libagm/aggllexer.cpp
-#    OUTPUT libagm/agglparser.cpp libagm/agglparser.hpp
-# )
-# SET_SOURCE_FILES_PROPERTIES(libagm/agglparser.cpp GENERATED) 
-# SET_SOURCE_FILES_PROPERTIES(libagm/aggllexer.cpp GENERATED) 
-# SET(AGM_CODE ${AGM_CODE} libagm/aggllexer.cpp libagm/agglparser.cpp)
-# SET(LIBS ${LIBS} -lfl )
-
-
 #  Library building  #
 ######################
 if (ROBOCOMP_SUPPORT)
    add_library(agmdummy SHARED AGMWorldModel.cpp AGMAgent.cpp )
+   set(ROBOCOMP_ADDITIONAL_SRC AGMAgent.cpp)
 endif (ROBOCOMP_SUPPORT)
 
 add_library(agm SHARED ${AGM_CODE} ${XMLVIEWER3D_MOCS} )
 target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES} ${OSG_LIBS} ${QT_LIBRARIES} )
 add_dependencies(agm agmdummy)
 
-add_executable ( testagm tools/testagm.cpp AGMAgent.cpp )
+add_executable ( testagm tools/testagm.cpp ${ROBOCOMP_ADDITIONAL_SRC} )
 target_link_libraries ( testagm agm -L. -L.. -lagm ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
-add_executable ( agm_xml2pddlProblem tools/agm_xml2pddlProblem.cpp AGMAgent.cpp )
+add_executable ( agm_xml2pddlProblem tools/agm_xml2pddlProblem.cpp ${ROBOCOMP_ADDITIONAL_SRC} )
 target_link_libraries ( agm_xml2pddlProblem agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
-add_executable ( agm_xmlViewer3D tools/agm_xmlViewer3D.cpp AGMAgent.cpp )
+add_executable ( agm_xmlViewer3D tools/agm_xmlViewer3D.cpp ${ROBOCOMP_ADDITIONAL_SRC} )
 target_link_libraries ( agm_xmlViewer3D agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
@@ -209,11 +187,11 @@ add_dependencies(testagm agm)
 find_package(Doxygen)
 if(DOXYGEN_FOUND)
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
-  add_custom_target(doc
-  ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
-  WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-  COMMENT "Generating API documentation with Doxygen" VERBATIM
-)
+  add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating API documentation with Doxygen"
+    VERBATIM
+  )
 endif(DOXYGEN_FOUND)
 
 
