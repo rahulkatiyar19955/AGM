@@ -1,4 +1,5 @@
 #include <agm_misc_functions.h>
+#include <agm_modelConverter.h>
 
 #include <algorithm>
 
@@ -54,3 +55,16 @@ std::string int2str(const int32_t &i)
 }
 
 
+#if ROBOCOMP_SUPPORT == 1
+namespace AGMMisc
+{
+	void publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel)
+	{
+		RoboCompAGMWorldModel::Event e;
+		AGMModelConverter::fromInternalToIce(oldModel, e.backModel);
+		AGMModelConverter::fromInternalToIce(newModel, e.newModel);
+		agmagenttopic->modificationProposal(e);
+
+	}
+}
+#endif

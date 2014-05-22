@@ -1,10 +1,10 @@
 #!/bin/sh
 
-rm -rf html/*
 cd ..
+rm -rf html/*
 make doc
 cd doc
-cp tabs.css html/tabs.css
-cp AGGLEditor.png html/AGGLEditor.png
-cp AGGLEditor_A.png html/AGGLEditor_A.png
+cp doc/tabs.css html/tabs.css
+cp doc/AGGLEditor.png html/AGGLEditor.png
+cp doc/AGGLEditor_A.png html/AGGLEditor_A.png
 

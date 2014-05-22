@@ -28,6 +28,5 @@ while [ "$finished" = "" ]; do
 done
 
 cmake . -DROBOCOMP_SUPPORT=${ROBOCOMP_SUPPORT} -DPYTHON_BINDINGS=${PYTHON_BINDINGS}
-make
-sudo make install
+make && sudo make install
 

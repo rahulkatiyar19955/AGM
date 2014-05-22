@@ -99,7 +99,7 @@ if (ROBOCOMP_SUPPORT)
 	INCLUDE( $ENV{ROBOCOMP}/cmake/robocomp.cmake )
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 	SET(ICE_LIBS -lIce)
-	ROBOCOMP_WRAP_ICE( AGMWorldModel )
+	ROBOCOMP_WRAP_ICE( AGMWorldModel AGMAgent )
 	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
 endif (ROBOCOMP_SUPPORT)
 
@@ -182,22 +182,22 @@ WRAP_PYTHON_QRC( resource )
 #  Library building  #
 ######################
 if (ROBOCOMP_SUPPORT)
-   add_library(agmdummy SHARED AGMWorldModel.cpp )
+   add_library(agmdummy SHARED AGMWorldModel.cpp AGMAgent.cpp )
 endif (ROBOCOMP_SUPPORT)
 
 add_library(agm SHARED ${AGM_CODE} ${XMLVIEWER3D_MOCS} )
 target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES} ${OSG_LIBS} ${QT_LIBRARIES} )
 add_dependencies(agm agmdummy)
 
-add_executable ( testagm tools/testagm.cpp )
+add_executable ( testagm tools/testagm.cpp AGMAgent.cpp )
 target_link_libraries ( testagm agm -L. -L.. -lagm ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
-add_executable ( agm_xml2pddlProblem tools/agm_xml2pddlProblem.cpp )
+add_executable ( agm_xml2pddlProblem tools/agm_xml2pddlProblem.cpp AGMAgent.cpp )
 target_link_libraries ( agm_xml2pddlProblem agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
-add_executable ( agm_xmlViewer3D tools/agm_xmlViewer3D.cpp )
+add_executable ( agm_xmlViewer3D tools/agm_xmlViewer3D.cpp AGMAgent.cpp )
 target_link_libraries ( agm_xmlViewer3D agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
@@ -246,6 +246,7 @@ INSTALL(PROGRAMS "AGGLPlanner/agglplan.py" DESTINATION ${INST_SHARE_PATH}/ RENAM
 
 if (ROBOCOMP_SUPPORT)
 	INSTALL(FILES AGMWorldModel.h DESTINATION ${INST_INCL_PATH}/ )
+	INSTALL(FILES      AGMAgent.h DESTINATION ${INST_INCL_PATH}/ )
 endif (ROBOCOMP_SUPPORT)
 
 INSTALL(PROGRAMS python/parseAGGL.py DESTINATION ${INST_SHARE_PATH})
