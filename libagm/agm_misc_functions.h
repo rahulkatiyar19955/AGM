@@ -21,7 +21,7 @@ std::string int2str(const int32_t &i);
 
 
 
-// #if ROBOCOMP_SUPPORT == 1
+#if ROBOCOMP_SUPPORT == 1
 
 /*!
  * \class AGMMisc
@@ -41,4 +41,4 @@ public:
 	static inline std::string str2int(const int32_t &i) {  ::int2str(f); }
 }
 
-// #endif
+#endif
