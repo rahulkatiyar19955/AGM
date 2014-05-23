@@ -1,5 +1,6 @@
 #pragma once
 
+#include <agm_config.h>
 #include <agm_model.h>
 #include <agm_modelException.h>
 
@@ -35,10 +36,10 @@ class AGMMisc
 public:
 	/*! Publish a new world model (<em>worldModel</em>) using the proxy <em>agmagenttopic</em> using <em>oldModel</em> as the old model. */
 	static void publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel);
-	static inline float str2float(const std::string &s) {  ::str2float(s); }
-	static inline int32_t str2int(const std::string &s) {  ::str2int(s); }
-	static inline std::string str2float(const float &f) {  ::float2str(f); }
-	static inline std::string str2int(const int32_t &i) {  ::int2str(f); }
-}
+	static inline float str2float(const std::string &s);
+	static inline int32_t str2int(const std::string &s);
+	static inline std::string str2float(const float &f);
+	static inline std::string str2int(const int32_t &i);
+};
 
 #endif
