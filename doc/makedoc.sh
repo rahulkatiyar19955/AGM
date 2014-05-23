@@ -2,7 +2,8 @@
 
 rm -rf html/*
 cd ..
-make doc
+export ROBOCOMP_SUPPORT=1
+make doc ROBOCOMP_SUPPORT=1
 cd -
 cp tabs.css html/tabs.css
 cp AGGLEditor.png html/AGGLEditor.png
