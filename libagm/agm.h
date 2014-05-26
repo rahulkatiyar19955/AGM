@@ -1,8 +1,9 @@
 #pragma once
 
-// #include <agm_behavior.h>
+#include <agm_misc_functions.h>
 #include <agm_model.h>
 #include <agm_modelSymbols.h>
+#include <agm_modelPrinter.h>
 #include <agm_modelEdge.h>
 #include <agm_modelConverter.h>
 #include <agm_search.h>

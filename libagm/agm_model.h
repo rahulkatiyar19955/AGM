@@ -10,7 +10,7 @@
 #if ROBOCOMP_SUPPORT == 1
 #include <AGMWorldModel.h>
 #endif
-#include <agm_misc_functions.h>
+
 #include <agm_modelSymbols.h>
 
 class AGMModelEdge;
