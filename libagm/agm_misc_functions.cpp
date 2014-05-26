@@ -59,6 +59,7 @@ std::string int2str(const int32_t &i)
 void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel)
 {
 	RoboCompAGMWorldModel::Event e;
+	e.why = RoboCompAGMWorldModel::BehaviorBasedModification;
 	AGMModelConverter::fromInternalToIce(oldModel, e.backModel);
 	AGMModelConverter::fromInternalToIce(newModel, e.newModel);
 	printf("<<\n");

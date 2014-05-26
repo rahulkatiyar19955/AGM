@@ -185,7 +185,7 @@ class Server (Ice.Application):
 			agentConfigs = self.communicator().getProperties().getProperty( "AGENTS" ).split(',')
 			for agent in agentConfigs:
 				proxy = self.communicator().getProperties().getProperty(agent)
-				if len(proxy)==0:
+				if len(proxy)>0:
 					behavior_proxy = RoboCompAGMCommonBehavior.AGMCommonBehaviorPrx.uncheckedCast(self.communicator().stringToProxy(proxy))
 					if not behavior_proxy:
 						print agentConfigs
