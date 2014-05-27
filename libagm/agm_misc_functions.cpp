@@ -1,5 +1,6 @@
 #include <agm_misc_functions.h>
 #include <agm_modelConverter.h>
+#include <agm_modelPrinter.h>
 
 #include <algorithm>
 
@@ -62,7 +63,8 @@ void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &ag
 	e.why = RoboCompAGMWorldModel::BehaviorBasedModification;
 	AGMModelConverter::fromInternalToIce(oldModel, e.backModel);
 	AGMModelConverter::fromInternalToIce(newModel, e.newModel);
-	printf("<<\n");
+	printf("<<%d\n", newModel->numberOfSymbols());
+// 	AGMModelPrinter::printWorld(newModel);
 	agmagenttopic->modificationProposal(e);
 	printf(">>\n");
 }

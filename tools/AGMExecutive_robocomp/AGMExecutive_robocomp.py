@@ -94,10 +94,12 @@ class AGMAgentTopicI (RoboCompAGMAgent.AGMAgentTopic):
 	def __init__(self, _handler):
 		self.handler = _handler
 	def modificationProposal(self, modification, current=None):
+		print 'AGMAgentTopicI::modificationProposal'
 		self.handler.mutex.acquire()
 		self.handler.modificationProposal(modification)
 		self.handler.mutex.release()
 	def update(self, nodeModification, current=None):
+		print 'AGMAgentTopicI::update'
 		self.handler.mutex.acquire()
 		self.handler.updateNode(nodeModification)
 		self.handler.mutex.release()
@@ -183,7 +185,9 @@ class Server (Ice.Application):
 
 			# Read agent's configurations and create the correspoding proxies
 			agentConfigs = self.communicator().getProperties().getProperty( "AGENTS" ).split(',')
+			print 'AGENT configs:', agentConfigs
 			for agent in agentConfigs:
+				print 'Configuring ', agent
 				proxy = self.communicator().getProperties().getProperty(agent)
 				if len(proxy)>0:
 					behavior_proxy = RoboCompAGMCommonBehavior.AGMCommonBehaviorPrx.uncheckedCast(self.communicator().stringToProxy(proxy))
@@ -200,19 +204,26 @@ class Server (Ice.Application):
 
 
 			# Subscribe to AGMAgentTopic
+			print 'Subscribing to AGMAgentTopic'
+			print 'Subscribing to AGMAgentTopic'
 			proxy = self.communicator().getProperties().getProperty( "IceStormProxy")
 			topicManager = IceStorm.TopicManagerPrx.checkedCast(self.communicator().stringToProxy(proxy))
 			adapterT = self.communicator().createObjectAdapter("AGMAgentTopic")
 			agentTopic = AGMAgentTopicI(executive)
 			proxyT = adapterT.addWithUUID(agentTopic).ice_oneway()
 			try:
+				print 'AGMAGentTopic 1'
 				topic = topicManager.retrieve("AGMAgentTopic")
+				print 'AGMAGentTopic 2'
 				qos = {}
+				print 'AGMAGentTopic 3'
 				topic.subscribeAndGetPublisher(qos, proxyT)
+				print 'AGMAGentTopic 4'
+				adapterT.activate()
+				print 'AGMAGentTopic 5'
 			except IceStorm.NoSuchTopic:
 				print "Error! No topic found!"
 				sys.exit(1)
-			adapterT.activate()
 
 			# Run executive thread
 			print 'AGMExecutive initialization ok'

@@ -124,6 +124,7 @@ class Executive(threading.Thread):
 		self.currentModel = xmlModelParser.graphFromXML(self.initialModel)
 		self.updatePlan()
 	def setModel(self, model):
+		print model
 		self.currentModel = model
 		self.broadcastModel()
 	def setMission(self, target):
@@ -248,7 +249,7 @@ class Executive(threading.Thread):
 		except:
 			traceback.print_exc()
 			print "can't publish executiveVisualizationTopic.update"
-
+		print 'done'
 	def modificationProposal(self, modification):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
