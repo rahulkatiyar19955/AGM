@@ -94,12 +94,10 @@ class AGMAgentTopicI (RoboCompAGMAgent.AGMAgentTopic):
 	def __init__(self, _handler):
 		self.handler = _handler
 	def modificationProposal(self, modification, current=None):
-		print 'AGMAgentTopicI::modificationProposal'
 		self.handler.mutex.acquire()
 		self.handler.modificationProposal(modification)
 		self.handler.mutex.release()
 	def update(self, nodeModification, current=None):
-		print 'AGMAgentTopicI::update'
 		self.handler.mutex.acquire()
 		self.handler.updateNode(nodeModification)
 		self.handler.mutex.release()
@@ -211,19 +209,17 @@ class Server (Ice.Application):
 			adapterT = self.communicator().createObjectAdapter("AGMAgentTopic")
 			agentTopic = AGMAgentTopicI(executive)
 			proxyT = adapterT.addWithUUID(agentTopic).ice_oneway()
-			try:
-				print 'AGMAGentTopic 1'
-				topic = topicManager.retrieve("AGMAgentTopic")
-				print 'AGMAGentTopic 2'
-				qos = {}
-				print 'AGMAGentTopic 3'
-				topic.subscribeAndGetPublisher(qos, proxyT)
-				print 'AGMAGentTopic 4'
-				adapterT.activate()
-				print 'AGMAGentTopic 5'
-			except IceStorm.NoSuchTopic:
-				print "Error! No topic found!"
-				sys.exit(1)
+			AGMAgentTopic_subscription = False
+			while not AGMAgentTopic_subscription:
+				try:
+					topic = topicManager.retrieve("AGMAgentTopic")
+					qos = {}
+					topic.subscribeAndGetPublisher(qos, proxyT)
+					adapterT.activate()
+					AGMAgentTopic_subscription = True
+				except IceStorm.NoSuchTopic:
+					print "Error! No topic found! Sleeping for a while..."
+					time.sleep(1)
 
 			# Run executive thread
 			print 'AGMExecutive initialization ok'
