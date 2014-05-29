@@ -83,13 +83,13 @@ int32_t AGMMisc::str2int(const std::string &s)
 }
 
 
-std::string AGMMisc::str2float(const float &f)
+std::string AGMMisc::float2str(const float &f)
 {
 	return ::float2str(f);
 }
 
 
-std::string AGMMisc::str2int(const int32_t &i)
+std::string AGMMisc::int2str(const int32_t &i)
 {
 	return ::int2str(i);
 }

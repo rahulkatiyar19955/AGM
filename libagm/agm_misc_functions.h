@@ -38,8 +38,8 @@ public:
 	static void publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel);
 	static inline float str2float(const std::string &s);
 	static inline int32_t str2int(const std::string &s);
-	static inline std::string str2float(const float &f);
-	static inline std::string str2int(const int32_t &i);
+	static inline std::string float2str(const float &f);
+	static inline std::string int2str(const int32_t &i);
 };
 
 #endif
