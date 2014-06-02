@@ -142,6 +142,30 @@ class Executive(threading.Thread):
 				if i[0] != '#':
 					ret.append(i)
 		return ret
+	
+	def callMonitoring(self):
+		stored = False
+		print 'Trying with the last steps of the current plan...'
+		domain = '/tmp/domainActive.py'
+		init   = '/tmp/lastWorld.xml'
+		target = '/tmp/target.py'
+		try:
+			print '<<<Call Monitoring'
+			print '<<<Call Monitoring'
+			print self.plan
+			print '   Call Monitoring>>>'
+			print '   Call Monitoring>>>'
+			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(domain, init, target, AGGLPlannerPlan(self.plan))
+			if ret:
+				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
+				stored = True
+				self.plan = planMonitoring
+			else:
+				print 'No modified version of the current plan satisfies the goal. Replanning is necessary.'
+		except:
+			stored = False
+		return stored, stepsFwd
+
 	def updatePlan(self):
 		# Save world
 		self.currentModel.toXML("/tmp/lastWorld.xml")
@@ -149,25 +173,7 @@ class Executive(threading.Thread):
 		# First, try with the current plan
 		stored = False
 		if self.plan != None:
-			print 'Trying with the last steps of the current plan...'
-			domain = '/tmp/domainActive.py'
-			init   = '/tmp/lastWorld.xml'
-			target = '/tmp/target.py'
-			try:
-				print '<<<Call Monitoring'
-				print '<<<Call Monitoring'
-				print self.plan
-				print '   Call Monitoring>>>'
-				print '   Call Monitoring>>>'
-				ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(domain, init, target, AGGLPlannerPlan(self.plan))
-				if ret:
-					print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
-					stored = True
-					self.plan = planMonitoring
-				else:
-					print 'No modified version of the current plan satisfies the goal. Replanning is necessary.'
-			except:
-				stored = False
+			stored, stepsFwd = self.callMonitoring()
 		else:
 			print 'No habia plan previo'
 
@@ -184,6 +190,7 @@ class Executive(threading.Thread):
 			lines = self.ignoreCommentsInPlan(ofile.readlines())
 			ofile.close()
 			self.plan = AGGLPlannerPlan('\n'.join(lines), direct=True)
+			stored, stepsFwd = self.callMonitoring()
 			if len(lines) == 0:
 				self.plan = None
 				print 'No solutions found!'
