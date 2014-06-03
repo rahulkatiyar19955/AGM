@@ -45,20 +45,25 @@ def AGMExecutiveMonitoring(domain, init, target, plan, stepsFwd=0):
 		traceback.print_exc()
 		sys.exit(134)
 
+	#print 'Running AGMExecutiveMonitoring (steps='+str(stepsFwd)+') with plan:'
+	#print len(plan)
+	#print plan
 	try:
 		ret2 = False
 		if len(currentPlan)>0:
 			try:
+				#print 'Trying one step ahead...', stepsFwd
 				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domain, init, target, currentPlan.removeFirstAction(), stepsFwd+1)
 			except:
+				#print steps, 'steps ahead did not work'
 				traceback.print_exc()
 				ret2 = False
 		if ret2:
-			#print 'ok'
+			#print 'ok', stepsFwd
 			return ret2, stepsFwd2, planMonitoring2
 		else:
 			try:
-				#print 'try with', stepsFwd
+				#print 'CHECK with', stepsFwd
 				p = PyPlanChecker(domain, init, currentPlan, target, '', verbose=False)
 				if p.valid:
 					print 'GOT PLAN FROM MONITORING!!!'
@@ -68,9 +73,12 @@ def AGMExecutiveMonitoring(domain, init, target, plan, stepsFwd=0):
 					#print stepsFwd, 'doesn\'t work'
 					return False, 0, None
 			except:
+				traceback.print_exc()
 				return False, 0, None
 	except:
+		traceback.print_exc()
 		sys.exit(4991)
+	traceback.print_exc()
 	sys.exit(692)
 
 
@@ -145,6 +153,7 @@ class Executive(threading.Thread):
 	
 	def callMonitoring(self):
 		stored = False
+		stepsFwd = 0
 		print 'Trying with the last steps of the current plan...'
 		domain = '/tmp/domainActive.py'
 		init   = '/tmp/lastWorld.xml'
@@ -163,7 +172,9 @@ class Executive(threading.Thread):
 			else:
 				print 'No modified version of the current plan satisfies the goal. Replanning is necessary.'
 		except:
+			print traceback.print_exc()
 			stored = False
+		print 'done callMonitoring'
 		return stored, stepsFwd
 
 	def updatePlan(self):

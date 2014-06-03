@@ -93,8 +93,10 @@ class PyPlanChecker(object):
 			if verbose: print 'Rule: ', e
 			if verbose: print 'Line: ', line
 			if verbose: print 'Not achieved'
+			self.valid = False
 			#traceback.print_exc()
 		except:
+			self.valid = False
 			if verbose: print 'Not achieved (error)'
 			#traceback.print_exc()
 
