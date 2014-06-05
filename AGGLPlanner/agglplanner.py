@@ -40,10 +40,12 @@ import inspect
 # C O N F I G U R A T I O N
 maxWorldIncrement = 40
 maxCost = 200
-stopWithFirstPlan = True
+stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 10.
 maxTimeWaitLimit = 1000.
+
+maxCostRatioToBestSolution = 1.00001
 
 
 class GoalAchieved(Exception):
@@ -182,6 +184,11 @@ def printResult(result):
 	if verbose > 0:
 		print 'Cost', result.cost
 		print 'Score', result.score
+		l = 0
+		for action in result.history:
+			if action[0] != '#':
+				l += 1
+		print 'Length', l
 		print 'Probability', result.probability
 		#print 'NodeID', result.nodeId
 		print 'Actions\n----------------'
@@ -263,10 +270,10 @@ class PyPlan(object):
 							if n[1].cost < mincostOnList:
 								mincostOnList = n[1].cost
 				# Check if we got to the maximum cost or to three times the minimi
-				if head.cost > maxCost:
-					raise MaxCostReached(head.cost)
-				elif len(results)>0 and head.cost>3*cheapestSolutionCost:
-					raise GoalAchieved
+				#if head.cost > maxCost:
+					#raise MaxCostReached(head.cost)
+				#elif len(results)>0 and head.cost>3*cheapestSolutionCost:
+					#raise GoalAchieved
 				# Small test
 				if verbose>5: print 'Expanding'.ljust(5), head
 				for k in self.ruleMap:
@@ -308,7 +315,13 @@ class PyPlan(object):
 								#print '+('+str(deriv.cost)+')'
 						if not deriv in knownNodes:
 							if deriv.stop == False:
-								if len(deriv.graph.nodes.keys()) <= maxWorldSize:
+								if cheapestSolutionCost < 1:
+									ratio = 0.
+								else:
+									ratio = float(deriv.cost) / float(cheapestSolutionCost)
+								#print cheapestSolutionCost, deriv.cost
+								#print ratio
+								if len(deriv.graph.nodes.keys()) <= maxWorldSize and ratio < maxCostRatioToBestSolution:
 									knownNodes.append(head)
 									#heapq.heappush(openNodes, (-deriv.score, deriv)) # score... the more the better
 									#heapq.heappush(openNodes, ( deriv.cost, deriv)) # cost...  the less the better
@@ -345,6 +358,11 @@ class PyPlan(object):
 				if resultFile != None:
 					resultFile.write(str(action)+'\n')
 			if verbose > 0: print "----------------\nExplored", explored, "nodes"
+			for r in results:
+				print '<<<<<<<'
+				printResult(r)
+				print '>>>>>>>'
+
 
 if __name__ == '__main__': # program domain problem result
 	#from pycallgraph import *

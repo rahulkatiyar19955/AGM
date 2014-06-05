@@ -87,8 +87,10 @@ def ruleImplementation(rule):
 
 def comboRuleImplementation(rule, r, indent):
 	ret = ''
-	ret += indent+"def " + rule.name + "(self, snode, stackP=[], equivalencesP=[]):"
+	ret += indent+"def " + rule.name + "(self, snode, stackP=None, equivalencesP=None):"
 	indent += "\t"
+	ret += indent+"if stackP == None: stackP=[]"
+	ret += indent+"if equivalencesP == None: equivalencesP=[]"
 	ret += indent+"stack        = copy."+COPY_OPTION+"(stackP)"
 	ret += indent+"equivalences = copy."+COPY_OPTION+"(equivalencesP)"
 	#if debug:
@@ -106,8 +108,10 @@ def comboRuleImplementation(rule, r, indent):
 	
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True, finish=''):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
 	indent += "\t"
+	ret += indent+"if stack == None: stack=[]"
+	ret += indent+"if equivalences == None: equivalences=[]"
 	ret += indent+"aliasDict = dict()"
 	ret += indent+"sid = str(len(stack)+"+str(len(rule.atoms))+")"
 	#ret += indent+"stack = copy."+COPY_OPTION+"(stack)"
@@ -174,8 +178,10 @@ def normalRuleImplementation(rule, ret, indent):
 	#print 'normalRuleImplementation.parameters', rule.parameters
 	#print 'normalRuleImplementation.precondition', rule.precondition
 	#print 'normalRuleImplementation.effect', rule.effect
-	ret += indent+"def " + rule.name + "(self, snode, stackP=[], equivalencesP=[]):"
+	ret += indent+"def " + rule.name + "(self, snode, stackP=None, equivalencesP=None):"
 	indent += "\t"
+	ret += indent+"if stackP == None: stackP=[]"
+	ret += indent+"if equivalencesP == None: equivalencesP=[]"
 	ret += indent + "stack        = copy."+COPY_OPTION+"(stackP)"
 	ret += indent + "equivalences = copy."+COPY_OPTION+"(equivalencesP)"
 	ret += indent + "symbol_nodes_copy = copy."+COPY_OPTION+"(snode.graph.nodes)"
@@ -337,8 +343,10 @@ def normalRuleImplementation(rule, ret, indent):
 	# TRIGGER
 	# TRIGGER
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=[], equivalences=[], checked=True, finish=''):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
 	indent += "\t"
+	ret += indent+"if stack == None: stack=[]"
+	ret += indent+"if equivalences == None: equivalences=[]"
 	if len(optimal_node_list)>0:
 		ret += indent+"if not checked:"
 		indent += "\t"
@@ -425,7 +433,8 @@ def normalRuleImplementation(rule, ret, indent):
 #
 # Here we define how preconditions are implemented in the generated code
 #
-def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stuff={'availableid':0}):
+def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stuff=None):
+	if stuff == None: stuff = {'availableid':0}
 	if len(precondition) == 0:
 		return '', indent, modifier, stuff
 	# Split the list in its head and body
@@ -514,7 +523,8 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 #
 # Here we define how effects are implemented in the generated code
 #
-def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff={'availableid':0, 'mode':'normal'}):
+def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
+	if stuff == None: stuff = {'availableid':0, 'mode':'normal'}
 	if len(effect) == 0:
 		return '', indent, modifier, stuff
 	# Split the list in its head and body

@@ -6,8 +6,10 @@ def distance(x1, y1, x2, y2):
 	return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
 
 class AGMSymbol(object):
-	def __init__(self, name, sType, pos=[0,0], attributes=dict()):
+	def __init__(self, name, sType, pos=None, attributes=None):
 		object.__init__(self)
+		if pos==None: pos=[0,0]
+		if attributes==None: attributes=dict()
 		self.name = str(name)
 		self.sType = str(sType)
 		self.pos = pos
@@ -260,7 +262,8 @@ class AGMGraph(object):
 			raise BasicException("")
 
 
-	def addNode(self, x, y, name, stype, attributes=dict()):
+	def addNode(self, x, y, name, stype, attributes=None):
+		if attributes==None: attributes=dict()
 		if not name in self.nodes.keys():
 			self.nodes[name] = AGMSymbol(str(name), str(stype), [x,y], attributes)
 	def removeNode(self, x, y, diameter):
@@ -385,8 +388,10 @@ class AGMRule(object):
 		return self.lhs.linkTypes().union(self.rhs.linkTypes())
 
 class AGMComboRule(object):
-	def __init__(self, name='', passive=False, cost=1, ats=list(), eqs=list()):
+	def __init__(self, name='', passive=False, cost=1, ats=None, eqs=None):
 		object.__init__(self)
+		if ats==None: ats=list()
+		if eqs==None: eqs=list()
 		self.name = name
 		self.passive = passive
 		self.atoms = ats
