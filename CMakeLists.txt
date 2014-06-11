@@ -80,18 +80,22 @@ endif (PYTHON_BINDINGS)
 set(Boost_USE_STATIC_LIBS   OFF)
 set(Boost_USE_MULTITHREADED ON)
 if (PYTHON_BINDINGS)
-	find_package(Boost COMPONENTS system thread python REQUIRED)
+	#find_package(Boost COMPONENTS system thread python REQUIRED)
+	SET(Boost_LIBRARIES -lboost_system -lboost_thread -lboost_python )
 else (PYTHON_BINDINGS)
-	find_package(Boost COMPONENTS system thread REQUIRED)
+	SET(Boost_LIBRARIES -lboost_system -lboost_thread )
+	#find_package(Boost COMPONENTS system thread REQUIRED)
 endif (PYTHON_BINDINGS)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 # (libpython)
-find_package(PythonLibs REQUIRED)
-MESSAGE(STATUS "PYTHON BINDINGS: DIRS ${PYTHON_INCLUDE_DIRS}")
-MESSAGE(STATUS "PYTHON BINDINGS: LIBS ${PYTHON_LIBRARIES}")
-include_directories(${PYTHON_INCLUDE_DIRS})
-link_directories(${PYTHON_LIBRARIES})
+if (PYTHON_BINDINGS)
+	find_package(PythonLibs REQUIRED)
+	MESSAGE(STATUS "PYTHON BINDINGS: DIRS ${PYTHON_INCLUDE_DIRS}")
+	MESSAGE(STATUS "PYTHON BINDINGS: LIBS ${PYTHON_LIBRARIES}")
+	include_directories(${PYTHON_INCLUDE_DIRS})
+	link_directories(${PYTHON_LIBRARIES})
+endif (PYTHON_BINDINGS)
 
 # RoboComp support
 if (ROBOCOMP_SUPPORT)
@@ -179,7 +183,10 @@ add_executable ( agm_xmlViewer3D tools/agm_xmlViewer3D.cpp ${ROBOCOMP_ADDITIONAL
 target_link_libraries ( agm_xmlViewer3D agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
-
+MESSAGE ( STATUS "aa ${Boost_LIBRARIES} dd" )
+MESSAGE ( STATUS "bb ${Boost_LIBRARIES} cc" )
+MESSAGE ( STATUS "cc ${Boost_LIBRARIES} bb" )
+MESSAGE ( STATUS "dd ${Boost_LIBRARIES} aa" )
 
 
 #  Doxygen  #

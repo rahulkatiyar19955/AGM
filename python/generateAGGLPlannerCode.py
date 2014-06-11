@@ -366,7 +366,7 @@ def normalRuleImplementation(rule, ret, indent):
 			ret += indent+"raise WrongRuleExecution('"+rule.name+"_trigger"+str(lelele)+"')"
 			indent = indent[:-1]
 		indent = indent[:-1]
-	ret += indent+"smap = copy."+COPY_OPTION+"(n2id)"
+        #ret += indent+"smap = copy."+COPY_OPTION+"(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
@@ -379,7 +379,7 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"# Create nodes"
 	for newNode in newNodes:
 		ret += indent+"newName = str(getNewIdForSymbol(newNode))"
-		ret += indent+"smap['"+newNode.name+"'] = newName"
+                ret += indent+"n2id['"+newNode.name+"'] = newName"
 		ret += indent+"newNode.graph.nodes[newName] = AGMSymbol(newName, '"+newNode.sType+"')"
 	ret += indent+"# Retype nodes"
 	# Retype nodes
@@ -388,7 +388,7 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+"# Remove nodes"
 	# Remove nodes
 	for deleteNode in deleteNodes:
-		ret += indent+"del newNode.graph.nodes[smap['"+deleteNode.name+"']]"
+                ret += indent+"del newNode.graph.nodes[n2id['"+deleteNode.name+"']]"
 	if len(deleteNodes)>0:
 		ret += indent+"newNode.graph.removeDanglingEdges()"
 	# Remove links
@@ -398,12 +398,12 @@ def normalRuleImplementation(rule, ret, indent):
 		deleteLinks_str = ''
 		for l in range(len(deleteLinks)):
 			if l > 0: deleteLinks_str += ", "
-			deleteLinks_str += "[smap['" + deleteLinks[l].a + "'], smap['" + deleteLinks[l].b + "'], '" + deleteLinks[l].linkType + "']"
+                        deleteLinks_str += "[n2id['" + deleteLinks[l].a + "'], n2id['" + deleteLinks[l].b + "'], '" + deleteLinks[l].linkType + "']"
 		ret += indent+"newNode.graph.links = [x for x in newNode.graph.links if [x.a, x.b, x.linkType] not in [ "+deleteLinks_str+" ]]"
 	# Create links
 	ret += indent+"# Create links"
 	for newLink in newLinks:
-		ret += indent+"l = AGMLink(smap['"+newLink.a+"'], smap['"+newLink.b+"'], '"+newLink.linkType+"')"
+                ret += indent+"l = AGMLink(n2id['"+newLink.a+"'], n2id['"+newLink.b+"'], '"+newLink.linkType+"')"
 		ret += indent+"if not l in newNode.graph.links:"
 		ret += indent+"\tnewNode.graph.links.append(l)"
 	# Quantifier-related code (EFFECT)

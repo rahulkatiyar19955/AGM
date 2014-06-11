@@ -6,9 +6,9 @@
 #  -----  AGGLPlanner  -----
 #  -------------------------
 #
-#  Almost a free/libre AI planner.
+#  A free/libre open source AI planner.
 #
-#  Copyright (C) 2013 by Luis J. Manso
+#  Copyright (C) 2013 - 2014 by Luis J. Manso
 #
 #  AGGLPlanner is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
