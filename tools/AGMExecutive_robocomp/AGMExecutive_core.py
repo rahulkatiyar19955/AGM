@@ -63,7 +63,7 @@ def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0)
 			try:
 				print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
 				print plan
-				p = PyPlanChecker(domain, init, currentPlan, target, '', verbose=True)
+				p = PyPlanChecker(domain, init, currentPlan, target, '', verbose=False)
 				if p.valid:
 					print 'GOT PLAN FROM MONITORING!!!'
 					print currentPlan
