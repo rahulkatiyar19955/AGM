@@ -38,22 +38,20 @@ import RoboCompPlanning
 import AGMModelConversion
 
 #ret, stepsFwd, planMonitoring = 
-def AGMExecutiveMonitoring(domain, init, target, plan, stepsFwd=0):
+def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0):
 	try:
 		currentPlan = AGGLPlannerPlan(plan)
 	except:
 		traceback.print_exc()
 		sys.exit(134)
 
-	#print 'Running AGMExecutiveMonitoring (steps='+str(stepsFwd)+') with plan:'
-	#print len(plan)
-	#print plan
 	try:
 		ret2 = False
 		if len(currentPlan)>0:
 			try:
 				#print 'Trying one step ahead...', stepsFwd
-				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domain, init, target, currentPlan.removeFirstAction(), stepsFwd+1)
+				newPlan = currentPlan.removeFirstAction(currentModel)
+				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domain, init, currentModel, target, newPlan, stepsFwd+1)
 			except:
 				#print steps, 'steps ahead did not work'
 				traceback.print_exc()
@@ -63,14 +61,15 @@ def AGMExecutiveMonitoring(domain, init, target, plan, stepsFwd=0):
 			return ret2, stepsFwd2, planMonitoring2
 		else:
 			try:
-				#print 'CHECK with', stepsFwd
-				p = PyPlanChecker(domain, init, currentPlan, target, '', verbose=False)
+				print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
+				print plan
+				p = PyPlanChecker(domain, init, currentPlan, target, '', verbose=True)
 				if p.valid:
 					print 'GOT PLAN FROM MONITORING!!!'
 					print currentPlan
 					return True, stepsFwd, currentPlan
 				else:
-					#print stepsFwd, 'doesn\'t work'
+					print 'doesn\'t work'
 					return False, 0, None
 			except:
 				traceback.print_exc()
@@ -164,7 +163,7 @@ class Executive(threading.Thread):
 			print self.plan
 			print '   Call Monitoring>>>'
 			print '   Call Monitoring>>>'
-			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(domain, init, target, AGGLPlannerPlan(self.plan))
+			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(domain, init, self.currentModel, target, AGGLPlannerPlan(self.plan))
 			if ret:
 				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
 				stored = True

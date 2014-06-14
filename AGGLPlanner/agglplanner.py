@@ -115,10 +115,21 @@ class AGGLPlannerPlan(object):
 		else:
 			print 'Unknown plan type ('+str(type(init))+')! (internal error)'
 			sys.exit(-321)
-	def removeFirstAction(self):
+	def removeFirstAction(self, init):
+		actionToRemove = self.data[0]
+		symbolsInAction = set(actionToRemove.parameters.values())
+		nodesInWorld = set(init.nodes.keys())
+		created = symbolsInAction.difference(nodesInWorld)
 		c = AGGLPlannerPlan()
 		for action in self.data[1:]:
 			c.data.append(copy.deepcopy(action))
+		if len(created) > 0:
+			minCreated = min([int(x) for x in created])
+			for action in c.data:
+				for parameter in action.parameters:
+					if int(action.parameters[parameter]) >= minCreated:
+						n = str(int(action.parameters[parameter])-len(created))
+						action.parameters[parameter] = n
 		return c
 	def __iter__(self):
 		self.current = -1
