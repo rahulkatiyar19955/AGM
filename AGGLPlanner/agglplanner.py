@@ -40,7 +40,7 @@ import inspect
 # C O N F I G U R A T I O N
 maxWorldIncrement = 40
 maxCost = 200
-stopWithFirstPlan = False
+stopWithFirstPlan = True
 verbose = 1
 maxTimeWaitAchieved = 10.
 maxTimeWaitLimit = 1000.
@@ -369,10 +369,10 @@ class PyPlan(object):
 				if resultFile != None:
 					resultFile.write(str(action)+'\n')
 			if verbose > 0: print "----------------\nExplored", explored, "nodes"
-			for r in results:
-				print '<<<<<<<'
-				printResult(r)
-				print '>>>>>>>'
+			#for r in results:
+				#print '<<<<<<<'
+				#printResult(r)
+				#print '>>>>>>>'
 
 
 if __name__ == '__main__': # program domain problem result

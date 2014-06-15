@@ -114,6 +114,7 @@ def comboRuleImplementation(rule, r, indent):
 	ret += indent+"if equivalences == None: equivalences=[]"
 	ret += indent+"aliasDict = dict()"
 	ret += indent+"sid = str(len(stack)+"+str(len(rule.atoms))+")"
+	ret += indent+"inCombo = (len(stack) > 0)"
 	#ret += indent+"stack = copy."+COPY_OPTION+"(stack)"
 	#ret += indent+"equivalences = copy."+COPY_OPTION+"(equivalences)"
 	ret += indent+"for atom in ["
@@ -151,7 +152,8 @@ def comboRuleImplementation(rule, r, indent):
 	#ret += indent+"newNode.depth -= 1 + " + str(len(rule.atoms))
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
-	ret += indent+"newNode.cost += " + str(rule.cost)
+	ret += indent+"if not inCombo:"
+	ret += indent+"\tnewNode.cost += " + str(rule.cost)
 	ret += indent+"newNode.depth += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
 	ret += indent+"newNode.parentId = snode.nodeId"
@@ -196,6 +198,7 @@ def normalRuleImplementation(rule, ret, indent):
 	#ret += indent+"equivalences = copy."+COPY_OPTION+"(equivalences)"
 	ret += indent+"if len(stack) > 0:"
 	indent += "\t"
+	ret += indent+"inCombo = True"
 	ret += indent+"pop = stack.pop()"
 	ret += indent+"me = pop[0]"
 	ret += indent+"if len(pop)>2:"
@@ -225,6 +228,7 @@ def normalRuleImplementation(rule, ret, indent):
 		#print rule.name, len(nodesPlusParameters)
 		ret += indent+"else:"
 		indent += "\t"
+		ret += indent+"inCombo = False"
 		for n in nodesPlusParameters:
 			ret += indent+"symbol_"+n+"_nodes = symbol_nodes_copy"
 		indent = indent[:-1]
@@ -292,7 +296,7 @@ def normalRuleImplementation(rule, ret, indent):
 	#ret += indent+"print 'Running rule "+rule.name+"'"
 	ret += indent+"stack2        = copy."+COPY_OPTION+"(stack)"
 	ret += indent+"equivalences2 = copy."+COPY_OPTION+"(equivalences)"
-	ret += indent+"r1 = self."+rule.name+"_trigger(snode, n2id, stack2, equivalences2, copy."+COPY_OPTION+"(finishesCombo))"
+	ret += indent+"r1 = self."+rule.name+"_trigger(snode, n2id, stack2, inCombo, equivalences2, copy."+COPY_OPTION+"(finishesCombo))"
 	ret += indent+"c = copy."+COPY_OPTION+"(r1)"
 	ret += indent+"if 'fina' in locals():"
 	ret += indent+"\tc.history.append(finishesCombo)"
@@ -343,7 +347,7 @@ def normalRuleImplementation(rule, ret, indent):
 	# TRIGGER
 	# TRIGGER
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, inCombo=False, equivalences=None, checked=True, finish=''):"
 	indent += "\t"
 	ret += indent+"if stack == None: stack=[]"
 	ret += indent+"if equivalences == None: equivalences=[]"
@@ -418,7 +422,7 @@ def normalRuleImplementation(rule, ret, indent):
 	indent = '\n\t\t'
 	ret += indent+"# Misc stuff"
 	ret += indent+"newNode.probability *= 1."
-	ret += indent+"if len(stack) == 0:"
+	ret += indent+"if not inCombo:"
 	ret += indent+"\tnewNode.cost += "+str(rule.cost)
 	ret += indent+"\tnewNode.depth += 1"
 	ret += indent+"newNode.history.append('" + rule.name + "@' + str(n2id) )"
