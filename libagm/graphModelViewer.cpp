@@ -205,9 +205,9 @@ void GraphModelViewer::addNode(std::string id, std::string stype)
 {
 	SymbolNode *s;
 	s = new SymbolNode(id, stype);
-	float x = float(random()%100)/10.;
-	float y = float(random()%100)/10.;
-	float z = float(random()%100)/10.;
+	float x = float(random()%10)/10.;
+	float y = float(random()%10)/10.;
+	float z = float(random()%10)/10.;
 	printf("(%f, %f, %f)\n", x, y, z);
 	s->setPosition(x, y, z);
 	group->addChild(s);
@@ -284,6 +284,8 @@ void GraphModelViewer::paintEvent( QPaintEvent* event )
 
 void GraphModelViewer::animateStep()
 {
+	printf("%s: %d\n", __FILE__, __LINE__);
+	printf("animateStep\n");
 	const float T = 1;
 
 	// Update repulsion-induced force
@@ -341,19 +343,23 @@ void GraphModelViewer::animateStep()
 
 	// Relocate edges
 	relocateEdges();
+	printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 
 /// This method updates the widget with the current model ('w' vairable).
 void GraphModelViewer::update(const AGMModel::SPtr &w)
 {
+	printf("%s: %d\n", __FILE__, __LINE__);
 	model = w;
 	updateStructure();
-	//recalculatePositions();
+// 	recalculatePositions();
+	printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 void GraphModelViewer::updateStructure()
 {
+	printf("%s: %d\n", __FILE__, __LINE__);
 	// Push back new nodes
 	for (uint32_t e1=0; e1<model->symbols.size(); e1++)
 	{
@@ -372,6 +378,7 @@ void GraphModelViewer::updateStructure()
 			node.name = model->symbols[e1]->toString();
 			node.type = model->symbols[e1]->symbolType;
 			node.identifier = model->symbols[e1]->identifier;
+			printf("create %s\n", node.name.c_str());
 			nodes.push_back(node);
 			addNode(node.name, node.type);
 		}
@@ -390,6 +397,7 @@ void GraphModelViewer::updateStructure()
 		}
 		if (not found)
 		{
+			printf("ooooooooo\n");
 			nodes.erase(nodes.begin() + e1);
 			removeNode(nodes[e1].name);
 		}
@@ -435,10 +443,12 @@ void GraphModelViewer::updateStructure()
 			exit(-1);
 		}
 	}
+	printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 void GraphModelViewer::removeEdge(std::string src, std::string dst, std::string label)
 {
+	printf("%s: %d\n", __FILE__, __LINE__);
 
 }
 
