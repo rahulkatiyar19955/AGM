@@ -20,8 +20,8 @@ int main(int argc, char **argv)
 	while (arguments.read("--CullThreadPerCameraDrawThreadPerContext")) threadingModel = osgViewer::ViewerBase::CullThreadPerCameraDrawThreadPerContext;
 
 	QApplication app(argc, argv);
-	
-	GraphModelViewer *graphViewer = new GraphModelViewer(threadingModel, true);
+
+	GraphModelViewer *graphViewer = new GraphModelViewer(threadingModel, NULL, true);
 
 
 	std::string path = std::string(argv[1]);

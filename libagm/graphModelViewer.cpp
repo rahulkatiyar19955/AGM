@@ -175,13 +175,13 @@ void GraphModelEdge::relocate()
 	tip->set(p2-pIncNorm*(TIPSIZE+4), 2.*RADIUS/3., 3 *TIPSIZE);
 	tip->setRotation(quat);
 	tipDrawable->dirtyDisplayList();
-	
+
 	billboard->setPosition(0, (p1+p2)/2.f);
 }
 
 
 
-GraphModelViewer::GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadingModel, bool autoUpdate) : QWidget()
+GraphModelViewer::GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadingModel, QWidget *parent, bool autoUpdate) : QWidget(parent)
 {
 	setThreadingModel(threadingModel);
 
@@ -205,10 +205,18 @@ void GraphModelViewer::addNode(std::string id, std::string stype)
 {
 	SymbolNode *s;
 	s = new SymbolNode(id, stype);
-	s->setPosition(0., 0., 0.);
+	float x = float(random()%100)/10.;
+	float y = float(random()%100)/10.;
+	float z = float(random()%100)/10.;
+	printf("(%f, %f, %f)\n", x, y, z);
+	s->setPosition(x, y, z);
 	group->addChild(s);
 	nodeMapId[id] = s;
 	nodeVector.push_back(s);
+}
+
+void GraphModelViewer::removeNode(std::string id)
+{
 }
 
 void GraphModelViewer::setNodePosition(std::string id, osg::Vec3 np)
@@ -277,7 +285,7 @@ void GraphModelViewer::paintEvent( QPaintEvent* event )
 void GraphModelViewer::animateStep()
 {
 	const float T = 1;
-	
+
 	// Update repulsion-induced force
 	// For each symbol
 	for (uint32_t symbol1=0; symbol1<nodeVector.size(); symbol1++)
@@ -330,9 +338,107 @@ void GraphModelViewer::animateStep()
 		// Update position
 		nodeVector[symbol1]->setPosition(nodeVector[symbol1]->pos + nodeVector[symbol1]->vel*T);
 	}
-	
+
 	// Relocate edges
 	relocateEdges();
 }
 
+
+/// This method updates the widget with the current model ('w' vairable).
+void GraphModelViewer::update(const AGMModel::SPtr &w)
+{
+	model = w;
+	updateStructure();
+	//recalculatePositions();
+}
+
+void GraphModelViewer::updateStructure()
+{
+	// Push back new nodes
+	for (uint32_t e1=0; e1<model->symbols.size(); e1++)
+	{
+		bool found = false;
+		for (uint32_t e2=0; e2<nodes.size(); e2++)
+		{
+			if (nodes[e2].name == model->symbols[e1]->toString())
+			{
+				found = true;
+				break;
+			}
+		}
+		if (not found)
+		{
+			GRNNodeInfo node;
+			node.name = model->symbols[e1]->toString();
+			node.type = model->symbols[e1]->symbolType;
+			node.identifier = model->symbols[e1]->identifier;
+			nodes.push_back(node);
+			addNode(node.name, node.type);
+		}
+	}
+	// Remove deleted nodes
+	for (uint32_t e1=0; e1<nodes.size();)
+	{
+		bool found = false;
+		for (uint32_t e2=0; e2<model->symbols.size(); e2++)
+		{
+			if (nodes[e1].name == model->symbols[e2]->toString())
+			{
+				found = true;
+				break;
+			}
+		}
+		if (not found)
+		{
+			nodes.erase(nodes.begin() + e1);
+			removeNode(nodes[e1].name);
+		}
+		else
+		{
+			e1++;
+		}
+	}
+
+	// Clear edges
+	for (uint32_t e=0; e<nodes.size();e++)
+	{
+		nodes[e].edges.clear();
+		nodes[e].edgesNames.clear();
+		for (uint32_t dg=0; dg<nodes[e].edges.size(); dg++)
+		{
+			removeEdge(nodes[e].name, nodes[nodes[e].edges[dg]].name, nodes[e].edgesNames[dg]);
+		}
+	}
+	// Push back edges again
+	for (uint32_t e=0; e<model->edges.size(); e++)
+	{
+		std::string first  = model->symbols[model->getIndexByIdentifier(model->edges[e].symbolPair.first) ]->toString();
+		std::string second = model->symbols[model->getIndexByIdentifier(model->edges[e].symbolPair.second)]->toString();
+		int32_t idx1=-1;
+		int32_t idx2=-1;
+		for (uint32_t n=0; n<nodes.size(); n++)
+		{
+			if (nodes[n].name == first)
+				idx1 = n;
+			if (nodes[n].name == second)
+				idx2 = n;
+		}
+		if (idx1 > -1 and idx2 > -1)
+		{
+			nodes[idx1].edges.push_back(idx2);
+			nodes[idx1].edgesNames.push_back(model->edges[e].linking);
+			addEdge(nodes[idx1].name, nodes[idx2].name, model->edges[e].linking);
+		}
+		else
+		{
+			printf("We had a link whose nodes where not found?!? (%s --> %s)\n", first.c_str(), second.c_str());
+			exit(-1);
+		}
+	}
+}
+
+void GraphModelViewer::removeEdge(std::string src, std::string dst, std::string label)
+{
+
+}
 

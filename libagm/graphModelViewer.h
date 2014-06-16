@@ -84,7 +84,7 @@ private:
 			return osg::Quat(-aQuat+M_PIl/2., osg::Vec3(0, 1, 0));
 		}
 	}
-	
+
 	osg::Cylinder *line;
 	osg::Cone *tip;
 	osg::ShapeDrawable *lineDrawable;
@@ -101,16 +101,29 @@ class GraphModelViewer : public QWidget, public osgViewer::CompositeViewer
 Q_OBJECT
 friend class GraphModelEdge;
 public:
-	GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadingModel=osgViewer::CompositeViewer::SingleThreaded, bool autoUpdate=false);
+	GraphModelViewer(osgViewer::ViewerBase::ThreadingModel threadingModel=osgViewer::CompositeViewer::SingleThreaded, QWidget *parent=NULL, bool autoUpdate=false);
 
 	void addNode(std::string id, std::string stype);
+	void removeNode(std::string id);
 	void setNodePosition(std::string id, osg::Vec3 np);
 	void addEdge(std::string src, std::string dst, std::string label);
+	void removeEdge(std::string src, std::string dst, std::string label);
 
 public slots:
 	void animateStep();
+	void update(const AGMModel::SPtr &w);
 
 private:
+	// Internal representation for nodes.
+	struct GRNNodeInfo
+	{
+		std::string name;
+		std::string type;
+		int32_t identifier;
+		std::vector<uint32_t> edges;
+		std::vector<std::string> edgesNames;
+	};
+	std::vector<GRNNodeInfo> nodes;
 	osg::Group *group;
 	osg::ref_ptr<osgViewer::GraphicsWindowEmbedded> gw;
 
@@ -126,8 +139,11 @@ private:
 
 	void relocateEdges() { for (uint32_t i=0; i<edges.size(); i++) { edges[i]->relocate(); } }
 
-protected:
+	void updateStructure();
 
+protected:
+	AGMModel::SPtr model;
 	QTimer timer;
 };
+
 
