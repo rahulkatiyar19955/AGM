@@ -101,6 +101,7 @@ class Executive(threading.Thread):
 		print 'generate domain passive'
 		self.agmData.generateAGGLPlannerCode("/tmp/domainPasive.py", skipPassiveRules=True)
 		print 'read initialmodelpath'
+		self.initialModelPath = initialModelPath
 		self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
 		print 'set mission'
 		self.backModelICE  = None
@@ -128,7 +129,7 @@ class Executive(threading.Thread):
 			print 'There was some problem broadcasting'
 			sys.exit(1)
 	def reset(self):
-		self.currentModel = xmlModelParser.graphFromXML(self.initialModel)
+		self.currentModel = xmlModelParser.graphFromXML(self.initialModelPath)
 		self.updatePlan()
 	def setModel(self, model):
 		print model
