@@ -11,6 +11,7 @@
 #if ROBOCOMP_SUPPORT == 1
 void AGMModelConverter::fromInternalToIce(const AGMModel::SPtr &src, RoboCompAGMWorldModel::World &dst)
 {
+	src->removeDanglingEdges();
 	dst.nodes.clear();
 	for (uint32_t i=0; i<src->symbols.size(); ++i)
 	{

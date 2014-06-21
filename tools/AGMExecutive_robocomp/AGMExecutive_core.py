@@ -61,15 +61,15 @@ def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0)
 			return ret2, stepsFwd2, planMonitoring2
 		else:
 			try:
-				print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
-				print plan
+				#print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
+				#print plan
 				p = PyPlanChecker(domain, init, currentPlan, target, '', verbose=False)
 				if p.valid:
-					print 'GOT PLAN FROM MONITORING!!!'
-					print currentPlan
+					#print 'GOT PLAN FROM MONITORING!!!'
+					#print currentPlan
 					return True, stepsFwd, currentPlan
 				else:
-					print 'doesn\'t work'
+					#print 'doesn\'t work'
 					return False, 0, None
 			except:
 				traceback.print_exc()
@@ -159,11 +159,11 @@ class Executive(threading.Thread):
 		init   = '/tmp/lastWorld.xml'
 		target = '/tmp/target.py'
 		try:
-			print '<<<Call Monitoring'
-			print '<<<Call Monitoring'
-			print self.plan
-			print '   Call Monitoring>>>'
-			print '   Call Monitoring>>>'
+			#print '<<<Call Monitoring'
+			#print '<<<Call Monitoring'
+			#print self.plan
+			#print '   Call Monitoring>>>'
+			#print '   Call Monitoring>>>'
 			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(domain, init, self.currentModel, target, AGGLPlannerPlan(self.plan))
 			if ret:
 				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
@@ -174,7 +174,7 @@ class Executive(threading.Thread):
 		except:
 			print traceback.print_exc()
 			stored = False
-		print 'done callMonitoring'
+		#print 'done callMonitoring'
 		return stored, stepsFwd
 
 	def updatePlan(self):
@@ -202,12 +202,12 @@ class Executive(threading.Thread):
 			ofile.close()
 			self.plan = AGGLPlannerPlan('\n'.join(lines), direct=True)
 			stored, stepsFwd = self.callMonitoring()
-			if len(lines) == 0:
-				self.plan = None
-				print 'No solutions found!'
-				print 'No solutions found!'
-				print 'No solutions found!'
-				return
+			#if len(lines) == 0:
+				#self.plan = None
+				#print 'No solutions found!'
+				#print 'No solutions found!'
+				#print 'No solutions found!'
+				#return
 		else:
 			print 'Got plan from monitorization'
 			print 'plan'

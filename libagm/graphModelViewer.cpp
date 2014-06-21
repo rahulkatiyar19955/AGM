@@ -284,7 +284,7 @@ void GraphModelViewer::paintEvent( QPaintEvent* event )
 
 void GraphModelViewer::animateStep()
 {
-	printf("%s: %d\n", __FILE__, __LINE__);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
 	printf("animateStep\n");
 	const float T = 1;
 
@@ -343,23 +343,23 @@ void GraphModelViewer::animateStep()
 
 	// Relocate edges
 	relocateEdges();
-	printf("%s: %d\n", __FILE__, __LINE__);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 
 /// This method updates the widget with the current model ('w' vairable).
 void GraphModelViewer::update(const AGMModel::SPtr &w)
 {
-	printf("%s: %d\n", __FILE__, __LINE__);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
 	model = w;
 	updateStructure();
 // 	recalculatePositions();
-	printf("%s: %d\n", __FILE__, __LINE__);
+// 	printf("%s: %d\n", __FIdLE__, __LINE__);
 }
 
 void GraphModelViewer::updateStructure()
 {
-	printf("%s: %d\n", __FILE__, __LINE__);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
 	// Push back new nodes
 	for (uint32_t e1=0; e1<model->symbols.size(); e1++)
 	{
@@ -443,12 +443,12 @@ void GraphModelViewer::updateStructure()
 			exit(-1);
 		}
 	}
-	printf("%s: %d\n", __FILE__, __LINE__);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
 }
 
 void GraphModelViewer::removeEdge(std::string src, std::string dst, std::string label)
 {
-	printf("%s: %d\n", __FILE__, __LINE__);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
 
 }
 

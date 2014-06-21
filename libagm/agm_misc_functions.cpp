@@ -57,16 +57,17 @@ std::string int2str(const int32_t &i)
 
 
 #if ROBOCOMP_SUPPORT == 1
-void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel)
+void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel, std::string sender)
 {
 	RoboCompAGMWorldModel::Event e;
+	e.sender = sender;
 	e.why = RoboCompAGMWorldModel::BehaviorBasedModification;
 	AGMModelConverter::fromInternalToIce(oldModel, e.backModel);
 	AGMModelConverter::fromInternalToIce(newModel, e.newModel);
-	printf("<<%d\n", newModel->numberOfSymbols());
+// 	printf("<<%d\n", newModel->numberOfSymbols());
 // 	AGMModelPrinter::printWorld(newModel);
 	agmagenttopic->modificationProposal(e);
-	printf(">>\n");
+// 	printf(">>\n");
 }
 #endif
 

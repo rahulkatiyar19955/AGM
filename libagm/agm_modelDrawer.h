@@ -120,7 +120,7 @@ private:
 // printf("%s: %d\n", __FILE__, __LINE__);
 			if (s<0 or f<0)
 			{
-				printf("%d --> %d\n", model->getIndexByIdentifier(model->edges[e].symbolPair.first));
+				printf("%d --> %d\n", model->getIndexByIdentifier(model->edges[e].symbolPair.first), model->getIndexByIdentifier(model->edges[e].symbolPair.second));
 				continue;	
 			}
 // printf("%s: %d\n", __FILE__, __LINE__);
