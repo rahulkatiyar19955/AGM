@@ -55,22 +55,27 @@ def fromInternalToIce(src):
 	return dst
 
 
-def fromIceToInternal_model(src):
+def fromIceToInternal_model(src, ignoreInvalidEdges=False):
 	dst = AGMGraph()
 	
+	knownNodes = dict()
 	for srcNode in src.nodes:
 		dst.addNode(0,0, str(srcNode.nodeIdentifier), srcNode.nodeType, srcNode.attributes)
+		knownNodes[str(srcNode.nodeIdentifier)] = True
 		if srcNode.nodeIdentifier == -1:
-			print "Can't transform models containing nodes with invalid identifiers (type: "+src.nodes[i].nodeType+").\n"
+			raise Exception("Can't transform models containing nodes with invalid identifiers (type: "+src.nodes[i].nodeType+").\n")
 			sys.exit(-1)
 
 	for srcLink in src.edges:
-		edge = AGMLink(str(srcLink.a), str(srcLink.b), srcLink.edgeType)
-		dst.links.append(edge)
 		if srcLink.a == -1 or srcLink.b == -1:
-			print "Can't transform models containing nodes with invalid identifiers (type: "+src.edges[i].edgeType+").\n"
+			raise Exception("Can't transform models containing nodes with invalid identifiers (type: "+src.edges[i].edgeType+").\n")
 			sys.exit(-1)
-	
+		edge = AGMLink(str(srcLink.a), str(srcLink.b), srcLink.edgeType)
+		if str(srcLink.a) in knownNodes and str(srcLink.b) in knownNodes:
+			dst.links.append(edge)
+		else:
+			if not ignoreInvalidEdges:
+				raise Exception('I was sent a model with an edge linkning a non-existing node.')
 	return dst
 
 def fromIceToInternal_node(node):

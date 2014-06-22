@@ -51,8 +51,11 @@ def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0)
 			try:
 				#print 'Trying one step ahead...', stepsFwd
 				newPlan = currentPlan.removeFirstAction(currentModel)
+				print 'ddddddddddddddddd'
 				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domain, init, currentModel, target, newPlan, stepsFwd+1)
+				print 'bbbbbbbbbbbbbbbbb'
 			except:
+				print 'XXXXXXXXXXXXXXXXXXXXX'
 				#print steps, 'steps ahead did not work'
 				traceback.print_exc()
 				ret2 = False
@@ -72,9 +75,11 @@ def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0)
 					#print 'doesn\'t work'
 					return False, 0, None
 			except:
+				print 'zzzzzzzzzzzzzzzzzzzzz'
 				traceback.print_exc()
 				return False, 0, None
 	except:
+		print 'WWWWWWWWWWWWWWWWWWWWW'
 		traceback.print_exc()
 		sys.exit(4991)
 	traceback.print_exc()
@@ -88,6 +93,7 @@ class Executive(threading.Thread):
 		self.mutex = threading.RLock()
 		self.agents = dict()
 		self.plan = None
+		self.modifications = 0
 		# Set proxies
 		self.executiveTopic = executiveTopic
 		self.executiveVisualizationTopic = executiveVisualizationTopic
@@ -164,17 +170,22 @@ class Executive(threading.Thread):
 			#print self.plan
 			#print '   Call Monitoring>>>'
 			#print '   Call Monitoring>>>'
+			print 'PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP'
 			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(domain, init, self.currentModel, target, AGGLPlannerPlan(self.plan))
+			print ret, stepsFwd, planMonitoring
+			print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
 			if ret:
 				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
 				stored = True
 				self.plan = planMonitoring
 			else:
 				print 'No modified version of the current plan satisfies the goal. Replanning is necessary.'
+				stored = False
 		except:
 			print traceback.print_exc()
+			print 'PARECE QUE NO FUNCIONO...'
 			stored = False
-		#print 'done callMonitoring'
+		print 'done callMonitoring', stored, stepsFwd
 		return stored, stepsFwd
 
 	def updatePlan(self):
@@ -184,10 +195,14 @@ class Executive(threading.Thread):
 		# First, try with the current plan
 		stored = False
 		if self.plan != None:
+			print 'YYYYYYYYYYYYYYYY1'
 			stored, stepsFwd = self.callMonitoring()
+			print 'YYYYYYYYYYYYYYYY2'
+			print stored, stepsFwd
 		else:
 			print 'No habia plan previo'
 
+		print 'Running the planner?', stored==False
 		if stored == False:
 			# Run planner
 			import time
@@ -277,7 +292,10 @@ class Executive(threading.Thread):
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
 		self.worldModelICE = modification.newModel
-		self.setModel(AGMModelConversion.fromIceToInternal_model(self.worldModelICE))
+		internalModel = AGMModelConversion.fromIceToInternal_model(self.worldModelICE, ignoreInvalidEdges=True)
+		self.modifications += 1
+		internalModel.toXML('modification'+(str(self.modifications).zfill(4))+'.xml')
+		self.setModel(internalModel)
 		self.updatePlan()
 
 	def updateNode(self, nodeModification):
