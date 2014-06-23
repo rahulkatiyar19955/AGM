@@ -51,11 +51,8 @@ def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0)
 			try:
 				#print 'Trying one step ahead...', stepsFwd
 				newPlan = currentPlan.removeFirstAction(currentModel)
-				print 'ddddddddddddddddd'
 				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domain, init, currentModel, target, newPlan, stepsFwd+1)
-				print 'bbbbbbbbbbbbbbbbb'
 			except:
-				print 'XXXXXXXXXXXXXXXXXXXXX'
 				#print steps, 'steps ahead did not work'
 				traceback.print_exc()
 				ret2 = False
@@ -75,11 +72,9 @@ def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0)
 					#print 'doesn\'t work'
 					return False, 0, None
 			except:
-				print 'zzzzzzzzzzzzzzzzzzzzz'
 				traceback.print_exc()
 				return False, 0, None
 	except:
-		print 'WWWWWWWWWWWWWWWWWWWWW'
 		traceback.print_exc()
 		sys.exit(4991)
 	traceback.print_exc()
@@ -170,10 +165,8 @@ class Executive(threading.Thread):
 			#print self.plan
 			#print '   Call Monitoring>>>'
 			#print '   Call Monitoring>>>'
-			print 'PPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPPP'
 			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(domain, init, self.currentModel, target, AGGLPlannerPlan(self.plan))
 			print ret, stepsFwd, planMonitoring
-			print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<'
 			if ret:
 				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
 				stored = True
@@ -195,9 +188,7 @@ class Executive(threading.Thread):
 		# First, try with the current plan
 		stored = False
 		if self.plan != None:
-			print 'YYYYYYYYYYYYYYYY1'
 			stored, stepsFwd = self.callMonitoring()
-			print 'YYYYYYYYYYYYYYYY2'
 			print stored, stepsFwd
 		else:
 			print 'No habia plan previo'
