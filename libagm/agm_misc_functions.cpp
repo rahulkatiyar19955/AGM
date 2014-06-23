@@ -62,12 +62,14 @@ void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &ag
 	RoboCompAGMWorldModel::Event e;
 	e.sender = sender;
 	e.why = RoboCompAGMWorldModel::BehaviorBasedModification;
+	oldModel->removeDanglingEdges();
 	AGMModelConverter::fromInternalToIce(oldModel, e.backModel);
+	newModel->removeDanglingEdges();
 	AGMModelConverter::fromInternalToIce(newModel, e.newModel);
-// 	printf("<<%d\n", newModel->numberOfSymbols());
-// 	AGMModelPrinter::printWorld(newModel);
+	//printf("<<%d\n", newModel->numberOfSymbols());
+	//AGMModelPrinter::printWorld(newModel);
 	agmagenttopic->modificationProposal(e);
-// 	printf(">>\n");
+	//printf(">>\n");
 }
 #endif
 
