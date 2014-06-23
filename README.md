@@ -1,2 +1,2 @@
-The documentation is hosted in [https://ljmanso.com/agm](http://ljmanso.com/agm).
+The documentation is hosted in [http://grammarsandrobots.org/AGM/](http://grammarsandrobots.org/AGM/).
 
