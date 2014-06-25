@@ -369,6 +369,8 @@ class PyPlan(object):
 				if resultFile != None:
 					resultFile.write(str(action)+'\n')
 			if verbose > 0: print "----------------\nExplored", explored, "nodes"
+			for e in domain.dddd:
+				print e, domain.dddd[e]
 			#for r in results:
 				#print '<<<<<<<'
 				#printResult(r)

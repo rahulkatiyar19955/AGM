@@ -960,13 +960,16 @@ FINDMILK: active(2)
 {
 	recognizeObjFails as wtf
 	tellHumanAboutUnknownObject as waaat
-	humanClassifiesMilk as itsjustmilk
-	humanTellsUsAboutMilk as tellme
+#	humanClassifiesMilk as itsjustmilk
+#	humanTellsUsAboutMilk as tellme
 	where:
-	wtf.r = waaat.r = itsjustmilk.r
-	wtf.o = waaat.o = itsjustmilk.o
-	wtf.s = waaat.sr = tellme.s
-	waaat.h = itsjustmilk.h = tellme.h
+	wtf.r = waaat.r
+#	= itsjustmilk.r
+	wtf.o = waaat.o
+# = itsjustmilk.o
+	wtf.s = waaat.sr
+#	= tellme.s
+#	waaat.h = itsjustmilk.h = tellme.h
 }
 
 

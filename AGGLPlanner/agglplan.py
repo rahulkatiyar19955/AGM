@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 # -*- coding: utf-8 -*-
 #
 #  -------------------------
@@ -23,7 +24,6 @@
 #  along with AGGLPlanner. If not, see <http://www.gnu.org/licenses/>.
 
 # Python distribution imports
-
 import sys, traceback, subprocess
 
 sys.path.append('/usr/local/share/agm/')
