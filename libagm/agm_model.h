@@ -204,19 +204,43 @@ public:
 	 */
 	AGMModelSymbol::SPtr getSymbolByName(const std::string &name) const;
 
-	/// Includes a new edge in the model given the identifiers of two symbols. Returns True on success.
+	
+	/*! \brief Includes a new edge in the model given the identifiers of two symbols. Returns True on success.
+	 *
+	 * \throws AGMException Nodes a and b must exist
+	 * 
+	 */
 	bool addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
+	
+	/*! \brief Includes a new edge in the model given the identifiers of two symbols with a set of attributes.  Returns True on success.
+	 *
+	 * \throws AGMException Nodes a and b must exist
+	 * 
+	 */
+	bool addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr);
 
-	/// Removes a new edge in the model given the identifiers of two symbols. Returns True on success.
+	/*! \brief Removes a new edge in the model given the identifiers of two symbols. Returns True on success.
+	 *
+	 * \throws AGMException Nodes a and b must exist
+	 * 
+	 */
+	
 	bool removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
 
-	/// Automatically updates the next available identifier as the smaller identifier that is bigger than any of the existing ones.
+	/*! \brief Automatically updates the next available identifier as the smaller identifier that is bigger than any of the existing ones.
+	 *	  
+	 */
 	void resetLastId();
-
-	/// Set the next available identifier as <em>'i'</em>. When possible, use AGMModel::resetLastId() instead.
+	
+	/*! \brief  Set the next available identifier as <em>'i'</em>. When possible, use AGMModel::resetLastId() instead.
+	 *	  
+	 */
 	void setLastId(int32_t i) { lastId = i; }
 
-	/// Returns the next available identifier and makes the returned value unavailable.
+	/// 
+	/*! \brief Returns the next available identifier and makes the returned value unavailable.
+	 *	  
+	 */
 	int32_t getNewId();
 
 	/*! \brief Returns a string containing the PDDL description of a planning problem given the current model and a target model.

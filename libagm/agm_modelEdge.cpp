@@ -6,6 +6,7 @@ AGMModelEdge::AGMModelEdge()
 {
 	symbolPair = std::pair<int32_t, int32_t>(0, 0);
 	linking = "-";
+	attributes.clear();
 }
 
 AGMModelEdge::~AGMModelEdge()
@@ -21,8 +22,21 @@ AGMModelEdge::AGMModelEdge(const AGMModelEdge &src)
 
 AGMModelEdge::AGMModelEdge(int32_t a, int32_t b, std::string linking_)
 {
+	/*std::map<std::string,std::string> atr;
+	atr.clear();
+	AGMModelEdge(a,b,linking_,atr);*/
+	
 	symbolPair = std::pair<int32_t, int32_t>(a, b);
 	linking = linking_;
+	
+	
+}
+
+AGMModelEdge::AGMModelEdge(int32_t a, int32_t b, std::string linking_, std::map<std::string, std::string> atr)
+{
+	symbolPair = std::pair<int32_t, int32_t>(a, b);
+	linking = linking_;
+	attributes = atr;
 }
 
 AGMModelEdge& AGMModelEdge::operator=(const AGMModelEdge &src)
@@ -78,7 +92,23 @@ std::string AGMModelEdge::toString(const AGMModel *world) const
 	return stringStream.str();
 }
 
+void AGMModelEdge::setAttribute(std::string a, std::string v)
+{
+	attributes[a] = v;
+}
 
+std::string AGMModelEdge::getAttribute(std::string a)
+{
+	//return attributes[a];
+	std::string s="";
+	try{
+		s= attributes.at(a);
+	}
+	catch (const std::out_of_range& oor) {
+		std::cerr << "Out of Range error: " << oor.what() << '\n';
+	}
+	return s; 
+}
 
 
 
