@@ -105,7 +105,7 @@ std::string AGMModelEdge::getAttribute(std::string a)
 		s= attributes.at(a);
 	}
 	catch (const std::out_of_range& oor) {
-		std::cerr << "Out of Range error: " << oor.what() << '\n';
+		std::cout << "Out of Range error: " << oor.what() << '\n';
 	}
 	return s; 
 }

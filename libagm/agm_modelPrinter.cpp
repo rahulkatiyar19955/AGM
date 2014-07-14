@@ -24,6 +24,11 @@ void AGMModelPrinter::printWorld(const AGMModel *w)
 	for (uint32_t i=0; i<w->edges.size(); ++i)
 	{
 		printf("%d -> %d  (%s)\n", w->edges[i].symbolPair.first, w->edges[i].symbolPair.second, w->edges[i].linking.c_str());
+		std::map<std::string, std::string>::const_iterator itr = w->edges[i].attributes.begin();
+		for(; itr!=w->edges[i].attributes.end(); ++itr)
+		{
+			printf("\t<%s> --> <%s>\n", itr->first.c_str(), itr->second.c_str());
+		}
 	}
 }
 
@@ -48,6 +53,11 @@ void AGMModelPrinter::printWorld(FILE *fd, const RoboCompAGMWorldModel::World &w
 	for (uint32_t i=0; i<w.edges.size(); ++i)
 	{
 		fprintf(fd, "%d -> %d  (%s)\n", w.edges[i].a, w.edges[i].b, w.edges[i].edgeType.c_str());
+		std::map<std::string, std::string>::const_iterator itr = w.edges[i].attributes.begin();
+		for(; itr!=w.edges[i].attributes.end(); ++itr)
+		{
+			printf("\t<%s> --> <%s>\n", itr->first.c_str(), itr->second.c_str());
+		}
 	}
 }
 
