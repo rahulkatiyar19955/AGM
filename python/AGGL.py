@@ -43,11 +43,18 @@ class AGMSymbol(object):
 
 
 class AGMLink(object):
-	def __init__(self, a, b, linkType, enabled=True):
+	def __init__(self, a, b, linkType, attrs=None, enabled=True):
 		object.__init__(self)
 		self.a = a
 		self.b = b
 		self.linkType = linkType
+		if attrs==None:
+			self.attributes = {}
+		elif type(attrs)==type({}):
+			self.attributes = attrs
+		else:
+			print 'Wrong value for AGMLink() [attrs is not a dictionary]'
+			sys.exit(-1358)
 		self.color = 'white'
 		self.enabled = enabled
 	def toString(self):
