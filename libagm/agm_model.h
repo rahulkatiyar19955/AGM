@@ -99,48 +99,64 @@ public:
 	 */
 	bool removeSymbol(int32_t id);
 
+
 	/// Replaces the first of the indentifiers with the second one in all edges of the model. It is very useful when creating a new symbol that is meant to substitute another existing symbol.
 	int32_t replaceIdentifierInEdges(int32_t existing, int32_t replacement);
+
 
 	/// Returns a shared pointer to a new symbol of type <em>symbolType</em>, with identifier <em>id</em>. If omitted, <em>id</em> is set to <em>-1</em>, which makes the symbol to be automatically assigned the first available identifier.
 	AGMModelSymbol::SPtr newSymbol(std::string symbolType, int32_t id=-1);
 
+
 	/// Returns a shared pointer to a new symbol of type <em>symbolType</em>, with identifier <em>id</em>. If <em>id</em> is set to <em>-1</em>, which makes the symbol to be automatically assigned the first available identifier.
 	AGMModelSymbol::SPtr newSymbol(int32_t identifier, std::string symbolType);
+
 
 	/// Returns a shared pointer to a new symbol of type <em>symbolType</em>. Its behavior is the one of the previous method, but it also sets for the new symbol the map of attributes provided as <em>attrs</em>.
 	AGMModelSymbol::SPtr newSymbol(int32_t identifier, std::string symbolType, std::map<std::string, std::string> attrs);
 
+
 	/// Removes all edges related to the symbol with identifier <em>id</em>.
 	bool removeEdgesRelatedToSymbol(int32_t id);
+
 
 	/// Removes all edges related to an unexisting symbol. Dangling edges only exist if users remove symbols using the variable <em>symbols</em> directly, which is disencouraged. Generally it's a better idea to remove symbols using the method <em>removeSymbol</em>.
 	bool removeDanglingEdges();
 
+
 private:
+
 	/// Inserts a given symbol in the model given a shared pointer to it.
 	int32_t insertSymbol(AGMModelSymbol::SPtr s);
+
 
 	/// Inserts a given symbol in the model given a regular pointer to it.
 	int32_t insertSymbol(AGMModelSymbol *s) { return insertSymbol(AGMModelSymbol::SPtr(s)); }
 public:
+
+
 	/// Name of the model. Only used for debugging purposes.
 	std::string name;
 
+
 	/// Returns a shared pointer to the symbol of identifier <em>identifier</em>
 	AGMModelSymbol::SPtr getSymbol(int32_t identifier) const;
-	
+
+
 	/// Returns the number of edges in the model.
 	int32_t numberOfEdges() const;
 
+
 	/// Returns the number of symbols in the model.
 	int32_t numberOfSymbols() const;
-	
+
+
 	/*! \brief Returns the index of a given symbol '<em>sym</em>' (shared pointer) within the model. If not found, returns <em>-1</em>. 
 	 * 
 	 *  Optionally, the user can provide an offset within the symbol vector (zero by default).
 	 */
 	int32_t indexOfSymbol(const AGMModelSymbol::SPtr &sym, int32_t from=0) const;
+
 
 	/*! \brief Returns the index of a given symbol '<em>sym</em>' (reference) within the model. If not found, returns <em>-1</em>. 
 	 * 
@@ -148,17 +164,21 @@ public:
 	 */
 	int32_t indexOfFirstSymbolByValues(const AGMModelSymbol &sym, int32_t from=0) const;
 
+
 	/*! \brief Returns the index of the first symbol of type '<em>symbolType</em>' within the model. If not found, returns <em>-1</em>.
 	 *
 	 *  Optionally, the user can provide an offset within the symbol vector (zero by default).
 	 */
 	int32_t indexOfFirstSymbolByType(const std::string &symbolType, int32_t from=0) const;
 
+
 	/// Returns a reference to the symbol vector. Use with care.
 	std::vector<AGMModelSymbol::SPtr> getSymbols() const;
 
+
 	/// Returns a reference to the edge vector. Use with care. <strong>DEPRECATED</STRONG>1
 	std::vector<AGMModelEdge> getEdges() const;
+
 
 	/*! \brief Returns a reference to the symbol located in position <em>'index'</em> within the symbol vector.
 	 * 
@@ -166,8 +186,10 @@ public:
 	 */
 	AGMModelSymbol::SPtr &symbol(uint32_t index);
 
+
 	/// \brief Returns a reference to the edge located in position <em>'index'</em> within the edge vector.
 	AGMModelEdge &edge(uint32_t index);
+
 
 	/*! \brief Returns the identifier of the symbol with <strong><em>"name"</em></strong> <em>'name'</em>, where a symbol's name is considered to be the concatenation of its type, the underscore character ('_') and its identifier. If not found returns <em>-1</em>.
 	 * 
@@ -177,8 +199,10 @@ public:
 	 */
 	int32_t getIdentifierByName(std::string name) const;
 
+
 	/// Returns the identifier of the symbol with <strong><em>"symbolType"</em></strong> type. If not found returns <em>-1</em>.
 	int32_t getIdentifierByType(std::string symbolType, int32_t i=0) const;
+
 
 	/*! \brief <strong>DEPRECATED</STRONG>: DON'T USE THIS METHOD
 	 * 
@@ -187,8 +211,10 @@ public:
 	 */
 	int32_t getLinkedID(int32_t id, std::string linkname, int32_t i=0) const;
 
+
 	/// Returns the index of the symbol with identifier '<em>targetId</em>, <em>-1</em> if the symbol is not found.
 	int32_t getIndexByIdentifier(int32_t targetId) const;
+
 
 	/*! \brief Returns a shared pointer to the symbol with identifier '<em>targetId</em>'.
 	 *
@@ -197,6 +223,7 @@ public:
 	 */
 	AGMModelSymbol::SPtr getSymbolByIdentifier(int32_t targetId) const;
 
+
 	/*! \brief Returns a shared pointer to the symbol with name '<em>name</em>', where a symbol's name is considered to be the concatenation of its type, the underscore character ('_') and its identifier.
 	 *
 	 * \throws AGMException If no symbol with identifier 'targetId' is found.
@@ -204,44 +231,40 @@ public:
 	 */
 	AGMModelSymbol::SPtr getSymbolByName(const std::string &name) const;
 
-	
-	/*! \brief Includes a new edge in the model given the identifiers of two symbols. Returns True on success.
+
+	/*! \brief Includes a new edge in the model given the identifiers of two symbols with an optional attribute map.  Returns True on success.
 	 *
 	 * \throws AGMException Nodes a and b must exist
 	 * 
 	 */
-	bool addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
-	
-	/*! \brief Includes a new edge in the model given the identifiers of two symbols with a set of attributes.  Returns True on success.
-	 *
-	 * \throws AGMException Nodes a and b must exist
-	 * 
-	 */
-	bool addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr);
+	bool addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr=std::map<std::string, std::string>());
+
 
 	/*! \brief Removes a new edge in the model given the identifiers of two symbols. Returns True on success.
 	 *
 	 * \throws AGMException Nodes a and b must exist
 	 * 
 	 */
-	
 	bool removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
+
 
 	/*! \brief Automatically updates the next available identifier as the smaller identifier that is bigger than any of the existing ones.
 	 *	  
 	 */
 	void resetLastId();
-	
+
+
 	/*! \brief  Set the next available identifier as <em>'i'</em>. When possible, use AGMModel::resetLastId() instead.
-	 *	  
+	 *
 	 */
 	void setLastId(int32_t i) { lastId = i; }
 
-	/// 
+
 	/*! \brief Returns the next available identifier and makes the returned value unavailable.
 	 *	  
 	 */
 	int32_t getNewId();
+
 
 	/*! \brief Returns a string containing the PDDL description of a planning problem given the current model and a target model.
 	 * 
@@ -260,12 +283,16 @@ public:
 	/// Vector of the edges that the model holds.
 	std::vector<AGMModelEdge> edges;
 private:
+
 	/// Overwrites the symbols attribute with the vector provided.
 	void setSymbols(std::vector<AGMModelSymbol::SPtr> s);
+
 	/// Overwrites the edges attribute with the vector provided.
 	void setEdges(std::vector<AGMModelEdge> e);
+
 	/// Overwrites the whole objects with the attributes in the model provied.
 	void setFrom(const AGMModel &src);
+
 	/// This variable holds the next available symbol identifier.
 	int32_t lastId;
 

@@ -285,7 +285,7 @@ void GraphModelViewer::paintEvent( QPaintEvent* event )
 void GraphModelViewer::animateStep()
 {
 // 	printf("%s: %d\n", __FILE__, __LINE__);
-	printf("animateStep\n");
+// 	printf("animateStep\n");
 	const float T = 1;
 
 	// Update repulsion-induced force

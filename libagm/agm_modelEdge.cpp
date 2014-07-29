@@ -11,8 +11,6 @@ AGMModelEdge::AGMModelEdge()
 
 AGMModelEdge::~AGMModelEdge()
 {
-	symbolPair = std::pair<int32_t, int32_t>(0, 0);
-	linking = "-";
 }
 
 AGMModelEdge::AGMModelEdge(const AGMModelEdge &src)
@@ -20,17 +18,6 @@ AGMModelEdge::AGMModelEdge(const AGMModelEdge &src)
 	setFrom(src);
 }
 
-AGMModelEdge::AGMModelEdge(int32_t a, int32_t b, std::string linking_)
-{
-	/*std::map<std::string,std::string> atr;
-	atr.clear();
-	AGMModelEdge(a,b,linking_,atr);*/
-	
-	symbolPair = std::pair<int32_t, int32_t>(a, b);
-	linking = linking_;
-	
-	
-}
 
 AGMModelEdge::AGMModelEdge(int32_t a, int32_t b, std::string linking_, std::map<std::string, std::string> atr)
 {
@@ -51,6 +38,7 @@ void AGMModelEdge::setFrom(const AGMModelEdge &src)
 {
 	linking = src.linking;
 	symbolPair = src.symbolPair;
+	attributes = src.attributes;
 }
 
 
@@ -101,11 +89,13 @@ std::string AGMModelEdge::getAttribute(std::string a)
 {
 	//return attributes[a];
 	std::string s="";
-	try{
+	try
+	{
 		s= attributes.at(a);
 	}
-	catch (const std::out_of_range& oor) {
-		std::cout << "Out of Range error: " << oor.what() << '\n';
+	catch (const std::out_of_range& oor)
+	{
+		std::cerr << "Out of Range error: " << oor.what() << '\n';
 	}
 	return s; 
 }

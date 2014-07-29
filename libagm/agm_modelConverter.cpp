@@ -268,15 +268,12 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 			}
 			else
 			{
-				printf("??? %s\n", cur->name);
+				printf("??? %s (%d)\n", cur->name, __LINE__);
 			}
 		}
 	}
 
-
 	dst->resetLastId();
-	//checks
-	
 }
 
 

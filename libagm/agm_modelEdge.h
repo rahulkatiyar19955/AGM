@@ -18,8 +18,7 @@ class AGMModelEdge
 public:
 	AGMModelEdge();
 	~AGMModelEdge();
-	AGMModelEdge(int32_t a, int32_t b, std::string linking_);
-	AGMModelEdge(int32_t a, int32_t b, std::string linking_, std::map<std::string, std::string> atr);
+	AGMModelEdge(int32_t a, int32_t b, std::string linking_, std::map<std::string, std::string> atr=std::map<std::string, std::string>());
 	AGMModelEdge(const AGMModelEdge &src);
 	AGMModelEdge& operator=(const AGMModelEdge &src);
 	AGMModelEdge *operator->() { return this; }

@@ -567,33 +567,6 @@ int32_t AGMModel::getNewId()
 }
 
 
-bool AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName)
-{
-	// Nodes must exist.
-	if (a < 0 or b < 0)
-	{
-		AGMMODELEXCEPTION("Trying to link invalid identifiers");;
-	}
-
-	// Check the edge doesn't already exists
-	for (uint32_t i=0; i<edges.size(); i++)
-	{
-		if (edges[i].symbolPair.first == a)
-		{
-			if (edges[i].symbolPair.second == b)
-			{
-				if (edges[i].getLabel() == edgeName)
-				{
-					return false;
-				}
-			}
-		}
-	}
-	AGMModelEdge edge(a, b, edgeName);
-	edges.push_back(edge);
-	return true;
-}
-
 bool AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr)
 {
 	// Nodes must exist.
@@ -616,7 +589,7 @@ bool AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edg
 			}
 		}
 	}
-	AGMModelEdge edge(a, b, edgeName,atr);
+	AGMModelEdge edge(a, b, edgeName, atr);
 	edges.push_back(edge);
 	return true;
 }
