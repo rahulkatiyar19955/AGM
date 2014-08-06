@@ -323,6 +323,7 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.cost,               SIGNAL("valueChanged(int)"), self.changeCost)
 
 		currRule = self.ui.rulesList.currentItem().text()
+		self.setWindowTitle('AGGLEditor - ['+currRule+']')
 	def generateCode(self):
 		path_pddl = QFileDialog.getSaveFileName(self, "Save FULL grammar (model verification) PDDL file as", "", "*.pddl")[0]
 		if not path_pddl.endswith(".pddl"): path_pddl += ".pddl"
