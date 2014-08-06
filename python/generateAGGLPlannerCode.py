@@ -6,7 +6,8 @@ sys.path.append('/usr/local/share/agm/')
 from AGGL import *
 from xmlModelParser import *
 
-COPY_OPTION = "kakadeepcopy"
+#COPY_OPTION = "kkdeepcopy"
+COPY_OPTION = "copy.deepcopy"
 #debug = True
 debug = False
 scorePerContition = 100
@@ -22,7 +23,7 @@ dddd = dict()
 # PyPy's copy.deepcopy is actually faster than PyPy's cPickle, so there should be no reason to use it
 def mydeepcopy(obj):
 	return cPickle.loads(cPickle.dumps(obj, -1))
-def kakadeepcopy(obj):
+def kkdeepcopy(obj):
 	global dddd
 	if type(obj) == type([]):
 		for l in obj:
@@ -391,6 +392,10 @@ def normalRuleImplementation(rule, ret, indent):
 		indent = indent[:-1]
         #ret += indent+"smap = "+COPY_OPTION+"(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
+	ret += indent+"for l in newNode.graph.links:"
+	ret += indent+"\tif type(l) != type(AGMLink('a','b','c')):"
+	ret += indent+"\t\tprint 'Ya jodidos en "+str(rule.name)+"'"
+	ret += indent+"\t\tsys.exit(-1)"
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
@@ -421,7 +426,7 @@ def normalRuleImplementation(rule, ret, indent):
 		deleteLinks_str = ''
 		for l in range(len(deleteLinks)):
 			if l > 0: deleteLinks_str += ", "
-                        deleteLinks_str += "[n2id['" + deleteLinks[l].a + "'], n2id['" + deleteLinks[l].b + "'], '" + deleteLinks[l].linkType + "']"
+			deleteLinks_str += "[n2id['" + deleteLinks[l].a + "'], n2id['" + deleteLinks[l].b + "'], '" + deleteLinks[l].linkType + "']"
 		ret += indent+"newNode.graph.links = [x for x in newNode.graph.links if [x.a, x.b, x.linkType] not in [ "+deleteLinks_str+" ]]"
 	# Create links
 	ret += indent+"# Create links"
@@ -632,11 +637,12 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 				ret += effectType + '"] in snode.graph.links # LINK'
 			else:
 				if modifier == 'not':
-					ret += indent+'if     [n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"] in newNode.graph.links:'
-					ret += indent+'\tnewNode.graph.links.remove([n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"])'
+					ret += indent+'if [n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"] in newNode.graph.links:'
+					#ret += indent+'\tnewNode.graph.links.remove([n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"])'
+					ret += indent+'\tnewNode.graph.links = [x for x in newNode.graph.links if x.a!=n2id["'+effectBody[0]+'"] or x.b!=n2id["'+effectBody[1]+'"] or x.linkType!="'+effectType+'"]'
 				else:
 					ret += indent+'if not [n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"] in newNode.graph.links:'
-					ret += indent+'\tnewNode.graph.links.append([n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"])'
+					ret += indent+'\tnewNode.graph.links.append(AGMLink(n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"))'
 		except:
 			print 'ERROR IN', effectType
 			print 'ERROR IN', effectBody

@@ -1,4 +1,4 @@
-import math, traceback, itertools, copy, sys
+import math, traceback, itertools, copy, sys, inspect
 
 from pddlAGGL import *
 
@@ -53,7 +53,7 @@ class AGMLink(object):
 		elif type(attrs)==type({}):
 			self.attributes = attrs
 		else:
-			print 'Wrong value for AGMLink() [attrs is not a dictionary]'
+			print 'Wrong value for AGMLink() [attrs is not a dictionary]', type(attrs)
 			sys.exit(-1358)
 		self.color = 'white'
 		self.enabled = enabled
@@ -148,13 +148,10 @@ class AGMGraph(object):
 	def __repr__(self):
 		return self.__str__()
 	def __cmp__(self):
-		#print '__cmp__'
 		return object.__cmp__(self)
 	def __hash__(self):
-		#print '__hash__'
 		return (len(self.nodes), len(self.links))
 	def __eq__(self, other):
-		#print '__EQ__'
 		try:
 			# Basic: number of nodes
 			if len(self.nodes) != len(other.nodes):
@@ -288,7 +285,7 @@ class AGMGraph(object):
 			print 'No such node', str(name)+'. Internal editor error.'
 			pass
 	def addEdge(self, a, b, linkname='link'):
-		self.links.append(AGMLink(a, b, linkname, True))
+		self.links.append(AGMLink(a, b, linkname, enabled=True))
 	def removeEdge(self, a, b):
 		i = 0
 		while i < len(self.links):
@@ -405,7 +402,6 @@ class AGMComboRule(object):
 		self.cost = cost
 		self.equivalences = []
 		for eq in eqs:
-			#print eq
 			eqResult = list()
 			for element in eq:
 				eqResult.append([element[0], element[1]])

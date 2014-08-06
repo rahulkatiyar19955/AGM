@@ -183,10 +183,6 @@ add_executable ( agm_xmlViewer3D tools/agm_xmlViewer3D.cpp ${ROBOCOMP_ADDITIONAL
 target_link_libraries ( agm_xmlViewer3D agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
-MESSAGE ( STATUS "aa ${Boost_LIBRARIES} dd" )
-MESSAGE ( STATUS "bb ${Boost_LIBRARIES} cc" )
-MESSAGE ( STATUS "cc ${Boost_LIBRARIES} bb" )
-MESSAGE ( STATUS "dd ${Boost_LIBRARIES} aa" )
 
 
 #  Doxygen  #
@@ -199,6 +195,9 @@ if(DOXYGEN_FOUND)
     COMMENT "Generating API documentation with Doxygen"
     VERBATIM
   )
+  MESSAGE( STATUS "Doxygen found.")
+else(DOXYGEN_FOUND)
+  MESSAGE( WARNING "Doxygen not found. You will not be able to generate the documentation.")
 endif(DOXYGEN_FOUND)
 
 

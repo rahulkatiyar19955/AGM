@@ -32,7 +32,7 @@ class AGMGraphParsing:
 			if verbose: print '\t\tL:', l.lhs, '->', l.rhs, '('+l.no, l.linkType+') ['+l.enabled+']'
 			lV = True
 			if len(l.enabled)>0: lV = False
-			links.append(AGMLink(l.lhs, l.rhs, l.linkType, lV))
+			links.append(AGMLink(l.lhs, l.rhs, l.linkType, enabled=lV))
 		if verbose: print '\t}'
 		return AGMGraph(nodes, links)
 

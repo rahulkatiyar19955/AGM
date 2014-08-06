@@ -38,7 +38,7 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
-maxWorldIncrement = 40
+maxWorldIncrement = 4
 maxCost = 200
 stopWithFirstPlan = True
 verbose = 1
@@ -226,7 +226,6 @@ class PyPlan(object):
 		# Get goal-checking code
 		target = imp.load_source('target', targetPath)
 		self.targetCode = target.CheckTarget
-
 
 		# Some little initialization
 		maxWorldSize = maxWorldIncrement+len(self.initWorld.graph.nodes.keys())
