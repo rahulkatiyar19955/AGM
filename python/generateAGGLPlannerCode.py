@@ -440,9 +440,14 @@ def normalRuleImplementation(rule, ret, indent):
 		ret += indent+"# Textual effects"
 		ret += indent+"nodes = "+COPY_OPTION+"(newNode.graph.nodes)"
 		indentP = indent
-		effectCode, indent, effectId, stuff = normalRuleImplementation_EFFECT(rule.effectAST, indent)
+		try:
+			effectCode, indent, effectId, stuff = normalRuleImplementation_EFFECT(rule.effectAST, indent)
+		except:
+			print 'Error in the "effects" section of rule', rule.name
+			sys.exit(-1)
 		ret += indentP+'backVars = n2id.keys()'
 		ret += effectCode
+		# These three lines remove temporal variables from the scope (defined in n2id)
 		ret += indentP+'for k in n2id.keys():'
 		ret += indentP+'\tif not k in backVars:'
 		ret += indentP+'\t\tdel n2id[k]'
@@ -566,8 +571,8 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 	formulaId = stuff['availableid']
 	stuff['availableid'] += 1
 	ret = ''
+	#print '<',effectType,'>'
 
-	#print 'normalRuleImplementation EFFECT #'+str(effectType)+'# ', ' #'+str(effectBody)+'#'
 	if effectType == "not":
 		effectBody = effectBody[0]
 		if stuff['mode'] == 'condition':
@@ -635,6 +640,8 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 	elif effectType == "retype":
 		ret += indent+"newNode.graph.nodes[n2id['"+effectBody[0]+"']].sType = '"+effectBody[1]+"'"
 	else:
+		if effectBody[0] == '':
+			raise Exception('ERROR IN: '+str(effect))
 		try:
 			if stuff['mode'] == "condition":
 				ret += indent+'condition'+str(formulaId) + ' = ['
@@ -653,8 +660,6 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 			print 'ERROR IN', effectType
 			print 'ERROR IN', effectBody
 			traceback.print_exc()
-			
-	#ret += "end "+str(effectType)
 	return ret, indent, formulaId, stuff
 
 def generate(agm, skipPassiveRules):
@@ -663,7 +668,7 @@ def generate(agm, skipPassiveRules):
 	text += ruleDeclaration(agm)
 	text += ruleTriggerDeclaration(agm)
 	for rule in agm.rules:
-		text+= ruleImplementation(rule)
+		text += ruleImplementation(rule)
 	return text
 
 
