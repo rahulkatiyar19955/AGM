@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>720</width>
-    <height>569</height>
+    <width>1375</width>
+    <height>967</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -145,142 +145,126 @@
           </item>
          </layout>
         </item>
-        <item>
-         <layout class="QVBoxLayout" name="layoutCombo">
-          <item>
-           <widget class="QPlainTextEdit" name="plainTextEdit"/>
-          </item>
-         </layout>
-        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="layoutWidget">
        <layout class="QVBoxLayout" name="layoutDown">
         <item>
-         <widget class="QTabWidget" name="tabWidget">
-          <property name="currentIndex">
-           <number>0</number>
-          </property>
-          <widget class="QWidget" name="tab">
-           <attribute name="title">
-            <string>Edit rule</string>
-           </attribute>
-           <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout">
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout">
-              <item>
-               <widget class="QLabel" name="label_4">
-                <property name="text">
-                 <string>Rules</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QListWidget" name="rulesList">
-                <property name="enabled">
-                 <bool>true</bool>
-                </property>
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Rules</string>
+              </property>
+             </widget>
             </item>
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_2">
-              <item>
-               <widget class="QLabel" name="label_5">
-                <property name="text">
-                 <string>Tools</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QListWidget" name="toolsList">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-                  <horstretch>1</horstretch>
-                  <verstretch>1</verstretch>
-                 </sizepolicy>
-                </property>
-               </widget>
-              </item>
-             </layout>
+             <widget class="QListWidget" name="rulesList">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
             </item>
            </layout>
-          </widget>
-          <widget class="QWidget" name="tabParameters">
-           <attribute name="title">
-            <string>Textual code</string>
-           </attribute>
-           <layout class="QGridLayout" name="gridLayout">
-            <item row="1" column="0">
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_2">
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Tools</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QListWidget" name="toolsList">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                <horstretch>1</horstretch>
+                <verstretch>1</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="layoutCombo">
+            <item>
+             <widget class="QLabel" name="comboRuleLabel">
+              <property name="text">
+               <string>Combo rule editor</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPlainTextEdit" name="comboRuleTextEdit"/>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_5">
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Parameters</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QTextEdit" name="textParameters">
               <property name="tabStopWidth">
                <number>20</number>
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_6">
+            <item>
+             <widget class="QLabel" name="label_7">
+              <property name="text">
+               <string>Precondition</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QTextEdit" name="textPrecondition">
               <property name="tabStopWidth">
                <number>20</number>
               </property>
              </widget>
             </item>
-            <item row="1" column="2">
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+            <item>
+             <widget class="QLabel" name="label_8">
+              <property name="text">
+               <string>Effect</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QTextEdit" name="textEffect">
               <property name="tabStopWidth">
                <number>20</number>
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_6">
-              <property name="font">
-               <font>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>Parameters</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QLabel" name="label_7">
-              <property name="font">
-               <font>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>Precondition</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QLabel" name="label_8">
-              <property name="font">
-               <font>
-                <weight>75</weight>
-                <bold>true</bold>
-               </font>
-              </property>
-              <property name="text">
-               <string>Effect</string>
-              </property>
-             </widget>
-            </item>
            </layout>
-          </widget>
-         </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -293,8 +277,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>720</width>
-     <height>22</height>
+     <width>1375</width>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -311,7 +295,6 @@
      <string>More</string>
     </property>
     <addaction name="actionGraphmar"/>
-    <addaction name="actionAdvanced"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">

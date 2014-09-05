@@ -38,7 +38,7 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
-maxWorldIncrement = 4
+maxWorldIncrement = 6
 maxCost = 200
 stopWithFirstPlan = True
 verbose = 1

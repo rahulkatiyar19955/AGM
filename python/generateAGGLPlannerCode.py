@@ -197,9 +197,6 @@ def normalRuleImplementation(rule, ret, indent):
 		for i in rule.parametersAST:
 			nodesPlusParameters[i[0]] = AGMSymbol(i[0], i[1])
 	# >>>
-	#print 'normalRuleImplementation.parameters', rule.parameters
-	#print 'normalRuleImplementation.precondition', rule.precondition
-	#print 'normalRuleImplementation.effect', rule.effect
 	ret += indent+"def " + rule.name + "(self, snode, stackP=None, equivalencesP=None):"
 	indent += "\t"
 	ret += indent+"if stackP == None: stackP=[]"
@@ -304,15 +301,18 @@ def normalRuleImplementation(rule, ret, indent):
 	# Quantifier-related code (PRECONDITION)
 	# <<<
 	if rule.preconditionAST != None:
+		indentP = indent
 		preconditionCode, indent, conditionId, stuff = normalRuleImplementation_PRECONDITION(rule.preconditionAST, indent)
+		ret += indentP+'backVars = n2id.keys()'
 		ret += preconditionCode
-		ret += indent+'if precondition'+str(conditionId)+':'
+		ret += indentP+'for k in n2id.keys():'
+		ret += indentP+'\tif not k in backVars:'
+		ret += indentP+'\t\tdel n2id[k]'
+		ret += indentP+'if precondition'+str(conditionId)+':'
 		indent += '\t'
 	# >>>
 	# Code to call rule execution
 	ret += indent+"# At this point we meet all the conditions."
-	ret += indent+"# Insert additional conditions manually here if you want."
-	ret += indent+"# (beware that the code could be regenerated and you might lose your changes)."
 	#ret += indent+"print 'Running rule "+rule.name+"'"
 	ret += indent+"stack2        = "+COPY_OPTION+"(stack)"
 	ret += indent+"equivalences2 = "+COPY_OPTION+"(equivalences)"
@@ -439,8 +439,14 @@ def normalRuleImplementation(rule, ret, indent):
 	if rule.effectAST != None:
 		ret += indent+"# Textual effects"
 		ret += indent+"nodes = "+COPY_OPTION+"(newNode.graph.nodes)"
+		indentP = indent
 		effectCode, indent, effectId, stuff = normalRuleImplementation_EFFECT(rule.effectAST, indent)
+		ret += indentP+'backVars = n2id.keys()'
 		ret += effectCode
+		ret += indentP+'for k in n2id.keys():'
+		ret += indentP+'\tif not k in backVars:'
+		ret += indentP+'\t\tdel n2id[k]'
+
 	# >>>
 	# Misc stuff
 	indent = '\n\t\t'
