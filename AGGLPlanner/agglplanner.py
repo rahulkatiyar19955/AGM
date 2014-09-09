@@ -39,13 +39,13 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
-number_of_threads = 3
+number_of_threads = 1
 maxWorldIncrement = 6
 maxCost = 200
 stopWithFirstPlan = True
 verbose = 1
 maxTimeWaitAchieved = 10.
-maxTimeWaitLimit = 1000.
+maxTimeWaitLimit = 600.
 
 maxCostRatioToBestSolution = 1.00001
 
@@ -112,7 +112,6 @@ class AGGLPlannerPlan(object):
 			for action in init:
 				self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
 		elif type(init) == type(AGGLPlannerPlan()):
-			#print 'AGGLPlannerPlan("COPY class")'
 			self.data = copy.deepcopy(init.data)
 		else:
 			print 'Unknown plan type ('+str(type(init))+')! (internal error)'
@@ -208,56 +207,93 @@ def printResult(result):
 	for action in result.history:
 		print action
 
+class LockableList(list):
+	def __init__(self, *args):
+		list.__init__(self, *args)
+		self.mutex = threading.RLock()
+	def size(self):
+		self.mutex.acquire()
+		ret = len(self)
+		self.mutex.release()
+		return ret
+	def heapqPop(self):
+		self.mutex.acquire()
+		try:
+			ret = heapq.heappop(self)
+		finally:
+			self.mutex.release()
+		return ret
+	def heapqPush(self, value):
+		self.mutex.acquire()
+		heapq.heappush(self, value)
+		self.mutex.release()
+	def getFirstElement(self):
+		self.mutex.acquire()
+		ret = self[0]
+		self.mutex.release()
+		return ret
+	def append(self, v):
+		self.mutex.acquire()
+		super(LockableList, self).append(v)
+		self.mutex.release()
+	def lock(self):
+		self.mutex.acquire()
+	def unlock(self):
+		self.mutex.release()
 
-def CheckSymbolInGraph(graph, symbol):
-	for cacho_n in graph.nodes:
-		cacho = graph.nodes[cacho_n]
-		if cacho.sType == symbol:
-			return True
-	return False
+class LockableInteger(object):
+	def __init__(self, val=0):
+		self.value = val
+		self.mutex = threading.RLock()
+	def set(self):
+		self.mutex.acquire()
+		self.value = val
+		self.mutex.release()
+	def get(self):
+		self.mutex.acquire()
+		ret = self.value
+		self.mutex.release()
+		return ret
+	def lock(self):
+		self.mutex.acquire()
+	def unlock(self):
+		self.mutex.release()
+	def increase(self):
+		self.mutex.acquire()
+		self.value += 1
+		self.mutex.release()
 
 class PyPlan(object):
 	def __init__(self, domainPath, init, targetPath, resultFile):
 		object.__init__(self)
 		# Get initial world mdoel
-		self.initWorld = WorldStateHistory(xmlModelParser.graphFromXML(init))
-		self.initWorld.nodeId = 0
+		initWorld = WorldStateHistory(xmlModelParser.graphFromXML(init))
+		initWorld.nodeId = 0
 		# Get graph rewriting rules
-		domain = imp.load_source('domain', domainPath)
-		self.domain     = domain.RuleSet()
-
-		#
-		# These should be secured
-		#
-
+		domain = imp.load_source('domain', domainPath).RuleSet()
+		ruleMap = domain.getRules()
 		# Get goal-checking code
 		target = imp.load_source('target', targetPath)
 		self.targetCode = target.CheckTarget
-		# Some little initialization
-		self.maxWorldSize = maxWorldIncrement+len(self.initWorld.graph.nodes.keys())
-		self.mincostOnList = 0
-		self.ruleMap = self.domain.getRules()
-		self.openNodes = []
-		heapq.heappush(self.openNodes, (0, copy.deepcopy(self.initWorld)))
-		if verbose>1: print 'INIT'.ljust(20), self.initWorld
-		self.knownNodes = []
-		self.results = []
-		self.explored = 0
-		self.cheapestSolutionCost = -1
-		self.timeA = datetime.datetime.now()
 
-		# These are thread-safe
+		# Search initialization
+		self.maxWorldSize = maxWorldIncrement+len(initWorld.graph.nodes.keys())
+		self.minCostOnOpenNodes = LockableInteger(0)
+		self.openNodes = LockableList()
+		self.knownNodes = LockableList()
+		self.results = LockableList()
+		self.explored = LockableInteger(0)
+		self.cheapestSolutionCost = LockableInteger(-1)
 		self.end_condition = EndCondition()
+		self.openNodes.heapqPush((0, copy.deepcopy(initWorld)))
+		if verbose>1: print 'INIT'.ljust(20), initWorld
 
+		# Create initial state
+		initWorld.score, achieved = self.targetCode(initWorld.graph)
 
-
-		# Run threads
-		self.initWorld.score, achieved = self.targetCode(self.initWorld.graph)
 		if achieved:
-			self.results.append(self.initWorld)
-			self.cheapestSolutionCost = self.results[0].cost
-			for s in self.results:
-				if s.cost < self.cheapestSolutionCost: self.cheapestSolutionCost = s.cost
+			self.results.append(initWorld)
+			self.cheapestSolutionCost.set(self.results.getFirstElement().cost)
 			# Check if we should stop because we are looking for the first solution
 			if stopWithFirstPlan:
 				self.end_condition.set("GoalAchieved")
@@ -268,12 +304,11 @@ class PyPlan(object):
 				lock = thread.allocate_lock()
 				lock.acquire()
 				self.thread_locks.append(lock)
-				thread.start_new_thread(self.startThreadedWork, (lock, i))
-			print 'Main thread waits'
+				thread.start_new_thread(self.startThreadedWork, (lock, i, copy.deepcopy(ruleMap)))
 			# Wait for the threads to stop
 			for lock in self.thread_locks:
 				lock.acquire()
-			print 'workers finished'
+
 		if self.end_condition.get() == "IndexError":
 			if verbose > 0: print 'End: state space exhausted'
 		elif self.end_condition.get() == "MaxCostReached":
@@ -282,9 +317,13 @@ class PyPlan(object):
 			if verbose > 0: print 'End: best solution found'
 		elif self.end_condition.get() == "GoalAchieved":
 			if verbose > 0: print 'End: goal achieved'
+		elif self.end_condition.get() == "TimeLimit":
+			if verbose > 0: print 'End: TimeLimit'
 		elif self.end_condition.get() == None:
 			if verbose > 0: print 'NDD:DD:D:EWJRI'
 		else:
+			print 'UNKNOWN ERROR r3oite43kiohnx+439'
+			print self.end_condition.get()
 			print 'UNKNOWN ERROR r3oite43kiohnx+439'
 
 		if len(self.results)==0:
@@ -300,77 +339,56 @@ class PyPlan(object):
 			for action in self.results[i].history:
 				if resultFile != None:
 					resultFile.write(str(action)+'\n')
-			if verbose > 0: print "----------------\nExplored", self.explored, "nodes"
-			for e in domain.dddd:
-				print e, domain.dddd[e]
+			if verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
+			#for e in domain.dddd:
+				#print e, domain.dddd[e]
 
-	def startThreadedWork(self, lock, i):
-		print 'Start thead worker'+str(i)
+	def startThreadedWork(self, lock, i, ruleMap):
+		timeA = datetime.datetime.now()
 		while True:
-			#print str(i)+'a'
 			timeB = datetime.datetime.now()
-			timeElapsed = (timeB-self.timeA).seconds + (timeB-self.timeA).microseconds/1e6
+			timeElapsed = (timeB-timeA).seconds + (timeB-timeA).microseconds/1e6
 			# Check if we should give up because it already took too much time
+			nResults = self.results.size()
 			if timeElapsed > maxTimeWaitLimit:
-				if len(self.results)>0:
-					self.end_condition.set("GoalAchieved")
-					lock.release()
-					return
-				else:
-					self.end_condition.set("TimeLimit")
-					lock.release()
-					return
-			# Check if we should stop looking because it's taking quite a long time and we already have a solution
-			elif timeElapsed > maxTimeWaitAchieved and len(self.results)>0:
+				if nResults>0: self.end_condition.set("GoalAchieved")
+				else: self.end_condition.set("TimeLimit")
+				lock.release()
+				return
+			# Else, proceed...
+			# Try to pop a node from the queue
+			try:
+				head = self.openNodes.heapqPop()[1] # P O P   POP   p o p   pop
+			except:
+				time.sleep(0.00001)
+				continue
+
+			# Update 'minCostOnOpenNodes', so we can stop when the minimum cost in the queue is bigger than one in the results
+			self.updateMinCostOnOpenNodes(head.cost)
+			# Check if we got to the maximum cost or the minimum solution
+			if head.cost > maxCost:
+				self.end_condition.set("MaxCostReached")
+				lock.release()
+				return
+			elif self.results.size()>0 and head.cost>self.cheapestSolutionCost.value:
 				self.end_condition.set("GoalAchieved")
 				lock.release()
 				return
-			#print str(i)+'b'
-			# Else, proceed...
-			if len(self.openNodes) == 0:
-				time.sleep(0.001)
-				continue
-			# Pop a node from the queue
-			head = heapq.heappop(self.openNodes)[1] # P O P   POP   p o p   pop
-			# Update 'mincostOnList', so we can stop when the minimum cost in the queue is bigger than one in the results
-			if head.cost <= self.mincostOnList:
-				if len(self.openNodes)==0:
-					self.mincostOnList = 0
-				else:
-					self.mincostOnList = self.openNodes[0][1].cost
-					for n in self.openNodes:
-						if n[1].cost < self.mincostOnList:
-							self.mincostOnList = n[1].cost
-			# Check if we got to the maximum cost or the minimum solution
-			#if head.cost > maxCost:
-				#self.end_condition.set("MaxCostReached")
-				#lock.release()
-				#return
-			#elif len(results)>0 and head.cost>self.cheapestSolutionCost:
-				#self.end_condition.set("GoalAchieved")
-				#lock.release()
-				#return
-			# Small test
-			#print str(i)+'c'
 			if verbose>5: print 'Expanding'.ljust(5), head
-			for k in self.ruleMap:
-				prtd = False
+			for k in ruleMap:
 				# Iterate over rules and generate derivates
-				for deriv in self.ruleMap[k](head):
-					if not prtd:
-						if verbose>5: print '  ', k
-						prtd = True
-					self.explored += 1
-					if verbose > 0:
-						if self.explored % 300 == 0:
-							print 'Explored nodes:', self.explored,
-							print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-							print 'First(cost:'+str(self.openNodes[ 0][1].cost)+', score:'+str(self.openNodes[ 0][1].score)+', depth:'+str(self.openNodes[ 0][1].depth)+')'
-							print  'Last(cost:'+str(self.openNodes[-1][1].cost)+', score:'+str(self.openNodes[-1][1].score)+', depth:'+str(self.openNodes[-1][1].depth)+')'
+				for deriv in ruleMap[k](head):
+					self.explored.increase()
+					#if verbose > 0:
+						#if self.getExploredNumber() % 300 == 0:
+							#print 'Explored nodes:', self.getExploredNumber()
+							#print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
+							#print 'First(cost:'+str(self.openNodes[ 0][1].cost)+', score:'+str(self.openNodes[ 0][1].score)+', depth:'+str(self.openNodes[ 0][1].depth)+')'
+							#print  'Last(cost:'+str(self.openNodes[-1][1].cost)+', score:'+str(self.openNodes[-1][1].score)+', depth:'+str(self.openNodes[-1][1].depth)+')'
 					deriv.score, achieved = self.targetCode(deriv.graph)
 					if verbose>4: print deriv.score, achieved, deriv
 					if achieved:
-						#print 'Found solution', deriv.cost
+						print 'Found solution', deriv.cost
 						self.results.append(deriv)
 						# Should we stop with the first plan?
 						if stopWithFirstPlan:
@@ -378,36 +396,60 @@ class PyPlan(object):
 							lock.release()
 							return
 						# Compute cheapest solution
-						self.cheapestSolutionCost = self.results[0].cost
-						for s in self.results:
-							if s.cost < self.cheapestSolutionCost:
-								self.cheapestSolutionCost = s.cost
-						# Check if ws should stop because there are no cheaper possibilities
-						stopBecauseAllOpenNodesAreMoreExpensive = True
-						for c in self.openNodes:
-							if c[0] < self.cheapestSolutionCost:
-								stopBecauseAllOpenNodesAreMoreExpensive = False
-								break
-						if stopBecauseAllOpenNodesAreMoreExpensive:
+						stopNow = self.updateCheapestSolutionCostAndCheckIfTheBestSolutionWasAlreadyFound(self.results[0].cost)
+						if stopNow:
 							self.end_condition.set("BestSolutionFound")
 							lock.release()
 							return
-						#else:
-							#print '+('+str(deriv.cost)+')'
-					if not deriv in self.knownNodes:
+					self.knownNodes.lock()
+					notDerivInKnownNodes = not deriv in self.knownNodes
+					self.knownNodes.unlock()
+					if notDerivInKnownNodes:
 						if deriv.stop == False:
-							if self.cheapestSolutionCost < 1:
+							if self.cheapestSolutionCost.value < 1:
 								ratio = 0.
 							else:
-								ratio = float(deriv.cost) / float(self.cheapestSolutionCost)
-							#print cheapestSolutionCost, deriv.cost
-							#print ratio
+								ratio = float(deriv.cost) / float(self.cheapestSolutionCost.value)
 							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize and ratio < maxCostRatioToBestSolution:
 								self.knownNodes.append(head)
-								#heapq.heappush(self.openNodes, (-deriv.score, deriv)) # score... the more the better
-								#heapq.heappush(self.openNodes, ( deriv.cost, deriv)) # cost...  the less the better
-								heapq.heappush(self.openNodes, ( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
-								#heapq.heappush(self.openNodes, ( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv)) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+								#self.openNodes.heapqPush( (-deriv.score, deriv)) # score... the more the better
+								#self.openNodes.heapqPush( ( deriv.cost, deriv)) # cost...  the less the better
+								self.openNodes.heapqPush( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+								#self.openNodes.heapqPush( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+
+	def updateCheapestSolutionCostAndComputeLeastExpensiveOpenNode(self, cost):
+		self.cheapestSolutionCost.lock()
+		self.cheapestSolutionCost = cost
+		self.results.lock()
+		for s in self.results:
+			if s.cost < self.cheapestSolutionCost:
+				self.cheapestSolutionCost = s.cost
+		self.results.unlock()
+		# Check if ws should stop because there are no cheaper possibilities
+		self.openNodes.lock()
+		for c in self.openNodes:
+			if c[0] < self.cheapestSolutionCost:
+				self.openNodes.unlock()
+				return False
+				break
+		self.openNodes.unlock()
+		self.cheapestSolutionCost.unlock()
+		return True
+
+	def updateMinCostOnOpenNodes(self, cost):
+		self.minCostOnOpenNodes.lock()
+		self.openNodes.lock()
+		if cost < self.minCostOnOpenNodes.value:
+			if self.getNumberOfOpenNodes()==0:
+				self.minCostOnOpenNodes.value = 0
+			else:
+				self.minCostOnOpenNodes.value = self.firstOpenNode()[1].cost
+				for n in self.openNodes:
+					if n[1].cost < self.minCostOnOpenNodes.value:
+						self.minCostOnOpenNodes.value = n[1].cost
+		self.openNodes.unlock()
+		self.minCostOnOpenNodes.unlock()
+
 
 if __name__ == '__main__': # program domain problem result
 	#from pycallgraph import *
