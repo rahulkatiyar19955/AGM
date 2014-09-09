@@ -39,7 +39,7 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
-number_of_threads = 1
+number_of_threads = 0
 maxWorldIncrement = 6
 maxCost = 200
 stopWithFirstPlan = True
@@ -297,17 +297,19 @@ class PyPlan(object):
 			# Check if we should stop because we are looking for the first solution
 			if stopWithFirstPlan:
 				self.end_condition.set("GoalAchieved")
-		else:
+		elif number_of_threads>0:
 			# Run working threads
 			self.thread_locks = []
 			for i in xrange(number_of_threads):
 				lock = thread.allocate_lock()
 				lock.acquire()
 				self.thread_locks.append(lock)
-				thread.start_new_thread(self.startThreadedWork, (lock, i, copy.deepcopy(ruleMap)))
+				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), lock, i))
 			# Wait for the threads to stop
 			for lock in self.thread_locks:
 				lock.acquire()
+		else:
+			self.startThreadedWork(ruleMap)
 
 		if self.end_condition.get() == "IndexError":
 			if verbose > 0: print 'End: state space exhausted'
@@ -322,9 +324,9 @@ class PyPlan(object):
 		elif self.end_condition.get() == None:
 			if verbose > 0: print 'NDD:DD:D:EWJRI'
 		else:
-			print 'UNKNOWN ERROR r3oite43kiohnx+439'
+			print 'UNKNOWN ERROR'
 			print self.end_condition.get()
-			print 'UNKNOWN ERROR r3oite43kiohnx+439'
+			print 'UNKNOWN ERROR'
 
 		if len(self.results)==0:
 			if verbose > 0: print 'No plan found.'
@@ -343,7 +345,10 @@ class PyPlan(object):
 			#for e in domain.dddd:
 				#print e, domain.dddd[e]
 
-	def startThreadedWork(self, lock, i, ruleMap):
+	def startThreadedWork(self, ruleMap, lock=None, i=0):
+		if lock == None:
+			lock = thread.allocate_lock()
+			lock.acquire()
 		timeA = datetime.datetime.now()
 		while True:
 			timeB = datetime.datetime.now()
