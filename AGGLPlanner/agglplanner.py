@@ -40,7 +40,7 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 number_of_threads = 0
-maxWorldIncrement = 14
+maxWorldIncrement = 8
 maxCost = 200
 stopWithFirstPlan = False
 verbose = 1
@@ -294,15 +294,15 @@ class PyPlan(object):
 		if achieved:
 			self.results.append(initWorld)
 			self.cheapestSolutionCost.set(self.results.getFirstElement().cost)
-			# Check if we should stop because we are looking for the first solution
-			if stopWithFirstPlan:
-				self.end_condition.set("GoalAchieved")
+			self.end_condition.set("GoalAchieved")
 		elif number_of_threads>0:
 			# Run working threads
 			self.thread_locks = []
+			threadStatus = LockableList()
 			for i in xrange(number_of_threads):
 				lock = thread.allocate_lock()
 				lock.acquire()
+				threadStatus.append(True)
 				self.thread_locks.append(lock)
 				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), lock, i))
 			# Wait for the threads to stop
@@ -345,10 +345,14 @@ class PyPlan(object):
 			#for e in domain.dddd:
 				#print e, domain.dddd[e]
 
-	def startThreadedWork(self, ruleMap, lock=None, i=0):
+	def startThreadedWork(self, ruleMap, lock=None, i=0, threadPoolStatus=None):
 		if lock == None:
 			lock = thread.allocate_lock()
 			lock.acquire()
+		if threadPoolStatus != None:
+			threadPoolStatus.lock()
+			threadPoolStatus[i] = True
+			threadPoolStatus.unlock()
 		timeA = datetime.datetime.now()
 		while True:
 			timeB = datetime.datetime.now()
@@ -364,8 +368,25 @@ class PyPlan(object):
 			# Try to pop a node from the queue
 			try:
 				head = self.openNodes.heapqPop()[1] # P O P   POP   p o p   pop
+				if threadPoolStatus:
+					threadPoolStatus.lock()
+					threadPoolStatus[i] = True
+					threadPoolStatus.unlock()
 			except:
+				if not threadPoolStatus:
+					self.end_condition.set("IndexError")
+					print 'aaaaaaaaaaaaaaaaaaaaaaa'
+					lock.release()
+					return
 				time.sleep(0.00001)
+				threadPoolStatus.lock()
+				threadPoolStatus[i] = False
+				if not True in threadPoolStatus:
+					self.end_condition.set("IndexError")
+					print 'bbbbbbbbbbbbbbbbbbbbbbb'
+					lock.release()
+					return
+				threadPoolStatus.unlock()
 				continue
 
 			# Update 'minCostOnOpenNodes', so we can stop when the minimum cost in the queue is bigger than one in the results
@@ -384,12 +405,24 @@ class PyPlan(object):
 				# Iterate over rules and generate derivates
 				for deriv in ruleMap[k](head):
 					self.explored.increase()
-					#if verbose > 0:
-						#if self.getExploredNumber() % 300 == 0:
-							#print 'Explored nodes:', self.getExploredNumber()
-							#print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-							#print 'First(cost:'+str(self.openNodes[ 0][1].cost)+', score:'+str(self.openNodes[ 0][1].score)+', depth:'+str(self.openNodes[ 0][1].depth)+')'
-							#print  'Last(cost:'+str(self.openNodes[-1][1].cost)+', score:'+str(self.openNodes[-1][1].score)+', depth:'+str(self.openNodes[-1][1].depth)+')'
+					if verbose > 0:
+						doIt=False
+						nowNow = datetime.datetime.now()
+						try:
+							elap = (nowNow-self.lastTime).seconds + (nowNow-self.lastTime).microseconds/1e6
+							doIt = elap > 3
+						except:
+							self.lastTime = datetime.datetime.now()
+							doIt = True
+						if doIt:
+							self.lastTime = nowNow
+							try:
+								print 'Explored nodes:', self.explored.get()
+								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
+								print 'First(cost:'+str(self.openNodes[ 0][1].cost)+', score:'+str(self.openNodes[ 0][1].score)+', depth:'+str(self.openNodes[ 0][1].depth)+')'
+								print  'Last(cost:'+str(self.openNodes[-1][1].cost)+', score:'+str(self.openNodes[-1][1].score)+', depth:'+str(self.openNodes[-1][1].depth)+')'
+							except:
+								pass
 					deriv.score, achieved = self.targetCode(deriv.graph)
 					if verbose>4: print deriv.score, achieved, deriv
 					if achieved:
