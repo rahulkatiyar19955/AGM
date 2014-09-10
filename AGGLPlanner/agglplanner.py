@@ -245,7 +245,7 @@ class LockableInteger(object):
 	def __init__(self, val=0):
 		self.value = val
 		self.mutex = threading.RLock()
-	def set(self):
+	def set(self, val):
 		self.mutex.acquire()
 		self.value = val
 		self.mutex.release()

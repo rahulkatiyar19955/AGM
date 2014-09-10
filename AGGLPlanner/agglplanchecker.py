@@ -68,9 +68,10 @@ class PyPlanChecker(object):
 				if verbose: print 'Executing action', line 
 				line += 1
 				if verbose: print action
-				#for p in action.parameters.keys():
-					#if not action.parameters[p] in world.graph.nodes.keys():
-						#raise WrongRuleExecution("Parameter '"+action.parameters[p]+"' (variable '"+p+"') doesn't exists in the current world model.")
+				for p in action.parameters.keys():
+					if not action.parameters[p] in world.graph.nodes.keys():
+						print 'XXXXXXXXXXXX'
+						raise WrongRuleExecution("Parameter '"+action.parameters[p]+"' (variable '"+p+"') doesn't exists in the current world model.")
 				world = self.domain.getTriggers()[action.name](world, action.parameters, checked=False)
 				if verbose: print 'result:'
 				if verbose: print world

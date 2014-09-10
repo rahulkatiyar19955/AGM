@@ -73,21 +73,26 @@ def ruleTriggerDeclaration(agm):
 
 def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere):
 	ret = ''
+	info = []
 	number = 0
 	for link in linkList:
 		if newSymbol == link.a or newSymbol == link.b:
 			pre = ' and '
+			negated = ''
 			if not link.enabled:
 				pre += 'not '
+				negated = 'not '
 			if newSymbol == link.a:
 				if link.b in alreadyThere:
 					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
+					info.append('print "'+str(link.a)+'---['+str(link.linkType)+']--->'+str(link.b)+'",[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
 					number += 1
 			elif newSymbol == link.b:
 				if link.a in alreadyThere:
 					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
+					info.append('print "'+str(link.a)+'---['+str(link.linkType)+']--->'+str(link.b)+'",[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
 					number += 1
-	return ret, number
+	return ret, number, info
 
 
 def ruleImplementation(rule):
@@ -293,7 +298,7 @@ def normalRuleImplementation(rule, ret, indent):
 		ret += indent+"if symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
-		conditions, number = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
+		conditions, number, ll = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
 		ret += conditions
 		ret += ":"
 		symbols_in_stack.append(n)
@@ -376,17 +381,22 @@ def normalRuleImplementation(rule, ret, indent):
 		indent += "\t"
 		lelele = 0
 		symbols_in_stack = []
+		moreErrorInformation = ''
 		for n in optimal_node_list:
 			lelele += 1
 			ret += indent+"test_symbol_"+n+" = snode.graph.nodes[n2id['"+n+"']]"
 			ret += indent+"if not (test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
+			moreErrorInformation = "print 'test_symbol_"+n+".sType == "+nodesPlusParameters[n].sType+"' , test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
 			for other in symbols_in_stack:
 				ret += " and test_symbol_"+n+".name!=test_symbol_" + str(other) + ".name"
-			conditions, number = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
+			conditions, number, linksInfo = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
 			ret += conditions
 			ret += "):"
 			symbols_in_stack.append(n)
 			indent += "\t"
+			ret += indent+moreErrorInformation
+			for l in linksInfo:
+				ret += indent+l
 			ret += indent+"raise WrongRuleExecution('"+rule.name+"_trigger"+str(lelele)+"')"
 			indent = indent[:-1]
 		indent = indent[:-1]
@@ -732,7 +742,7 @@ def CheckTarget(graph):"""
 		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n_n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
-		conditions, number = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack)
+		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack)
 		conditions = conditions.replace("snode.graph", "graph")
 		conditionsListList.append( [conditions, number] )
 		ret += conditions
