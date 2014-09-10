@@ -40,9 +40,9 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 number_of_threads = 0
-maxWorldIncrement = 6
+maxWorldIncrement = 14
 maxCost = 200
-stopWithFirstPlan = True
+stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 10.
 maxTimeWaitLimit = 600.
@@ -401,7 +401,7 @@ class PyPlan(object):
 							lock.release()
 							return
 						# Compute cheapest solution
-						stopNow = self.updateCheapestSolutionCostAndCheckIfTheBestSolutionWasAlreadyFound(self.results[0].cost)
+						stopNow = self.updateCheapestSolutionCostAndComputeLeastExpensiveOpenNode(self.results[0].cost)
 						if stopNow:
 							self.end_condition.set("BestSolutionFound")
 							lock.release()
@@ -424,16 +424,16 @@ class PyPlan(object):
 
 	def updateCheapestSolutionCostAndComputeLeastExpensiveOpenNode(self, cost):
 		self.cheapestSolutionCost.lock()
-		self.cheapestSolutionCost = cost
+		self.cheapestSolutionCost.set(cost)
 		self.results.lock()
 		for s in self.results:
-			if s.cost < self.cheapestSolutionCost:
-				self.cheapestSolutionCost = s.cost
+			if s.cost < self.cheapestSolutionCost.value:
+				self.cheapestSolutionCost.set(s.cost)
 		self.results.unlock()
 		# Check if ws should stop because there are no cheaper possibilities
 		self.openNodes.lock()
 		for c in self.openNodes:
-			if c[0] < self.cheapestSolutionCost:
+			if c[0] < self.cheapestSolutionCost.value:
 				self.openNodes.unlock()
 				return False
 				break
