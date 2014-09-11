@@ -375,6 +375,7 @@ class PyPlan(object):
 			# Try to pop a node from the queue
 			try:
 				head = self.openNodes.heapqPop()[1] # P O P   POP   p o p   pop
+				self.knownNodes.append(head)
 				if threadPoolStatus:
 					threadPoolStatus.lock()
 					threadPoolStatus[i] = True
@@ -459,7 +460,6 @@ class PyPlan(object):
 							else:
 								ratio = float(deriv.cost) / float(self.cheapestSolutionCost.value)
 							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize and ratio < maxCostRatioToBestSolution:
-								self.knownNodes.append(head)
 								#self.openNodes.heapqPush( (-deriv.score, deriv)) # score... the more the better
 								self.openNodes.heapqPush( ( deriv.cost, deriv)) # cost...  the less the better
 								#self.openNodes.heapqPush( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
