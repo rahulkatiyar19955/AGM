@@ -40,7 +40,7 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 number_of_threads = 0
-maxWorldIncrement = 8
+maxWorldIncrement = 0
 maxCost = 200
 stopWithFirstPlan = False
 verbose = 1
@@ -48,6 +48,13 @@ maxTimeWaitAchieved = 10.
 maxTimeWaitLimit = 600.
 
 maxCostRatioToBestSolution = 1.00001
+
+
+def heapsort(iterable):
+	h = []
+	for value in iterable:
+		heapq.heappush(h, value)
+	return [heapq.heappop(h) for i in range(len(h))]
 
 class EndCondition(object):
 	def __init__(self, status=None):
@@ -304,7 +311,7 @@ class PyPlan(object):
 				lock.acquire()
 				threadStatus.append(True)
 				self.thread_locks.append(lock)
-				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), lock, i))
+				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), lock, i, threadStatus))
 			# Wait for the threads to stop
 			for lock in self.thread_locks:
 				lock.acquire()
@@ -418,11 +425,15 @@ class PyPlan(object):
 							self.lastTime = nowNow
 							try:
 								print 'Explored nodes:', self.explored.get()
-								print "(last cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-								print 'First(cost:'+str(self.openNodes[ 0][1].cost)+', score:'+str(self.openNodes[ 0][1].score)+', depth:'+str(self.openNodes[ 0][1].depth)+')'
-								print  'Last(cost:'+str(self.openNodes[-1][1].cost)+', score:'+str(self.openNodes[-1][1].score)+', depth:'+str(self.openNodes[-1][1].depth)+')'
+								rrrr = heapsort(self.openNodes)
+								print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
+								if len(self.openNodes) > 0:
+									print 'First['+str(rrrr[ 0][0])+'](cost:'+str(rrrr[ 0][1].cost)+', score:'+str(rrrr[ 0][1].score)+', depth:'+str(rrrr[ 0][1].depth)+')'
+									print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
+								else:
+									print 'no open nodes'
 							except:
-								pass
+								traceback.print_exc()
 					deriv.score, achieved = self.targetCode(deriv.graph)
 					if verbose>4: print deriv.score, achieved, deriv
 					if achieved:
@@ -434,8 +445,7 @@ class PyPlan(object):
 							lock.release()
 							return
 						# Compute cheapest solution
-						stopNow = self.updateCheapestSolutionCostAndComputeLeastExpensiveOpenNode(self.results[0].cost)
-						if stopNow:
+						if self.updateCheapestSolutionCostAndComputeStopCondition(self.results[0].cost):
 							self.end_condition.set("BestSolutionFound")
 							lock.release()
 							return
@@ -451,25 +461,26 @@ class PyPlan(object):
 							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize and ratio < maxCostRatioToBestSolution:
 								self.knownNodes.append(head)
 								#self.openNodes.heapqPush( (-deriv.score, deriv)) # score... the more the better
-								#self.openNodes.heapqPush( ( deriv.cost, deriv)) # cost...  the less the better
-								self.openNodes.heapqPush( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+								self.openNodes.heapqPush( ( deriv.cost, deriv)) # cost...  the less the better
+								#self.openNodes.heapqPush( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
 								#self.openNodes.heapqPush( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
 
-	def updateCheapestSolutionCostAndComputeLeastExpensiveOpenNode(self, cost):
+	def updateCheapestSolutionCostAndComputeStopCondition(self, cost):
 		self.cheapestSolutionCost.lock()
 		self.cheapestSolutionCost.set(cost)
 		self.results.lock()
 		for s in self.results:
 			if s.cost < self.cheapestSolutionCost.value:
 				self.cheapestSolutionCost.set(s.cost)
-		self.results.unlock()
 		# Check if ws should stop because there are no cheaper possibilities
 		self.openNodes.lock()
 		for c in self.openNodes:
 			if c[0] < self.cheapestSolutionCost.value:
+				self.results.unlock()
 				self.openNodes.unlock()
+				self.cheapestSolutionCost.unlock()
 				return False
-				break
+		self.results.unlock()
 		self.openNodes.unlock()
 		self.cheapestSolutionCost.unlock()
 		return True

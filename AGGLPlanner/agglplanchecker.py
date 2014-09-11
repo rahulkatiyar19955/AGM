@@ -59,7 +59,7 @@ class PyPlanChecker(object):
 		if verbose: print "PyPlanChecker applying plan"
 		try:
 			world = copy.deepcopy(self.initWorld)
-			if verbose: print world
+			#if verbose: print world
 			line = 0
 			if verbose: print '<<plan'
 			if verbose: print self.plan
@@ -74,7 +74,7 @@ class PyPlanChecker(object):
 						raise WrongRuleExecution("Parameter '"+action.parameters[p]+"' (variable '"+p+"') doesn't exists in the current world model.")
 				world = self.domain.getTriggers()[action.name](world, action.parameters, checked=False)
 				if verbose: print 'result:'
-				if verbose: print world
+				#if verbose: print world
 				world.graph.toXML('after_plan_step'+str(line)+".xml")
 
 			if verbose: print 'Done executing actions. Let\'s see what we\'ve got (computing score and checking if the goal was achieved).'
@@ -88,7 +88,7 @@ class PyPlanChecker(object):
 					if verbose: print action
 			else:
 				if verbose: print 'Not achieved (didn\'t get to the goal)'
-				if verbose: print world
+				#if verbose: print world
 		except WrongRuleExecution, e:
 			if verbose: print 'Invalid rule execution', action
 			if verbose: print 'Rule: ', e
