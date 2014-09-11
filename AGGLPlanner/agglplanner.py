@@ -45,7 +45,7 @@ maxCost = 200
 stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 10.
-maxTimeWaitLimit = 600.
+maxTimeWaitLimit = 600000.
 
 maxCostRatioToBestSolution = 1.00001
 
@@ -363,7 +363,7 @@ class PyPlan(object):
 		timeA = datetime.datetime.now()
 		while True:
 			timeB = datetime.datetime.now()
-			timeElapsed = (timeB-timeA).seconds + (timeB-timeA).microseconds/1e6
+			timeElapsed = float((timeB-timeA).seconds) + float((timeB-timeA).microseconds)/1e6
 			# Check if we should give up because it already took too much time
 			nResults = self.results.size()
 			if timeElapsed > maxTimeWaitLimit:
@@ -425,14 +425,15 @@ class PyPlan(object):
 						if doIt:
 							self.lastTime = nowNow
 							try:
-								print 'Explored nodes:', self.explored.get()
-								rrrr = heapsort(self.openNodes)
-								print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-								if len(self.openNodes) > 0:
-									print 'First['+str(rrrr[ 0][0])+'](cost:'+str(rrrr[ 0][1].cost)+', score:'+str(rrrr[ 0][1].score)+', depth:'+str(rrrr[ 0][1].depth)+')'
-									print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
-								else:
-									print 'no open nodes'
+								print str(int(timeElapsed))+','+str(len(self.openNodes))+','+str(len(self.knownNodes))
+								#print 'Explored nodes:', self.explored.get()
+								#rrrr = heapsort(self.openNodes)
+								#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
+								#if len(self.openNodes) > 0:
+									#print 'First['+str(rrrr[ 0][0])+'](cost:'+str(rrrr[ 0][1].cost)+', score:'+str(rrrr[ 0][1].score)+', depth:'+str(rrrr[ 0][1].depth)+')'
+									#print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
+								#else:
+									#print 'no open nodes'
 							except:
 								traceback.print_exc()
 					deriv.score, achieved = self.targetCode(deriv.graph)
