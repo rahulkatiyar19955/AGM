@@ -40,14 +40,13 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 number_of_threads = 0
-maxWorldIncrement = 0
+maxWorldIncrement = 10
 maxCost = 200
 stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 10.
-maxTimeWaitLimit = 600000.
+maxTimeWaitLimit = 300.
 
-maxCostRatioToBestSolution = 1.00001
 
 
 def heapsort(iterable):
@@ -214,34 +213,40 @@ def printResult(result):
 	for action in result.history:
 		print action
 
-class LockableList(list):
-	def __init__(self, *args):
-		list.__init__(self, *args)
+class LockableList():
+	def __init__(self):
+		self.thelist = []
 		self.mutex = threading.RLock()
+	def __len__(self):
+		return len(self.thelist)
+	def __getitem__(self, a):
+		return self.thelist.__getitem__(a)
+	def __iter__(self):
+		return self.thelist.__iter__()
 	def size(self):
 		self.mutex.acquire()
-		ret = len(self)
+		ret = len(self.thelist)
 		self.mutex.release()
 		return ret
 	def heapqPop(self):
 		self.mutex.acquire()
 		try:
-			ret = heapq.heappop(self)
+			ret = heapq.heappop(self.thelist)
 		finally:
 			self.mutex.release()
 		return ret
 	def heapqPush(self, value):
 		self.mutex.acquire()
-		heapq.heappush(self, value)
+		heapq.heappush(self.thelist, value)
 		self.mutex.release()
 	def getFirstElement(self):
 		self.mutex.acquire()
-		ret = self[0]
+		ret = self.thelist[0]
 		self.mutex.release()
 		return ret
 	def append(self, v):
 		self.mutex.acquire()
-		super(LockableList, self).append(v)
+		self.thelist.append(v)
 		self.mutex.release()
 	def lock(self):
 		self.mutex.acquire()
@@ -366,7 +371,7 @@ class PyPlan(object):
 			timeElapsed = float((timeB-timeA).seconds) + float((timeB-timeA).microseconds)/1e6
 			# Check if we should give up because it already took too much time
 			nResults = self.results.size()
-			if timeElapsed > maxTimeWaitLimit:
+			if timeElapsed > maxTimeWaitLimit or (timeElapsed > maxTimeWaitAchieved and nResults > 0):
 				if nResults>0: self.end_condition.set("GoalAchieved")
 				else: self.end_condition.set("TimeLimit")
 				lock.release()
@@ -426,20 +431,21 @@ class PyPlan(object):
 							self.lastTime = nowNow
 							try:
 								print str(int(timeElapsed))+','+str(len(self.openNodes))+','+str(len(self.knownNodes))
-								#print 'Explored nodes:', self.explored.get()
-								#rrrr = heapsort(self.openNodes)
-								#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-								#if len(self.openNodes) > 0:
-									#print 'First['+str(rrrr[ 0][0])+'](cost:'+str(rrrr[ 0][1].cost)+', score:'+str(rrrr[ 0][1].score)+', depth:'+str(rrrr[ 0][1].depth)+')'
-									#print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
-								#else:
-									#print 'no open nodes'
+								print 'Explored nodes:', self.explored.get()
+								print 'Solutions:', self.results.size()
+								rrrr = heapsort(self.openNodes)
+								print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
+								if len(self.openNodes) > 0:
+									print 'First['+str(rrrr[ 0][0])+'](cost:'+str(rrrr[ 0][1].cost)+', score:'+str(rrrr[ 0][1].score)+', depth:'+str(rrrr[ 0][1].depth)+')'
+									print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
+								else:
+									print 'no open nodes'
 							except:
 								traceback.print_exc()
 					deriv.score, achieved = self.targetCode(deriv.graph)
 					if verbose>4: print deriv.score, achieved, deriv
 					if achieved:
-						print 'Found solution', deriv.cost
+						#print 'Found solution', deriv.cost
 						self.results.append(deriv)
 						# Should we stop with the first plan?
 						if stopWithFirstPlan:
@@ -447,44 +453,33 @@ class PyPlan(object):
 							lock.release()
 							return
 						# Compute cheapest solution
-						if self.updateCheapestSolutionCostAndComputeStopCondition(self.results[0].cost):
-							self.end_condition.set("BestSolutionFound")
-							lock.release()
-							return
+						self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
 					self.knownNodes.lock()
 					notDerivInKnownNodes = not deriv in self.knownNodes
 					self.knownNodes.unlock()
 					if notDerivInKnownNodes:
 						if deriv.stop == False:
-							if self.cheapestSolutionCost.value < 1:
-								ratio = 0.
-							else:
-								ratio = float(deriv.cost) / float(self.cheapestSolutionCost.value)
-							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize and ratio < maxCostRatioToBestSolution:
+							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
 								#self.openNodes.heapqPush( (-deriv.score, deriv)) # score... the more the better
-								self.openNodes.heapqPush( ( deriv.cost, deriv)) # cost...  the less the better
-								#self.openNodes.heapqPush( (float(100.*deriv.cost)/(float(1.+deriv.score)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
-								#self.openNodes.heapqPush( (float(100.+deriv.cost)/(float(1.+deriv.score)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+								#self.openNodes.heapqPush( ( deriv.cost, deriv)) # cost...  the less the better
+								self.openNodes.heapqPush( (float(deriv.cost)/(float(deriv.score**2)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
 
-	def updateCheapestSolutionCostAndComputeStopCondition(self, cost):
+	def updateCheapestSolutionCostAndCutOpenNodes(self, cost):
 		self.cheapestSolutionCost.lock()
-		self.cheapestSolutionCost.set(cost)
-		self.results.lock()
-		for s in self.results:
-			if s.cost < self.cheapestSolutionCost.value:
-				self.cheapestSolutionCost.set(s.cost)
-		# Check if ws should stop because there are no cheaper possibilities
-		self.openNodes.lock()
-		for c in self.openNodes:
-			if c[0] < self.cheapestSolutionCost.value:
-				self.results.unlock()
-				self.openNodes.unlock()
-				self.cheapestSolutionCost.unlock()
-				return False
-		self.results.unlock()
-		self.openNodes.unlock()
-		self.cheapestSolutionCost.unlock()
-		return True
+		if cost >= self.cheapestSolutionCost.get():
+			self.cheapestSolutionCost.unlock()
+		else:
+			self.openNodes.lock()
+			self.cheapestSolutionCost.set(cost)
+
+			newOpenNodes = LockableList()
+			for node in self.openNodes:
+				if node[1].cost < cost:
+					newOpenNodes.heapqPush(node)
+			self.openNodes.thelist = newOpenNodes.thelist
+
+			self.openNodes.unlock()
+			self.cheapestSolutionCost.unlock()
 
 	def updateMinCostOnOpenNodes(self, cost):
 		self.minCostOnOpenNodes.lock()
