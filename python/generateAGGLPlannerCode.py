@@ -7,7 +7,8 @@ from AGGL import *
 from xmlModelParser import *
 
 #COPY_OPTION = "kkdeepcopy"
-COPY_OPTION = "copy.deepcopy"
+#COPY_OPTION = "copy.deepcopy"
+COPY_OPTION = "copy.copy"
 #debug = True
 debug = False
 scorePerContition = 100
@@ -85,12 +86,12 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere):
 			if newSymbol == link.a:
 				if link.b in alreadyThere:
 					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
-					info.append('print "'+str(link.a)+'---['+str(link.linkType)+']--->'+str(link.b)+'",[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
+					info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
 					number += 1
 			elif newSymbol == link.b:
 				if link.a in alreadyThere:
 					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
-					info.append('print "'+str(link.a)+'---['+str(link.linkType)+']--->'+str(link.b)+'",[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
+					info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
 					number += 1
 	return ret, number, info
 
@@ -130,7 +131,7 @@ def comboRuleImplementation(rule, r, indent):
 	ret += indent+"return self." + rule.name + "_trigger(snode, dict(), stack, equivalences)"
 	ret += indent
 	ret += "\n"
-	
+
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
 	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
@@ -192,7 +193,7 @@ def comboRuleImplementation(rule, r, indent):
 	ret += "\n"
 	ret += "\n"
 	return r + ret
-	
+
 
 def normalRuleImplementation(rule, ret, indent):
 	# Quantifier-related code (PARAMETERS)
@@ -368,7 +369,7 @@ def normalRuleImplementation(rule, ret, indent):
 	ret += indent+""
 	ret += "\n"
 	indent = "\n\t"
-	
+
 	# TRIGGER
 	# TRIGGER
 	ret += indent+"# Rule " + rule.name
@@ -402,10 +403,6 @@ def normalRuleImplementation(rule, ret, indent):
 		indent = indent[:-1]
         #ret += indent+"smap = "+COPY_OPTION+"(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
-	ret += indent+"for l in newNode.graph.links:"
-	ret += indent+"\tif type(l) != type(AGMLink('a','b','c')):"
-	ret += indent+"\t\tprint 'Ya jodidos en "+str(rule.name)+"'"
-	ret += indent+"\t\tsys.exit(-1)"
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
@@ -599,7 +596,7 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 	elif effectType == "or":
 		print 'OR statements are not allowed in effects'
 		sys.exit(1)
-# Partially done, the conditional mode is not tested 
+# Partially done, the conditional mode is not tested
 	elif effectType == "and":
 		if stuff['mode'] == "condition":
 			ret += indent+'effect'+str(formulaId)+' = True # AND initialization as true'
@@ -730,7 +727,7 @@ def CheckTarget(graph):"""
 	ret += indent+"# Hard score"
 	for n_n in graph.nodes:
 		n = str(n_n)
-		#print nm 
+		#print nm
 		ret += indent+"# "+n
 		if (n[0] in "0123456789") and n in graph.nodes: # This checks the node is already in the model
 			ret += indent+"symbol_"+n+"_name = '" + n + "'"

@@ -40,12 +40,12 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 number_of_threads = 0
-maxWorldIncrement = 10
+maxWorldIncrement = 25
 maxCost = 200
 stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 10.
-maxTimeWaitLimit = 300.
+maxTimeWaitLimit = 3000.
 
 
 
@@ -386,17 +386,16 @@ class PyPlan(object):
 					threadPoolStatus[i] = True
 					threadPoolStatus.unlock()
 			except:
+				traceback.print_exc()
 				if not threadPoolStatus:
 					self.end_condition.set("IndexError")
-					print 'aaaaaaaaaaaaaaaaaaaaaaa'
 					lock.release()
 					return
-				time.sleep(0.00001)
+				time.sleep(0.001)
 				threadPoolStatus.lock()
 				threadPoolStatus[i] = False
 				if not True in threadPoolStatus:
 					self.end_condition.set("IndexError")
-					print 'bbbbbbbbbbbbbbbbbbbbbbb'
 					lock.release()
 					return
 				threadPoolStatus.unlock()
@@ -418,30 +417,6 @@ class PyPlan(object):
 				# Iterate over rules and generate derivates
 				for deriv in ruleMap[k](head):
 					self.explored.increase()
-					if verbose > 0:
-						doIt=False
-						nowNow = datetime.datetime.now()
-						try:
-							elap = (nowNow-self.lastTime).seconds + (nowNow-self.lastTime).microseconds/1e6
-							doIt = elap > 3
-						except:
-							self.lastTime = datetime.datetime.now()
-							doIt = True
-						if doIt:
-							self.lastTime = nowNow
-							try:
-								print str(int(timeElapsed))+','+str(len(self.openNodes))+','+str(len(self.knownNodes))
-								print 'Explored nodes:', self.explored.get()
-								print 'Solutions:', self.results.size()
-								rrrr = heapsort(self.openNodes)
-								print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-								if len(self.openNodes) > 0:
-									print 'First['+str(rrrr[ 0][0])+'](cost:'+str(rrrr[ 0][1].cost)+', score:'+str(rrrr[ 0][1].score)+', depth:'+str(rrrr[ 0][1].depth)+')'
-									print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
-								else:
-									print 'no open nodes'
-							except:
-								traceback.print_exc()
 					deriv.score, achieved = self.targetCode(deriv.graph)
 					if verbose>4: print deriv.score, achieved, deriv
 					if achieved:
@@ -462,7 +437,33 @@ class PyPlan(object):
 							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
 								#self.openNodes.heapqPush( (-deriv.score, deriv)) # score... the more the better
 								#self.openNodes.heapqPush( ( deriv.cost, deriv)) # cost...  the less the better
-								self.openNodes.heapqPush( (float(deriv.cost)/(float(deriv.score**2)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+								#self.openNodes.heapqPush( (float(deriv.cost)/(float(deriv.score**2)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+								self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+			if verbose > 0:
+				doIt=False
+				nowNow = datetime.datetime.now()
+				try:
+					elap = (nowNow-self.lastTime).seconds + (nowNow-self.lastTime).microseconds/1e6
+					doIt = elap > 3
+				except:
+					self.lastTime = datetime.datetime.now()
+					doIt = True
+				if doIt:
+					self.lastTime = nowNow
+					try:
+						#print nowNow
+						print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
+						#print 'Explored nodes:', self.explored.get()
+						#print 'Solutions:', self.results.size()
+						#rrrr = heapsort(self.openNodes)
+						#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
+						#if len(self.openNodes) > 0:
+							#print 'First['+str(rrrr[ 0][0])+'](cost:'+str(rrrr[ 0][1].cost)+', score:'+str(rrrr[ 0][1].score)+', depth:'+str(rrrr[ 0][1].depth)+')'
+							#print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
+						#else:
+							#print 'no open nodes'
+					except:
+						traceback.print_exc()
 
 	def updateCheapestSolutionCostAndCutOpenNodes(self, cost):
 		self.cheapestSolutionCost.lock()
