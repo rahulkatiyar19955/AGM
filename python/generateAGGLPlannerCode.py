@@ -96,6 +96,19 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere):
 	return ret, number, info
 
 
+def newLinkScore(linkList, newSymbol, alreadyThere):
+	ret = []
+	for link in linkList:
+		if newSymbol == link.a or newSymbol == link.b:
+			# Adapt to negated links
+			if not link.enabled: negated = 'not'
+			else: negated = ''
+			# Condition itself
+			if ((newSymbol == link.a) and (link.b in alreadyThere)) or ((newSymbol == link.b) and (link.a in alreadyThere)):
+				ret.append('if [n2id["'+str(link.a)+'"],n2id["'+str(link.b)+'"],"'+str(link.linkType)+'"] ' +negated+'in graph.links: linksVal += 100')
+	return ret
+
+
 def ruleImplementation(rule):
 	if rule.passive: return ''
 	ret = ''
@@ -682,10 +695,18 @@ def generate(agm, skipPassiveRules):
 def generateTarget(graph):
 	ret = """import copy, sys
 sys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import *
+
+def computeMaxScore(a, b, maxScore):
+	s = 0
+	for i in a: s+=i
+	for i in b: s+=i
+	if s > maxScore: return s
+	return maxScore
+
 def CheckTarget(graph):"""
 	indent = "\n\t"
 	# Make a copy of the current graph node list
-	ret += indent+"n2id = dict()\n"+indent+"score = 0"
+	ret += indent+"n2id = dict()\n"
 	## Generate Link list
 	linkList = []
 	for link_i in range(len(graph.links)):
@@ -694,7 +715,7 @@ def CheckTarget(graph):"""
 	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
 
 	ret += indent+"maxScore = 0"
-	ret += indent+"scoreA = 0"
+	ret += indent+"scoreEasy = 0"
 	ret += '\n'
 	easy = 1
 	if True:
@@ -712,19 +733,22 @@ def CheckTarget(graph):"""
 			ret += indent+"typesDict['"+t+"'] = " + str(typesDict[t])
 		ret += indent+"for n in graph.nodes:"
 		ret += indent+"	if graph.nodes[n].sType in typesDict:"
-		ret += indent+"		scoreA += 1"
+		ret += indent+"		scoreEasy += 1"
 		ret += indent+"		typesDict[graph.nodes[n].sType] -= 1"
 		ret += indent+"		if typesDict[graph.nodes[n].sType] == 0:"
 		ret += indent+"			del typesDict[graph.nodes[n].sType]"
 		ret += '\n'
 
 	conditionsListList = []
-	# Generate the loop that checks the actual model
+	# Generate the loop that checks the model
 	symbols_in_stack = []
 	score = 0
-	#ret += indent+"try:"
-	#indent += "\t"
+
+	pops = []
+
 	ret += indent+"# Hard score"
+	ret += indent+"scoreNodes = []"
+	ret += indent+"scoreLinks = []"
 	for n_n in graph.nodes:
 		n = str(n_n)
 		#print nm
@@ -736,6 +760,12 @@ def CheckTarget(graph):"""
 			indent += "\t"
 		ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
 		ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+		ret += indent+"linksVal = 0"
+		for cond in newLinkScore(graph.links, n_n, symbols_in_stack):
+			ret += indent+cond
+		ret += indent+"scoreLinks.append(linksVal)"
+		pops.append(indent+'scoreLinks.pop()')
+		ret += indent+"maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)"
 		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n_n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
@@ -747,8 +777,9 @@ def CheckTarget(graph):"""
 		symbols_in_stack.append(n_n)
 		indent += "\t"
 		score += scorePerContition
-		ret += indent + "score = " + str(score)
-		ret += indent + "if score > maxScore: maxScore = score"
+		ret += indent + "scoreNodes.append(100)"
+		pops.append(indent+'scoreNodes.pop()')
+		ret += indent + "maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)"
 
 	allConditionsStr = ''
 	for c in conditionsListList:
@@ -758,20 +789,14 @@ def CheckTarget(graph):"""
 	for cond in conditionsSeparated:
 		if len(cond) > 1:
 			realCond += 1
-			ret += indent+"if " + cond + ": score += "+str(scorePerContition)+""
-	ret += indent+"if score > maxScore: maxScore = score"
-	ret += indent+"if score == " + str(score + realCond*scorePerContition) + ":"
-	ret += indent+"\treturn score+scoreA, True"
+			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
+	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ": return maxScore+scoreEasy, True"
+
+
 	# Rule ending
+	while len(pops)>0:
+		ret += pops.pop()
 	indent = "\n\t"
-	#ret += indent+"except:"
-	#ret += indent+"\tprint graph.nodes.keys()"
-	#ret += indent+"\tprint 'ERROR'"
-	#ret += indent+"\timport sys"
-	#ret += indent+"\tsys.exit(1)"
-	ret += indent+"return score+scoreA, False"
-	ret += indent+""
-	ret += indent+""
+	ret += indent+"return maxScore+scoreEasy, False"
 	ret += "\n"
 	return ret
-
