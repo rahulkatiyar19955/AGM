@@ -40,7 +40,7 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 number_of_threads = 0
-maxWorldIncrement = 25
+maxWorldIncrement = 10
 maxCost = 200
 stopWithFirstPlan = False
 verbose = 1
@@ -221,6 +221,10 @@ class LockableList():
 		return len(self.thelist)
 	def __getitem__(self, a):
 		return self.thelist.__getitem__(a)
+	def __setitem__(self, a, b):
+		self.mutex.acquire()
+		self.thelist.__setitem__(a, b)
+		self.mutex.release()
 	def __iter__(self):
 		return self.thelist.__iter__()
 	def size(self):
@@ -386,7 +390,6 @@ class PyPlan(object):
 					threadPoolStatus[i] = True
 					threadPoolStatus.unlock()
 			except:
-				traceback.print_exc()
 				if not threadPoolStatus:
 					self.end_condition.set("IndexError")
 					lock.release()
