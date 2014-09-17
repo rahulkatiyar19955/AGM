@@ -224,13 +224,13 @@ AGMModelSymbol::iterator AGMModelSymbol::iterator::operator++(int32_t times)
 	return it;
 }
 
-AGMModelEdge AGMModelSymbol::iterator::operator*()
+AGMModelEdge &AGMModelSymbol::iterator::operator*()
 {
 	if (modelRef == NULL) AGMMODELEXCEPTION(std::string("Attempting to use uninitialized iterator!"));
 	return modelRef->edges[index];
 }
 
-AGMModelEdge AGMModelSymbol::iterator::operator->()
+AGMModelEdge &AGMModelSymbol::iterator::operator->()
 {
 	if (modelRef == NULL) AGMMODELEXCEPTION(std::string("Attempting to use uninitialized iterator!"));
 	return modelRef->edges[index];

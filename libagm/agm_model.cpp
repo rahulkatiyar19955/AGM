@@ -57,7 +57,7 @@ void AGMModel::setFrom(const AGMModel &src)
 		AGMModelEdge edge(src.edges[i].symbolPair.first, src.edges[i].symbolPair.second, src.edges[i].linking);
 		edges.push_back(edge);
 	}
-	
+
 	resetLastId();
 }
 
@@ -430,19 +430,7 @@ int32_t AGMModel::getIndexByIdentifier(int32_t targetId) const
 	return -1;
 }
 
-AGMModelSymbol::SPtr AGMModel::getSymbolByIdentifier(int32_t targetId) const
-{
-	const int32_t index = getIndexByIdentifier(targetId);
-	if (index != -1)
-	{
-		return symbols[index];
-	}
-	std::ostringstream s;
-	s << "Exception: " << targetId;
-	AGMMODELEXCEPTION(std::string("Exception: Trying to get a node with an unexistent identifier (")+s.str()+std::string(")."));
-}
-
-AGMModelSymbol::SPtr AGMModel::getSymbol(int32_t identif) const
+AGMModelSymbol::SPtr AGMModel::getSymbolByIdentifier(int32_t identif) const
 {
 	for (uint32_t i=0; i<symbols.size(); ++i)
 	{
@@ -454,6 +442,11 @@ AGMModelSymbol::SPtr AGMModel::getSymbol(int32_t identif) const
 	std::ostringstream s;
 	s << "Exception: " << identif;
 	AGMMODELEXCEPTION(std::string("Exception: Trying to get a node with an unexistent index (")+s.str()+std::string(")."));
+}
+
+AGMModelSymbol::SPtr AGMModel::getSymbol(int32_t identif) const
+{
+	return getSymbolByIdentifier(identif);
 }
 
 AGMModelSymbol::SPtr AGMModel::getSymbolByName(const std::string &ss) const

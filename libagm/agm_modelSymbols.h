@@ -19,8 +19,8 @@ class AGMModelSymbol;
 /*!
  * @brief Nodes --symbols-- of AGMModel graphs
  *
- * 
- * 
+ *
+ *
  */
 class AGMModelSymbol
 {
@@ -29,8 +29,8 @@ public:
 	/*!
 		* @brief Iterator class for accessing the edges of a particular symbol.
 		*
-		* 
-		* 
+		*
+		*
 		*/
 	class iterator
 	{
@@ -54,9 +54,9 @@ public:
 		/// Parametrized increment
 		iterator operator++(int32_t times);
 		/// Get referenced edge.
-		AGMModelEdge operator*();
+		AGMModelEdge & operator*();
 		/// Get referenced edge.
-		AGMModelEdge operator->();
+		AGMModelEdge & operator->();
 // 	private:
 		int32_t index;
 		AGMModel *modelRef;
@@ -76,7 +76,7 @@ private:
 	void init(AGMModel *model, std::string typ, int32_t id=-1);
 	void init(AGMModel *model, int32_t identifier, std::string typ);
 	void init(AGMModel *model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr);
-public:	
+public:
 	typedef boost::shared_ptr<AGMModelSymbol> SPtr;
 	std::string toString() const;
 	std::string typeString() const;
