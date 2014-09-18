@@ -749,13 +749,19 @@ def CheckTarget(graph):"""
 	ret += indent+"# Hard score"
 	ret += indent+"scoreNodes = []"
 	ret += indent+"scoreLinks = []"
+
+	print 'ACHO', graph.nodes
+	print 'ACHO', graph.nodes.keys()
 	for n_n in graph.nodes:
 		n = str(n_n)
 		#print nm
 		ret += indent+"# "+n
+		print str(n)+':', (n[0] in "0123456789"), (n in graph.nodes)
 		if (n[0] in "0123456789") and n in graph.nodes: # This checks the node is already in the model
+			print str(n), 'CONSTANT'
 			ret += indent+"symbol_"+n+"_name = '" + n + "'"
 		else: # otherwise, we're talking about a variable!
+			print str(n), 'VARIABLE'
 			ret += indent+"for symbol_"+n+"_name in graph.nodes:"
 			indent += "\t"
 		ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"

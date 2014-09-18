@@ -28,6 +28,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 # AGM
 sys.path.append('/usr/local/share/agm')
 
+import AGMModelConversion
 
 # Check that RoboComp has been correctly detected
 ROBOCOMP = ''
@@ -79,11 +80,12 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 		#self.handler.mutex.release()
 		return world, target, plan
 	def world2agmgraph(self, target):
-		ret = AGMGraph()
-		for node in target.nodes:
-			ret.addNode(0,0, node.nodeIdentifier, node.nodeType, attributes=node.attributes)
-		for edge in target.edges:
-			ret.addEdge(edge.a, edge.b, edge.edgeType)
+		ret = AGMModelConversion.fromIceToInternal_model(target, ignoreInvalidEdges=True)
+		#ret = AGMGraph()
+		#for node in target.nodes:
+			#ret.addNode(0,0, node.nodeIdentifier, node.nodeType, attributes=node.attributes)
+		#for edge in target.edges:
+			#ret.addEdge(edge.a, edge.b, edge.edgeType)
 		return ret
 
 class AGMCommonBehaviorI (RoboCompAGMCommonBehavior.AGMCommonBehavior):
@@ -110,7 +112,7 @@ class Server (Ice.Application):
 		status = 0;
 		try:
 			self.shutdownOnInterrupt()
-			
+
 			# Get component's parameters from config file
 			initialModelPath =   self.communicator().getProperties().getProperty( "InitialModelPath" )
 			agglPath =           self.communicator().getProperties().getProperty( "AGGLPath" )
