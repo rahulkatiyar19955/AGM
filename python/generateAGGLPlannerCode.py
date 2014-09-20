@@ -704,7 +704,6 @@ def getOptimalTargetNodeCheckOrder(graph):
 	varbls = []
 	for n_n in graph.nodes:
 		n = str(n_n)
-		print n
 		if (n[0] in "0123456789"):
 			consts.append(n)
 		else:

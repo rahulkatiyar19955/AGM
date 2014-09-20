@@ -40,7 +40,7 @@ import inspect
 # C O N F I G U R A T I O N
 # C O N F I G U R A T I O N
 number_of_threads = 0
-maxWorldIncrement = 10
+maxWorldIncrement = 14
 maxCost = 200
 stopWithFirstPlan = False
 verbose = 1
