@@ -692,6 +692,44 @@ def generate(agm, skipPassiveRules):
 	return text
 
 
+def getOptimalTargetNodeCheckOrder(graph):
+	## Generate Link list
+	linkList = []
+	for link_i in range(len(graph.links)):
+		link = graph.links[link_i]
+		linkList.append([link.a, link.b, link.linkType])
+	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
+	## Initialize separated list for constants and variables
+	consts = []
+	varbls = []
+	for n_n in graph.nodes:
+		n = str(n_n)
+		print n
+		if (n[0] in "0123456789"):
+			consts.append(n)
+		else:
+			varbls.append(n)
+	initialSort = consts + varbls
+	## generate points for close-to-optimal list
+	counter = dict()
+	for n in varbls:
+		counter[n] = 0
+	for n in varbls:
+		for link in linkList:
+			if link[0] in consts+[n] or link[1] in consts+[n]:
+				counter[n] = counter[n] + 1
+	## actually generate the optimal list
+	optimal_node_list_t = []
+	for n in counter.keys():
+		optimal_node_list_t.append((counter[n], n))
+	optimal_node_list_t = sorted(optimal_node_list_t, reverse=True)
+	optimal_node_list = copy.deepcopy(consts)
+	for o in optimal_node_list_t:
+		optimal_node_list.append(o[1])
+	## return!
+	return optimal_node_list
+
+
 def generateTarget(graph):
 	ret = """import copy, sys
 sys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import *
@@ -750,18 +788,13 @@ def CheckTarget(graph):"""
 	ret += indent+"scoreNodes = []"
 	ret += indent+"scoreLinks = []"
 
-	print 'ACHO', graph.nodes
-	print 'ACHO', graph.nodes.keys()
-	for n_n in graph.nodes:
+	#for n_n in graph.nodes:
+	for n_n in getOptimalTargetNodeCheckOrder(graph):
 		n = str(n_n)
-		#print nm
 		ret += indent+"# "+n
-		print str(n)+':', (n[0] in "0123456789"), (n in graph.nodes)
 		if (n[0] in "0123456789") and n in graph.nodes: # This checks the node is already in the model
-			print str(n), 'CONSTANT'
 			ret += indent+"symbol_"+n+"_name = '" + n + "'"
 		else: # otherwise, we're talking about a variable!
-			print str(n), 'VARIABLE'
 			ret += indent+"for symbol_"+n+"_name in graph.nodes:"
 			indent += "\t"
 		ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
