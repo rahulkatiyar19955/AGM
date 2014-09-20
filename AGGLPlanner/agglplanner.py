@@ -211,7 +211,8 @@ def printResult(result):
 		#print 'NodeID', result.nodeId
 		print 'Actions\n----------------'
 	for action in result.history:
-		print action
+		if action[0] != '#':
+			print action
 
 class LockableList():
 	def __init__(self):
