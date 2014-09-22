@@ -247,8 +247,8 @@ class Executive(threading.Thread):
 		# Send plan
 		print 'Send plan to'
 		for agent in self.agents:
+			print '\t', agent
 			try:
-				print '\t', agent
 				self.agents[agent].activateAgent(params)
 			except:
 				print 'Can\'t connect to', agent
