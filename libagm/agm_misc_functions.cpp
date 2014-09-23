@@ -8,7 +8,6 @@ float str2float(const std::string &s)
 {
 	if (s.size()<=0)
 	{
-		printf("libagm: Error parsing float <empty>\n");
 		AGMMODELEXCEPTION("libagm: Error parsing float <empty>\n");
 	}
 
@@ -25,7 +24,6 @@ int32_t str2int(const std::string &s)
 {
 	if (s.size()<=0)
 	{
-		printf("libagm: Error parsing int <empty>\n");
 		AGMMODELEXCEPTION("libagm: Error parsing int <empty>\n");
 	}
 
