@@ -71,6 +71,16 @@ void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &ag
 	agmagenttopic->modificationProposal(e);
 	//printf(">>\n");
 }
+
+void AGMMisc::publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMAgentTopicPrx &agmagenttopic)
+{
+	RoboCompAGMWorldModel::Node iceSymbol;
+	AGMModelConverter::fromInternalToIce(symbol, iceSymbol);
+	agmagenttopic->update(iceSymbol);
+}
+
+
+
 #endif
 
 

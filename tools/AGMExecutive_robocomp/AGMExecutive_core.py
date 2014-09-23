@@ -247,11 +247,12 @@ class Executive(threading.Thread):
 		# Send plan
 		print 'Send plan to'
 		for agent in self.agents:
-			print '\t', agent
+			print '\t', agent,
 			try:
 				self.agents[agent].activateAgent(params)
 			except:
-				print 'Can\'t connect to', agent
+				print '     (can\'t connect to', agent, '!!!)',
+			print ''
 
 		# Publish new information using the executiveVisualizationTopic
 		try:
