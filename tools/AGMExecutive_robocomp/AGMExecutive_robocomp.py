@@ -59,25 +59,17 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 	def __init__(self, _handler):
 		self.handler = _handler
 	def broadcastModel(self, current=None):
-		self.handler.mutex.acquire()
 		self.handler.broadcastModel()
-		self.handler.mutex.release()
 	def activate(self, current=None):
 		pass
 	def deactivate(self, current=None):
 		pass
 	def reset(self, current=None):
-		self.handler.mutex.acquire()
 		self.handler.reset()
-		self.handler.mutex.release()
 	def setMission(self, target, current=None):
-		self.handler.mutex.acquire()
 		targetAGM = self.world2agmgraph(target)
 		self.handler.setMission(targetAGM)
-		self.handler.mutex.release()
 	def getData(self, current=None):
-		#self.handler.mutex.acquire()
-		#self.handler.mutex.release()
 		return world, target, plan
 	def world2agmgraph(self, target):
 		ret = AGMModelConversion.fromIceToInternal_model(target, ignoreInvalidEdges=True)
@@ -96,20 +88,16 @@ class AGMAgentTopicI (RoboCompAGMAgent.AGMAgentTopic):
 	def __init__(self, _handler):
 		self.handler = _handler
 	def modificationProposal(self, modification, current=None):
-		self.handler.mutex.acquire()
 		self.handler.modificationProposal(modification)
-		self.handler.mutex.release()
 	def update(self, nodeModification, current=None):
-		self.handler.mutex.acquire()
 		self.handler.updateNode(nodeModification)
-		self.handler.mutex.release()
 
 from AGMExecutive_core import Executive
 
 
 class Server (Ice.Application):
 	def run (self, argv):
-		status = 0;
+		status = 0
 		try:
 			self.shutdownOnInterrupt()
 
@@ -230,7 +218,9 @@ class Server (Ice.Application):
 			print '-------------------------------------------------------------'
 			print '----     R u n     A G M E x e c u t i v e,     r u n   -----'
 			print '-------------------------------------------------------------'
+			#executive.mutex.acquire()
 			executive.updatePlan()
+			#executive.mutex.release()
 			self.shutdownOnInterrupt()
 			self.communicator().waitForShutdown()
 		except:

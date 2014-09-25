@@ -1,4 +1,4 @@
-import sys, traceback, Ice, subprocess, threading, time, Queue, os
+import sys, traceback, Ice, subprocess, threading, time, Queue, os, time
 import IceStorm
 
 # AGM
@@ -37,7 +37,7 @@ import RoboCompPlanning
 
 import AGMModelConversion
 
-#ret, stepsFwd, planMonitoring = 
+#ret, stepsFwd, planMonitoring =
 def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0):
 	try:
 		currentPlan = AGGLPlannerPlan(plan)
@@ -89,6 +89,7 @@ class Executive(threading.Thread):
 		self.agents = dict()
 		self.plan = None
 		self.modifications = 0
+		self.lastPypyKill = time.time()
 		# Set proxies
 		self.executiveTopic = executiveTopic
 		self.executiveVisualizationTopic = executiveVisualizationTopic
@@ -109,11 +110,12 @@ class Executive(threading.Thread):
 		self.setModel(xmlModelParser.graphFromXML(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 		print 'setmission'
-		self.setMission(xmlModelParser.graphFromXML(initialMissionPath))
+		self.setMission(xmlModelParser.graphFromXML(initialMissionPath), avoidUpdate=True)
 
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
 	def broadcastModel(self):
+		self.mutex.acquire()
 		try:
 			print '<<<broadcastinnn'
 			print self.currentModel
@@ -129,21 +131,27 @@ class Executive(threading.Thread):
 		except:
 			print 'There was some problem broadcasting'
 			sys.exit(1)
+		self.mutex.release()
 	def reset(self):
+		self.mutex.acquire()
 		self.currentModel = xmlModelParser.graphFromXML(self.initialModelPath)
 		self.updatePlan()
+		self.mutex.release()
 	def setModel(self, model):
 		print model
 		self.currentModel = model
 		self.broadcastModel()
-	def setMission(self, target):
+	def setMission(self, target, avoidUpdate=False):
+		self.mutex.acquire()
 		self.target = target
 		self.target.toXML("/tmp/target.xml")
 		targetText = generateTarget(self.target)
 		ofile = open("/tmp/target.py", 'w')
 		ofile.write(targetText)
 		ofile.close()
-		self.updatePlan()
+		if not avoidUpdate:
+			self.updatePlan()
+		self.mutex.release()
 	def ignoreCommentsInPlan(self, plan):
 		ret = []
 		for i in plan:
@@ -151,7 +159,7 @@ class Executive(threading.Thread):
 				if i[0] != '#':
 					ret.append(i)
 		return ret
-	
+
 	def callMonitoring(self):
 		stored = False
 		stepsFwd = 0
@@ -191,16 +199,17 @@ class Executive(threading.Thread):
 			stored, stepsFwd = self.callMonitoring()
 			print stored, stepsFwd
 		else:
-			print 'No habia plan previo'
+			print 'There was no previous plan'
 
 		print 'Running the planner?', stored==False
 		if stored == False:
 			# Run planner
-			import time
 			print 'Running the planner...'
 			start = time.time()
+			#self.mutex.release()
 			subprocess.call(["agglplanner", "/tmp/domainActive.py", "/tmp/lastWorld.xml", "/tmp/target.py", "/tmp/result.txt"])
 			end = time.time()
+			#self.mutex.acquire()
 			print 'It took', end - start, 'seconds'
 			# Get the output
 			ofile = open("/tmp/result.txt", 'r')
@@ -208,12 +217,6 @@ class Executive(threading.Thread):
 			ofile.close()
 			self.plan = AGGLPlannerPlan('\n'.join(lines), direct=True)
 			stored, stepsFwd = self.callMonitoring()
-			#if len(lines) == 0:
-				#self.plan = None
-				#print 'No solutions found!'
-				#print 'No solutions found!'
-				#print 'No solutions found!'
-				#return
 		else:
 			print 'Got plan from monitorization'
 			print 'plan'
@@ -227,8 +230,8 @@ class Executive(threading.Thread):
 		if len(self.plan) > 0:
 			action = self.plan.data[0].name
 			parameterMap = self.plan.data[0].parameters
-			
-		print 'action: <'+action+'>  parameters:  <'+str(parameterMap)+'>' 
+
+		print 'action: <'+action+'>  parameters:  <'+str(parameterMap)+'>'
 		# Prepare parameters
 		params = dict()
 		params['action'] = RoboCompAGMCommonBehavior.Parameter()
@@ -283,14 +286,26 @@ class Executive(threading.Thread):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
+		now = time.time()
+		while self.mutex.acquire(0)==False:
+			sys.exit(2)
+			time.sleep(1)
+			print 'Tryin...'
+			if (now - self.lastPypyKill) > 1:
+				subprocess.call(["killall", "-9", "pypy"])
+				self.lastPypyKill = now
 		self.worldModelICE = modification.newModel
 		internalModel = AGMModelConversion.fromIceToInternal_model(self.worldModelICE, ignoreInvalidEdges=True)
 		self.modifications += 1
 		internalModel.toXML('modification'+(str(self.modifications).zfill(4))+'.xml')
 		self.setModel(internalModel)
 		self.updatePlan()
+		self.mutex.release()
 
 	def updateNode(self, nodeModification):
+		self.mutex.acquire()
 		internal = AGMModelConversion.fromIceToInternal_node(nodeModification)
 		self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
-		self.executiveTopic.modelUpdated(nodeModification)		
+		self.executiveTopic.modelUpdated(nodeModification)
+		self.mutex.release()
+
