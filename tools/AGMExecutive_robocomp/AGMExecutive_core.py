@@ -285,7 +285,20 @@ class Executive(threading.Thread):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
+		
+		# Handle model conversion and verification that the model is not the current model
+		worldModelICE = modification.newModel
+		internalModel = AGMModelConversion.fromIceToInternal_model(worldModelICE, ignoreInvalidEdges=True)
+		try:
+			if internalModel.equivalent(self.lastModification):
+				return
+			else:
+				self.lastModification = internalModel
+		except AttributeError:
+			self.lastModification = internalModel
+		#
 		sup = self.modifications
+		self.modifications += 1
 		print "<<<<<<<<<<<modificationProposal(self, modification)", sup
 		now = time.time()
 		print 'Tryin...'
@@ -295,9 +308,7 @@ class Executive(threading.Thread):
 				subprocess.call(["killall", "-9", "pypy"])
 				self.lastPypyKill = now
 			time.sleep(1)
-		self.worldModelICE = modification.newModel
-		internalModel = AGMModelConversion.fromIceToInternal_model(self.worldModelICE, ignoreInvalidEdges=True)
-		self.modifications += 1
+		self.worldModelICE = worldModelICE
 		internalModel.toXML('modification'+(str(self.modifications).zfill(4))+'.xml')
 		self.setModel(internalModel)
 		self.updatePlan()

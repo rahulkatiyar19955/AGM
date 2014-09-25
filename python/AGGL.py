@@ -20,7 +20,11 @@ class AGMSymbol(object):
 	def __repr__(self):
 		return self.toString()
 	def __eq__(self, other):
-		#print '__EQ__ sym'
+		if self.sType == other.sType and self.name == other.name:
+			return True
+		else:
+			return False
+	def equivalent(self, other):
 		if self.sType == other.sType and self.name == other.name:
 			return True
 		else:
@@ -170,6 +174,25 @@ class AGMGraph(object):
 		except:
 			return False
 
+	def equivalent(self, other):
+		try:
+			# Basic: number of nodes
+			if len(self.nodes) != len(other.nodes):
+				return False
+			# Basic: number of links
+			if len(self.links) != len(other.links):
+				return False
+			# Exhaustive nodes
+			for l in self.nodes:
+				if not self.nodes[l].equivalent(other.nodes[l]):
+					return False
+			for l in range(len(self.links)):
+				if not self.links[l] in other.links:
+					return False
+			return True
+		except:
+			return False
+		
 	def __cmp__(self, other):
 		# Basic: number of nodes
 		if len(self.nodes) != len(other.nodes):
