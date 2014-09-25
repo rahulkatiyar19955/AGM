@@ -117,8 +117,8 @@ class Executive(threading.Thread):
 	def broadcastModel(self):
 		self.mutex.acquire()
 		try:
-			print '<<<broadcastinnn'
-			print self.currentModel
+			#print '<<<broadcastinnn'
+			#print self.currentModel
 			ev = RoboCompAGMWorldModel.Event()
 			if self.backModelICE == None:
 				ev.backModel = AGMModelConversion.fromInternalToIce(self.currentModel)
@@ -127,7 +127,7 @@ class Executive(threading.Thread):
 			ev.newModel = AGMModelConversion.fromInternalToIce(self.currentModel)
 			self.executiveTopic.modelModified(ev)
 			self.backModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
-			print 'broadcastinnn>>>'
+			#print 'broadcastinnn>>>'
 		except:
 			print 'There was some problem broadcasting'
 			sys.exit(1)
@@ -138,7 +138,7 @@ class Executive(threading.Thread):
 		self.updatePlan()
 		self.mutex.release()
 	def setModel(self, model):
-		print model
+		#print model
 		self.currentModel = model
 		self.broadcastModel()
 	def setMission(self, target, avoidUpdate=False):
@@ -184,7 +184,7 @@ class Executive(threading.Thread):
 				stored = False
 		except:
 			print traceback.print_exc()
-			print 'PARECE QUE NO FUNCIONO...'
+			print 'It didn\'t seem to work.'
 			stored = False
 		print 'done callMonitoring', stored, stepsFwd
 		return stored, stepsFwd
@@ -207,6 +207,7 @@ class Executive(threading.Thread):
 			print 'Running the planner...'
 			start = time.time()
 			#self.mutex.release()
+			subprocess.call(["killall", "-9", "pypy"])
 			subprocess.call(["agglplanner", "/tmp/domainActive.py", "/tmp/lastWorld.xml", "/tmp/target.py", "/tmp/result.txt"])
 			end = time.time()
 			#self.mutex.acquire()
@@ -219,9 +220,7 @@ class Executive(threading.Thread):
 			stored, stepsFwd = self.callMonitoring()
 		else:
 			print 'Got plan from monitorization'
-			print 'plan'
 			print self.plan
-			print 'plan'
 			print 'Got plan from monitorization'
 
 		# Extract first action
@@ -286,14 +285,16 @@ class Executive(threading.Thread):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
+		sup = self.modifications
+		print "<<<<<<<<<<<modificationProposal(self, modification)", sup
 		now = time.time()
+		print 'Tryin...'
 		while self.mutex.acquire(0)==False:
-			sys.exit(2)
-			time.sleep(1)
-			print 'Tryin...'
-			if (now - self.lastPypyKill) > 1:
+			print 'couldn\'t acquire'
+			if (now - self.lastPypyKill) > 3:
 				subprocess.call(["killall", "-9", "pypy"])
 				self.lastPypyKill = now
+			time.sleep(1)
 		self.worldModelICE = modification.newModel
 		internalModel = AGMModelConversion.fromIceToInternal_model(self.worldModelICE, ignoreInvalidEdges=True)
 		self.modifications += 1
@@ -301,6 +302,7 @@ class Executive(threading.Thread):
 		self.setModel(internalModel)
 		self.updatePlan()
 		self.mutex.release()
+		print "modificationProposal(self, modification)>>>>>>>>>>>", sup
 
 	def updateNode(self, nodeModification):
 		self.mutex.acquire()
