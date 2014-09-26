@@ -20,6 +20,8 @@ _agglcomplete_ ()
 }
 
 complete -o nospace -F _agglcomplete_ AGGLEditor
+complete -o nospace -F _agglcomplete_ aggleditor
+
 
 
 
