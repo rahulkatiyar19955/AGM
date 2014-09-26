@@ -752,29 +752,7 @@ def CheckTarget(graph):"""
 	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
 
 	ret += indent+"maxScore = 0"
-	ret += indent+"scoreEasy = 0"
 	ret += '\n'
-	easy = 1
-	if True:
-		ret += indent+"# Easy score"
-		typesDict = dict()
-		for n in graph.nodes:
-			t = graph.nodes[n].sType
-			easy += 1
-			if t in typesDict:
-				typesDict[t] += 1
-			else:
-				typesDict[t] = 1
-		ret += indent+"typesDict = dict()"
-		for t in typesDict:
-			ret += indent+"typesDict['"+t+"'] = " + str(typesDict[t])
-		ret += indent+"for n in graph.nodes:"
-		ret += indent+"	if graph.nodes[n].sType in typesDict:"
-		ret += indent+"		scoreEasy += 1"
-		ret += indent+"		typesDict[graph.nodes[n].sType] -= 1"
-		ret += indent+"		if typesDict[graph.nodes[n].sType] == 0:"
-		ret += indent+"			del typesDict[graph.nodes[n].sType]"
-		ret += '\n'
 
 	conditionsListList = []
 	# Generate the loop that checks the model
@@ -828,13 +806,13 @@ def CheckTarget(graph):"""
 		if len(cond) > 1:
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
-	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ": return maxScore+scoreEasy, True"
+	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ": return maxScore, True"
 
 
 	# Rule ending
 	while len(pops)>0:
 		ret += pops.pop()
 	indent = "\n\t"
-	ret += indent+"return maxScore+scoreEasy, False"
+	ret += indent+"return maxScore, False"
 	ret += "\n"
 	return ret
