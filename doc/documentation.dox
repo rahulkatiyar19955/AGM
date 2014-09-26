@@ -3,6 +3,9 @@
 
 
 \section intro_sec Introduction
+<table border="0">
+<tr>
+<td>
 <strong>AGM</strong> (Active Grammar-based modeling) is a modern core for robotic architectures capable of performing <strong>perception-aware planning</strong> (that means that, besides any regular planning-related task, you can use AGM to plan goals that involve detecting and modeling new objects). AGM relies on a visual language named <strong>AGGL</strong> (Active Graph Grammar Language) that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. In conjunction with an AI planner, AGGL descriptions are used by AGM to reason about what to do depending on the robots' current goal and world model.
 
 <strong>AGGL</strong> (Active Graph Grammar Language) is a powerful (yet easy to understand) visual language that is used describe the possible changes that robots can make to their world models and the behavior that they should adopt if such changes are desired. The description of these changes, expressed as graph-grammar rules, can be used for several purposes:
@@ -12,7 +15,12 @@
 <li>Generating plans to perceive the world</li>
 <li>Verifying world model modifications</li>
 </ul>
-
+</td>
+<td>
+<img src="AGGLEditor_B.png" width="700px">
+</td>
+</tr>
+</table>
 
 \section more_sec Read more
 \ref agmworks
@@ -35,7 +43,23 @@
 /**
 \page agmworks How does AGM work?
 
-In the context of AGM, a behavior is the resulting phenomena of the coordinated interaction between the main modules of the architecture. These modules eventually propose world model changes to the executive, entering in a loop in which AGM activates some modules and --after a modeling or performing some action-- these modules propose model changes.
+In the context of AGM, behavior is the resulting phenomena of the coordinated interaction between the main modules of the architecture. In every AGM-based architecture, we can find three types of modules:
+- a pool of <b><em>agents</em></b>, which are the modules that do the "real work" by interacting with the physical environment
+- a <b><em>grammar-based controller</em></b>, in charge of controlling the agents and managing the robot's knowledge
+- and a <b><em>planner</em></b>, which used by the controller to find plans and verify structural changes in the robot's knowledge
+
+\image html wholePicture.png
+
+Each grammar-based controller is composed of three elements:
+- the current world <b><em>model</em></b>
+- the <b><em>grammar</em></b> of the world, which is specified using the AGGL language
+- the <b><em>mission</em></b> of the robot, which is also stored in a separate file
+- and the <b><em>executive</em></b>, which is the software using or controlling the previous elements
+
+
+AGM works as a loop where the beggining of each cycle is triggered by world model change proposals from one of the agents. When an agent which finishes performing an action, perceiving a new world element or any modification in the environment that should affect the robot's behavior, it proposes world model changes to the executive. These changes are verified by the executive and, if they are correct, the world model is updated (and broadcasted to all of the agents) and the plan is updated, entering in a loop in which AGM configure agents and, after performing some action or detecting the world model should be updated, these agents propose model changes.
+
+AGM provides the executive and the planner. The rest of the elements of the architecture --the agents and the grammar-- is domain-dependent and depends on the tasks each robot is required to perform.
 
 
 **/

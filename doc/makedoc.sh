@@ -8,4 +8,7 @@ cd -
 cp tabs.css html/tabs.css
 cp AGGLEditor.png html/AGGLEditor.png
 cp AGGLEditor_A.png html/AGGLEditor_A.png
+cp AGGLEditor_B.png html/AGGLEditor_B.png
+cp wholePicture.png html/wholePicture.png
+
 
