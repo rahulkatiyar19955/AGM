@@ -219,7 +219,7 @@ AGGLEditor is a visual editor for AGGL files. Writing graph-grammar rules in oth
 
 \image html AGGLEditor.png
 
-The corresponding PDDL code would be the following. Looks pretty nasty right? You don't want to write that code manually. That's what AGGLEditor is for. We want to make designing graph grammars easier.
+The corresponding PDDL code would be the following. It looks pretty nasty, right? You don't want to write that code manually. That's what AGGLEditor is for. We want to make designing graph grammars easier.
 
 \code{.lisp}
 (:action tellHumanAboutMug
@@ -231,48 +231,31 @@ The corresponding PDDL code would be the following. Looks pretty nasty right? Yo
 
 
 \section AGGLEditor_us_cr Create & save AGGL files
-a
-\subsection AGGLEditor_us_cr_cr Create
-a
-\subsection AGGLEditor_us_cr_sa Save
+As in most programs with a user interface, there is a open and a save option in the 'File' section of the main menu. Unless a grammar file is specified as the first argument of the program (case in which such file is opened), it starts with an empty grammar.
 
 \section AGGLEditor_us_crru Create & delete rules
-d
-\subsection AGGLEditor_us_crru_cr Create
-d
-\subsection AGGLEditor_us_crru_de Delete
-d
+In the main menu of the editor, select the corresponding option to create or delete rules. It also lets users to rename rules. In the case of deletion or renaming, the operation will be applied to the rule currently selected.
 
 \section AGGLEditor_us_crsy Create delete & modify symbols
-f
-\subsection AGGLEditor_us_crsy_cr Create symbol
-f
-\subsection AGGLEditor_us_crsy_de Delete symbol
-f
-\subsection AGGLEditor_us_crsy_na Changing name
-ff
-\subsection AGGLEditor_us_crsy_ty Changing type
-ff
+Creation, deletion and modification of symbols is performed selecting the corresponding option in the 'Tools' pan of the editor. The following operations can be applied to symbols:
+- <b>add:</b> click on the position where it is desired to create a new symbol, whether in the area designed for the LHS or RHS
+- <b>remove:</b> click over the symbol to be deleted
+- <b>change type:</b> click over the symbol whose type is to be modified
+- <b>move:</b> click over the symbol whose type is to be modified
+
 
 \section AGGLEditor_us_cred Create, delete & modify edge labels
-f
-\subsection AGGLEditor_us_cred_cr Create edge
-f
-\subsection AGGLEditor_us_cred_de Delete edge
-f
-\subsection AGGLEditor_us_cred_mo Edit label
-f
+Creation, deletion and modification of the edges is performed selecting the corresponding option in the 'Tools' pan of the editor. The following operations can be applied to edges:
+- <b>add:</b> press the left button of the mouse in the source node of the edge and release the button in the destination node
+- <b>remove:</b> click over the label of the edge to be deleted
+- <b>edit an edge's label:</b> click over the label to be modified
 
 
 \section AGGLEditor_generatePDDL Generate PDDL code
-In case you want to use a PDDL planner...
+In case you want to use a PDDL planner you can export the grammar to PDDL using the option 'Tools' -> 'Generate PDDL domain' in the main menu of the program. You will be asked for two file names. The first file (FULL) will contain the whole set of rules (it is supposed to be used for model verification purposes), the second file will contain only active rules (it is supposed to be used for regular planning pruposes).
 
-Generate PDDL code (full, active).
-
-\section AGGLEditor_generatePNG Export rules to PNG
-
-Export
-
+\section AGGLEditor_generatePNG Export rules to PNG or SVG
+To document how your robot works, or to share your domain definition with others as image files, the AGGL editor allows you to export the grammar to PNG or SVG files. To do this, select the corresponding tool within the 'Tools' section of the main menu.
 
 **/
 
