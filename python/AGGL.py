@@ -192,7 +192,7 @@ class AGMGraph(object):
 			return True
 		except:
 			return False
-		
+
 	def __cmp__(self, other):
 		# Basic: number of nodes
 		if len(self.nodes) != len(other.nodes):
@@ -342,7 +342,7 @@ class AGMGraph(object):
 		for l in self.links:
 			ret.add(l.linkType)
 		return ret
-	
+
 	def getNode(self, identifier):
 		return self.nodes[identifier]
 
@@ -450,7 +450,7 @@ class AGMComboRule(object):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
 		ret = self.name + ' : ' + passiveStr + '('+ str(self.cost) +')\n{\n'
-	
+
 		if len(self.text) > 0:
 			ret += self.text
 		else:
@@ -507,7 +507,7 @@ class AGMFileData(object):
 		text = AGMPDDL.toPDDL(a, self.properties["name"], skipPassiveRules)
 		w.write(text)
 		w.close()
-		
+
 	def generateAGGLPlannerCode(self, filename, skipPassiveRules=False):
 		w = open(filename, 'w')
 		a = copy.deepcopy(self.agm)
@@ -515,4 +515,4 @@ class AGMFileData(object):
 		text = generateAGGLPlannerCode.generate(a, skipPassiveRules)
 		w.write(text)
 		w.close()
-		
+

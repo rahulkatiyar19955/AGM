@@ -86,6 +86,9 @@ class Executive(threading.Thread):
 	def __init__(self, agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech):
 		threading.Thread.__init__(self)
 		self.mutex = threading.RLock()
+		self.pypyKillMutex = threading.RLock()
+		self.pypyInProgress = 0
+		self.plannerExecutionID=0
 		self.agents = dict()
 		self.plan = None
 		self.modifications = 0
@@ -160,12 +163,12 @@ class Executive(threading.Thread):
 					ret.append(i)
 		return ret
 
-	def callMonitoring(self):
+	def callMonitoring(self, peid):
 		stored = False
 		stepsFwd = 0
 		print 'Trying with the last steps of the current plan...'
 		domain = '/tmp/domainActive.py'
-		init   = '/tmp/lastWorld.xml'
+		init   = '/tmp/lastWorld'+peid+'.xml'
 		target = '/tmp/target.py'
 		try:
 			#print '<<<Call Monitoring'
@@ -190,13 +193,16 @@ class Executive(threading.Thread):
 		return stored, stepsFwd
 
 	def updatePlan(self):
-		# Save world
-		self.currentModel.toXML("/tmp/lastWorld.xml")
+		# Kill any previous planning process
+		subprocess.call(["killall", "-9", "pypy"])
 
 		# First, try with the current plan
 		stored = False
 		if self.plan != None:
-			stored, stepsFwd = self.callMonitoring()
+			self.pypyKillMutex.acquire()
+			peid = '_'+str(self.plannerExecutionID)
+			self.pypyKillMutex.release()
+			stored, stepsFwd = self.callMonitoring(peid)
 			print stored, stepsFwd
 		else:
 			print 'There was no previous plan'
@@ -206,18 +212,33 @@ class Executive(threading.Thread):
 			# Run planner
 			print 'Running the planner...'
 			start = time.time()
-			#self.mutex.release()
-			subprocess.call(["killall", "-9", "pypy"])
-			subprocess.call(["agglplanner", "/tmp/domainActive.py", "/tmp/lastWorld.xml", "/tmp/target.py", "/tmp/result.txt"])
+			#PRE
+			self.pypyKillMutex.acquire()
+			self.pypyInProgress += 1
+			self.plannerExecutionID+=1
+			peid = '_'+str(self.plannerExecutionID)
+			self.currentModel.toXML("/tmp/lastWorld"+peid+".xml")
+			self.pypyKillMutex.release()
+			#CALL
+			subprocess.call(["agglplanner", "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"])
+			#POST Check if the planner was killed
+			self.pypyKillMutex.acquire()
+			self.pypyInProgress -= 1
+			if self.pypyInProgress == 0: plannerWasKilled = False
+			else: plannerWasKilled = True
+			self.pypyKillMutex.release()
+			#CONTINUE?
+			if plannerWasKilled:
+				print 'There\'s another planning process running... abort'
+				return
 			end = time.time()
-			#self.mutex.acquire()
 			print 'It took', end - start, 'seconds'
 			# Get the output
-			ofile = open("/tmp/result.txt", 'r')
+			ofile = open("/tmp/result"+peid+".txt", 'r')
 			lines = self.ignoreCommentsInPlan(ofile.readlines())
 			ofile.close()
 			self.plan = AGGLPlannerPlan('\n'.join(lines), direct=True)
-			stored, stepsFwd = self.callMonitoring()
+			stored, stepsFwd = self.callMonitoring(peid)
 		else:
 			print 'Got plan from monitorization'
 			print self.plan
@@ -285,7 +306,7 @@ class Executive(threading.Thread):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
-		
+
 		# Handle model conversion and verification that the model is not the current model
 		worldModelICE = modification.newModel
 		internalModel = AGMModelConversion.fromIceToInternal_model(worldModelICE, ignoreInvalidEdges=True)

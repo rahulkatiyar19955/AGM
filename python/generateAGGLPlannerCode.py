@@ -72,7 +72,7 @@ def ruleTriggerDeclaration(agm):
 	return ret
 
 
-def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere):
+def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, debug=False):
 	ret = ''
 	info = []
 	number = 0
@@ -86,12 +86,12 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere):
 			if newSymbol == link.a:
 				if link.b in alreadyThere:
 					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
-					info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
+					if debug: info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
 					number += 1
 			elif newSymbol == link.b:
 				if link.a in alreadyThere:
 					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
-					info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
+					if debug: info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
 					number += 1
 	return ret, number, info
 
@@ -752,7 +752,29 @@ def CheckTarget(graph):"""
 	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
 
 	ret += indent+"maxScore = 0"
+	ret += indent+"scoreEasy = 0"
 	ret += '\n'
+	easy = 1
+	if True:
+		ret += indent+"# Easy score"
+		typesDict = dict()
+		for n in graph.nodes:
+			t = graph.nodes[n].sType
+			easy += 1
+			if t in typesDict:
+				typesDict[t] += 1
+			else:
+				typesDict[t] = 1
+		ret += indent+"typesDict = dict()"
+		for t in typesDict:
+			ret += indent+"typesDict['"+t+"'] = " + str(typesDict[t])
+		ret += indent+"for n in graph.nodes:"
+		ret += indent+"	if graph.nodes[n].sType in typesDict:"
+		ret += indent+"		scoreEasy += 1"
+		ret += indent+"		typesDict[graph.nodes[n].sType] -= 1"
+		ret += indent+"		if typesDict[graph.nodes[n].sType] == 0:"
+		ret += indent+"			del typesDict[graph.nodes[n].sType]"
+		ret += '\n'
 
 	conditionsListList = []
 	# Generate the loop that checks the model
@@ -806,13 +828,13 @@ def CheckTarget(graph):"""
 		if len(cond) > 1:
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
-	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ": return maxScore, True"
+	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ": return maxScore+scoreEasy, True"
 
 
 	# Rule ending
 	while len(pops)>0:
 		ret += pops.pop()
 	indent = "\n\t"
-	ret += indent+"return maxScore, False"
+	ret += indent+"return maxScore+scoreEasy, False"
 	ret += "\n"
 	return ret

@@ -54,7 +54,7 @@ class PyPlanChecker(object):
 			self.targetCode = target.CheckTarget
 		# Get plan
 		self.plan = AGGLPlannerPlan(planPath)
-		
+
 		# Apply plan
 		if verbose: print "PyPlanChecker applying plan"
 		try:
@@ -65,7 +65,7 @@ class PyPlanChecker(object):
 			if verbose: print self.plan
 			if verbose: print 'plan>>'
 			for action in self.plan:
-				if verbose: print 'Executing action', line 
+				if verbose: print 'Executing action', line
 				line += 1
 				if verbose: print action
 				for p in action.parameters.keys():
@@ -103,7 +103,7 @@ class PyPlanChecker(object):
 		if resultPath!='':
 			world.graph.toXML(resultPath)
 
-		
+
 def printUsage():
 	print 'Usage\n\t', sys.argv[0], ' domain.[py/aggl] init.xml plan.plan target.[py/xml]   [result.xml]'
 	sys.exit(0)
@@ -147,7 +147,7 @@ if __name__ == '__main__': # program domain problem result
 		target = "/tmp/target.py"
 	elif not target.endswith('.py'):
 		printUsage()
-		
+
 
 
 	p = PyPlanChecker(domain, init, plan, target, result)

@@ -62,7 +62,7 @@ def fromIceToInternal_model(src, ignoreInvalidEdges=False):
 	for srcNode in src.nodes:
 		dst.addNode(0,0, str(srcNode.nodeIdentifier), srcNode.nodeType, srcNode.attributes)
 		knownNodes[str(srcNode.nodeIdentifier)] = True
-		print srcNode.nodeIdentifier, str(srcNode.nodeIdentifier)
+		#print srcNode.nodeIdentifier, str(srcNode.nodeIdentifier)
 		if srcNode.nodeIdentifier == -1:
 			raise Exception("Can't transform models containing nodes with invalid identifiers (type: "+src.nodes[i].nodeType+").\n")
 			sys.exit(-1)
