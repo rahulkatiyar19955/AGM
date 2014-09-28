@@ -234,11 +234,14 @@ class Executive(threading.Thread):
 			end = time.time()
 			print 'It took', end - start, 'seconds'
 			# Get the output
-			ofile = open("/tmp/result"+peid+".txt", 'r')
-			lines = self.ignoreCommentsInPlan(ofile.readlines())
-			ofile.close()
-			self.plan = AGGLPlannerPlan('\n'.join(lines), direct=True)
-			stored, stepsFwd = self.callMonitoring(peid)
+			try:
+				ofile = open("/tmp/result"+peid+".txt", 'r')
+				lines = self.ignoreCommentsInPlan(ofile.readlines())
+				ofile.close()
+				self.plan = AGGLPlannerPlan('\n'.join(lines), direct=True)
+				stored, stepsFwd = self.callMonitoring(peid)
+			except: # The planner was probably killed
+				return
 		else:
 			print 'Got plan from monitorization'
 			print self.plan
