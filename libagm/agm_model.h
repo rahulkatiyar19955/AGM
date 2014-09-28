@@ -9,20 +9,24 @@
 #include <agm_modelException.h>
 #if ROBOCOMP_SUPPORT == 1
 #include <AGMWorldModel.h>
+#include <AGMCommonBehavior.h>
 #endif
 
 #include <agm_modelSymbols.h>
+
+int32_t str2int(const std::string &s);
 
 class AGMModelEdge;
 class AGMModelConverter;
 class AGMModelSymbol;
 
+
 /*!
  * \class AGMModel
  * @brief Graph representation for robots' models
  *
- * More detailed information to come... 
- * 
+ * More detailed information to come...
+ *
  */
 class AGMModel
 {
@@ -31,7 +35,7 @@ friend class AGMModelSymbol;
 public:
 	/*!
 	 *  @brief Iterator class for accessing the symbols in an AGMModel object.
-	 * 
+	 *
 	 */
 	class iterator
 	{
@@ -67,9 +71,9 @@ public:
 	//
 	// Constructors and related
 	//
-	
+
 	//! Shared pointer type to point to AGMModel objects.
-	typedef boost::shared_ptr<AGMModel> SPtr; 
+	typedef boost::shared_ptr<AGMModel> SPtr;
 	//! Default constructor.
 	AGMModel();
 	//! Copy constructor using a shared pointer.
@@ -151,15 +155,15 @@ public:
 	int32_t numberOfSymbols() const;
 
 
-	/*! \brief Returns the index of a given symbol '<em>sym</em>' (shared pointer) within the model. If not found, returns <em>-1</em>. 
-	 * 
+	/*! \brief Returns the index of a given symbol '<em>sym</em>' (shared pointer) within the model. If not found, returns <em>-1</em>.
+	 *
 	 *  Optionally, the user can provide an offset within the symbol vector (zero by default).
 	 */
 	int32_t indexOfSymbol(const AGMModelSymbol::SPtr &sym, int32_t from=0) const;
 
 
-	/*! \brief Returns the index of a given symbol '<em>sym</em>' (reference) within the model. If not found, returns <em>-1</em>. 
-	 * 
+	/*! \brief Returns the index of a given symbol '<em>sym</em>' (reference) within the model. If not found, returns <em>-1</em>.
+	 *
 	 *  Optionally, the user can provide an offset within the symbol vector (zero by default).
 	 */
 	int32_t indexOfFirstSymbolByValues(const AGMModelSymbol &sym, int32_t from=0) const;
@@ -175,13 +179,34 @@ public:
 	/// Returns a reference to the symbol vector. Use with care.
 	std::vector<AGMModelSymbol::SPtr> getSymbols() const;
 
+#if ROBOCOMP_SUPPORT == 1
+	/// Returns a map of smart pointers to a list of symbools
+	template <typename T>
+	std::map<std::string, AGMModelSymbol::SPtr>getSymbolsMap(::RoboCompAGMCommonBehavior::ParameterMap params, T t)
+	{
+		std::map<std::string, AGMModelSymbol::SPtr> ret;
+		ret[t] = getSymbolByIdentifier(str2int(params[t].value));
+		return ret;
+	}
+	template<typename T, typename... Args>
+	std::map<std::string, AGMModelSymbol::SPtr>getSymbolsMap(::RoboCompAGMCommonBehavior::ParameterMap params, T t, Args... args)
+	{
+		std::map<std::string, AGMModelSymbol::SPtr> ret, recurs;
+		ret[t] = getSymbolByIdentifier(str2int(params[t].value));
+		recurs = getSymbolsMap(params, args...);
+		ret.insert(recurs.begin(), recurs.end());
+		return ret;
+	}
+
+// 	worldModel->getSymbolsMap(params, "person", "objectr", "conth");
+#endif
 
 	/// Returns a reference to the edge vector. Use with care. <strong>DEPRECATED</STRONG>1
 	std::vector<AGMModelEdge> getEdges() const;
 
 
 	/*! \brief Returns a reference to the symbol located in position <em>'index'</em> within the symbol vector.
-	 * 
+	 *
 	 * \attention Note that <em>'index'</em> refers to the symbol's index within the symbol vector, not to its identifier.
 	 */
 	AGMModelSymbol::SPtr &symbol(uint32_t index);
@@ -192,9 +217,9 @@ public:
 
 
 	/*! \brief Returns the identifier of the symbol with <strong><em>"name"</em></strong> <em>'name'</em>, where a symbol's name is considered to be the concatenation of its type, the underscore character ('_') and its identifier. If not found returns <em>-1</em>.
-	 * 
+	 *
 	 * This method is handy when interacting with the AGM planner.
-	 * 
+	 *
 	 * \attention A symbol's name is considered to be the concatenation of its type, the underscore character ('_') and its identifier.
 	 */
 	int32_t getIdentifierByName(std::string name) const;
@@ -205,9 +230,9 @@ public:
 
 
 	/*! \brief <strong>DEPRECATED</STRONG>: DON'T USE THIS METHOD
-	 * 
+	 *
 	 * \deprecated This method is kept only to avoid breaking old code but shouldn't be used in new code. It will soon be removed from the API. Please, don't use this method anymore.
-	 * 
+	 *
 	 */
 	int32_t getLinkedID(int32_t id, std::string linkname, int32_t i=0) const;
 
@@ -219,7 +244,7 @@ public:
 	/*! \brief Returns a shared pointer to the symbol with identifier '<em>targetId</em>'.
 	 *
 	 * \throws AGMException If no symbol with identifier 'targetId' is found.
-	 * 
+	 *
 	 */
 	AGMModelSymbol::SPtr getSymbolByIdentifier(int32_t targetId) const;
 
@@ -227,7 +252,7 @@ public:
 	/*! \brief Returns a shared pointer to the symbol with name '<em>name</em>', where a symbol's name is considered to be the concatenation of its type, the underscore character ('_') and its identifier.
 	 *
 	 * \throws AGMException If no symbol with identifier 'targetId' is found.
-	 * 
+	 *
 	 */
 	AGMModelSymbol::SPtr getSymbolByName(const std::string &name) const;
 
@@ -235,7 +260,7 @@ public:
 	/*! \brief Includes a new edge in the model given the identifiers of two symbols with an optional attribute map.  Returns True on success.
 	 *
 	 * \throws AGMException Nodes a and b must exist
-	 * 
+	 *
 	 */
 	bool addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr=std::map<std::string, std::string>());
 
@@ -243,13 +268,13 @@ public:
 	/*! \brief Removes a new edge in the model given the identifiers of two symbols. Returns True on success.
 	 *
 	 * \throws AGMException Nodes a and b must exist
-	 * 
+	 *
 	 */
 	bool removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
 
 
 	/*! \brief Automatically updates the next available identifier as the smaller identifier that is bigger than any of the existing ones.
-	 *	  
+	 *
 	 */
 	void resetLastId();
 
@@ -261,15 +286,15 @@ public:
 
 
 	/*! \brief Returns the next available identifier and makes the returned value unavailable.
-	 *	  
+	 *
 	 */
 	int32_t getNewId();
 
 
 	/*! \brief Returns a string containing the PDDL description of a planning problem given the current model and a target model.
-	 * 
+	 *
 	 * The AGMModel instance which is used to generate the problem is used as initial world and '<em>target</em>' represents the target world.
-	 * 
+	 *
 	 * <em>unknowns</em> represents the maximum number of new symbols that the PDDL planner will use.
 	 * <em>domainName</em> is the name of the PDDL domain which is supposed to be use for the generated problem.
 	 * <em>problemName</em> is the name that the generated PDDL problem will be given.

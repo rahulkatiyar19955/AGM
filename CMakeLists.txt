@@ -103,7 +103,7 @@ if (ROBOCOMP_SUPPORT)
 	INCLUDE( $ENV{ROBOCOMP}/cmake/robocomp.cmake )
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 	SET(ICE_LIBS -lIce)
-	ROBOCOMP_WRAP_ICE( AGMWorldModel AGMAgent )
+	ROBOCOMP_WRAP_ICE( AGMWorldModel AGMAgent AGMCommonBehavior )
 	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
 endif (ROBOCOMP_SUPPORT)
 
@@ -163,7 +163,7 @@ WRAP_PYTHON_QRC( resource )
 #  Library building  #
 ######################
 if (ROBOCOMP_SUPPORT)
-   add_library(agmdummy SHARED AGMWorldModel.cpp AGMAgent.cpp )
+   add_library(agmdummy SHARED AGMWorldModel.cpp AGMAgent.cpp AGMCommonBehavior )
    set(ROBOCOMP_ADDITIONAL_SRC AGMAgent.cpp)
 endif (ROBOCOMP_SUPPORT)
 
@@ -230,8 +230,9 @@ INSTALL(PROGRAMS "AGGLPlanner/agglplan.py" DESTINATION ${INST_BIN_PATH}/ RENAME 
 INSTALL(PROGRAMS "AGGLPlanner/agglplan.py" DESTINATION ${INST_SHARE_PATH}/ RENAME agglplan.py )
 
 if (ROBOCOMP_SUPPORT)
-	INSTALL(FILES AGMWorldModel.h DESTINATION ${INST_INCL_PATH}/ )
-	INSTALL(FILES      AGMAgent.h DESTINATION ${INST_INCL_PATH}/ )
+	INSTALL(FILES     AGMWorldModel.h DESTINATION ${INST_INCL_PATH}/ )
+	INSTALL(FILES          AGMAgent.h DESTINATION ${INST_INCL_PATH}/ )
+	INSTALL(FILES AGMCommonBehavior.h DESTINATION ${INST_INCL_PATH}/ )
 endif (ROBOCOMP_SUPPORT)
 
 INSTALL(PROGRAMS python/parseAGGL.py DESTINATION ${INST_SHARE_PATH})
@@ -250,4 +251,6 @@ INSTALL(PROGRAMS tools/ui/resource_rc.py DESTINATION ${INST_SHARE_PATH})
 
 INSTALL(PROGRAMS tools/aggl_completion.bash DESTINATION /etc/bash_completion.d/ RENAME AGGLEditor)
 
+
+ADD_DEFINITIONS( -std=c++11 )
 
