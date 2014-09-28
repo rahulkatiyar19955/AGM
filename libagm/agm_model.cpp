@@ -596,7 +596,8 @@ bool AGMModel::removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &
 		AGMMODELEXCEPTION("Trying to un-link using invalid identifiers");;
 	}
 
-	// Check the edge doesn't already exists
+	bool removed = false;
+
 	for (uint32_t i=0; i<edges.size(); i++)
 	{
 		if (edges[i].symbolPair.first == a)
@@ -606,12 +607,38 @@ bool AGMModel::removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &
 				if (edges[i].getLabel() == edgeName)
 				{
 					edges.erase(edges.begin() + i);
-					return true;
+					removed = true;
 				}
 			}
 		}
 	}
-	return false;
+	return removed;
+}
+
+bool AGMModel::renameEdgeByIdentifiers(int32_t a, int32_t b, const std::string &was, const std::string &will)
+{
+	// Nodes must exist.
+	if (a < 0 or b < 0)
+	{
+		AGMMODELEXCEPTION("Trying to un-link using invalid identifiers");;
+	}
+
+	bool renamed = false;
+	for (uint32_t i=0; i<edges.size(); i++)
+	{
+		if (edges[i].symbolPair.first == a)
+		{
+			if (edges[i].symbolPair.second == b)
+			{
+				if (edges[i].getLabel() == was)
+				{
+					edges[i].setLabel(will);
+					renamed = true;
+				}
+			}
+		}
+	}
+	return renamed;
 }
 
 AGMModelSymbol::SPtr AGMModel::newSymbol(std::string typ, int32_t id)

@@ -10,8 +10,8 @@
 /*!
  * @brief Edges --relationships between symbols-- of AGMModel graphs
  *
- * 
- * 
+ *
+ *
  */
 class AGMModelEdge
 {
@@ -28,7 +28,7 @@ public:
 
 	void setLabel(std::string l);
 	void setSymbolPair(std::pair<int32_t, int32_t> p);
-	
+
 	///
 	void setAttribute(std::string a, std::string v);
 	std::string getAttribute(std::string a);
@@ -38,8 +38,8 @@ public:
 
 	void getStrings(const AGMModel::SPtr &world, std::string &label, std::string &a, std::string &b) const;
 	void getStrings(const AGMModel *world, std::string &label, std::string &a, std::string &b) const;
-	
-	
+
+
 // protected:
 	std::string linking;
 	std::pair<int32_t, int32_t> symbolPair;
