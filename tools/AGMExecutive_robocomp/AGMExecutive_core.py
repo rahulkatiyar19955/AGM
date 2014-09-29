@@ -82,9 +82,9 @@ def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0)
 
 
 
-class Executive(threading.Thread):
+class Executive(object):
 	def __init__(self, agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech):
-		threading.Thread.__init__(self)
+		#threading.Thread.__init__(self)
 		self.mutex = threading.RLock()
 		self.pypyKillMutex = threading.RLock()
 		self.pypyInProgress = 0
@@ -324,11 +324,12 @@ class Executive(threading.Thread):
 		sup = self.modifications
 		self.modifications += 1
 		print "<<<<<<<<<<<modificationProposal(self, modification)", sup
-		now = time.time()
 		print 'Tryin...'
 		while self.mutex.acquire(0)==False:
-			print 'couldn\'t acquire'
-			if (now - self.lastPypyKill) > 3:
+			now = time.time()
+			elap = (now - self.lastPypyKill)
+			print 'couldn\'t acquire', elap
+			if elap > 3.:
 				subprocess.call(["killall", "-9", "pypy"])
 				self.lastPypyKill = now
 			time.sleep(1)

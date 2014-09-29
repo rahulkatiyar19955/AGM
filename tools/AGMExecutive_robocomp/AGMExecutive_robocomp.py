@@ -213,7 +213,7 @@ class Server (Ice.Application):
 
 			# Run executive thread
 			print 'AGMExecutive initialization ok'
-			executive.start()
+			#executive.start()
 
 			print '-------------------------------------------------------------'
 			print '----     R u n     A G M E x e c u t i v e,     r u n   -----'
