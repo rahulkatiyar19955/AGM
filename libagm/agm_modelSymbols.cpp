@@ -50,7 +50,7 @@ void AGMModelSymbol::init(AGMModel *model, std::string typ, int32_t id)
 		identifier = id;
 
 	model->insertSymbol(this);
-
+	modelRef = model;
 // 	printf("new symbol: %s [%d] (%p)\n", symbolType.c_str(), identifier, this);
 }
 
@@ -73,6 +73,7 @@ void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ)
 	symbolType = typ;
 
 	model->insertSymbol(this);
+	modelRef = model;
 
 // 	printf("new symbol: %s [%d] (%p)\n", symbolType.c_str(), identifier, this);
 }
@@ -92,6 +93,7 @@ void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ, std::map
 	if (model != NULL)
 		model->insertSymbol(this);
 
+	modelRef = model;
 // 	printf("new symbol: %s [%d] (%p)\n", symbolType.c_str(), identifier, this);
 }
 

@@ -104,8 +104,19 @@ public:
 		return edgesEnd(m.get());
 	}
 
+	AGMModelSymbol::iterator begin()
+	{
+		return edgesBegin(modelRef);
+	}
+	AGMModelSymbol::iterator end()
+	{
+		return AGMModelSymbol::iterator::end(modelRef, this);
+	}
+
+
 	bool operator==(const AGMModelSymbol &p) const;
 
+	AGMModel *modelRef;
 	std::string symbolType;
 	int32_t identifier;
 	std::map<std::string, std::string> attributes;
