@@ -31,6 +31,9 @@
 # MODE USE:
 # 		agglplan gramatica.aggl init.xml target.xml
 #
+# Also, we can keep the results in a file with:
+#		 agglplan gramatica.aggl init.xml target.xml result.plan
+#
 # Python distribution imports
 import sys, traceback, subprocess
 
@@ -41,33 +44,38 @@ from generateAGGLPlannerCode import *
 from agglplanner import *
 
 if __name__ == '__main__': # program domain problem result
+	# We check if the program was run with all necessary arguments.
+	# If there aren't all the arguments, we show an error mesage with how to use the program.
+	# If there are all the arguments, we keep them in local variables.
 	if len(sys.argv)<4:
 		print 'Usage\n\t', sys.argv[0], ' domain.aggl init.xml target.xml [result.plan]'
 	else:
-		domainFile = sys.argv[1]
-		worldFile  = sys.argv[2]
-		targetFile = sys.argv[3]
+		domainFile = sys.argv[1] 	# the grammar
+		worldFile  = sys.argv[2] 	# the initial world status
+		targetFile = sys.argv[3]	# the goal o target world status
 		result = None
 		if len(sys.argv)>4:
-			result = sys.argv[4]
+			result = sys.argv[4]    # the file name where we keep the results of the program.
 			
-		print 'Generating search code...',
+		print '\nGenerating search code...',
 
-		# Generate domain Python file
-		agmData = AGMFileDataParsing.fromFile(domainFile)
-		agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
+		# Generate domain Python file <--- like aggl2agglpy
+		# agmData is a variable of AGMFileData class, in AGGL.py file
+		agmData = AGMFileDataParsing.fromFile(domainFile) # CHECK the grammar. Is a parseAGGL.py's class
+		agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True) # write the grammar in a python file.
 
 		# Generate target Python file
 		graph = graphFromXML(targetFile)
 		outputText = generateTarget(graph)
 		ofile = open("/tmp/target.py", 'w')
-		ofile.write(outputText)
+		ofile.write(outputText) # we save the python code of the target world status in the file target.py.
 		ofile.close()
 
 		# Run planner
 		import time
 		print 'done\nRunning the planner...'
 		start = time.time()
+		# We call the agglplaner, the main program that makes all the process...
 		if result:
 			subprocess.call(["agglplanner", "/tmp/domain.py", worldFile, "/tmp/target.py", result])
 		else:

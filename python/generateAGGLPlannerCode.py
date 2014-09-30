@@ -728,7 +728,10 @@ def getOptimalTargetNodeCheckOrder(graph):
 	## return!
 	return optimal_node_list
 
-
+#---------------------------------------------------------------------------------------#
+# METHOD: GENERATE TARGET                                                               #
+# This method generates and returns the code of the target world status in python       # 
+#---------------------------------------------------------------------------------------#
 def generateTarget(graph):
 	ret = """import copy, sys
 sys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import *
