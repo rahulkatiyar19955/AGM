@@ -22,7 +22,15 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with AGGLPlanner. If not, see <http://www.gnu.org/licenses/>.
-
+#
+#--------------------------------------------------------------------------
+#                            DOCUMENTATION                                 
+#--------------------------------------------------------------------------
+# This file loads the grammar, the initial state of the world and the GOAL 
+# status without changing the files extensions of the grammar and the goal.
+# MODE USE:
+# 		agglplan gramatica.aggl init.xml target.xml
+#
 # Python distribution imports
 import sys, traceback, subprocess
 

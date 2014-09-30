@@ -7,8 +7,8 @@ from AGGL import *
 from xmlModelParser import *
 
 #COPY_OPTION = "kkdeepcopy"
-#COPY_OPTION = "copy.deepcopy"
-COPY_OPTION = "copy.copy"
+COPY_OPTION = "copy.deepcopy"
+#COPY_OPTION = "copy.copy"
 #debug = True
 debug = False
 scorePerContition = 100
