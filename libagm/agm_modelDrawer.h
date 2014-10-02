@@ -16,7 +16,7 @@
 #define SPRING_LENGTH 50.
 #define HOOKES_CONSTANT 0.14
 #define FRICTION 0.97
-#define FIELD_FORCE_MULTIPLIER 60000.
+#define FIELD_FORCE_MULTIPLIER 690000.
 
 
 /*!
@@ -42,7 +42,7 @@ public:
 	/// This method updates the widget with the current model ('w' vairable).
 	void update(const AGMModel::SPtr &w)
 	{
-		drawer->autoResize();
+		drawer->autoResize(true);
 		mutex.lock();
 		model = AGMModel::SPtr(new AGMModel(w));
 		updateStructure();
@@ -56,7 +56,6 @@ private:
 	/// Inspects the current model to detect significant changes.
 	void updateStructure()
 	{
-// printf("%s: %d\n", __FILE__, __LINE__);
 		// Push back new nodes
 		for (uint32_t e1=0; e1<model->symbols.size(); e1++)
 		{
@@ -83,7 +82,6 @@ private:
 				nodes.push_back(node);
 			}
 		}
-// printf("%s: %d\n", __FILE__, __LINE__);
 		// Remove deleted nodes
 		for (uint32_t e1=0; e1<nodes.size();)
 		{
@@ -101,7 +99,6 @@ private:
 			else
 				e1++;
 		}
-// printf("%s: %d\n", __FILE__, __LINE__);
 		// Clear edges
 		for (uint32_t e=0; e<nodes.size();e++)
 		{
@@ -109,29 +106,22 @@ private:
 			nodes[e].edgesOriented.clear();
 			nodes[e].edgesNames.clear();
 		}
-// printf("%s: %d\n", __FILE__, __LINE__);
 		// Push back edges again
 		for (uint32_t e=0; e<model->edges.size(); e++)
 		{
-// printf("%s: %d\n", __FILE__, __LINE__);
 			int f = model->getIndexByIdentifier(model->edges[e].symbolPair.first);
-// printf("%s: %d\n", __FILE__, __LINE__);
 			int s = model->getIndexByIdentifier(model->edges[e].symbolPair.second);
-// printf("%s: %d\n", __FILE__, __LINE__);
 			if (s<0 or f<0)
 			{
-				printf("%d --> %d\n", model->getIndexByIdentifier(model->edges[e].symbolPair.first), model->getIndexByIdentifier(model->edges[e].symbolPair.second));
+// 				printf("%d --> %d\n", model->getIndexByIdentifier(model->edges[e].symbolPair.first), model->getIndexByIdentifier(model->edges[e].symbolPair.second));
 				continue;	
 			}
-// printf("%s: %d\n", __FILE__, __LINE__);
 			std::string first  = model->symbols[f]->toString();
 			std::string second = model->symbols[s]->toString();
-// printf("%s: %d\n", __FILE__, __LINE__);
 			int32_t idx1=-1;
 			int32_t idx2=-1;
 			for (uint32_t n=0; n<nodes.size(); n++)
 			{
-// printf("%s: %d\n", __FILE__, __LINE__);
 				if (nodes[n].name == first)
 					idx1 = n;
 				if (nodes[n].name == second)
@@ -139,7 +129,6 @@ private:
 			}
 			if (idx1 > -1 and idx2 > -1)
 			{
-// printf("%s: %d\n", __FILE__, __LINE__);
 				nodes[idx1].edges.push_back(idx2);
 				nodes[idx2].edges.push_back(idx1);
 
@@ -148,13 +137,10 @@ private:
 			}
 			else
 			{
-// printf("%s: %d\n", __FILE__, __LINE__);
 				printf("We had a link whose nodes where not found?!? (%s --> %s)\n", first.c_str(), second.c_str());
 				exit(-1);
 			}
-// printf("%s: %d\n", __FILE__, __LINE__);
 		}
-// printf("%s: %d\n", __FILE__, __LINE__);
 		modified = true;
 	}
 
@@ -252,7 +238,10 @@ private:
 		// Draw links
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
-			if (modified) { /*printf("IDENTIFIER %s  index:%d (LINKS:%d,%d)\n", nodes[n].name.c_str(), n, (int)nodes[n].edgesOriented.size(), (int)nodes[n].edgesNames.size());*/ }
+			if (modified)
+			{
+				/*printf("IDENTIFIER %s  index:%d (LINKS:%d,%d)\n", nodes[n].name.c_str(), n, (int)nodes[n].edgesOriented.size(), (int)nodes[n].edgesNames.size());*/
+			}
 			for (uint32_t e=0; e<nodes[n].edgesOriented.size(); e++)
 			{
 				int32_t o1 = n;
@@ -282,6 +271,7 @@ private:
 				inc /= sqrt(inc.x()*inc.x() + inc.y()*inc.y());
 				p1 = p1 + radius*inc;
 				p2 = p2 - radius*inc;
+
 				// Link itself
 				drawer->drawLine(QLineF(p1, p2), QColor(0, 0, 0));
 				// Arrow
@@ -291,6 +281,8 @@ private:
 					QPointF pr = QPointF(p2.x()-(radius*0.5)*cos(angle+a), p2.y()+(radius*0.5)*sin(angle+a));
 					drawer->drawLine(QLineF(p2,  pr), QColor(0, 0, 0));
 				}
+
+
 				// Text
 				int32_t linkHeight = 16;
 				int32_t linkGroupBase = (-linkGroupCount+1)*linkHeight/2;
@@ -301,6 +293,7 @@ private:
 			}
 		}
 
+
 		// Draw nodes
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
@@ -310,7 +303,6 @@ private:
 			drawer->drawText(p+QPointF(0,+10), QString::number(nodes[n].identifier), 10, QColor(255), true);
 		}
 		modified = false;
-// 		printf("\n\n");
 
 		if (tableWidget != NULL) drawTable();
 	}
