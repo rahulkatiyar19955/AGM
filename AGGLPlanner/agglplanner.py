@@ -89,6 +89,9 @@ class AGGLPlannerAction(object):
 	def __str__(self):
 		return self.name+'@'+str(self.parameters)
 
+#---------------------------------------------------------------#
+#       DOCUMENTATION OF THE CLASS AGGL PLANNER PLAN		#
+#---------------------------------------------------------------#
 class AGGLPlannerPlan(object):
 	def __init__(self, init='', direct=False):
 		object.__init__(self)
