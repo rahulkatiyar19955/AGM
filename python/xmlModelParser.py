@@ -66,6 +66,10 @@ class AGMWorldModelParser(xmllib.XMLParser):
 	def end_attribute(self):
 		pass
 
+#----------------------------------------------------------#
+# Method: GRAPH FROM XML				   #
+# Make a graph with the information contains in a XML file #
+#----------------------------------------------------------#
 def graphFromXML(path):
 	try:
 		parser = AGMWorldModelParser(path)

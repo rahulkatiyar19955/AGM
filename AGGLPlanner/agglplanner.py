@@ -89,6 +89,9 @@ class AGGLPlannerAction(object):
 	def __str__(self):
 		return self.name+'@'+str(self.parameters)
 
+#---------------------------------------------------------------#
+#       DOCUMENTATION OF THE CLASS AGGL PLANNER PLAN		#
+#---------------------------------------------------------------#
 class AGGLPlannerPlan(object):
 	def __init__(self, init='', direct=False):
 		object.__init__(self)
@@ -211,8 +214,8 @@ def printResult(result):
 		#print 'NodeID', result.nodeId
 		print 'Actions\n----------------'
 	for action in result.history:
-		if action[0] != '#':
-			print action
+		#if action[0] != '#':
+		print action
 
 class LockableList():
 	def __init__(self):

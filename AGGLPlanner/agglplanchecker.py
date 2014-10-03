@@ -37,11 +37,24 @@ from agglplanner import *
 from parseAGGL import *
 from generateAGGLPlannerCode import *
 
-
+#--------------------------------------------------------------------------------------------#
+#			DOCUMENTATION OF THE CLASS PY PLAN CHECKER			     #
+# This class is responsible for checking the plan that is generated in python.               #
+# Methods: __init__ and printUsage                                                           #
+#--------------------------------------------------------------------------------------------#
 class PyPlanChecker(object):
+	#------------------------------------------------------------------------------------#
+	#         		   METHOD __INIT__				             #
+	# This method receives as input parameters seven things:                             #
+	#	- SELF: I dont know what it is.						     #
+	#	- DOMAIN PATH: file with the grammar (I am not sure)			     #
+	#	- INIT: the initial world status (the file XML)				     #
+	#	- PLAN PATH: I dont know
+	#	- TARGET PATH: the final or target worl status (I am not sure)
+	#------------------------------------------------------------------------------------#
 	def __init__(self, domainPath, init, planPath, targetPath, resultPath='', verbose=True):
 		object.__init__(self)
-		# Get initial world mdoel
+		# Get initial world model
 		self.initWorld  = WorldStateHistory(xmlModelParser.graphFromXML(init))
 		# Get graph rewriting rules
 		if verbose: print 'domainPath:', domainPath
@@ -58,7 +71,7 @@ class PyPlanChecker(object):
 		# Apply plan
 		if verbose: print "PyPlanChecker applying plan"
 		try:
-			world = copy.deepcopy(self.initWorld)
+			world = copy.deepcopy(self.initWorld) # we copy the initial world status.
 			#if verbose: print world
 			line = 0
 			if verbose: print '<<plan'
