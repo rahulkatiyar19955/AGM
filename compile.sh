@@ -16,16 +16,17 @@ while [ "$finished" = "" ]; do
 done
 
 # Should we compile Python bindings?
-finished=""
-while [ "$finished" = "" ]; do
-	case $PYTHON_BINDINGS in
-		y | Y | yes | YES ) PYTHON_BINDINGS="True"; finished="true";;
-		n | N | no | NO ) PYTHON_BINDINGS="False"; finished="true";;
-		*) PYTHON_BINDINGS="-1";
-			echo -n "Do you want to build Python bindings? (y/n): "
-			read PYTHON_BINDINGS;;
-	esac
-done
+#finished=""
+#while [ "$finished" = "" ]; do
+#	case $PYTHON_BINDINGS in
+#		y | Y | yes | YES ) PYTHON_BINDINGS="True"; finished="true";;
+#		n | N | no | NO ) PYTHON_BINDINGS="False"; finished="true";;
+#		*) PYTHON_BINDINGS="-1";
+#			echo -n "Do you want to build Python bindings? (y/n): "
+#			read PYTHON_BINDINGS;;
+#	esac
+#done
+PYTHON_BINDINGS="False"
 
 cmake . -DROBOCOMP_SUPPORT=${ROBOCOMP_SUPPORT} -DPYTHON_BINDINGS=${PYTHON_BINDINGS}
 make && sudo make install
