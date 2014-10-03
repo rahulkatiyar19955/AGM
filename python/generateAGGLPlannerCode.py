@@ -116,15 +116,15 @@ def ruleImplementation(rule):
 	ret += indent+"# Rule " + rule.name
 
 	if type(rule) == AGMRule:
-		ret = normalRuleImplementation(rule, ret, indent)
+		ret += normalRuleImplementation(rule, indent)
 	elif type(rule) == AGMComboRule:
-		ret = comboRuleImplementation(rule, ret, indent)
+		ret += comboRuleImplementation(rule, indent)
 	else:
 		print 'Unknown rule type'
 		sys.exit(-2346)
 	return ret
 
-def comboRuleImplementation(rule, r, indent):
+def comboRuleImplementation(rule, indent):
 	ret = ''
 	ret += indent+"def " + rule.name + "(self, snode, stackP=None, equivalencesP=None):"
 	indent += "\t"
@@ -205,10 +205,11 @@ def comboRuleImplementation(rule, r, indent):
 
 	ret += "\n"
 	ret += "\n"
-	return r + ret
+	return ret
 
 
-def normalRuleImplementation(rule, ret, indent):
+def normalRuleImplementation(rule, indent):
+	ret = ''
 	# Quantifier-related code (PARAMETERS)
 	# <<<
 	nodesPlusParameters = rule.lhs.nodes
