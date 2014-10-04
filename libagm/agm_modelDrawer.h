@@ -22,6 +22,7 @@
 /*!
  * @brief AGMModel drawing class
  *
+ * @ingroup CPPAPI
  * 
  * 
  */

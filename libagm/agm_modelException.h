@@ -10,6 +10,7 @@
 /*!
  * @brief Generic AGM exception.
  *
+ * @ingroup CPPAPI
  * 
  * 
  */

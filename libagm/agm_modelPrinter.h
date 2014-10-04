@@ -15,6 +15,7 @@
 /*!
  * @brief Utility class to print AGMModel graphs
  *
+ * @ingroup CPPAPI
  * 
  * 
  */

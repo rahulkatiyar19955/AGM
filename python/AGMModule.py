@@ -1,3 +1,6 @@
+##
+# @defgroup PyAPI AGM's Python API
+
 # Python distribution imports
 import sys, traceback, os, re, threading, time, string, math, random
 import numpy as np

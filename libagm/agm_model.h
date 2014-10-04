@@ -23,6 +23,7 @@ class AGMModelSymbol;
 
 /*!
  * \class AGMModel
+ * @ingroup CPPAPI
  * @brief Graph representation for robots' models
  *
  * More detailed information to come...

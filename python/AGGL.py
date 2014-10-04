@@ -5,6 +5,9 @@ from pddlAGGL import *
 def distance(x1, y1, x2, y2):
 	return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
 
+## AGM Symbol
+# @ingroup PyAPI
+#
 class AGMSymbol(object):
 	def __init__(self, name, sType, pos=None, attributes=None):
 		object.__init__(self)
@@ -46,6 +49,9 @@ class AGMSymbol(object):
 		return False
 
 
+## AGM Link
+# @ingroup PyAPI
+#
 class AGMLink(object):
 	def __init__(self, a, b, linkType, attrs=None, enabled=True):
 		object.__init__(self)
@@ -119,6 +125,9 @@ class AGMLink(object):
 	def __repr__(self):
 		return self.__str__()
 
+## AGM Graph
+# @ingroup PyAPI
+#
 class AGMGraph(object):
 	def __init__(self, nodes=None, links=None, side='n'):
 		object.__init__(self)
@@ -359,6 +368,10 @@ class AGMGraph(object):
 		f.write('</AGMModel>\n\n')
 		f.close()
 
+
+## AGM Rule
+# @ingroup PyAPI
+#
 class AGMRule(object):
 	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, parameters='', precondition='', effect=''):
 		object.__init__(self)
@@ -414,6 +427,12 @@ class AGMRule(object):
 	def linkTypes(self):
 		return self.lhs.linkTypes().union(self.rhs.linkTypes())
 
+
+
+
+## AGM Combo rule
+# @ingroup PyAPI
+#
 class AGMComboRule(object):
 	def __init__(self, name='', passive=False, cost=1, ats=None, eqs=None):
 		object.__init__(self)
@@ -471,6 +490,10 @@ class AGMComboRule(object):
 		return ret
 
 
+
+## AGM class
+# @ingroup PyAPI
+#
 class AGM(object):
 	def __init__(self):
 		object.__init__(self)
@@ -479,6 +502,9 @@ class AGM(object):
 		self.rules.append(rule)
 
 
+## AGM file data
+# @ingroup PyAPI
+#
 class AGMFileData(object):
 	def __init__(self):
 		object.__init__(self)
@@ -500,6 +526,9 @@ class AGMFileData(object):
 		w.write(writeString)
 		w.close()
 
+	## Generates PDDL code
+	# @param filename The path of the file where the PDDL version of the grammar is written
+	# @param skipPassiveRules Flag used to generate only active rules (false by default)
 	def generatePDDL(self, filename, skipPassiveRules=False):
 		#print 'Generating (partial =', str(skipPassiveRules)+') PDDL file'
 		w = open(filename, 'w')
@@ -510,6 +539,7 @@ class AGMFileData(object):
 
 	## Generates AGGL Planner code
 	# @param filename The path of the file where the python version of the grammar is written
+	# @param skipPassiveRules Flag used to generate only active rules (false by default)
 	def generateAGGLPlannerCode(self, filename, skipPassiveRules=False):
 		w = open(filename, 'w')
 		a = copy.deepcopy(self.agm)

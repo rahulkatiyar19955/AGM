@@ -168,6 +168,7 @@ def ruleImplementation(rule):
 	return ret
 
 ## This method generates the code for a combo rule
+# @ingroup PyAPI
 #
 # @param rule the current combo rule
 # @param indent

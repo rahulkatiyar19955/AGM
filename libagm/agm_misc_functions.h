@@ -26,6 +26,7 @@ std::string int2str(const int32_t &i);
 
 /*!
  * \class AGMMisc
+ * @ingroup C++API
  * @brief Class containing several useful functions.
  *
  * Class containing several useful functions.

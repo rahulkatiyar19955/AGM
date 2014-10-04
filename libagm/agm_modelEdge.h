@@ -10,6 +10,7 @@
 /*!
  * @brief Edges --relationships between symbols-- of AGMModel graphs
  *
+ * @ingroup CPPAPI
  *
  *
  */

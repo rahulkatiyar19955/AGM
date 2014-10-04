@@ -8,6 +8,9 @@ from parseQuantifiers import *
 debug = False
 #debug = True
 
+## AGM Graph parsing
+# @ingroup PyAPI
+#
 class AGMGraphParsing:
 	@staticmethod
 	def parseGraphFromAST(i, verbose=False):
@@ -37,6 +40,9 @@ class AGMGraphParsing:
 		return AGMGraph(nodes, links)
 
 
+## AGM Rule parsing
+# @ingroup PyAPI
+#
 class AGMRuleParsing:
 	@staticmethod
 	def parseRuleFromAST(i, parameters, precondition, effect, verbose=False):
@@ -77,6 +83,9 @@ class AGMRuleParsing:
 			return combo
 		
 
+## AGGL Parser
+# @ingroup PyAPI
+#
 class AGMFileDataParsing:
 	## This method makes the analysis of the .aggl file where is stored the grammar that we will use.
 	# It returns agmFD, a variable with the grammar file, the properties, symbols and rules of the grammar.

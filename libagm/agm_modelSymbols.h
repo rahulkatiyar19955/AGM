@@ -19,6 +19,7 @@ class AGMModelSymbol;
 /*!
  * @brief Nodes --symbols-- of AGMModel graphs
  *
+ * @ingroup CPPAPI
  *
  *
  */
