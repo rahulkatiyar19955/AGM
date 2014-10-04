@@ -37,21 +37,13 @@ from agglplanner import *
 from parseAGGL import *
 from generateAGGLPlannerCode import *
 
-#--------------------------------------------------------------------------------------------#
-#			DOCUMENTATION OF THE CLASS PY PLAN CHECKER			     #
-# This class is responsible for checking the plan that is generated in python.               #
-# Methods: __init__ and printUsage                                                           #
-#--------------------------------------------------------------------------------------------#
+## This class is responsible for checking the plan that is generated in python.
 class PyPlanChecker(object):
-	#------------------------------------------------------------------------------------#
-	#         		   METHOD __INIT__				             #
-	# This method receives as input parameters seven things:                             #
-	#	- SELF: I dont know what it is.						     #
-	#	- DOMAIN PATH: file with the grammar (I am not sure)			     #
-	#	- INIT: the initial world status (the file XML)				     #
-	#	- PLAN PATH: I dont know
-	#	- TARGET PATH: the final or target worl status (I am not sure)
-	#------------------------------------------------------------------------------------#
+	## Constructor method:
+	# @param domainPath Python version of the grammar
+	# @param init XML-version of the initial world state
+	# @param planPath Path of the plan
+	# @param target Python-version of the target state
 	def __init__(self, domainPath, init, planPath, targetPath, resultPath='', verbose=True):
 		object.__init__(self)
 		# Get initial world model

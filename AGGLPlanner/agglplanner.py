@@ -89,10 +89,12 @@ class AGGLPlannerAction(object):
 	def __str__(self):
 		return self.name+'@'+str(self.parameters)
 
-#---------------------------------------------------------------#
-#       DOCUMENTATION OF THE CLASS AGGL PLANNER PLAN		#
-#---------------------------------------------------------------#
+## @brief AGGLPlannerPlan is used as a plan container.
 class AGGLPlannerPlan(object):
+	## @brief Parametrized constructor.
+	# @param init Optional initialization variable. It can be a) string containing a plan; b) a filename where such string is to be found;
+	# or c) a list of tuples where each tuple contains the name of a rule and a dictionary with the variable mapping of the rule.
+	# 
 	def __init__(self, init='', direct=False):
 		object.__init__(self)
 		self.data = []
@@ -125,14 +127,20 @@ class AGGLPlannerPlan(object):
 		else:
 			print 'Unknown plan type ('+str(type(init))+')! (internal error)'
 			sys.exit(-321)
-	def removeFirstAction(self, init):
-		actionToRemove = self.data[0]
-		symbolsInAction = set(actionToRemove.parameters.values())
-		nodesInWorld = set(init.nodes.keys())
-		created = symbolsInAction.difference(nodesInWorld)
+
+	## @brief Returns a copy of the plan without the first action assuming the action was executed. It's used for monitorization purposes.
+	# @param currentModel Model associated to the current state of the world
+	# @retval The resulting version of the plan
+	def removeFirstAction(self, currentModel):
+		## @internal Create the copy without the first actions.
 		c = AGGLPlannerPlan()
 		for action in self.data[1:]:
 			c.data.append(copy.deepcopy(action))
+		## @internal Modify the rest of the actions assuming the first action was executed.
+		actionToRemove = self.data[0]
+		symbolsInAction = set(actionToRemove.parameters.values())
+		nodesInWorld = set(currentModel.nodes.keys())
+		created = symbolsInAction.difference(nodesInWorld)
 		if len(created) > 0:
 			minCreated = min([int(x) for x in created])
 			for action in c.data:
