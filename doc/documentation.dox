@@ -29,11 +29,7 @@
 <br />
 \ref installation
 <br />
-\ref AGGLEditor
-<br />
-\ref executive
-<br />
-\ref commontasks
+\ref tutorials
 
 **/
 
@@ -263,4 +259,15 @@ To document how your robot works, or to share your domain definition with others
 
 **/
 
+
+/**
+\page tutorials Tutorials
+
+ - The concept behind AGM: \ref agmworks "how does it work?"
+ - What do I get with AGM? \ref components "AGM components"
+ - How to install AGM: \ref installation "AGM installation"
+ - Creating an AGGL domain: \ref AGGLEditor "using aggleditor"
+ - How to use AGM in a robot: \ref executive "the AGM executive"
+
+*/
 

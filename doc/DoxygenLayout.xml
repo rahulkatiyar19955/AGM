@@ -4,8 +4,8 @@
   <navindex>
     <tab type="mainpage" visible="yes" title="main"/>
 	<tab type="user" url="@ref installation" visible="yes" title="installation"/>
-	<tab type="user" url="@ref installation" visible="yes" title="tutorials"/>
-	<tab type="modules" visible="yes" title="API" intro=""/>
+	<tab type="user" url="@ref tutorials" visible="yes" title="tutorials"/>
+	<tab type="modules" visible="yes" title="API" intro="There is a C++ and a Python API:"/>
     <tab type="namespaces" visible="yes" title="">
       <tab type="namespacelist" visible="yes" title="" intro=""/>
       <tab type="namespacemembers" visible="yes" title="" intro=""/>
@@ -17,6 +17,8 @@
       <tab type="hierarchy" visible="yes" title="" intro=""/>
       <tab type="classmembers" visible="yes" title="" intro=""/>
     </tab>
+-->
+<!--
     <tab type="files" visible="yes" title="">
       <tab type="filelist" visible="yes" title="" intro=""/>
       <tab type="globals" visible="yes" title="" intro=""/>

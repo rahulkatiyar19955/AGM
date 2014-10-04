@@ -70,17 +70,4 @@ AGMModelPrinter::printWorld(model);
 **/
 
 
-/**
-\page tutorials Turorials
-\tableofcontents
-
-\section installation Installing AGM
-doc doc doc
-
-\section modifying Making a structural modification to a model
-Este código borra el símbolo de identificador cero e introduce dos símbolos en su lugar. Es pues un cambio estructural:
-
-
- */
-
 
