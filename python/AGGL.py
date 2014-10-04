@@ -508,11 +508,8 @@ class AGMFileData(object):
 		w.write(text)
 		w.close()
 
-	#----------------------------------------------------------------------#
-	# METHOD: Generate AGGL Planner Code				       #
-	# This method open/creates a file with the name of the first parameter # 
-	# where it writes the code of the grammar in python                    #
-	#----------------------------------------------------------------------#
+	## Generates AGGL Planner code
+	# @param filename The path of the file where the python version of the grammar is written
 	def generateAGGLPlannerCode(self, filename, skipPassiveRules=False):
 		w = open(filename, 'w')
 		a = copy.deepcopy(self.agm)

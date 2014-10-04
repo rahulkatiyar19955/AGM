@@ -13,10 +13,7 @@ COPY_OPTION = "copy.deepcopy"
 debug = False
 scorePerContition = 100
 
-#--------------------------------------------------------------#
-# This is the information that is placed in the header, each   #
-# time that the code plan is generated			       #
-#--------------------------------------------------------------#
+## Returns the necessary header of the python version of a grammar
 def constantHeader():
 	return """import copy, sys, cPickle
 sys.path.append('/usr/local/share/agm/')
@@ -59,13 +56,10 @@ class RuleSet(object):
 
 """
 
-#---------------------------------------------------------------#
-# This is the declaration of the first method in the grammar.py #
-# file. This method receives as input parameter:                #
-#	- AGM: is all the grammar                               #
-# This method returns:						#
-#	- RET: the string with the code				#
-#---------------------------------------------------------------#
+## This is the declaration of the first method in the grammar.py file. This method receives as input parameter:
+# @parameter agm The grammar
+#
+# @retval the string with the grammar's code
 def ruleDeclaration(agm):
 	# We write the name os the first method, getRules and
 	# make the mapping of the dictionary of 
@@ -81,13 +75,10 @@ def ruleDeclaration(agm):
 	ret += "\n		return mapping\n\n"
 	return ret
 
-#---------------------------------------------------------------#
-# This is the declaration of the getTriggers method in the	#
-# grammar.py file. This method receives as input parameter: 	#
-#	- AGM: is all the grammar				#
-# This method returns:						#
-#	- RET: the string with the code				#
-#---------------------------------------------------------------#
+## This is the declaration of the getTriggers method in the grammar.py file. This method receives as input parameter:
+# @param agm The grammar
+#
+# @retval the string with the grammar's code
 def ruleTriggerDeclaration(agm):
 	ret = """\tdef getTriggers(self):
 		mapping = dict()"""
@@ -100,21 +91,17 @@ def ruleTriggerDeclaration(agm):
 	return ret
 
 # These are the first three methods of the file that has the active grammar rules -- active.py --
-#--------------------------------------------------------------------------------------#
 
-#--------------------------------------------------------------------------------------#
-#----------------------------------------------------------------#
-# This method creates the part of the code that define the links #
-# Receives as input parameters:					 #
-#	-LINK LIST: list of all the connection betwen two symbol #
-#	- NEW SYMBOL: the symbol that is comparing the link.	 #
-#	- ALREADY THERE:					 #
-#	- DEBUG: a flag to display additional information	 #
-# This method returns:						 #
-#	- RET: the string with the code				 #
-#	- NUMBER: 						 #
-#	- INFO: all the debug information			 #
-#----------------------------------------------------------------#
+## This method creates the part of the code that define the links
+# @param linkList list of all the connection betwen two symbol
+# @param newSymbol the symbol that is comparing the link
+# @param alreadyThere
+# @param debug flag to display additional information
+#
+# @retval A tuple containing:
+# - the string with the code
+# - the number of links processed
+# - the debugging code
 def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, debug=False):
 	ret = ''
 	info = []
@@ -138,15 +125,13 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, debug=Fa
 					number += 1
 	return ret, number, info
 
-#----------------------------------------------------------------#
-# This creates de heuristic of a link				 #
-# Receives as input parameters:					 #
-#	-LINK LIST: list of all the connection betwen two symbol #
-#	- NEW SYMBOL: the symbol that is comparing the link.	 #
-#	- ALREADY THERE:					 #
-# This method returns:						 #
-#	- RET: the string with the code				 #
-#----------------------------------------------------------------#
+## This creates de heuristic of a link
+#
+# @param linkList list of all the connection betwen two symbol
+# @param newSymbol the symbol that is comparing the link.	 #
+# @param alreadyThere
+#
+# @retval the string with the code
 def newLinkScore(linkList, newSymbol, alreadyThere):
 	ret = []
 	for link in linkList:
@@ -160,13 +145,12 @@ def newLinkScore(linkList, newSymbol, alreadyThere):
 	return ret
 
 
-#----------------------------------------------------------------#
-# This method implements all the necesary code to execute a rule #
-# It receives as input parameter:				 #
-#	- RULE: the current rule.				 #
-# This method returns:						 #
-#	- RET: the string with the code				 #
-#----------------------------------------------------------------#
+## This method calls the corresponding generator for a rule (normal or combo)
+#
+# @param rule the rule taken as input
+#
+# @retval the string with the code
+#
 def ruleImplementation(rule):
 	# We dont work with passive rules.
 	if rule.passive: return ''
@@ -183,14 +167,12 @@ def ruleImplementation(rule):
 		sys.exit(-2346)
 	return ret
 
-#----------------------------------------------------------------#
-# This method writes all the code for a combo rule.		 #
-# It receives as input parameters:				 #
-#	- RULE: the current combo rule				 #
-#	- INDENT: 
-# This method returns:						 #
-#	- R+RET: the string with the code			 #
-#----------------------------------------------------------------#
+## This method generates the code for a combo rule
+#
+# @param rule the current combo rule
+# @param indent
+#
+# @retval the string with the code
 def comboRuleImplementation(rule, indent):
 	ret = ''
 	ret += indent+"def " + rule.name + "(self, snode, stackP=None, equivalencesP=None):"
@@ -274,14 +256,11 @@ def comboRuleImplementation(rule, indent):
 	ret += "\n"
 	return ret
 
-#----------------------------------------------------------------#
-# This method writes all the code for a NORMAL rule.		 #
-# It receives as input parameters:				 #
-#	- RULE: the current combo rule				 #
-#	- INDENT: 
-# This method returns:						 #
-#	- RET: the string with the code				 #
-#----------------------------------------------------------------#
+## This method generates the code for a NORMAL rule
+# @param the rule
+# @param indent
+#
+# @retval the string with the code
 def normalRuleImplementation(rule, indent):
 	ret = ''
 	# Quantifier-related code (PARAMETERS)
@@ -562,25 +541,20 @@ def normalRuleImplementation(rule, indent):
 	ret += indent+""
 	ret += "\n"
 	return ret
-#-----------------------------------------------------------------------------------------#
 
-#-----------------------------------------------------------------------------------------#
+
+
+## Generation of the python code for rules' preconditions
+# @param precondition Precondition AST
+# @param indent
+# @param modifier
+# @param stuff
 #
-# Here we define how preconditions are implemented in the generated code
-#
-#----------------------------------------------------------------#
-# This method writes all the code for a rule with preconditions	 #
-# It receives as input parameters:				 #
-#	- PRECONDITION: obvius					 #
-#	- INDENT: 
-#	- MODIFIER:
-#	- STUFF:
-# This method returns:						 #
-#	- RET: the string with the code				 #
-#	- INDENT:
-#	- FORMULA ID:
-#	- STUFF
-#----------------------------------------------------------------#
+# @retval Tuple containing:
+# - code: String containing the resulting code
+# - indent:
+# - formulaId:
+# - stuff:
 def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stuff=None):
 	if stuff == None: stuff = {'availableid':0}
 	if len(precondition) == 0:
@@ -668,22 +642,17 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 			traceback.print_exc()
 	return ret, indent, formulaId, stuff
 
+## Generation of the python code for rules' effects
+# @param precondition Effect AST
+# @param indent
+# @param modifier
+# @param stuff
 #
-# Here we define how effects are implemented in the generated code
-#
-#----------------------------------------------------------------#
-# This method writes all the code for a rule with effects	 #
-# It receives as input parameters:				 #
-#	- effect: obvius					 #
-#	- INDENT: 
-#	- MODIFIER:
-#	- STUFF:
-# This method returns:						 #
-#	- RET: the string with the code				 #
-#	- INDENT:
-#	- FORMULA ID:
-#	- STUFF
-#----------------------------------------------------------------#
+# @retval Tuple containing:
+# - code: String containing the resulting code
+# - indent:
+# - formulaId:
+# - stuff:
 def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 	if stuff == None: stuff = {'availableid':0, 'mode':'normal'}
 	if len(effect) == 0:
@@ -783,12 +752,10 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 			print 'ERROR IN', effectBody
 			traceback.print_exc()
 	return ret, indent, formulaId, stuff
-#--------------------------------------------------------------------------#
 
-#--------------------------------------------------------------------------#
-#----------------------------------------------------------------#
-# This method
-#----------------------------------------------------------------#
+
+
+## 
 def generate(agm, skipPassiveRules):
 	text = ''
 	text += constantHeader()
@@ -835,10 +802,10 @@ def getOptimalTargetNodeCheckOrder(graph):
 	## return!
 	return optimal_node_list
 
-#---------------------------------------------------------------------------------------#
-# METHOD: GENERATE TARGET                                                               #
-# This method generates and returns the code of the target world status in python       # 
-#---------------------------------------------------------------------------------------#
+## Generates target
+# @param The graph used to generate the target
+#
+# @retval The python code used to check the target world state
 def generateTarget(graph):
 	ret = """import copy, sys
 sys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import *

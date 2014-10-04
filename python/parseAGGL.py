@@ -78,14 +78,10 @@ class AGMRuleParsing:
 		
 
 class AGMFileDataParsing:
+	## This method makes the analysis of the .aggl file where is stored the grammar that we will use.
+	# It returns agmFD, a variable with the grammar file, the properties, symbols and rules of the grammar.
 	@staticmethod
 	def fromFile(filename, verbose=False):
-		#-----------------------------------------------------------#
-		# This method makes the analysis of the .aggl file where is #
-		# stored the grammar that we will use.                      #
-		# It returns agmFD, a variable with the grammar file, the   #
-		# properties, symbols and rules of the grammar.             #
-		#-----------------------------------------------------------#
 		if verbose: print 'Verbose:', verbose
 		# Clear previous data
 		agmFD = AGMFileData()
