@@ -779,6 +779,7 @@ FILE_PATTERNS          = *.c \
                          *.c++ \
                          *.h \
                          *.hh \
+                         *.py \
                          *.hxx \
                          *.hpp \
                          *.h++ \
@@ -804,33 +805,14 @@ EXCLUDE                = AGMAgent.h AGMAgent.cpp \
                          AGMCommonBehavior.h AGMCommonBehavior.cpp \
                          AGGLEditor.py \
                          AGGLPlanner \
-                         AGGL.py \
-                         AGMModule.py \
                          ../CMakeFiles \
                          CMakeFiles \
                          ../examples \
                          examples \
                          lex.yy.c \
-                         libagm/aggllexer.cpp \
-                         libagm/aggllexer.l \
-                         libagm/agglparser.cpp \
-                         libagm/agglparser.hpp \
-                         libagm/agglparser.y \
-                         libagm/agm_rule.cpp \
-                         libagm/agm_rule.h \
-                         libagm/agm_search.cpp \
-                         libagm/agm_searchPath.cpp \
-                         libagm/agm_search.h \
-                         libagm/agm_searchPath.h \
                          libagm/fake \
-                         libagm/lex.yy.c \
-                         python/AGGL.py \
-                         python/AGMModule.py \
-                         python/parseAGGL.py \
-                         python/pddlAGGL.py \
                          ../RoboCompAGMExecutive \
                          RoboCompAGMExecutive \
-                         RoboCompAGMMissionControllerExample \
                          *.sh \
                          tools/AGGLEditor.py \
                          tools/agm_xml2pddlProblem.cpp \
@@ -846,10 +828,8 @@ EXCLUDE                = AGMAgent.h AGMAgent.cpp \
                          tools/ui/ui_appearance.py \
                          tools/ui/ui_guiAGGLEditor.py \
                          tools/ui/ui_guiGraphViewer.py \
-                         tools/xmlModelParser.py \
                          ui_* \
-                         ui/ui_* \
-                         xmlModelParser.py
+                         ui/ui_*
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -919,7 +899,7 @@ IMAGE_PATH             = doc/
 # code is scanned, but not when the output code is generated. If lines are added
 # or removed, the anchors will not be placed correctly.
 
-INPUT_FILTER           =
+INPUT_FILTER = "python /usr/bin/doxypy"
 
 # The FILTER_PATTERNS tag can be used to specify filters on a per file pattern
 # basis. Doxygen will compare the file name with each pattern and apply the
@@ -928,14 +908,15 @@ INPUT_FILTER           =
 # filters are used. If the FILTER_PATTERNS tag is empty or if none of the
 # patterns match the file name, INPUT_FILTER is applied.
 
-FILTER_PATTERNS        = "*.py=/usr/bin/doxypy"
+FILTER_PATTERNS        = ""
 
 # If the FILTER_SOURCE_FILES tag is set to YES, the input filter (if set using
 # INPUT_FILTER ) will also be used to filter the input files that are used for
 # producing the source files to browse (i.e. when SOURCE_BROWSER is set to YES).
 # The default value is: NO.
 
-FILTER_SOURCE_FILES    = NO
+FILTER_SOURCE_FILES = YES
+
 
 # The FILTER_SOURCE_PATTERNS tag can be used to specify source filters per file
 # pattern. A pattern will override the setting for FILTER_PATTERN (if any) and
