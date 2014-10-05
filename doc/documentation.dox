@@ -67,7 +67,7 @@ AGM provides the executive and the planner. The rest of the elements of the arch
 
 \section download Download
 
-Despite we haven't made a release yet, the repository is quite stable and is unlikely to be broken. You can download a repository snapshot using this <a href="https://github.com/ljmanso/AGM/archive/master.zip">link</a> or clone the repository using a git client.
+Despite we haven't made any release yet, the repository is quite stable and is unlikely to be broken. You can download a repository snapshot using this <a href="https://github.com/ljmanso/AGM/archive/master.zip">link</a> or clone the repository using a git client.
 \code{.sh}
 git clone git://github.com/ljmanso/AGM.git
 \endcode
@@ -81,64 +81,31 @@ Mandatory dependencies:
 apt-get install cmake ppython python-pyside python-pyparsing
 \endcode
 
-Optional:
+Optional dependencies:
 \code{.sh}
 apt-get install python-numpy python-imaging
 \endcode
 
 Once the dependencies have been installed AGM and its associated applications can safely be installed using a script that allows users to select which optional features to activate (you can also run cmake-gui manually if you wish):
 
-\code{.sh
+\code{.sh}
 sh compile.sh
 \endcode
 
 \section compilationproblems Common compilation problems
 
-\section lackdeps Lack of dependencies
+\subsection lackdeps Lack of dependencies
 
 Lack of required dependencies is the most common issue when compiling, make sure you installed all of them. In case you are using a Debian-based distribution (and it's not very outdated) you can try running the instDep.sh script. Basically, the required dependencies are:
 
-cmake
-G++
-Python
-PyParsing
-PySide
-RoboComp: Optional. Required if it is desired to use AGM with RoboComp.
-libboost-python: Optional. Required for libAGM Python bindings.
-
-\section prevdecl Previous declaration of yyparse with C++ linkage
-
-\code{.cpp}
-agglparser.hpp:XXX:5: error: previous declaration of ‘int yyparse()’ with ‘C++’ linkage
-\endcode
-
-This seems to be caused by a bug in the bison version that comes with the latest Debian and Ubuntu. This is solved by editing aggllexer.l and agglparser.y, changing 'extern "C"' to 'extern'. In aggllexer you need to change:
-
-\code{.cpp}
-#define YY_DECL extern "C" int yylex()
-\endcode
-
-to
-
-\code{.cpp}
-#define YY_DECL extern int yylex()
-\endcode
-
-and, in agglparser.y:
-
-\code{.cpp}
-extern "C" int yylex();
-extern "C" int yyparse();
-extern "C" FILE *yyin;
-\endcode
-
-to
-
-\code{.cpp}
-extern int yylex();
-extern int yyparse();
-extern FILE *yyin;
-\endcode
+- cmake
+- g++
+- python
+- PyPy
+- PyParsing
+- PySide
+- RoboComp: Optional. Required if it is desired to use AGM with RoboComp.
+- libboost-python: Optional. Required for libAGM Python bindings.
 
 **/
 
@@ -261,12 +228,21 @@ To document how your robot works, or to share your domain definition with others
 
 
 /**
+\page AGGLPlanner AGGL Planner
+
+Unlike most modern AI planners, AGGL works using an A* search...
+
+*/
+
+
+/**
 \page tutorials Tutorials
 
- - The concept behind AGM: \ref agmworks "how does it work?"
+ - The concept behind AGM: \ref agmworks "how does AGM work in a robot?"
  - What do I get with AGM? \ref components "AGM components"
  - How to install AGM: \ref installation "AGM installation"
  - Creating an AGGL domain: \ref AGGLEditor "using aggleditor"
+ - Using the \ref AGGLPlanner "AGGL planner"
  - How to use AGM in a robot: \ref executive "the AGM executive"
 
 */
