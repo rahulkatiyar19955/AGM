@@ -23,7 +23,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with AGGLPlanner. If not, see <http://www.gnu.org/licenses/>.
 
-# Python distribution imports
 import signal
 import thread
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -37,8 +36,6 @@ from AGGL import *
 import inspect
 
 # C O N F I G U R A T I O N
-# C O N F I G U R A T I O N
-# C O N F I G U R A T I O N
 number_of_threads = 0
 maxWorldIncrement = 14
 maxCost = 200
@@ -46,8 +43,6 @@ stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 10.
 maxTimeWaitLimit = 3000.
-
-
 
 def heapsort(iterable):
 	h = []
@@ -218,8 +213,6 @@ def printResult(result):
 			if action[0] != '#':
 				l += 1
 		print 'Length', l
-		print 'Probability', result.probability
-		#print 'NodeID', result.nodeId
 		print 'Actions\n----------------'
 	for action in result.history:
 		#if action[0] != '#':
@@ -354,7 +347,6 @@ class PyPlan(object):
 		else:
 			print 'UNKNOWN ERROR'
 			print self.end_condition.get()
-			print 'UNKNOWN ERROR'
 
 		if len(self.results)==0:
 			if verbose > 0: print 'No plan found.'
@@ -370,8 +362,6 @@ class PyPlan(object):
 				if resultFile != None:
 					resultFile.write(str(action)+'\n')
 			if verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
-			#for e in domain.dddd:
-				#print e, domain.dddd[e]
 
 	def startThreadedWork(self, ruleMap, lock=None, i=0, threadPoolStatus=None):
 		if lock == None:
@@ -450,9 +440,6 @@ class PyPlan(object):
 					if notDerivInKnownNodes:
 						if deriv.stop == False:
 							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
-								#self.openNodes.heapqPush( (-deriv.score, deriv)) # score... the more the better
-								#self.openNodes.heapqPush( ( deriv.cost, deriv)) # cost...  the less the better
-								#self.openNodes.heapqPush( (float(deriv.cost)/(float(deriv.score**2)), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
 								self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
 			if verbose > 0:
 				doIt=False
@@ -468,8 +455,6 @@ class PyPlan(object):
 					try:
 						#print nowNow
 						print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
-						#print 'Explored nodes:', self.explored.get()
-						#print 'Solutions:', self.results.size()
 						#rrrr = heapsort(self.openNodes)
 						#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
 						#if len(self.openNodes) > 0:
@@ -511,7 +496,6 @@ class PyPlan(object):
 		self.openNodes.unlock()
 		self.minCostOnOpenNodes.unlock()
 
-
 if __name__ == '__main__': # program domain problem result
 	#from pycallgraph import *
 	#from pycallgraph.output import GraphvizOutput
@@ -525,5 +509,3 @@ if __name__ == '__main__': # program domain problem result
 			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], None)
 		else:
 			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], open(sys.argv[4], 'w'))
-
-

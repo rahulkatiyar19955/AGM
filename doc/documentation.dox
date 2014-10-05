@@ -116,6 +116,34 @@ Lack of required dependencies is the most common issue when compiling, make sure
 
 \tableofcontents
 
+Before learning about how to use the AGM executive you should already know how the AGM architecture works. Read the \ref agmworks "corresponding tutorial" otherwise.
+
+AGM has been used in actual robots using a Python-based executive along with \underline "<a href="https://github.com/robocomp/robocomp">RoboComp</a>". The executive is shipped with AGM in the <i>tools/AGMExecutive_robocomp</i> subdirectory. The use and configuration of the executive is quite straightforward:
+\code{.sh}
+python AGMExecutive_robocomp.py --Ice.Config=configFile
+\endcode
+where configFile is a file containing the configuration of the executive:
+\code{.sh}
+AGMExecutive.Endpoints=tcp -p 10198
+AGMCommonBehavior.Endpoints=tcp -p 11198
+AGMAgentTopic.Endpoints=tcp -p 12198
+
+# REMOTE  PROXIES
+PlanningProxy = planning:tcp              -h localhost -p 10195
+IceStormProxy = IceStorm/TopicManager:tcp -p 9999
+
+# AGM - File paths
+AGGLPath = <<PATH TO THE AGGL DOMAIN>>
+InitialModelPath = <<PATH TO THE INITIAL WORLD STATE>>
+InitialMissionPath = <<PATH TO THE MISSION's GOALS>>
+
+# AGENT specification
+AGENTS = navigation,object,grasping,hri
+navigation  = agmcommonbehavior:tcp -h localhost -p 10330
+object      = agmcommonbehavior:tcp -h localhost -p 10331
+grasping    = agmcommonbehavior:tcp -h localhost -p 10332
+hri         = agmcommonbehavior:tcp -h localhost -p 10333
+\endcode
 
 */
 
@@ -228,9 +256,63 @@ To document how your robot works, or to share your domain definition with others
 
 
 /**
-\page AGGLPlanner AGGL Planner
+\page agglplanner agglplanner
 
-Unlike most modern AI planners, AGGL works using an A* search...
+\section introduction Introduction to agglplanner
+Despite AGGL domains can be compiled into PDDL domains, enabling using most modern PDDL planners to be used with AGGL domains after translation, you can also choose to direclty use the AGGL planner. Most modern PDDL planners work in a two-stage fashion: first, they instantiate all the possible world states; then, they search for the cheapest path to a state meeting the goal conditions. This allows the search stage to use sophisticated heuristics that can only be applied after a full instantiation of the state space. These planners work this way because they assume that it's worth it to instantiate the whole state space. However, there are scenarios where this assumption is not valid:
+ - those where the state space is huge
+ - those where the actions deal with a considerable number of symbols
+
+The development of the AGGL planner started because we realized that these scenarios are quite common, respectively:
+ - when the world size is variable (e.g., the robot is able to create and delete symbols as a consequence of its actions)
+ - when the actions are inherently complex, taking into account more than a few symbols (e.g., in HRI domains where it's mandatory to consider the robot itself, its beliefs, its position, a person, the location of such person, and the beliefs of such person)
+
+Unlike most modern AI planners, AGGL works performing an A* search, so it's not necessary to instantiate all the world states. Despite this design decission makes impossible for the AGGL planner to use the efficient heuristics used by other planners, we found that for realistically complex domains where the world state has not a fixed size it's faster to use an A* search.
+
+On the other hand, instead of making the planner interpret the domain and perform the search, we use an intermediate code generation step which converts the goal and the rules of the AGGL domain to Python functions generating new world states. This way we managed to write the AGGL planner itself in less than five hundred lines of code. Used in conjunction with PyPy, a fast implementation of the Python language, agglplanner can outperform modern AI planners.
+
+\section agglplannerusage agglplanner's usage
+As introduced in the previous section, before the search process is performed, the target and the AGGL domain are first translated into Python code. The domain is translated to Python code using the aggl2agglpy command:
+\code{.sh}
+aggl2agglpy -i agglDomain.aggl -a activeRules.aggl.py -f activeAndPassiveRules.aggl.py
+\endcode
+This command produces two output files, the first one contains only the rules that can be proactively triggered by the robot, the second one contains also rules triggered by exogenous events.
+
+The target code is also translated to Python code using the aggl2agglpy command:
+\code{.sh}
+aggl2agglpy -x targetPattern.xml -o targetCode.py
+\endcode
+
+Once the code is generated, the search process can be run using the agglplanner command:
+\code{.sh}
+agglplanner domain.aggl.py init.xml targetCode.py
+\endcode
+where domain.aggl.py is the Python code generated from a AGGL domain, init.xml is an XML file describing the initial world state, and targetCode.py is the a target python code file generated using aggl2agglpy.
+
+The whole process can be done using the agglplan command, assuming we are insterested in using the active rules of the domain for the search of a solution:
+\code{.sh}
+ljmanso@acho:~$ cd ~/AGM/examples/logistics/
+ljmanso@acho:~/AGM/examples/logistics$ agglplan domain1.aggl init0.xml goal0.xml 
+Generating search code... done
+Running the planner...
+End: goal achieved
+Got 1  plans!
+-----  R  E  S  U  L  T  S  -----
+Cost 4
+Score 302
+Length 4
+----------------
+DRIVETRUCK@{'lo2': '8', 'ci': '10', 'lo1': '6', 'tr': '2'}
+LOADTRUCK@{'obj': '1', 'truck': '2', 'loc': '8'}
+DRIVETRUCK@{'lo2': '6', 'ci': '10', 'lo1': '8', 'tr': '2'}
+UNLOADTRUCK@{'obj': '1', 'truck': '2', 'loc': '6'}
+----------------
+Explored 7 nodes
+It took 1.07220196724 seconds
+ljmanso@acho:~/AGM/examples/logistics$
+\endcode
+
+
 
 */
 
@@ -242,7 +324,7 @@ Unlike most modern AI planners, AGGL works using an A* search...
  - What do I get with AGM? \ref components "AGM components"
  - How to install AGM: \ref installation "AGM installation"
  - Creating an AGGL domain: \ref AGGLEditor "using aggleditor"
- - Using the \ref AGGLPlanner "AGGL planner"
+ - Using the \ref agglplanner "AGGL planner"
  - How to use AGM in a robot: \ref executive "the AGM executive"
 
 */
