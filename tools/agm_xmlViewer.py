@@ -80,7 +80,7 @@ class GraphViewer(QMainWindow):
 		self.connect(self.ui.actionManual,           SIGNAL("triggered(bool)"),  self.setManualLayout)
 		self.drawers = []
 		self.widgets = []
-		self.automatic = True
+		self.automatic = False#True
 		
 		global vertexDiameter
 		global fontName

@@ -15,16 +15,12 @@ option (ROBOCOMP_SUPPORT "Build with support for RoboComp" OFF)
 #  Set sources  #
 #################
 SET (AGM_CODE
-  libagm/agm.cpp
   libagm/agm_misc_functions.cpp
   libagm/agm_model.cpp
   libagm/agm_modelEdge.cpp
   libagm/agm_modelPrinter.cpp
   libagm/agm_modelSymbols.cpp
   libagm/agm_modelConverter.cpp
-  libagm/agm_search.cpp
-  libagm/agm_searchPath.cpp
-  libagm/agm_rule.cpp
   libagm/graphModelViewer.cpp
 )
 
@@ -39,8 +35,6 @@ SET (HEADERS
   libagm/agm_modelSymbols.h
   libagm/agm_misc_functions.h
   libagm/agm_modelConverter.h
-  libagm/agm_search.h
-  libagm/agm_rule.h
   libagm/agm_config.h
   libagm/graphModelViewer.h
 )

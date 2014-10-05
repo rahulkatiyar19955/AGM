@@ -6,8 +6,6 @@
 #include <agm_modelPrinter.h>
 #include <agm_modelEdge.h>
 #include <agm_modelConverter.h>
-#include <agm_search.h>
-#include <agm_rule.h>
 
 /** @defgroup CPPAPI AGM's C++ API
 
