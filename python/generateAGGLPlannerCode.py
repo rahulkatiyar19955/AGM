@@ -13,18 +13,12 @@ COPY_OPTION = "copy.deepcopy"
 debug = False
 scorePerContition = 100
 
+
 ## Returns the necessary header of the python version of a grammar
 def constantHeader():
-	return """import copy, sys, cPickle
-sys.path.append('/usr/local/share/agm/')
-from AGGL import *
-from agglplanner import *
-
-dddd = dict()
-
-# PyPy's copy.deepcopy is actually faster than PyPy's cPickle, so there should be no reason to use it
-def mydeepcopy(obj):
-	return cPickle.loads(cPickle.dumps(obj, -1))
+	copyFunction=''
+	if COPY_OPTION == "kkdeepcopy":
+		copyFunction = """dddd = dict()
 def kkdeepcopy(obj):
 	global dddd
 	if type(obj) == type([]):
@@ -37,8 +31,19 @@ def kkdeepcopy(obj):
 			dddd[type(obj)] = 'str'
 	else:
 		dddd[type(obj)] = 'other'
-	return copy.deepcopy(obj)
+	return copy.deepcopy(obj)"""
+	elif COPY_OPTION == "cPiclke":
+		copyFunction = """import cPickle
+# PyPy's copy.deepcopy is actually faster than PyPy's cPickle, so there should be no reason to use it
+def mydeepcopy(obj):
+	return cPickle.loads(cPickle.dumps(obj, -1))"""
 
+
+	return """import copy, sys, cPickle
+sys.path.append('/usr/local/share/agm/')
+from AGGL import *
+from agglplanner import *
+"""+copyFunction+"""
 def getNewIdForSymbol(node):
 	m = 1
 	for k in node.graph.nodes:
