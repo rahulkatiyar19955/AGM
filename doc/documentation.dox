@@ -316,7 +316,7 @@ The previous example find a plan to find the pattern of the folowing graph:
 \image html goal2.png
 starting from the world model defined in the following graph:
 \image html init2.png
-
+using the domain defined in @link https://github.com/ljmanso/AGM/blob/master/examples/logistics/domain1.aggl this file @endlink. 
 
 
 */
