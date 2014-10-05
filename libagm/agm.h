@@ -11,6 +11,8 @@
 
 /** @defgroup CPPAPI AGM's C++ API
 
+\warning This information is outdated, the API has been improved since this text was written.
+
 \section creating Creating a modeling
 doc doc doc
 
@@ -61,7 +63,7 @@ catch(const Ice::Exception &e) { cout << e << endl; }
 
 
 \section print Printing a model
-Da igual que sea un AGMModel::Sptr o la versión Ice del tipo de datos, usaremos la misma función:
+Regardless of whether we have a AGMModel::SPtr or it RoboComp Ice version we will use the same function:
 
 \code{.cpp}
 AGMModelPrinter::printWorld(model);
