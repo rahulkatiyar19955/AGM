@@ -312,6 +312,11 @@ It took 1.07220196724 seconds
 ljmanso@acho:~/AGM/examples/logistics$
 \endcode
 
+The previous example find a plan to find the pattern of the folowing graph:
+\image html goal2.png
+starting from the world model defined in the following graph:
+\image html init2.png
+
 
 
 */

@@ -671,7 +671,7 @@ FILE_VERSION_FILTER    =
 # DoxygenLayout.xml, doxygen will parse it automatically even if the LAYOUT_FILE
 # tag is left empty.
 
-LAYOUT_FILE            =
+LAYOUT_FILE            = doc/DoxygenLayout.xml
 
 # The CITE_BIB_FILES tag can be used to specify one or more bib files containing
 # the reference definitions. This must be a list of .bib files. The .bib
@@ -801,6 +801,7 @@ RECURSIVE              = YES
 
 EXCLUDE                = AGMAgent.h AGMAgent.cpp \
                          AGMWorldModel.h AGMWorldModel.cpp \
+                         AGMCommonBehavior.h AGMCommonBehavior.cpp \
                          AGGLEditor.py \
                          AGGLPlanner \
                          AGGL.py \
@@ -927,7 +928,7 @@ INPUT_FILTER           =
 # filters are used. If the FILTER_PATTERNS tag is empty or if none of the
 # patterns match the file name, INPUT_FILTER is applied.
 
-FILTER_PATTERNS        =
+FILTER_PATTERNS        = "*.py=/usr/bin/doxypy"
 
 # If the FILTER_SOURCE_FILES tag is set to YES, the input filter (if set using
 # INPUT_FILTER ) will also be used to filter the input files that are used for
