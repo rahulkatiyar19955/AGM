@@ -320,7 +320,7 @@ using the domain defined in <a style="text-decoration: underline;" href="https:/
 \section agglplannerdesign agglplanner's design
 As aforementioned, agglplanner uses an intermediate code generation step which converts the goal of the planner to a Python function returning the heuristic for the specific goal; and the rules of the AGGL domain to Python functions generating new world states.
 
-
+The code generation of the heuristic is implemented in generateTarget(graph)
 
 */
 

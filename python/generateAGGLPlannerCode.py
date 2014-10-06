@@ -15,6 +15,7 @@ scorePerContition = 100
 
 
 ## Returns the necessary header of the python version of a grammar
+# @ingroup AGGLGeneration
 def constantHeader():
 	copyFunction=''
 	if COPY_OPTION == "kkdeepcopy":
@@ -62,6 +63,7 @@ class RuleSet(object):
 """
 
 ## This is the declaration of the first method in the grammar.py file. This method receives as input parameter:
+# @ingroup AGGLGeneration
 # @parameter agm The grammar
 #
 # @retval the string with the grammar's code
@@ -81,6 +83,7 @@ def ruleDeclaration(agm):
 	return ret
 
 ## This is the declaration of the getTriggers method in the grammar.py file. This method receives as input parameter:
+# @ingroup AGGLGeneration
 # @param agm The grammar
 #
 # @retval the string with the grammar's code
@@ -98,6 +101,8 @@ def ruleTriggerDeclaration(agm):
 # These are the first three methods of the file that has the active grammar rules -- active.py --
 
 ## This method creates the part of the code that define the links
+# @ingroup AGGLGeneration
+#
 # @param linkList list of all the connection betwen two symbol
 # @param newSymbol the symbol that is comparing the link
 # @param alreadyThere
@@ -132,6 +137,8 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, debug=Fa
 
 ## This creates de heuristic of a link
 #
+# @ingroup AGGLGeneration
+#
 # @param linkList list of all the connection betwen two symbol
 # @param newSymbol the symbol that is comparing the link.	 #
 # @param alreadyThere
@@ -151,6 +158,8 @@ def newLinkScore(linkList, newSymbol, alreadyThere):
 
 
 ## This method calls the corresponding generator for a rule (normal or combo)
+#
+# @ingroup AGGLGeneration
 #
 # @param rule the rule taken as input
 #
@@ -173,7 +182,8 @@ def ruleImplementation(rule):
 	return ret
 
 ## This method generates the code for a combo rule
-# @ingroup PyAPI
+#
+# @ingroup AGGLGeneration
 #
 # @param rule the current combo rule
 # @param indent
@@ -263,6 +273,9 @@ def comboRuleImplementation(rule, indent):
 	return ret
 
 ## This method generates the code for a NORMAL rule
+#
+# @ingroup AGGLGeneration
+#
 # @param the rule
 # @param indent
 #
@@ -551,6 +564,9 @@ def normalRuleImplementation(rule, indent):
 
 
 ## Generation of the python code for rules' preconditions
+#
+# @ingroup AGGLGeneration
+#
 # @param precondition Precondition AST
 # @param indent
 # @param modifier
@@ -649,6 +665,9 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 	return ret, indent, formulaId, stuff
 
 ## Generation of the python code for rules' effects
+#
+# @ingroup AGGLGeneration
+#
 # @param precondition Effect AST
 # @param indent
 # @param modifier
@@ -761,7 +780,10 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 
 
 
-## 
+##  djijo ioju oij o
+#
+# @ingroup AGGLGeneration
+#
 def generate(agm, skipPassiveRules):
 	text = ''
 	text += constantHeader()
@@ -809,6 +831,9 @@ def getOptimalTargetNodeCheckOrder(graph):
 	return optimal_node_list
 
 ## Generates target
+#
+# @ingroup AGGLGeneration
+#
 # @param The graph used to generate the target
 #
 # @retval The python code used to check the target world state
