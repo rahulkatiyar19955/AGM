@@ -510,9 +510,12 @@ class AGMHierarchicalRule(object):
 			for element in eq:
 				eqResult.append([element[0], element[1]])
 			self.equivalences.append(eqResult)
-		self.text = self.generateTextFromCombo()
-	def generateTextFromCombo(self):
+		self.text = self.generateTextFromHierarchical()
+	def generateTextFromHierarchical(self):
 		ret = ''
+		ret += self.lhs.toString() + '\n'
+		ret += '\t=>\n'
+		ret += self.rhs.toString() + '\n'
 		for a in self.atoms:
 			ret += '\t' + a[0] + ' as ' + a[1] + '\n'
 		ret += '\twhere:\n'
@@ -535,6 +538,9 @@ class AGMHierarchicalRule(object):
 		if len(self.text) > 0:
 			ret += self.text
 		else:
+			ret += self.lhs.toString() + '\n'
+			ret += '\t=>\n'
+			ret += self.rhs.toString() + '\n'
 			for a in self.atoms:
 				ret += '\t' + a[0] + ' as ' + a[1] + '\n'
 			ret += '\twhere:\n'
