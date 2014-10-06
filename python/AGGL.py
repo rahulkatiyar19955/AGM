@@ -380,7 +380,6 @@ class AGMRule(object):
 		self.rhs = rhs
 		self.cost = cost
 		self.passive = passive
-		self.mindepth = 0
 		self.parameters = parameters
 		self.precondition = precondition
 		self.effect = effect
@@ -393,8 +392,6 @@ class AGMRule(object):
 		if self.passive: passiveStr = "passive"
 		costStr = str(self.cost)
 		ret = self.name + ' : ' + passiveStr + '(' + costStr + ')'
-		if self.mindepth != 0:
-			ret += 'mindepth(' + str(self.mindepth) + ')'
 		ret += '\n{\n'
 		ret += self.lhs.toString() + '\n'
 		ret += '\t=>\n'
@@ -438,6 +435,71 @@ class AGMComboRule(object):
 		object.__init__(self)
 		if ats==None: ats=list()
 		if eqs==None: eqs=list()
+		self.name = name
+		self.passive = passive
+		self.atoms = ats
+		self.cost = cost
+		self.equivalences = []
+		for eq in eqs:
+			eqResult = list()
+			for element in eq:
+				eqResult.append([element[0], element[1]])
+			self.equivalences.append(eqResult)
+		self.text = self.generateTextFromCombo()
+	def generateTextFromCombo(self):
+		ret = ''
+		for a in self.atoms:
+			ret += '\t' + a[0] + ' as ' + a[1] + '\n'
+		ret += '\twhere:\n'
+		for e in self.equivalences:
+			first = True
+			for element in e:
+				if first:
+					first = False
+					ret += '\t'  + element[0] + '.' + element[1]
+				else:
+					ret += ' = ' + element[0] + '.' + element[1]
+			ret += '\n'
+		return ret
+
+	def toString(self):
+		passiveStr = "active"
+		if self.passive: passiveStr = "passive"
+		ret = self.name + ' : ' + passiveStr + '('+ str(self.cost) +')\n{\n'
+
+		if len(self.text) > 0:
+			ret += self.text
+		else:
+			for a in self.atoms:
+				ret += '\t' + a[0] + ' as ' + a[1] + '\n'
+			ret += '\twhere:\n'
+			for e in self.equivalences:
+				first = True
+				for element in e:
+					if first:
+						first = False
+						ret += '\t'  + element[0] + '.' + element[1]
+					else:
+						ret += ' = ' + element[0] + '.' + element[1]
+				ret += '\n'
+
+		ret += '}\n'
+		return ret
+
+
+
+## AGM Hierarchical rule
+# @ingroup PyAPI
+#
+class AGMHierarchicalRule(object):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, ats=None, eqs=None):
+		object.__init__(self)
+		if ats==None: ats=list()
+		if eqs==None: eqs=list()
+		self.lhs = lhs
+		if lhs == None: self.lhs = AGMGraph()
+		self.rhs = rhs
+		if rhs == None: self.rhs = AGMGraph()
 		self.name = name
 		self.passive = passive
 		self.atoms = ats

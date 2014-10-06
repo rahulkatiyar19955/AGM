@@ -69,10 +69,10 @@ class RuleSet(object):
 # @retval the string with the grammar's code
 def ruleDeclaration(agm):
 	# We write the name os the first method, getRules and
-	# make the mapping of the dictionary of 
+	# make the mapping of the dictionary of
 	ret = """\tdef getRules(self):
 		mapping = dict()"""
-	
+
 	# TO MAKE THE FILE WITH THE ACTIVES GRAMMAR RULES...
 	# We look for all the grammar rules. If is an active rule
 	# we take the name of the rule and took hold in the mapping variable.
@@ -90,7 +90,7 @@ def ruleDeclaration(agm):
 def ruleTriggerDeclaration(agm):
 	ret = """\tdef getTriggers(self):
 		mapping = dict()"""
-	# We write all the names of the trigger that we need after 
+	# We write all the names of the trigger that we need after
 	# for the active grammar rules.
 	for r in agm.rules:
 		if not r.passive:
@@ -197,15 +197,6 @@ def comboRuleImplementation(rule, indent):
 	ret += indent+"if equivalencesP == None: equivalencesP=[]"
 	ret += indent+"stack        = "+COPY_OPTION+"(stackP)"
 	ret += indent+"equivalences = "+COPY_OPTION+"(equivalencesP)"
-	#if debug:
-		#ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
-	if rule.mindepth > 0:
-		ret += indent+"if snode.depth < "+ str(rule.mindepth) + ":"
-		indent += '\t'
-		if debug:
-			ret += indent + "print 'return because of mindepth: node has', snode.depth, ' and rule\'s min is "+ rule.mindepth +"'"
-		ret += indent + "return []"
-		indent = indent[:-1]
 	ret += indent+"return self." + rule.name + "_trigger(snode, dict(), stack, equivalences)"
 	ret += indent
 	ret += "\n"
@@ -297,12 +288,6 @@ def normalRuleImplementation(rule, indent):
 	ret += indent + "equivalences = "+COPY_OPTION+"(equivalencesP)"
 	ret += indent + "symbol_nodes_copy = "+COPY_OPTION+"(snode.graph.nodes)"
 	ret += indent + "finishesCombo = ''"
-	#ret += indent+"print 'min:"+str(rule.mindepth)+" i_am:',snode.depth"
-	if rule.mindepth > 0:
-		ret += indent+"if snode.depth < "+ str(rule.mindepth) + ":"
-		indent += '\t'
-		ret += indent + "return []"
-		indent = indent[:-1]
 	#ret += indent+"stack = "+COPY_OPTION+"(stack)"
 	#ret += indent+"equivalences = "+COPY_OPTION+"(equivalences)"
 	ret += indent+"if len(stack) > 0:"

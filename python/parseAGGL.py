@@ -54,10 +54,6 @@ class AGMRuleParsing:
 		else:
 			print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
 			sys.exit(-345)
-		try:
-			mindepth = int(i.depth.value)
-		except:
-			mindepth = 0
 		if len(i.atomss)==0: # We are dealing with a normal rule!
 			#print 'Normal rule:', i.name
 			# We are dealing with a normal rule!
@@ -66,7 +62,6 @@ class AGMRuleParsing:
 			if verbose: print '\t===>'
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
 			regular = AGMRule(i.name, LHS, RHS, passive, i.cost, parameters, precondition, effect)
-			regular.mindepth = mindepth
 			if len(i.conditions) > 0:
 				regular.conditions = str(i.conditions[0])
 			else:
@@ -76,12 +71,15 @@ class AGMRuleParsing:
 			else:
 				regular.effects = ''
 			return regular
-		else: # We are dealing with a rule combo!
+		elif len(i.lhs)>0: # if there are rules inside AND a left hand side graph.. we're dealing with a hierarchical rule
+			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
+			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
+			hierarchical = AGMHierarchicalRule(i.name, LHS, RHS, passive, i.cost, i.atomss.asList(), i.equivalences.asList())
+		else:
 			#print 'Combo rule:', i.name
 			combo = AGMComboRule(i.name, passive, i.cost, i.atomss.asList(), i.equivalences.asList())
-			combo.mindepth = mindepth
 			return combo
-		
+
 
 ## AGGL Parser
 # @ingroup PyAPI
@@ -110,7 +108,6 @@ class AGMFileDataParsing:
 		nu = Combine( Optional(plusorminus) + number )
 		neg = Optional(Literal('*'))
 		sep = Suppress("===")
-		dep = Suppress("mindepth")
 		eq = Suppress("=")
 		cn = Suppress(":")
 		lk = Suppress("->")
@@ -134,14 +131,16 @@ class AGMFileDataParsing:
 		equivElement = Group(ids.setResultsName("rule") + pt + ids.setResultsName("variable"))
 		equivRhs = eq + equivElement
 		equiv = Group(equivElement.setResultsName("first") + OneOrMore(equivRhs).setResultsName("more"))
-		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + OneOrMore(atom).setResultsName("atomss") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
+		rule_seq  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + OneOrMore(atom).setResultsName("atomss") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
 		# NORMAL RULE
 		Prm = Optional(parameters   + op + almostanything + cl).setResultsName("parameters")
 		Cnd = Optional(precondition + op + almostanything + cl).setResultsName("precondition")
 		Eft = Optional(effect       + op + almostanything + cl).setResultsName("effect")
-		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(dep + po + nu.setResultsName("value") + pc).setResultsName("depth") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
+		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + OneOrMore(atom).setResultsName("atomss") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
+		# HIERARCHICAL RULE
+		rule_hierarchical  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 		# GENERAL RULE
-		rule = rule_nrm | rule_seq
+		rule = rule_nrm | rule_seq | rule_hierarchical
 		# PROPERTY
 		prop  = Group(an.setResultsName("prop") + eq + an.setResultsName("value"))
 		# WHOLE FILE
