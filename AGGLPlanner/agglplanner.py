@@ -58,8 +58,7 @@ verbose = 1
 maxTimeWaitAchieved = 10.
 maxTimeWaitLimit = 3000.
 
-## Method heapsort
-# This method receives as input parameter:
+## @brief Method heapsort. This method receives as input parameter:
 # @param iterable
 def heapsort(iterable):
 	h = []
@@ -67,9 +66,9 @@ def heapsort(iterable):
 		heapq.heappush(h, value)
 	return [heapq.heappop(h) for i in range(len(h))]
 
-## This class stored the status and a lock.
+##@brief This class stored the status and a lock.
 class EndCondition(object):
-	## Constructor Method. This method saves the status and the lock of the class.
+	##@brief Constructor Method. This method saves the status and the lock of the class.
 	# @param status it is an optional parameter and, by default, his value is None.
 	def __init__(self, status=None):
 		## Status of the class --> the status of the final condition
@@ -77,7 +76,7 @@ class EndCondition(object):
 		## The lock for read and write the status
 		self.lock = thread.allocate_lock()
 	
-	## Get Method. This method returns the status of the class. To do this, the method needs
+	##@brief Get Method. This method returns the status of the class. To do this, the method needs
 	# to lock the other threads. This method reads a critical variable.
 	# @retval ret is the status of the class.
 	def get(self):
@@ -86,7 +85,7 @@ class EndCondition(object):
 		self.lock.release()
 		return ret
 	      
-	## Set method. This method changes the value of the status attribute. To do this, the
+	##@brief Set method. This method changes the value of the status attribute. To do this, the
 	# method needs to write in a critical memory zone, so it is necesary to lock it.
 	# @param value is the new status
 	def set(self, value):
@@ -94,24 +93,29 @@ class EndCondition(object):
 		self.status = value
 		self.lock.release()
 
-## This class manages the exception of a wrong rule execution.
+##@brief This class manages the exception of a wrong rule execution.
 class WrongRuleExecution(Exception):
-	## Constructor method. It saves the data of the Exception
+	##@brief Constructor method. It saves the data of the Exception
 	# @param data
 	def __init__(self, data):
 		## Data of the exception 
 		self.data = data
 	
-	## This method returns the data of the exception.
+	##@brief This method returns the data of the exception.
 	# @retval data.
 	def __str__(self):
 		return self.data
 
-## 
+##@brief This class get the name and the parameters of an action that belongs to a plan.
 class AGGLPlannerAction(object):
+	##@brief Constructor method. It receives (optionally) the contructor method of the object, but, by default, it is empty.
+	# @param init is an optional initialization variable
+	# If anything is wrong, this method throws an exception.
 	def __init__(self, init=''):
 		object.__init__(self)
+		## Name of the action
 		self.name = ''
+		## Name of the action parameters
 		self.parameters = dict()
 		if len(init)>0:
 			parts = init.split('@')
@@ -119,27 +123,32 @@ class AGGLPlannerAction(object):
 			self.parameters = eval(parts[1])
 		else:
 			raise IndexError
+		      
+	##@brief This method returns the name and the parameters of the action in a string.
+	# @retval string with the name of the action and the parameters
 	def __str__(self):
 		return self.name+'@'+str(self.parameters)
 
 ## @brief AGGLPlannerPlan is used as a plan container.
 class AGGLPlannerPlan(object):
 	## @brief Parametrized constructor.
-	# @param init Optional initialization variable. It can be a) string containing a plan; b) a filename where such string is to be found;
+	# @param init Optional initialization variable. It can be a) string containing a plan; b) a filename where such string is to be found,
 	# or c) a list of tuples where each tuple contains the name of a rule and a dictionary with the variable mapping of the rule.
-	#
+	# @param direct optional. By default his value is FALSE
 	def __init__(self, init='', direct=False):
 		object.__init__(self)
+		
+		## Data of the plan file
 		self.data = []
 
 		if type(init) == type(''): # Read plan from file (assuming we've got a file path)
 				if len(init)>0:
 					if direct:
-						lines = init.split("\n")
+						lines = init.split("\n") #newline
 					else:
-						lines = open(init, 'r').readlines()
+						lines = open(init, 'r').readlines() # take the content of a file
 					for line_i in range(len(lines)):
-						line = lines[line_i].strip()
+						line = lines[line_i].strip() # take a line of the file content 
 						while len(line)>0:
 							if line[-1]=='\n': line = line[:-1]
 							else: break
@@ -182,37 +191,69 @@ class AGGLPlannerPlan(object):
 						n = str(int(action.parameters[parameter])-len(created))
 						action.parameters[parameter] = n
 		return c
+	      
+	## @brief This method This method subtracts a unit to counter the class.
+	# @retval the class with the diferent value of the counter
 	def __iter__(self):
+		## counter of the data 
 		self.current = -1
 		return self
+	      
+	## @brief This method counts +1 on the current variable. If the counter overcome the
+	# length of the data attribute, it raises an exception. If not, the method returns the
+	# data with the index==current+1.
+	# @retval the data with the index current+1
 	def next(self):
 		self.current += 1
 		if self.current >= len(self.data):
 			raise StopIteration
 		else:
 			return self.data[self.current]
+	
+	##@brief This method returns the information of the graph as a string.
+	# @retval a string with the information of the plan graph.
 	def __repr__(self):
+		## The plan graph
 		return self.graph.__str__()
+	      
+	##@brief this method returns a string with the data array information.
+	# @retval ret is the string with all the data
 	def __str__(self):
 		ret = ''
 		for a in self.data:
 			ret += a.__str__() + '\n'
 		return ret
+	
+	##@brief this method returns the length of the data array.
+	# @retval an integer that is the length of the data array.
 	def __len__(self):
 		return len(self.data)
 
+##@brief This class saves all the information of the current graph
 class WorldStateHistory(object):
+	##@brief Constructor method.
+	# @param init initialization variable
 	def __init__(self, init):
 		object.__init__(self)
+		# If
 		if isinstance(init, AGMGraph):
+			# Graph with the current world status.
 			self.graph = copy.deepcopy(init)
+			# The identifier of the graph that the current graph comes from
 			self.parentId = 0
+			# ???
 			self.probability = 1
+			# The cost of the new graph (as result of execute the heuristic?)
 			self.cost = 0
+			# The string with all the changes made from the original graph.
 			self.history = []
+			# The identifier of the current graph
 			self.nodeId = -1
+			# The depth of the current graph.
 			self.depth = 0
+			# A flag to stop.
 			self.stop = False
+			# The heuristic score of the current graph
 			self.score = 0
 		elif isinstance(type(init), type(WorldStateHistory)):
 			self.graph = copy.deepcopy(init.graph)
@@ -227,18 +268,30 @@ class WorldStateHistory(object):
 			print type(init)
 			print type(self)
 			sys.exit(1)
+			
+	##@brief
 	def __cmp__(self, other):
 		#print '__cmp__'
 		return self.graph.__cmp__(other.graph)
 	def __hash__(self):
 		return self.graph.__hash__()
+	
+	##@brief This method returns the result of comparing two graphs
+	# @param other the other graph.
+	# @retval a boolean wit the result of the comparison
 	def __eq__(self, other):
 		return self.graph.__eq__(other.graph)
+	      
+	
 	def __repr__(self):
 		return self.graph.__repr__()
+	      
+	##@brief This method returns a string with the information of the current graph.
 	def __str__(self):
 		return self.graph.__str__()
 
+##@brief This method prints on the screen all the information of the new graph: the cost, 
+# the score, the number of actions and the names of the actions.
 def printResult(result):
 	print '-----  R  E  S  U  L  T  S  -----'
 	if verbose > 0:
@@ -254,14 +307,27 @@ def printResult(result):
 		#if action[0] != '#':
 		print action
 
+##@brief
 class LockableList():
+	##@brief Constructor Method. It initializes the list and the mutex.
 	def __init__(self):
+		## The lockable list.
 		self.thelist = []
+		## The mutex associated to the list.
 		self.mutex = threading.RLock()
+		
+	##@brief This method return the length of the lockable list.
+	# @retval an integer that is the length of the list.
 	def __len__(self):
 		return len(self.thelist)
+	      
+	##@brief This method returns the item with the index a in the list.
+	# @param a is the index of the item.
+	# @retval the item that corresponds to the index a.
 	def __getitem__(self, a):
 		return self.thelist.__getitem__(a)
+	     
+	##
 	def __setitem__(self, a, b):
 		self.mutex.acquire()
 		self.thelist.__setitem__(a, b)

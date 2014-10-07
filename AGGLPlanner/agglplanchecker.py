@@ -48,9 +48,9 @@ from agglplanner import *
 from parseAGGL import *
 from generateAGGLPlannerCode import *
 
-## This class is responsible for checking the plan that is generated in python.
+##@brief This class is responsible for checking the plan that is generated in python.
 class PyPlanChecker(object):
-	## Constructor method: It initializes all class attributes and checks the plan
+	##@brief Constructor method: It initializes all class attributes and checks the plan
 	# @param domainPath Python version of the grammar
 	# @param init XML-version of the initial world state
 	# @param planPath Path of the plan
@@ -133,7 +133,7 @@ class PyPlanChecker(object):
 		if resultPath!='':
 			world.graph.toXML(resultPath)
 
-## This method prints the USER MODE of the PyPlanChecker class.
+## @brief This method prints the USER MODE of the PyPlanChecker class.
 # " Usage
 #   PROGRAM_NAME domain.[py/aggl] init.xml plan.plan target.[py/xml] [result.xml]
 def printUsage():
