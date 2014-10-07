@@ -8,6 +8,9 @@ def distance(x1, y1, x2, y2):
 ## AGM Symbol
 # @ingroup PyAPI
 #
+# @param name The identifier of the symbol
+# @param sType The type of the symbol
+# @attributes An optional attribute map
 class AGMSymbol(object):
 	def __init__(self, name, sType, pos=None, attributes=None):
 		object.__init__(self)
@@ -67,6 +70,8 @@ class AGMLink(object):
 			sys.exit(-1358)
 		self.color = 'white'
 		self.enabled = enabled
+	## Converts an AGMLink to a string
+	# @retval A string representing the link
 	def toString(self):
 		v = ''
 		if self.enabled:

@@ -22,18 +22,20 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with AGGLPlanner. If not, see <http://www.gnu.org/licenses/>.
-#
-#--------------------------------------------------------------------------
-#                            DOCUMENTATION                                 
-#--------------------------------------------------------------------------
-# This file loads the grammar, the initial state of the world and the GOAL 
-# status without changing the files extensions of the grammar and the goal.
-# MODE USE:
-# 		agglplan gramatica.aggl init.xml target.xml
-#
-# Also, we can keep the results in a file with:
-#		 agglplan gramatica.aggl init.xml target.xml result.plan
-#
+
+
+
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
+"""@package agglplan
+    @ingroup PyAPI
+    This file loads the grammar, the initial state of the world and the GOAL status without changing the files extensions of the grammar and the goal.
+    
+    MODE USE:	agglplan gramatica.aggl init.xml target.xml
+    
+    Also, we can keep the results in a file with: agglplan gramatica.aggl init.xml target.xml result.plan
+"""
+
 # Python distribution imports
 import sys, traceback, subprocess
 
@@ -50,36 +52,47 @@ if __name__ == '__main__': # program domain problem result
 	if len(sys.argv)<4:
 		print 'Usage\n\t', sys.argv[0], ' domain.aggl init.xml target.xml [result.plan]'
 	else:
-		domainFile = sys.argv[1] 	# the grammar
-		worldFile  = sys.argv[2] 	# the initial world status
-		targetFile = sys.argv[3]	# the goal o target world status
+		## the file that contains the grammar rules
+		domainFile = sys.argv[1] 	
+		## the file that contains the initial world status
+		worldFile  = sys.argv[2] 
+		## the goal o target world status
+		targetFile = sys.argv[3]
+		## the file name where we keep the results of the program
 		result = None
 		if len(sys.argv)>4:
-			result = sys.argv[4]    # the file name where we keep the results of the program.
+			result = sys.argv[4]
 			
-		print '\nGenerating search code...',
+		print '\nGenerating search code...'
 
-		# Generate domain Python file <--- like aggl2agglpy
-		# agmData is a variable of AGMFileData class, in AGGL.py file
-		agmData = AGMFileDataParsing.fromFile(domainFile) # CHECK the grammar. Is a parseAGGL.py's class
-		agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True) # write the grammar in a python file.
+		## Generate domain Python file <--- like aggl2agglpy. 
+		# agmData is a variable of AGMFileData class, in AGGL.py file. 
+		# First: we CHECK the grammar. Is a parseAGGL.py's class
+		# and we write the grammar in a python file.
+		agmData = AGMFileDataParsing.fromFile(domainFile) 
+		agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True) 
 
-		# Generate target Python file
+		## Generate target Python file.
+		# This sentence creates a graph based on the target world status
 		graph = graphFromXML(targetFile)
+		
+		## Generate the python code correspondig to the graph and
 		outputText = generateTarget(graph)
+		## Save the python code of the target world status in the file target.py.
 		ofile = open("/tmp/target.py", 'w')
-		ofile.write(outputText) # we save the python code of the target world status in the file target.py.
+		ofile.write(outputText) 
 		ofile.close()
 
 		# Run planner
 		import time
 		print 'done\nRunning the planner...'
+		## We store the initial or start time of the planner and call the agglplaner, the main program that makes all the process...
 		start = time.time()
-		# We call the agglplaner, the main program that makes all the process...
 		if result:
 			subprocess.call(["agglplanner", "/tmp/domain.py", worldFile, "/tmp/target.py", result])
 		else:
 			subprocess.call(["agglplanner", "/tmp/domain.py", worldFile, "/tmp/target.py"])
+		## We store the final time of the planner to calculate the total duration of the program
 		end = time.time()
 		print 'It took', end - start, 'seconds'
 

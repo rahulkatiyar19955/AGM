@@ -23,6 +23,20 @@
 #  You should have received a copy of the GNU General Public License
 #  along with AGGLPlanner. If not, see <http://www.gnu.org/licenses/>.
 
+
+
+
+#---------------------------------------------------------------------------------------------------------------------------------------------------#
+"""@package agglplanner
+    @ingroup PyAPI
+    This file loads the grammar, the initial state of the world and the GOAL status without changing the files extensions of the grammar and the goal.
+    
+    MODE USE:	agglplanner gramatica.aggl init.xml target.py
+    
+    Also, we can keep the results in a file with: agglplanner gramatica.aggl init.xml target.py result.plan
+"""
+
+
 import signal
 import thread
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -44,32 +58,56 @@ verbose = 1
 maxTimeWaitAchieved = 10.
 maxTimeWaitLimit = 3000.
 
+## Method heapsort
+# This method receives as input parameter:
+# @param iterable
 def heapsort(iterable):
 	h = []
 	for value in iterable:
 		heapq.heappush(h, value)
 	return [heapq.heappop(h) for i in range(len(h))]
 
+## This class stored the status and a lock.
 class EndCondition(object):
+	## Constructor Method. This method saves the status and the lock of the class.
+	# @param status it is an optional parameter and, by default, his value is None.
 	def __init__(self, status=None):
+		## Status of the class --> the status of the final condition
 		self.status = status
+		## The lock for read and write the status
 		self.lock = thread.allocate_lock()
+	
+	## Get Method. This method returns the status of the class. To do this, the method needs
+	# to lock the other threads. This method reads a critical variable.
+	# @retval ret is the status of the class.
 	def get(self):
 		self.lock.acquire()
 		ret = self.status
 		self.lock.release()
 		return ret
+	      
+	## Set method. This method changes the value of the status attribute. To do this, the
+	# method needs to write in a critical memory zone, so it is necesary to lock it.
+	# @param value is the new status
 	def set(self, value):
 		self.lock.acquire()
 		self.status = value
 		self.lock.release()
 
+## This class manages the exception of a wrong rule execution.
 class WrongRuleExecution(Exception):
+	## Constructor method. It saves the data of the Exception
+	# @param data
 	def __init__(self, data):
+		## Data of the exception 
 		self.data = data
+	
+	## This method returns the data of the exception.
+	# @retval data.
 	def __str__(self):
 		return self.data
 
+## 
 class AGGLPlannerAction(object):
 	def __init__(self, init=''):
 		object.__init__(self)
