@@ -321,24 +321,37 @@ class LockableList():
 	def __len__(self):
 		return len(self.thelist)
 	      
-	##@brief This method returns the item with the index a in the list.
-	# @param a is the index of the item.
+	##@brief This method returns the item with the index or keyword a in the list.
+	# @param a is the index or the keyword  of the item.
 	# @retval the item that corresponds to the index a.
 	def __getitem__(self, a):
 		return self.thelist.__getitem__(a)
 	     
-	##
+	##@brief This method changes the item for the item b. Is necessary to lock the
+	# the method, it changes a critical memory zone.-
+	# @param a first item
+	# @param b second item.
 	def __setitem__(self, a, b):
 		self.mutex.acquire()
 		self.thelist.__setitem__(a, b)
 		self.mutex.release()
+		
+	##@brief This method return the iterator of the list.
+	# @retval the iterator of the lockable list.
 	def __iter__(self):
 		return self.thelist.__iter__()
+	      
+	##@brief This method returns the size (the length) of the list.
+	# This method needs acces to a critical memory zone, so it is necessary to
+	# lock all the process.
+	# @retval ret is an integer that is the size of the list.
 	def size(self):
 		self.mutex.acquire()
 		ret = len(self.thelist)
 		self.mutex.release()
 		return ret
+	
+	##@brief this method 
 	def heapqPop(self):
 		self.mutex.acquire()
 		try:
@@ -346,6 +359,7 @@ class LockableList():
 		finally:
 			self.mutex.release()
 		return ret
+	
 	def heapqPush(self, value):
 		self.mutex.acquire()
 		heapq.heappush(self.thelist, value)
