@@ -17,34 +17,11 @@ scorePerContition = 100
 ## Returns the necessary header of the python version of a grammar
 # @ingroup AGGLGeneration
 def constantHeader():
-	copyFunction=''
-	if COPY_OPTION == "kkdeepcopy":
-		copyFunction = """dddd = dict()
-def kkdeepcopy(obj):
-	global dddd
-	if type(obj) == type([]):
-		for l in obj:
-			dddd[type(l)] = 'list'
-	elif type(obj) == type({}):
-		for k in obj:
-			dddd[(type(k), type(obj[k]))] = 'dict'
-	elif type(obj) == type('d'):
-			dddd[type(obj)] = 'str'
-	else:
-		dddd[type(obj)] = 'other'
-	return copy.deepcopy(obj)"""
-	elif COPY_OPTION == "cPiclke":
-		copyFunction = """import cPickle
-# PyPy's copy.deepcopy is actually faster than PyPy's cPickle, so there should be no reason to use it
-def mydeepcopy(obj):
-	return cPickle.loads(cPickle.dumps(obj, -1))"""
-
-
 	return """import copy, sys, cPickle
 sys.path.append('/usr/local/share/agm/')
 from AGGL import *
 from agglplanner import *
-"""+copyFunction+"""
+
 def getNewIdForSymbol(node):
 	m = 1
 	for k in node.graph.nodes:
@@ -484,12 +461,9 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	ret += indent+"newNode.nodeId = lastNodeId"
 	if thisIsActuallyAHierarchicalRule:
 		ret += indent+"newNode.parentNodeToExplore = " + COPY_OPTION + "(snode)"
-		ret += indent+"newNode.parentNodeToExploreWith = " + rule.name + "_COMBOINSIDE"
-		ret += indent+"newNode.stackP = "+COPY_OPTION+"(stackP)"
-		ret += indent+"newNode.equivalencesP = "+COPY_OPTION+"(equivalencesP)"
-	#ret += indent+"newNode.parentId = snode.nodeId"
-	#if debug:
-		#ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
+		ret += indent+"newNode.parentNodeToExploreWith = self." + rule.name + "_COMBOINSIDE"
+		ret += indent+"newNode.stackP = "+COPY_OPTION+"(stack)"
+		ret += indent+"newNode.equivalencesP = "+COPY_OPTION+"(equivalences)"
 	# Create nodes
 	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs, rule.parametersAST)
 	ret += indent+"# Create nodes"

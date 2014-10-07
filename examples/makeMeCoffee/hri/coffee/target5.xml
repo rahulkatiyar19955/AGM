@@ -1,6 +1,5 @@
 <AGMModel>
 
-
 	<symbol id="1" type="robot" />
 	<symbol id="20" type="person" />
 	<link src="1" dst="20" label="interacting" />
