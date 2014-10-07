@@ -1172,40 +1172,20 @@ reachAndGrasp : active(1)
 }
 
 
-recognizeObjMilk : active(1)
+findMilk : active(1)
 {
-	{
-		status:objectSt(65,-75)
-		object:object(-130,-75)
-		robot:robot(-290,-75)
-		robot->object(know)
-		object->status(hasStatus)
-		object->status(see)
-		object->status(position)
-		object->status(unclassified)
-	}
-	=>
-	{
-		status:objectSt(60,-75)
-		object:object(-130,-75)
-		robot:robot(-290,-75)
-		robot->object(know)
-		object->status(hasStatus)
-		object->status(see)
-		object->status(position)
-		object->status(classified)
-		object->status(milk)
-	}
+	findObjectVisuallyInTable as find
 	recognizeObjFails as fail
 	tellHumanAboutUnknownObject as tell
 	personClassifiesMilkPot as milk
 	where:
-	fail.status = tell.statusr = milk.statusr
-	fail.object = tell.objectr = milk.objectr
-	fail.robot = tell.robot = milk.robot
+	find.status = fail.status = tell.statusr = milk.statusr
+	find.object = fail.object = tell.objectr = milk.objectr
+	find.robot = fail.robot = tell.robot = milk.robot
 	tell.person = milk.person
 	tell.objecth = milk.objecth
 	tell.statush = milk.statush
 }
+
 
 
