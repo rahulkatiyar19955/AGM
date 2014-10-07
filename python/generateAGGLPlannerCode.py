@@ -173,9 +173,12 @@ def ruleImplementation(rule):
 	ret += indent+"# Rule " + rule.name
 	# We distinguish between normal rules and combo rules.
 	if type(rule) == AGMRule:
-		ret += normalRuleImplementation(rule, indent)
+		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMComboRule:
-		ret += comboRuleImplementation(rule, indent)
+		ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
+	elif type(rule) == AGMHierarchicalRule:
+		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
+		ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 	else:
 		print 'Unknown rule type'
 		sys.exit(-2346)
@@ -189,21 +192,23 @@ def ruleImplementation(rule):
 # @param indent
 #
 # @retval the string with the code
-def comboRuleImplementation(rule, indent):
+def comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False):
 	ret = ''
-	ret += indent+"def " + rule.name + "(self, snode, stackP=None, equivalencesP=None):"
+	if thisIsActuallyAHierarchicalRule: comboInside = "_COMBOINSIDE"
+	else: comboInside = ''
+	ret += indent+"def " + rule.name + comboInside + "(self, snode, stackP=None, equivalencesP=None):"
 	indent += "\t"
 	ret += indent+"if stackP == None: stackP=[]"
 	ret += indent+"if equivalencesP == None: equivalencesP=[]"
 	ret += indent+"stack        = "+COPY_OPTION+"(stackP)"
 	ret += indent+"equivalences = "+COPY_OPTION+"(equivalencesP)"
-	ret += indent+"return self." + rule.name + "_trigger(snode, dict(), stack, equivalences)"
+	ret += indent+"return self." + rule.name + comboInside + "_trigger(snode, dict(), stack, equivalences)"
 	ret += indent
 	ret += "\n"
 
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
+	ret += indent+"def " + rule.name + comboInside + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
 	indent += "\t"
 	ret += indent+"if stack == None: stack=[]"
 	ret += indent+"if equivalences == None: equivalences=[]"
@@ -251,9 +256,9 @@ def comboRuleImplementation(rule, indent):
 	ret += indent+"\tnewNode.cost += " + str(rule.cost)
 	ret += indent+"newNode.depth += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
-	ret += indent+"newNode.parentId = snode.nodeId"
-	if debug:
-		ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '" + rule.name + "'"
+	#ret += indent+"newNode.parentId = snode.nodeId"
+	#if debug:
+		#ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '" + rule.name + "'"
 	ret += indent+"newNode.history.append('# STARTS COMBO:"+rule.name+"_' + sid)"
 	#ret += indent+"print 'Calling ', stack[-1][1]"
 	ret += indent+'ret = self.getRules()[stack[-1][1]](newNode, stack, equivalences)'
@@ -271,7 +276,7 @@ def comboRuleImplementation(rule, indent):
 # @param indent
 #
 # @retval the string with the code
-def normalRuleImplementation(rule, indent):
+def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False):
 	ret = ''
 	# Quantifier-related code (PARAMETERS)
 	# <<<
@@ -301,7 +306,7 @@ def normalRuleImplementation(rule, indent):
 	ret += indent+"\tfina = "+COPY_OPTION+"(pop[2])"
 
 	if debug:
-		ret += indent+"print snode.nodeId, 'from', snode.parentId"
+		#ret += indent+"print snode.nodeId, 'from', snode.parentId"
 		ret += indent+"print 'Depth: ', snode.depth"
 		ret += indent+"print '"+rule.name+"', me"
 		ret += indent+"print stack"
@@ -422,9 +427,9 @@ def normalRuleImplementation(rule, indent):
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
-	ret += indent+"newNode.parentId = snode.nodeId"
-	if debug:
-		ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
+	#ret += indent+"newNode.parentId = snode.nodeId"
+	#if debug:
+		#ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
 	ret += indent+"derivsx = self.getRules()[stack2[-1][1]](newNode, stack2, equivalences2)"
 	ret += indent+"if 'fina' in locals():"
 	ret += indent+"\tfor n in derivsx: n.history.append(finishesCombo)"
@@ -477,9 +482,14 @@ def normalRuleImplementation(rule, indent):
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
-	ret += indent+"newNode.parentId = snode.nodeId"
-	if debug:
-		ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
+	if thisIsActuallyAHierarchicalRule:
+		ret += indent+"newNode.parentNodeToExplore = " + COPY_OPTION + "(snode)"
+		ret += indent+"newNode.parentNodeToExploreWith = " + rule.name + "_COMBOINSIDE"
+		ret += indent+"newNode.stackP = "+COPY_OPTION+"(stackP)"
+		ret += indent+"newNode.equivalencesP = "+COPY_OPTION+"(equivalencesP)"
+	#ret += indent+"newNode.parentId = snode.nodeId"
+	#if debug:
+		#ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '"+rule.name+"'"
 	# Create nodes
 	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs, rule.parametersAST)
 	ret += indent+"# Create nodes"
@@ -534,7 +544,6 @@ def normalRuleImplementation(rule, indent):
 	# Misc stuff
 	indent = '\n\t\t'
 	ret += indent+"# Misc stuff"
-	ret += indent+"newNode.probability *= 1."
 	ret += indent+"if not inCombo:"
 	ret += indent+"\tnewNode.cost += "+str(rule.cost)
 	ret += indent+"\tnewNode.depth += 1"
@@ -545,7 +554,6 @@ def normalRuleImplementation(rule, indent):
 	ret += indent+""
 	ret += "\n"
 	return ret
-
 
 
 ## Generation of the python code for rules' preconditions

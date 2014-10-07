@@ -75,6 +75,7 @@ class AGMRuleParsing:
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
 			hierarchical = AGMHierarchicalRule(i.name, LHS, RHS, passive, i.cost, i.atomss.asList(), i.equivalences.asList())
+			return hierarchical
 		else:
 			#print 'Combo rule:', i.name
 			combo = AGMComboRule(i.name, passive, i.cost, i.atomss.asList(), i.equivalences.asList())
