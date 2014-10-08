@@ -142,25 +142,25 @@ class AGGLPlannerPlan(object):
 		self.data = []
 
 		if type(init) == type(''): # Read plan from file (assuming we've got a file path)
-				if len(init)>0:
-					if direct:
-						lines = init.split("\n") #newline
-					else:
-						lines = open(init, 'r').readlines() # take the content of a file
-					for line_i in range(len(lines)):
-						line = lines[line_i].strip() # take a line of the file content 
-						while len(line)>0:
-							if line[-1]=='\n': line = line[:-1]
-							else: break
-						if len(line)>0:
-							if line[0] != '#':
-								try:
-									self.data.append(AGGLPlannerAction(line))
-								except:
-									if len(line)>0:
-										print 'Error reading plan file', init+". Line", str(line_i)+": <<"+line+">>"
+			if len(init)>0:
+				if direct:
+					lines = init.split("\n") #newline
 				else:
-					pass
+					lines = open(init, 'r').readlines() # take the content of a file
+				for line_i in range(len(lines)):
+					line = lines[line_i].strip() # take a line of the file content 
+					while len(line)>0:
+						if line[-1]=='\n': line = line[:-1]
+						else: break
+					if len(line)>0:
+						if line[0] != '#':
+							try:
+								self.data.append(AGGLPlannerAction(line))
+							except:
+								if len(line)>0:
+									print 'Error reading plan file', init+". Line", str(line_i)+": <<"+line+">>"
+			else:
+				pass
 		elif type(init) == type([]):
 			for action in init:
 				self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
@@ -257,7 +257,6 @@ class WorldStateHistory(object):
 			self.score = 0
 		elif isinstance(type(init), type(WorldStateHistory)):
 			self.graph = copy.deepcopy(init.graph)
-			self.probability = copy.deepcopy(init.probability)
 			self.cost = copy.deepcopy(init.cost)
 			self.history = copy.deepcopy(init.history)
 			self.depth = copy.deepcopy(init.depth)
@@ -515,6 +514,29 @@ class PyPlan(object):
 					try:
 						#print 'd'
 						gotFromHead = head.parentNodeToExploreWith(head.parentNodeToExplore, head.stackP, head.equivalencesP)
+						print 'ueeeeeee', len(gotFromHead)
+						for deriv in gotFromHead:
+							self.explored.increase()
+							deriv.score, achieved = self.targetCode(deriv.graph)
+							if verbose>4: print deriv.score, achieved, deriv
+							if achieved:
+								#print 'Found solution', deriv.cost
+								self.results.append(deriv)
+								# Should we stop with the first plan?
+								if stopWithFirstPlan:
+									self.end_condition.set("GoalAchieved")
+									lock.release()
+									return
+								# Compute cheapest solution
+								self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
+							self.knownNodes.lock()
+							notDerivInKnownNodes = not deriv in self.knownNodes
+							self.knownNodes.unlock()
+							if notDerivInKnownNodes:
+								if deriv.stop == False:
+									if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
+										self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+						continue
 						#print 'e'
 					except:
 						#print 'f'

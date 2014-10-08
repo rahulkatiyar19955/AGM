@@ -140,8 +140,10 @@ class AGMFileDataParsing:
 		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + OneOrMore(atom).setResultsName("atomss") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
 		# HIERARCHICAL RULE
 		rule_hierarchical  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
+		# indlude
+		include = Group(Suppress("include") + po + an.setResultsName("includefile") + pc)
 		# GENERAL RULE
-		rule = rule_nrm | rule_seq | rule_hierarchical
+		rule = rule_nrm | rule_seq | rule_hierarchical | include
 		# PROPERTY
 		prop  = Group(an.setResultsName("prop") + eq + an.setResultsName("value"))
 		# WHOLE FILE
@@ -180,57 +182,64 @@ class AGMFileDataParsing:
 		if verbose: print '\nRules:', len(result.rules)
 		number = 0
 		for i in result.rules:
-			preconditionRec = None
-			parametersList = None
-			effectRec = None
-			# Read params
-			parametersStr = ''
-			parametersList = []
-			if i.parameters:
-				if len(str(i.parameters[0]).strip())>0:
-					#print 'Parameters: <'+str(i.parameters[0])+'>'
-					parametersStr = str(i.parameters[0])
-					parametersTree = AGGLCodeParsing.parseParameters(parametersStr)
-					parametersList = AGMFileDataParsing.interpretParameters(parametersTree)
-			# Read precond
-			preconditionStr = ''
-			preconditionTree = None
-			preconditionRec = None
-			if i.precondition:
-				if len(str(i.precondition[0]).strip())>0:
-					#print 'Precondition: <'+i.precondition[0]+'>'
-					preconditionStr = str(i.precondition[0])
-					preconditionTree = AGGLCodeParsing.parseFormula(preconditionStr)
-					if len(preconditionTree)>0: preconditionTree = preconditionTree[0]
-					preconditionRec = AGMFileDataParsing.interpretPrecondition(preconditionTree)
-			# Read effect
-			effectStr = ''
-			effectTree = None
-			effectRec = None
-			if i.effect:
-				if len(str(i.effect[0]).strip())>0:
-					#print 'Effect: <', str(i.effect[0])+'>'
-					effectStr = str(i.effect[0])
-					effectTree = AGGLCodeParsing.parseFormula(effectStr)
-					if len(effectTree)>0: effectTree = effectTree[0]
-					effectRec = AGMFileDataParsing.interpretEffect(effectTree)
-			# Build rule
-			rule = AGMRuleParsing.parseRuleFromAST(i, parametersList, preconditionRec, effectRec, verbose)
-			rule.parameters      = parametersStr
-			rule.parametersAST   = parametersList
-			rule.precondition    = preconditionStr
-			rule.preconditionAST = preconditionRec
-			rule.effect          = effectStr
-			rule.effectAST       = effectRec
-			#print rule.name
-			#print 'PARMS', rule.parametersAST
-			#print 'PRECN', rule.preconditionAST
-			#print 'EFFEC', rule.effectAST
-			agmFD.addRule(rule)
-			#print i.parameters[0]
-			#print i.precondition[0]
-			#print i.effect[0]
-			number = number + 1
+			if i.includefile:
+				inc = AGMFileDataParsing.fromFile(i.includefile)
+				for incr in inc.agm.rules:
+					agmFD.addRule(incr)
+					number = number + 1
+			else:
+				preconditionRec = None
+				parametersList = None
+				effectRec = None
+				# Read params
+				parametersStr = ''
+				parametersList = []
+				
+				if i.parameters:
+					if len(str(i.parameters[0]).strip())>0:
+						#print 'Parameters: <'+str(i.parameters[0])+'>'
+						parametersStr = str(i.parameters[0])
+						parametersTree = AGGLCodeParsing.parseParameters(parametersStr)
+						parametersList = AGMFileDataParsing.interpretParameters(parametersTree)
+				# Read precond
+				preconditionStr = ''
+				preconditionTree = None
+				preconditionRec = None
+				if i.precondition:
+					if len(str(i.precondition[0]).strip())>0:
+						#print 'Precondition: <'+i.precondition[0]+'>'
+						preconditionStr = str(i.precondition[0])
+						preconditionTree = AGGLCodeParsing.parseFormula(preconditionStr)
+						if len(preconditionTree)>0: preconditionTree = preconditionTree[0]
+						preconditionRec = AGMFileDataParsing.interpretPrecondition(preconditionTree)
+				# Read effect
+				effectStr = ''
+				effectTree = None
+				effectRec = None
+				if i.effect:
+					if len(str(i.effect[0]).strip())>0:
+						#print 'Effect: <', str(i.effect[0])+'>'
+						effectStr = str(i.effect[0])
+						effectTree = AGGLCodeParsing.parseFormula(effectStr)
+						if len(effectTree)>0: effectTree = effectTree[0]
+						effectRec = AGMFileDataParsing.interpretEffect(effectTree)
+				# Build rule
+				rule = AGMRuleParsing.parseRuleFromAST(i, parametersList, preconditionRec, effectRec, verbose)
+				rule.parameters      = parametersStr
+				rule.parametersAST   = parametersList
+				rule.precondition    = preconditionStr
+				rule.preconditionAST = preconditionRec
+				rule.effect          = effectStr
+				rule.effectAST       = effectRec
+				#print rule.name
+				#print 'PARMS', rule.parametersAST
+				#print 'PRECN', rule.preconditionAST
+				#print 'EFFEC', rule.effectAST
+				agmFD.addRule(rule)
+				#print i.parameters[0]
+				#print i.precondition[0]
+				#print i.effect[0]
+				number = number + 1
 		return agmFD
 
 	@staticmethod
