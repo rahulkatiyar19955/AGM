@@ -127,8 +127,8 @@ class AGMFileDataParsing:
 		node  = Group(an.setResultsName("symbol") + cn + an.setResultsName("symbolType") + Optional(po + nu.setResultsName("x") + co + nu.setResultsName("y") + pc))
 		# GRAPH
 		graph = Group(op + ZeroOrMore(node).setResultsName("nodes") + ZeroOrMore(link).setResultsName("links") + cl)
-		# RULE SEQUENCE
-		atom = Group(ids.setResultsName("name") + Suppress("as") + ids.setResultsName("alias"))
+		# COMBO RULE
+		atom = Group(ids.setResultsName("name") + Suppress("as") + ids.setResultsName("alias") + Optional("optional"))
 		equivElement = Group(ids.setResultsName("rule") + pt + ids.setResultsName("variable"))
 		equivRhs = eq + equivElement
 		equiv = Group(equivElement.setResultsName("first") + OneOrMore(equivRhs).setResultsName("more"))
@@ -137,9 +137,9 @@ class AGMFileDataParsing:
 		Prm = Optional(parameters   + op + almostanything + cl).setResultsName("parameters")
 		Cnd = Optional(precondition + op + almostanything + cl).setResultsName("precondition")
 		Eft = Optional(effect       + op + almostanything + cl).setResultsName("effect")
-		rule_nrm  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + OneOrMore(atom).setResultsName("atomss") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
+		rule_nrm = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 		# HIERARCHICAL RULE
-		rule_hierarchical  = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
+		rule_hierarchical = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + OneOrMore(atom).setResultsName("atomss") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
 		# indlude
 		include = Group(Suppress("include") + po + an.setResultsName("includefile") + pc)
 		# GENERAL RULE
@@ -194,7 +194,7 @@ class AGMFileDataParsing:
 				# Read params
 				parametersStr = ''
 				parametersList = []
-				
+
 				if i.parameters:
 					if len(str(i.parameters[0]).strip())>0:
 						#print 'Parameters: <'+str(i.parameters[0])+'>'
