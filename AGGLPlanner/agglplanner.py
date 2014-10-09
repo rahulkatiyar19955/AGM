@@ -579,22 +579,35 @@ class PyPlan(object):
 					resultFile.write(str(action)+'\n')
 			if verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 
-	##@brief this method
+	##@brief This method starts the execution of program threads
+	# @param ruleMap 
+	# @param lock this is the clench of the each thread.
+	# @param i is the index of the thread
+	# @param threadPoolStatus this is the status of the thread. The threads have three possible status:
+	#	1) On hold because they are waiting for another thread finishes his execution.
+	#	2) Active. They are expanding a node.
+	#	3) All the threads are idle because all of them have finished his executions.
 	def startThreadedWork(self, ruleMap, lock=None, i=0, threadPoolStatus=None):
 		if lock == None:
+			# If there isnt any lock, we create one and we give it to the thread.
 			lock = thread.allocate_lock()
 			lock.acquire()
+			
 		if threadPoolStatus != None:
+			# If the thread status is different of none, we lock the 
+			# code and put the status of the i thread.
 			threadPoolStatus.lock()
-			threadPoolStatus[i] = True
+			threadPoolStatus[i] = True # el hilo esta en marcha.
 			threadPoolStatus.unlock()
+		# We take the initial time.	
 		timeA = datetime.datetime.now()
 		while True:
-			#print 'a'
+			# Again, we take the time and we calculated the elapsed time
 			timeB = datetime.datetime.now()
 			timeElapsed = float((timeB-timeA).seconds) + float((timeB-timeA).microseconds)/1e6
-			# Check if we should give up because it already took too much time
+			# We take the length of the result list.
 			nResults = self.results.size()
+			# Check if we should give up because it already took too much time
 			if timeElapsed > maxTimeWaitLimit or (timeElapsed > maxTimeWaitAchieved and nResults > 0):
 				if nResults>0: self.end_condition.set("GoalAchieved")
 				else: self.end_condition.set("TimeLimit")
@@ -603,17 +616,21 @@ class PyPlan(object):
 			# Else, proceed...
 			# Try to pop a node from the queue
 			try:
-				#print 'b'
+				# We take the head of the openNodes list: the first open node.
 				head = self.openNodes.heapqPop()[1] # P O P   POP   p o p   pop
-				#print 'c'
+
 				if threadPoolStatus:
 					threadPoolStatus.lock()
-					threadPoolStatus[i] = True
+					threadPoolStatus[i] = True # We say that the thread i is active.
+
 					threadPoolStatus.unlock()
-				# Handle hierarchical rules
+					
+				# HANDLE HIERARCHICAL RULES
 				if hasattr(head, "parentNodeToExplore") and False:
+					# if the current node of the graph has as attribute that it must to explore
+					# its parent node, then it is a Hierarchical rule.
 					try:
-						#print 'd'
+						# we take the parent node.
 						gotFromHead = head.parentNodeToExploreWith(head.parentNodeToExplore, head.stackP, head.equivalencesP)
 						#print 'ueeeeeee', len(gotFromHead)
 						for deriv in gotFromHead:
