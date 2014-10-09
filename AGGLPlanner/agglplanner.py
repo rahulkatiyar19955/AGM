@@ -510,11 +510,11 @@ class PyPlan(object):
 					threadPoolStatus[i] = True
 					threadPoolStatus.unlock()
 				# Handle hierarchical rules
-				if hasattr(head, "parentNodeToExplore"):
+				if hasattr(head, "parentNodeToExplore") and False:
 					try:
 						#print 'd'
 						gotFromHead = head.parentNodeToExploreWith(head.parentNodeToExplore, head.stackP, head.equivalencesP)
-						print 'ueeeeeee', len(gotFromHead)
+						#print 'ueeeeeee', len(gotFromHead)
 						for deriv in gotFromHead:
 							self.explored.increase()
 							deriv.score, achieved = self.targetCode(deriv.graph)
