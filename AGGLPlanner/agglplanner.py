@@ -30,9 +30,9 @@
 """@package agglplanner
     @ingroup PyAPI
     This file loads the grammar, the initial state of the world and the GOAL status without changing the files extensions of the grammar and the goal.
-    
+
     MODE USE:	agglplanner gramatica.aggl init.xml target.py
-    
+
     Also, we can keep the results in a file with: agglplanner gramatica.aggl init.xml target.py result.plan
 """
 
@@ -75,7 +75,7 @@ class EndCondition(object):
 		self.status = status
 		## The lock for read and write the status
 		self.lock = thread.allocate_lock()
-	
+
 	##@brief Get Method. This method returns the status of the class. To do this, the method needs
 	# to lock the other threads. This method reads a critical variable.
 	# @retval ret is the status of the class.
@@ -84,7 +84,7 @@ class EndCondition(object):
 		ret = self.status
 		self.lock.release()
 		return ret
-	      
+
 	##@brief Set method. This method changes the value of the status attribute. To do this, the
 	# method needs to write in a critical memory zone, so it is necesary to lock it.
 	# @param value is the new status
@@ -98,9 +98,9 @@ class WrongRuleExecution(Exception):
 	##@brief Constructor method. It saves the data of the Exception
 	# @param data
 	def __init__(self, data):
-		## Data of the exception 
+		## Data of the exception
 		self.data = data
-	
+
 	##@brief This method returns the data of the exception.
 	# @retval data.
 	def __str__(self):
@@ -123,7 +123,7 @@ class AGGLPlannerAction(object):
 			self.parameters = eval(parts[1])
 		else:
 			raise IndexError
-		      
+
 	##@brief This method returns the name and the parameters of the action in a string.
 	# @retval string with the name of the action and the parameters
 	def __str__(self):
@@ -137,7 +137,7 @@ class AGGLPlannerPlan(object):
 	# @param direct optional. By default his value is FALSE
 	def __init__(self, init='', direct=False):
 		object.__init__(self)
-		
+
 		## Data of the plan file
 		self.data = []
 
@@ -148,7 +148,7 @@ class AGGLPlannerPlan(object):
 				else:
 					lines = open(init, 'r').readlines() # take the content of a file
 				for line_i in range(len(lines)):
-					line = lines[line_i].strip() # take a line of the file content 
+					line = lines[line_i].strip() # take a line of the file content
 					while len(line)>0:
 						if line[-1]=='\n': line = line[:-1]
 						else: break
@@ -191,14 +191,14 @@ class AGGLPlannerPlan(object):
 						n = str(int(action.parameters[parameter])-len(created))
 						action.parameters[parameter] = n
 		return c
-	      
+
 	## @brief This method This method subtracts a unit to counter the class.
 	# @retval the class with the diferent value of the counter
 	def __iter__(self):
-		## counter of the data 
+		## counter of the data
 		self.current = -1
 		return self
-	      
+
 	## @brief This method counts +1 on the current variable. If the counter overcome the
 	# length of the data attribute, it raises an exception. If not, the method returns the
 	# data with the index==current+1.
@@ -209,13 +209,13 @@ class AGGLPlannerPlan(object):
 			raise StopIteration
 		else:
 			return self.data[self.current]
-	
+
 	##@brief This method returns the information of the graph as a string.
 	# @retval a string with the information of the plan graph.
 	def __repr__(self):
 		## The plan graph
 		return self.graph.__str__()
-	      
+
 	##@brief this method returns a string with the data array information.
 	# @retval ret is the string with all the data
 	def __str__(self):
@@ -223,7 +223,7 @@ class AGGLPlannerPlan(object):
 		for a in self.data:
 			ret += a.__str__() + '\n'
 		return ret
-	
+
 	##@brief this method returns the length of the data array.
 	# @retval an integer that is the length of the data array.
 	def __len__(self):
@@ -267,29 +267,29 @@ class WorldStateHistory(object):
 			print type(init)
 			print type(self)
 			sys.exit(1)
-			
+
 	##@brief
 	def __cmp__(self, other):
 		#print '__cmp__'
 		return self.graph.__cmp__(other.graph)
 	def __hash__(self):
 		return self.graph.__hash__()
-	
+
 	##@brief This method returns the result of comparing two graphs
 	# @param other the other graph.
 	# @retval a boolean wit the result of the comparison
 	def __eq__(self, other):
 		return self.graph.__eq__(other.graph)
-	      
-	
+
+
 	def __repr__(self):
 		return self.graph.__repr__()
-	      
+
 	##@brief This method returns a string with the information of the current graph.
 	def __str__(self):
 		return self.graph.__str__()
 
-##@brief This method prints on the screen all the information of the new graph: the cost, 
+##@brief This method prints on the screen all the information of the new graph: the cost,
 # the score, the number of actions and the names of the actions.
 def printResult(result):
 	print '-----  R  E  S  U  L  T  S  -----'
@@ -314,18 +314,18 @@ class LockableList():
 		self.thelist = []
 		## The mutex associated to the list.
 		self.mutex = threading.RLock()
-		
+
 	##@brief This method return the length of the lockable list.
 	# @retval an integer that is the length of the list.
 	def __len__(self):
 		return len(self.thelist)
-	      
+
 	##@brief This method returns the item with the index or keyword a in the list.
 	# @param a is the index or the keyword  of the item.
 	# @retval the item that corresponds to the index a.
 	def __getitem__(self, a):
 		return self.thelist.__getitem__(a)
-	     
+
 	##@brief This method changes the item for the item b. Is necessary to lock the
 	# the method, it changes a critical memory zone.-
 	# @param a first item
@@ -334,12 +334,12 @@ class LockableList():
 		self.mutex.acquire()
 		self.thelist.__setitem__(a, b)
 		self.mutex.release()
-		
+
 	##@brief This method return the iterator of the list.
 	# @retval the iterator of the lockable list.
 	def __iter__(self):
 		return self.thelist.__iter__()
-	      
+
 	##@brief This method returns the size (the length) of the list.
 	# This method needs acces to a critical memory zone, so it is necessary to
 	# lock all the process.
@@ -349,8 +349,8 @@ class LockableList():
 		ret = len(self.thelist)
 		self.mutex.release()
 		return ret
-	
-	##@brief this method 
+
+	##@brief this method
 	def heapqPop(self):
 		self.mutex.acquire()
 		try:
@@ -358,7 +358,7 @@ class LockableList():
 		finally:
 			self.mutex.release()
 		return ret
-	
+
 	def heapqPush(self, value):
 		self.mutex.acquire()
 		heapq.heappush(self.thelist, value)
@@ -510,11 +510,11 @@ class PyPlan(object):
 					threadPoolStatus[i] = True
 					threadPoolStatus.unlock()
 				# Handle hierarchical rules
-				if hasattr(head, "parentNodeToExplore"):
+				if hasattr(head, "parentNodeToExplore") and False:
 					try:
 						#print 'd'
 						gotFromHead = head.parentNodeToExploreWith(head.parentNodeToExplore, head.stackP, head.equivalencesP)
-						print 'ueeeeeee', len(gotFromHead)
+						#print 'ueeeeeee', len(gotFromHead)
 						for deriv in gotFromHead:
 							self.explored.increase()
 							deriv.score, achieved = self.targetCode(deriv.graph)

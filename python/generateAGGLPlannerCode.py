@@ -150,10 +150,13 @@ def ruleImplementation(rule):
 	ret += indent+"# Rule " + rule.name
 	# We distinguish between normal rules and combo rules.
 	if type(rule) == AGMRule:
+		print rule.name, 'normal'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMComboRule:
+		print rule.name, 'combo'
 		ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMHierarchicalRule:
+		print rule.name, 'hierarchical'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 		ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 	else:
@@ -641,9 +644,9 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 # @param stuff
 #
 # @retval Tuple containing:
-# - code: String containing the resulting code
-# - indent:
-# - formulaId:
+# - code: string containing the resulting code
+# - indent: the indentation level for the generated text (it depends on the context)
+# - modifier:
 # - stuff:
 def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 	if stuff == None: stuff = {'availableid':0, 'mode':'normal'}
@@ -672,7 +675,7 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 	elif effectType == "or":
 		print 'OR statements are not allowed in effects'
 		sys.exit(1)
-# Partially done, the conditional mode is not tested
+	# Partially done, the conditional mode is not tested
 	elif effectType == "and":
 		if stuff['mode'] == "condition":
 			ret += indent+'effect'+str(formulaId)+' = True # AND initialization as true'
@@ -704,7 +707,7 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 		ret += text
 	elif effectType == "when":
 		stuff['mode'] = 'condition'
-		text, indent, formulaIdRet1, stuff = normalRuleImplementation_EFFECT(effectBody[0], indent+'\t', 'whenA', stuff)
+		text, indent, formulaIdRet1, stuff = normalRuleImplementation_EFFECT(effectBody[0], indent, 'whenA', stuff)
 		stuff['mode'] = 'normal'
 		ret += text
 		ret += indent+'if condition'+str(formulaIdRet1)+' == True: # if what\'s inside the WHEN(if) is True'
