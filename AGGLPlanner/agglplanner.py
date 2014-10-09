@@ -58,8 +58,9 @@ verbose = 1
 maxTimeWaitAchieved = 10.
 maxTimeWaitLimit = 3000.
 
-## @brief Method heapsort. This method receives as input parameter:
-# @param iterable
+## @brief Method heapsort. This method receives an iterable thing. It stores the iterable thing
+# in a list and sorts the list.
+# @param iterable is any iterable thing (like a list, a map...)
 def heapsort(iterable):
 	h = []
 	for value in iterable:
@@ -94,9 +95,10 @@ class EndCondition(object):
 		self.lock.release()
 
 ##@brief This class manages the exception of a wrong rule execution.
+# It inherits from Excepction.
 class WrongRuleExecution(Exception):
 	##@brief Constructor method. It saves the data of the Exception
-	# @param data
+	# @param data anything that gets the information of the Excepction.
 	def __init__(self, data):
 		## Data of the exception
 		self.data = data
@@ -109,16 +111,17 @@ class WrongRuleExecution(Exception):
 ##@brief This class get the name and the parameters of an action that belongs to a plan.
 class AGGLPlannerAction(object):
 	##@brief Constructor method. It receives (optionally) the contructor method of the object, but, by default, it is empty.
-	# @param init is an optional initialization variable
+	# @param init is the plan
 	# If anything is wrong, this method throws an exception.
 	def __init__(self, init=''):
 		object.__init__(self)
-		## Name of the action
+		## Name of the rule
 		self.name = ''
-		## Name of the action parameters
+		## Name of the rule parameters (the parameters are in a dictionary)
 		self.parameters = dict()
 		if len(init)>0:
-			parts = init.split('@')
+			#we save the the list of all the words in the string, using @ as the separator
+			parts = init.split('@') 
 			self.name = parts[0]
 			self.parameters = eval(parts[1])
 		else:
@@ -132,21 +135,33 @@ class AGGLPlannerAction(object):
 ## @brief AGGLPlannerPlan is used as a plan container.
 class AGGLPlannerPlan(object):
 	## @brief Parametrized constructor.
-	# @param init Optional initialization variable. It can be a) string containing a plan; b) a filename where such string is to be found,
-	# or c) a list of tuples where each tuple contains the name of a rule and a dictionary with the variable mapping of the rule.
-	# @param direct optional. By default his value is FALSE
-	def __init__(self, init='', direct=False):
-		object.__init__(self)
+	# @param init is an optional initialization variable. It can be:
+	#	a) string containing a plan; 
+	#	b) a filename where such string is to be found,
+	# 	c) a list of tuples where each tuple contains the name of a rule and a dictionary with the variable mapping of the rule.
+	# @param textOrFile This parameter indicates whether 'init' is the name of a file (where is stored the plan code) or the text string with the plan code. By default his value is FALSE
+	def __init__(self, init='', textOrFile=False):
+		object.__init__(self) #se puede quitar
 
 		## Data of the plan file
 		self.data = []
-
+		# IF INIT IS A STRING....
 		if type(init) == type(''): # Read plan from file (assuming we've got a file path)
+			# If init is a string, we check its length. If there are something in the string, we check
+			# what it is:
 			if len(init)>0:
-				if direct:
+				 # If the string is all the plan code, we separate in lines with \n, but,
+				 # if the string is the name of the file where is stored all the plan code, we read and save
+				 # the file content in a local variable.
+				if textOrFile:
 					lines = init.split("\n") #newline
 				else:
 					lines = open(init, 'r').readlines() # take the content of a file
+				
+				# Now, we check the text to find possible errors. 
+				# First, we delete the white spaces at the start and the end of each text line.
+				# Second, we check if there are any line with only the character \n.
+				# Finally, is the line have something that is not a commentary, we save it like a grammar rule
 				for line_i in range(len(lines)):
 					line = lines[line_i].strip() # take a line of the file content
 					while len(line)>0:
@@ -157,14 +172,18 @@ class AGGLPlannerPlan(object):
 							try:
 								self.data.append(AGGLPlannerAction(line))
 							except:
-								if len(line)>0:
-									print 'Error reading plan file', init+". Line", str(line_i)+": <<"+line+">>"
+								print 'Error reading plan file', init+". Line", str(line_i)+": <<"+line+">>"
+			# If the string hasnt got anything, we dont apply any rule:
 			else:
 				pass
+		# IF INIT IS A LIST
 		elif type(init) == type([]):
+			# we take each element of the list and we save it as a grammar rule.
 			for action in init:
 				self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
+		#IF INIT IS A COMPLETE PLAN
 		elif type(init) == type(AGGLPlannerPlan()):
+			# we make a copy of the plan
 			self.data = copy.deepcopy(init.data)
 		else:
 			print 'Unknown plan type ('+str(type(init))+')! (internal error)'
@@ -192,10 +211,10 @@ class AGGLPlannerPlan(object):
 						action.parameters[parameter] = n
 		return c
 
-	## @brief This method This method subtracts a unit to counter the class.
+	## @brief This method initializes the iterator of the class.
 	# @retval the class with the diferent value of the counter
 	def __iter__(self):
-		## counter of the data
+		## iterator of the data
 		self.current = -1
 		return self
 
@@ -235,14 +254,13 @@ class WorldStateHistory(object):
 	# @param init initialization variable
 	def __init__(self, init):
 		object.__init__(self)
-		# If
+		
+		# If INIT IS A GRAPH
 		if isinstance(init, AGMGraph):
 			# Graph with the current world status.
 			self.graph = copy.deepcopy(init)
 			# The identifier of the graph that the current graph comes from
 			self.parentId = 0
-			# ???
-			self.probability = 1
 			# The cost of the new graph (as result of execute the heuristic?)
 			self.cost = 0
 			# The string with all the changes made from the original graph.
@@ -255,6 +273,7 @@ class WorldStateHistory(object):
 			self.stop = False
 			# The heuristic score of the current graph
 			self.score = 0
+		#IF INIT IS A INSTANCE OF WorldStateHistory
 		elif isinstance(type(init), type(WorldStateHistory)):
 			self.graph = copy.deepcopy(init.graph)
 			self.cost = copy.deepcopy(init.cost)
@@ -268,10 +287,14 @@ class WorldStateHistory(object):
 			print type(self)
 			sys.exit(1)
 
-	##@brief
+	##@brief This method compares two graphs. 
+	# @param other is the graph with which we compare.
+	# @retval an integer that can be 1 if the current graph is greater, -1 if it is smaller, and 0 if both are equals.
 	def __cmp__(self, other):
-		#print '__cmp__'
 		return self.graph.__cmp__(other.graph)
+	      
+	##@brief This method calculates the hashcode of the current graph.
+	# @retval an integer with the hashcode.
 	def __hash__(self):
 		return self.graph.__hash__()
 
@@ -281,7 +304,7 @@ class WorldStateHistory(object):
 	def __eq__(self, other):
 		return self.graph.__eq__(other.graph)
 
-
+	##@brief This method returns a string with the information of the current graph.
 	def __repr__(self):
 		return self.graph.__repr__()
 
@@ -306,7 +329,7 @@ def printResult(result):
 		#if action[0] != '#':
 		print action
 
-##@brief
+##@brief This is a class that implements a lockable list.
 class LockableList():
 	##@brief Constructor Method. It initializes the list and the mutex.
 	def __init__(self):
@@ -350,7 +373,9 @@ class LockableList():
 		self.mutex.release()
 		return ret
 
-	##@brief this method
+	##@brief This method makes a pop on the list. First, it acquires the mutex in order to lock all the process. 
+	# Then It does a pop of the list (using the heappop class). And finally it releases the mutex.
+	# @retval the pop of the list.
 	def heapqPop(self):
 		self.mutex.acquire()
 		try:
@@ -359,80 +384,142 @@ class LockableList():
 			self.mutex.release()
 		return ret
 
+	##@brief This method insert a value at the top of the list. It needs to acquire the mutex
+	# in order to lock all the process.
+	# @param value the element to insert.
 	def heapqPush(self, value):
 		self.mutex.acquire()
 		heapq.heappush(self.thelist, value)
 		self.mutex.release()
+		
+	##@brief The method returns the first element of the list. It needs to acquire the mutex
+	# in order to lock all the process. It doesnt remove the element of the list.
+	# @retval the first element of the list
 	def getFirstElement(self):
 		self.mutex.acquire()
 		ret = self.thelist[0]
 		self.mutex.release()
 		return ret
+	
+	##@brief This method introduces an element at the end of the list. It needs to acquire the 
+	# mutex in order to lock all the process.
+	# @param v is the new element.
 	def append(self, v):
 		self.mutex.acquire()
 		self.thelist.append(v)
 		self.mutex.release()
+		
+	##@brief This method lock the mutex (it acquires him)
 	def lock(self):
 		self.mutex.acquire()
+	
+	##@brief This method unlock the mutex (it releases him)
 	def unlock(self):
 		self.mutex.release()
 
+##@brief This class defines an integer that can be locked and unlocked.
 class LockableInteger(object):
+	##@brief constructor method. This method initializes the value of the integer and the 
+	# mutex of the class.
+	# @val is the initial value of the integer (it is an optional parameter).
 	def __init__(self, val=0):
+		## The value of the integer
 		self.value = val
+		## The mutex associated to the integer.
 		self.mutex = threading.RLock()
+		
+	##@brief This method changes the value of the integer. To do this, it needs to
+	# take the mutex in order to lock all the process.
+	# @param val the new value of the integer.
 	def set(self, val):
 		self.mutex.acquire()
 		self.value = val
 		self.mutex.release()
+	
+	##@brief This method returns the value of the integer. It needs the mutex.
+	# @retval ret is the value of the integer.
 	def get(self):
 		self.mutex.acquire()
 		ret = self.value
 		self.mutex.release()
 		return ret
+	      
+	##@brief This method acquires the mutex (it locks him)      
 	def lock(self):
 		self.mutex.acquire()
+		
+	##@brief This method releases the mutex (it unlocks him).	
 	def unlock(self):
 		self.mutex.release()
+	
+	##@brief This method increases the value of the integer by one.
+	# Like always, it needs to take the mutex.
 	def increase(self):
 		self.mutex.acquire()
 		self.value += 1
 		self.mutex.release()
 
+##@brief This is the main class. This makes all the process in order to create, check and execute the plan.
 class PyPlan(object):
+	##@brief The constructor method. This initializes all the attributes of the class and makes
+	# the first check of the plan.
+	# @param domainPath is the file name where is saved the grammar rules.
+	# @param init is the XML file where is saved the inital status of the world
+	# @param targetPath is the python file where is daved the target status of the world.
+	# @param resultFile is the optional name of the file where the plan result will be stored.
 	def __init__(self, domainPath, init, targetPath, resultFile):
 		object.__init__(self)
 		# Get initial world mdoel
 		initWorld = WorldStateHistory(xmlModelParser.graphFromXML(init))
 		initWorld.nodeId = 0
+		
 		# Get graph rewriting rules
 		domain = imp.load_source('domain', domainPath).RuleSet()
 		ruleMap = domain.getRules()
+		
 		# Get goal-checking code
 		target = imp.load_source('target', targetPath)
+		## This attribute stores the code of the goal status world.
 		self.targetCode = target.CheckTarget
 
 		# Search initialization
+		## This attribute indicates the maximum size that can reach the graph
 		self.maxWorldSize = maxWorldIncrement+len(initWorld.graph.nodes.keys())
+		## This attribute indicates the minimun cost of the open nodes of the graph
 		self.minCostOnOpenNodes = LockableInteger(0)
+		## This is the lockable list of all the open nodes.
 		self.openNodes = LockableList()
+		## This is the lockable list of all the know nodes of the graph.
 		self.knownNodes = LockableList()
+		## This is the lockable list of all the calculated results.
 		self.results = LockableList()
+		## This is the lockable list of all the explored nodes
 		self.explored = LockableInteger(0)
+		## This is the LockableInteger that stores the better cost of the solution
 		self.cheapestSolutionCost = LockableInteger(-1)
+		## This is the condition to stop.
 		self.end_condition = EndCondition()
+		# We save in the list of the open nodes, the initial status of the world
 		self.openNodes.heapqPush((0, copy.deepcopy(initWorld)))
 		if verbose>1: print 'INIT'.ljust(20), initWorld
 
 		# Create initial state
 		initWorld.score, achieved = self.targetCode(initWorld.graph)
-
+		
 		if achieved:
+			# If the goal is achieved, we save the solution in the result list, the
+			# solution cost in the cheapest solution cost and we put the end_condition
+			# as goal achieved in order to stop the execution.
 			self.results.append(initWorld)
 			self.cheapestSolutionCost.set(self.results.getFirstElement().cost)
 			self.end_condition.set("GoalAchieved")
+			
 		elif number_of_threads>0:
+			# But, if the goal is not achieved and there are more than 0 thread running (1, 2...)
+			# we creates a list where we will save the status of all the threads, take all
+			# the threads (with their locks) and save it in the thread_locks list.
 			# Run working threads
+			## This attributes is a list where we save all the thread that are running.
 			self.thread_locks = []
 			threadStatus = LockableList()
 			for i in xrange(number_of_threads):
@@ -445,9 +532,19 @@ class PyPlan(object):
 			for lock in self.thread_locks:
 				lock.acquire()
 		else:
+			# If the solution is not achieved and there arent any thread to execute the programm
+			# we stop it and show an error message.
 			print 'no threading'
 			self.startThreadedWork(ruleMap)
 
+		# We make others checks over the end_condition:
+		#	-- If the end condition is wrong.
+		#	-- or the end condition exceeded the maximum cost
+		#	-- or we have found the best overcome.
+		#	-- or we have achieved the goal
+		#	-- or we have exceeded the maximum time limit
+		#	-- or the end condition doesnt have any message
+		# we print the correspond message
 		if self.end_condition.get() == "IndexError":
 			if verbose > 0: print 'End: state space exhausted'
 		elif self.end_condition.get() == "MaxCostReached":
@@ -465,20 +562,24 @@ class PyPlan(object):
 			print self.end_condition.get()
 
 		if len(self.results)==0:
+			# If the length of the list is zero, it means that we have not found a plan.
 			if verbose > 0: print 'No plan found.'
 		else:
+			# But, if the length is greater than zero, it means that we have found a plan.
+			# We go over all the actions of the plan, and we look for the best solution (the minimun cost).
 			if verbose > 0: print 'Got', len(self.results),' plans!'
 			min_idx = 0
 			for i in range(len(self.results)):
 				if self.results[i].cost < self.results[min_idx].cost:
 					min_idx = i
 			i = min_idx
-			printResult(self.results[i])
+			printResult(self.results[i]) #the best solution
 			for action in self.results[i].history:
 				if resultFile != None:
 					resultFile.write(str(action)+'\n')
 			if verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 
+	##@brief this method
 	def startThreadedWork(self, ruleMap, lock=None, i=0, threadPoolStatus=None):
 		if lock == None:
 			lock = thread.allocate_lock()
