@@ -115,15 +115,9 @@ def hierarchicalTargetsDeclaration(agm):
 # - the string with the code
 # - the number of links processed
 # - the debugging code
-def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, forHierarchicalRule='', debug=False):
+def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, debug=False):
 	ret = ''
 	info = []
-	#if forHierarchicalRule:
-		#hrA = 'smapping['
-		#hrB = ']'
-	#else:
-	hrA = ''
-	hrB = ''
 	number = 0
 	for link in linkList:
 		if newSymbol == link.a or newSymbol == link.b:
@@ -134,13 +128,13 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, forHiera
 				negated = 'not '
 			if newSymbol == link.a:
 				if link.b in alreadyThere:
-					ret += pre + '[n2id['+hrA+'"'+str(link.a) + '"'+hrB+'],n2id['+hrA+'"'+ str(link.b) + '"'+hrB+'],"'+str(link.linkType)+'"] in snode.graph.links'
-					if debug: info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id['+hrA+'"'+str(link.a) + '"'+hrB+'],n2id['+hrA+'"'+ str(link.b) + '"'+hrB+'],"'+str(link.linkType)+'"] in snode.graph.links')
+					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
+					if debug: info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
 					number += 1
 			elif newSymbol == link.b:
 				if link.a in alreadyThere:
-					ret += pre + '[n2id['+hrA+'"'+str(link.a) + '"'+hrB+'],n2id['+hrA+'"'+ str(link.b) + '"'+hrB+'],"'+str(link.linkType)+'"] in snode.graph.links'
-					if debug: info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id['+hrA+'"'+str(link.a) + '"'+hrB+'],n2id['+hrA+'"'+ str(link.b) + '"'+hrB+'],"'+str(link.linkType)+'"] in snode.graph.links')
+					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
+					if debug: info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
 					number += 1
 	return ret, number, info
 
@@ -153,7 +147,7 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, forHiera
 # @param alreadyThere
 #
 # @retval the string with the code
-def newLinkScore(linkList, newSymbol, alreadyThere, forHierarchicalRule=''):
+def newLinkScore(linkList, newSymbol, alreadyThere):
 	ret = []
 	for link in linkList:
 		if newSymbol == link.a or newSymbol == link.b:
@@ -162,9 +156,6 @@ def newLinkScore(linkList, newSymbol, alreadyThere, forHierarchicalRule=''):
 			else: negated = ''
 			# Condition itself
 			if ((newSymbol == link.a) and (link.b in alreadyThere)) or ((newSymbol == link.b) and (link.a in alreadyThere)):
-				#if len(forHierarchicalRule)>0:
-					#ret.append('if [n2id[smapping["'+str(link.a)+'"]],n2id[smapping["'+str(link.b)+'"]],"'+str(link.linkType)+'"] ' +negated+'in graph.links: linksVal += 100')
-				#else:
 				ret.append('if [n2id["'+str(link.a)+'"],n2id["'+str(link.b)+'"],"'+str(link.linkType)+'"] ' +negated+'in graph.links: linksVal += 100')
 	return ret
 
@@ -932,7 +923,7 @@ def CheckTarget(graph):
 			else:
 				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 		ret += indent+"linksVal = 0"
-		for cond in newLinkScore(graph.links, n_n, symbols_in_stack, forHierarchicalRule):
+		for cond in newLinkScore(graph.links, n_n, symbols_in_stack):
 			ret += indent+cond
 		ret += indent+"scoreLinks.append(linksVal)"
 		pops.append(indent+'scoreLinks.pop()')
@@ -940,7 +931,7 @@ def CheckTarget(graph):
 		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n_n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
-		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack, forHierarchicalRule)
+		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack)
 		conditions = conditions.replace("snode.graph", "graph")
 		conditionsListList.append( [conditions, number] )
 		ret += conditions
