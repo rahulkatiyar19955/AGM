@@ -150,13 +150,10 @@ def ruleImplementation(rule):
 	ret += indent+"# Rule " + rule.name
 	# We distinguish between normal rules and combo rules.
 	if type(rule) == AGMRule:
-		print rule.name, 'normal'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMComboRule:
-		print rule.name, 'combo'
 		ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMHierarchicalRule:
-		print rule.name, 'hierarchical'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 		ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 	else:
