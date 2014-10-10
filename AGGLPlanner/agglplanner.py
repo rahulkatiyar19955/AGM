@@ -584,7 +584,7 @@ class PyPlan(object):
 		else:
 			# But, if the length is greater than zero, it means that we have found a plan.
 			# We go over all the actions of the plan, and we look for the best solution (the minimun cost).
-			if verbose > 0: print 'Got', len(self.results),' plans!'
+			if self.indent=='' and verbose > 0: print 'Got', len(self.results),' plans!'
 			min_idx = 0
 			for i in range(len(self.results)):
 				if self.results[i].cost < self.results[min_idx].cost:
@@ -597,10 +597,10 @@ class PyPlan(object):
 				if action[0] == '*':
 					ac = AGGLPlannerAction(action)
 					if action_index == 0 and ac.hierarchical:
-						print action, '{'
+						print self.indent, action, '{'
 						self.excludeList.append(ac.name)
 						aaa = PyPlan(domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', ac.parameters, self.excludeList, None)
-						print '}'
+						print self.indent, '}'
 				else:
 					print self.indent + action
 			print self.indent+'}'
