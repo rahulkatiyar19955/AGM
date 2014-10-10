@@ -597,7 +597,7 @@ class PyPlan(object):
 				if action[0] == '*':
 					ac = AGGLPlannerAction(action)
 					if action_index == 0 and ac.hierarchical:
-						print self.indent, action, '{'
+						print self.indent+str(action), '{'
 						self.excludeList.append(ac.name)
 						aaa = PyPlan(domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', ac.parameters, self.excludeList, None)
 						print self.indent, '}'
