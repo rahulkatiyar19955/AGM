@@ -118,12 +118,12 @@ def hierarchicalTargetsDeclaration(agm):
 def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, forHierarchicalRule='', debug=False):
 	ret = ''
 	info = []
-	if forHierarchicalRule:
-		hrA = 'smapping['
-		hrB = ']'
-	else:
-		hrA = ''
-		hrB = ''
+	#if forHierarchicalRule:
+		#hrA = 'smapping['
+		#hrB = ']'
+	#else:
+	hrA = ''
+	hrB = ''
 	number = 0
 	for link in linkList:
 		if newSymbol == link.a or newSymbol == link.b:
@@ -162,10 +162,10 @@ def newLinkScore(linkList, newSymbol, alreadyThere, forHierarchicalRule=''):
 			else: negated = ''
 			# Condition itself
 			if ((newSymbol == link.a) and (link.b in alreadyThere)) or ((newSymbol == link.b) and (link.a in alreadyThere)):
-				if len(forHierarchicalRule)>0:
-					ret.append('if [n2id[smapping["'+str(link.a)+'"]],n2id[smapping["'+str(link.b)+'"]],"'+str(link.linkType)+'"] ' +negated+'in graph.links: linksVal += 100')
-				else:
-					ret.append('if [n2id["'+str(link.a)+'"],n2id["'+str(link.b)+'"],"'+str(link.linkType)+'"] ' +negated+'in graph.links: linksVal += 100')
+				#if len(forHierarchicalRule)>0:
+					#ret.append('if [n2id[smapping["'+str(link.a)+'"]],n2id[smapping["'+str(link.b)+'"]],"'+str(link.linkType)+'"] ' +negated+'in graph.links: linksVal += 100')
+				#else:
+				ret.append('if [n2id["'+str(link.a)+'"],n2id["'+str(link.b)+'"],"'+str(link.linkType)+'"] ' +negated+'in graph.links: linksVal += 100')
 	return ret
 
 
@@ -193,7 +193,7 @@ def ruleImplementation(rule):
 	elif type(rule) == AGMHierarchicalRule:
 		#print rule.name, 'hierarchical'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
-		ret += generateTarget(rule.rhs, rule.name)
+		ret += generateTarget(rule.rhs, rule.name, rule.lhs)
 		#ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 	else:
 		print 'Unknown rule type'
@@ -801,7 +801,7 @@ def generate(agm, skipPassiveRules):
 	return text
 
 
-def getOptimalTargetNodeCheckOrder(graph):
+def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 	## Generate Link list
 	linkList = []
 	for link_i in range(len(graph.links)):
@@ -813,10 +813,25 @@ def getOptimalTargetNodeCheckOrder(graph):
 	varbls = []
 	for n_n in graph.nodes:
 		n = str(n_n)
-		if (n[0] in "0123456789"):
-			consts.append(n)
+		if lgraph:
+			#print 'hay left graph.... checking for:      ', n
+			if (n[0] in "0123456789"):
+				#print 'constante por numero'
+				consts.append(n)
+			else:
+				#print n, '>>',lgraph.nodes.keys()
+				if n in lgraph.nodes.keys():
+					#print 'constante porque si esta a la izq', n
+					consts.append(n)
+				else:
+					#print 'variable porque no esta a la izq', n
+					varbls.append(n)
 		else:
-			varbls.append(n)
+			if (n[0] in "0123456789"):
+				consts.append(n)
+			else:
+				varbls.append(n)
+
 	initialSort = consts + varbls
 	## generate points for close-to-optimal list
 	counter = dict()
@@ -844,7 +859,7 @@ def getOptimalTargetNodeCheckOrder(graph):
 # @param The graph used to generate the target
 #
 # @retval The python code used to check the target world state
-def generateTarget(graph, forHierarchicalRule=''):
+def generateTarget(graph, forHierarchicalRule='', lgraph=None):
 	ret = ''
 	indent = "\n\t"
 
@@ -859,13 +874,14 @@ def computeMaxScore(a, b, maxScore):
 	if s > maxScore: return s
 	return maxScore
 
-def CheckTarget(graph):"""
+def CheckTarget(graph):
+	n2id = dict()
+"""
 
 	else:
 		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping):'
 		indent += "\t"
-	# Make a copy of the current graph node list
-	ret += indent+"n2id = dict()\n"
+		ret += indent+"n2id = smapping\n"
 	## Generate Link list
 	linkList = []
 	for link_i in range(len(graph.links)):
@@ -874,29 +890,7 @@ def CheckTarget(graph):"""
 	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
 
 	ret += indent+"maxScore = 0"
-	ret += indent+"scoreEasy = 0"
 	ret += '\n'
-	easy = 1
-	if True:
-		ret += indent+"# Easy score"
-		typesDict = dict()
-		for n in graph.nodes:
-			t = graph.nodes[n].sType
-			easy += 1
-			if t in typesDict:
-				typesDict[t] += 1
-			else:
-				typesDict[t] = 1
-		ret += indent+"typesDict = dict()"
-		for t in typesDict:
-			ret += indent+"typesDict['"+t+"'] = " + str(typesDict[t])
-		ret += indent+"for n in graph.nodes:"
-		ret += indent+"	if graph.nodes[n].sType in typesDict:"
-		ret += indent+"		scoreEasy += 1"
-		ret += indent+"		typesDict[graph.nodes[n].sType] -= 1"
-		ret += indent+"		if typesDict[graph.nodes[n].sType] == 0:"
-		ret += indent+"			del typesDict[graph.nodes[n].sType]"
-		ret += '\n'
 
 	conditionsListList = []
 	# Generate the loop that checks the model
@@ -910,19 +904,33 @@ def CheckTarget(graph):"""
 	ret += indent+"scoreLinks = []"
 
 	#for n_n in graph.nodes:
-	for n_n in getOptimalTargetNodeCheckOrder(graph):
+	for n_n in getOptimalTargetNodeCheckOrder(graph, lgraph):
 		n = str(n_n)
 		ret += indent+"# "+n
+		constant = False
 		if (n[0] in "0123456789") and n in graph.nodes: # This checks the node is already in the model
-			ret += indent+"symbol_"+n+"_name = '" + n + "'"
+			constant = True
+		elif lgraph:
+			if n in lgraph.nodes:
+				constant = True
+		if constant:
+			if (n[0] in "0123456789") and n in graph.nodes:
+				ret += indent+"symbol_"+n+" = graph.nodes['"+n+"']"
+			else:
+				ret += indent+"symbol_"+n+" = graph.nodes[smapping['"+n+"']]"
 		else: # otherwise, we're talking about a variable!
+			ret += indent+"symbol_"+n+"_name = '" + n + "'"
 			ret += indent+"for symbol_"+n+"_name in graph.nodes:"
 			indent += "\t"
-		ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
+			ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
+
 		if len(forHierarchicalRule)>0:
-			ret += indent+"n2id[smapping['"+n+"']] = symbol_"+n+"_name"
+			ret += indent+"n2id['"+n+"'] = smapping['"+n+"']"
 		else:
-			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+			if constant:
+				ret += indent+"n2id['"+n+"'] = '"+n+"'"
+			else:
+				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 		ret += indent+"linksVal = 0"
 		for cond in newLinkScore(graph.links, n_n, symbols_in_stack, forHierarchicalRule):
 			ret += indent+cond
@@ -953,7 +961,7 @@ def CheckTarget(graph):"""
 		if len(cond) > 1:
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
-	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ": return maxScore+scoreEasy, True"
+	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ": return maxScore, True"
 
 
 	# Rule ending
@@ -961,6 +969,6 @@ def CheckTarget(graph):"""
 		ret += pops.pop()
 	indent = "\n\t"
 	if len(forHierarchicalRule)>0: indent+='\t'
-	ret += indent+"return maxScore+scoreEasy, False"
+	ret += indent+"return maxScore, False"
 	ret += "\n"
 	return ret

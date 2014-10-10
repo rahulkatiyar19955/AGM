@@ -602,7 +602,7 @@ class PyPlan(object):
 						aaa = PyPlan(domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', ac.parameters, self.excludeList, None)
 						print self.indent
 				else:
-					print self.indent+str(action)+ '  :-)'
+					print self.indent+str(action)
 
 			#printResult(self.results[i]) #the best solution
 			if resultFile != None:
