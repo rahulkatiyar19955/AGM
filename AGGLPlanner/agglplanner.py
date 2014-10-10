@@ -472,7 +472,7 @@ class PyPlan(object):
 	# @param init is the XML file where is saved the inital status of the world
 	# @param targetPath is the python file where is daved the target status of the world.
 	# @param resultFile is the optional name of the file where the plan result will be stored.
-	def __init__(self, domainPath, init, targetPath, symbol_mapping, excludeList, resultFile):
+	def __init__(self, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile):
 		object.__init__(self)
 		# Get initial world mdoel
 		initWorld = WorldStateHistory(xmlModelParser.graphFromXML(init))
@@ -480,6 +480,7 @@ class PyPlan(object):
 
 		self.symbol_mapping = copy.deepcopy(symbol_mapping)
 		self.excludeList = copy.deepcopy(excludeList)
+		self.indent = copy.deepcopy(indent)
 
 		# Get graph rewriting rules
 		domain = imp.load_source('domain', domainPath).RuleSet()
@@ -589,20 +590,19 @@ class PyPlan(object):
 					min_idx = i
 			i = min_idx
 
-			print '<<<<<<<<'
+			print self.indent+'{'
 			for action_index in xrange(len(self.results[i].history)):
 				action = self.results[i].history[action_index]
 				if action[0] == '*':
 					ac = AGGLPlannerAction(action)
-					print 'h', action
 					if action_index == 0 and ac.hierarchical:
-						print '{'
+						print action, '{'
 						self.excludeList.append(ac.name)
-						aaa = PyPlan(domainPath, init, domain.getHierarchicalTargets()[ac.name], ac.parameters, self.excludeList, None)
+						aaa = PyPlan(domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t' ac.parameters, self.excludeList, None)
 						print '}'
 				else:
-					print action
-			print '>>>>>>>>'
+					print self.indent + action
+			print self.indent+'}'
 
 			#printResult(self.results[i]) #the best solution
 			if resultFile != None:
@@ -780,6 +780,6 @@ if __name__ == '__main__': # program domain problem result
 		if len(sys.argv)<4:
 			print 'Usage\n\t', sys.argv[0], ' domain.aggl.py init.xml target.xml.py [result.plan]'
 		elif len(sys.argv)<5:
-			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], None, [], None)
+			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], '', None, [], None)
 		else:
-			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], None, [], open(sys.argv[4], 'w'))
+			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], '', None, [], open(sys.argv[4], 'w'))
