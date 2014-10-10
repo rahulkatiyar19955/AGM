@@ -591,19 +591,18 @@ class PyPlan(object):
 					min_idx = i
 			i = min_idx
 
-			#print self.indent+'{'
+			#print self.indent, self.results[i].history
 			for action_index in xrange(len(self.results[i].history)):
 				action = self.results[i].history[action_index]
-				if action[0] == '*':
-					ac = AGGLPlannerAction(action)
-					if action_index == 0 and ac.hierarchical:
-						print self.indent+str(action), '{'
+				ac = AGGLPlannerAction(action)
+				if ac.hierarchical:
+					print self.indent+str(action)
+					if action_index == 0:
 						self.excludeList.append(ac.name)
 						aaa = PyPlan(domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', ac.parameters, self.excludeList, None)
-						print self.indent, '}'
+						print self.indent
 				else:
-					print self.indent + action
-			#print self.indent+'}'
+					print self.indent+str(action)+ '  :-)'
 
 			#printResult(self.results[i]) #the best solution
 			if resultFile != None:
