@@ -529,7 +529,8 @@ class PyPlan(object):
 			# as goal achieved in order to stop the execution.
 			self.results.append(initWorld)
 			self.cheapestSolutionCost.set(self.results.getFirstElement().cost)
-			self.end_condition.set("GoalAchieved")
+			if self.indent == '':
+				self.end_condition.set("GoalAchieved")
 
 		elif number_of_threads>0:
 			# But, if the goal is not achieved and there are more than 0 thread running (1, 2...)
@@ -568,7 +569,7 @@ class PyPlan(object):
 		elif self.end_condition.get() == "BestSolutionFound":
 			if verbose > 0: print 'End: best solution found'
 		elif self.end_condition.get() == "GoalAchieved":
-			if verbose > 0: print 'End: goal achieved'
+			if self.indent == '' and verbose > 0: print 'End: goal achieved'
 		elif self.end_condition.get() == "TimeLimit":
 			if verbose > 0: print 'End: TimeLimit'
 		elif self.end_condition.get() == None:
@@ -598,7 +599,7 @@ class PyPlan(object):
 					if action_index == 0 and ac.hierarchical:
 						print action, '{'
 						self.excludeList.append(ac.name)
-						aaa = PyPlan(domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t' ac.parameters, self.excludeList, None)
+						aaa = PyPlan(domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', ac.parameters, self.excludeList, None)
 						print '}'
 				else:
 					print self.indent + action
@@ -608,7 +609,7 @@ class PyPlan(object):
 			if resultFile != None:
 				for action in self.results[i].history:
 					resultFile.write(str(action)+'\n')
-			if verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
+			if indent and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 
 	##@brief This method starts the execution of program threads
 	# @param ruleMap
@@ -728,7 +729,8 @@ class PyPlan(object):
 					self.lastTime = nowNow
 					try:
 						#print nowNow
-						print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
+						if self.indent == '':
+							print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
 						#rrrr = heapsort(self.openNodes)
 						#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
 						#if len(self.openNodes) > 0:
