@@ -54,7 +54,14 @@ class AGMRuleParsing:
 		else:
 			print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
 			sys.exit(-345)
-		if len(i.atomss)==0: # We are dealing with a normal rule!
+		#print i.name+'('+i.hierarchical+')'
+		if len(i.hierarchical)>0:
+			#print "Hierarchical rule:", i.name
+			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
+			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
+			hierarchical = AGMHierarchicalRule(i.name, LHS, RHS, passive, i.cost)
+			return hierarchical
+		elif len(i.atomss)==0: # We are dealing with a normal rule!
 			#print 'Normal rule:', i.name
 			# We are dealing with a normal rule!
 			if verbose: print '\nRule:', i.name
@@ -71,11 +78,6 @@ class AGMRuleParsing:
 			else:
 				regular.effects = ''
 			return regular
-		elif len(i.lhs)>0: # if there are rules inside AND a left hand side graph.. we're dealing with a hierarchical rule
-			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
-			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-			hierarchical = AGMHierarchicalRule(i.name, LHS, RHS, passive, i.cost, i.atomss.asList(), i.equivalences.asList())
-			return hierarchical
 		else:
 			#print 'Combo rule:', i.name
 			combo = AGMComboRule(i.name, passive, i.cost, i.atomss.asList(), i.equivalences.asList())
@@ -139,7 +141,7 @@ class AGMFileDataParsing:
 		Eft = Optional(effect       + op + almostanything + cl).setResultsName("effect")
 		rule_nrm = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 		# HIERARCHICAL RULE
-		rule_hierarchical = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + OneOrMore(atom).setResultsName("atomss") + Suppress("where:") + ZeroOrMore(equiv).setResultsName("equivalences") + cl)
+		rule_hierarchical = Group(Literal("hierarchical").setResultsName("hierarchical") + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 		# indlude
 		include = Group(Suppress("include") + po + an.setResultsName("includefile") + pc)
 		# GENERAL RULE

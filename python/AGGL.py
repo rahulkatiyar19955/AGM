@@ -497,44 +497,21 @@ class AGMComboRule(object):
 # @ingroup PyAPI
 #
 class AGMHierarchicalRule(object):
-	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, ats=None, eqs=None):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1):
 		object.__init__(self)
-		if ats==None: ats=list()
-		if eqs==None: eqs=list()
+		self.cost = cost
 		self.lhs = lhs
 		if lhs == None: self.lhs = AGMGraph()
 		self.rhs = rhs
 		if rhs == None: self.rhs = AGMGraph()
 		self.name = name
 		self.passive = passive
-		self.atoms = ats
-		self.cost = cost
-		self.equivalences = []
-		for eq in eqs:
-			eqResult = list()
-			for element in eq:
-				eqResult.append([element[0], element[1]])
-			self.equivalences.append(eqResult)
 		self.text = self.generateTextFromHierarchical()
 	def generateTextFromHierarchical(self):
 		ret = ''
 		ret += self.lhs.toString() + '\n'
 		ret += '\t=>\n'
 		ret += self.rhs.toString() + '\n'
-		for a in self.atoms:
-			ret += '\t' + a[0] + ' as ' + a[1] + '\n'
-		ret += '\twhere:\n'
-		for e in self.equivalences:
-			first = True
-			for element in e:
-				if first:
-					first = False
-					ret += '\t'  + element[0] + '.' + element[1]
-				else:
-					ret += ' = ' + element[0] + '.' + element[1]
-			ret += '\n'
-		return ret
-
 	def toString(self):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
@@ -546,19 +523,6 @@ class AGMHierarchicalRule(object):
 			ret += self.lhs.toString() + '\n'
 			ret += '\t=>\n'
 			ret += self.rhs.toString() + '\n'
-			for a in self.atoms:
-				ret += '\t' + a[0] + ' as ' + a[1] + '\n'
-			ret += '\twhere:\n'
-			for e in self.equivalences:
-				first = True
-				for element in e:
-					if first:
-						first = False
-						ret += '\t'  + element[0] + '.' + element[1]
-					else:
-						ret += ' = ' + element[0] + '.' + element[1]
-				ret += '\n'
-
 		ret += '}\n'
 		return ret
 

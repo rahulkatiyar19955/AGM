@@ -48,6 +48,7 @@ calentar : active(1)
 		fuego->fuegos(contenedor)
 		fuego->fuegos(fuego)
 		fuego->fuegos(encendido)
+		obj->objs(movible)
 	}
 	=>
 	{
@@ -56,6 +57,7 @@ calentar : active(1)
 		obj:obj(-235,-35)
 		fuego:obj(-20,-35)
 		obj->objs(caliente)
+		obj->objs(movible)
 		obj->fuego(en)
 		fuego->fuegos(contenedor)
 		fuego->fuegos(fuego)

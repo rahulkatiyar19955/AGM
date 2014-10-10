@@ -121,9 +121,15 @@ class AGGLPlannerAction(object):
 		self.parameters = dict()
 		if len(init)>0:
 			#we save the the list of all the words in the string, using @ as the separator
-			parts = init.split('@') 
+			parts = init.split('@')
 			self.name = parts[0]
-			self.parameters = eval(parts[1])
+			if self.name[0] == '*':
+				self.name = self.name[1:]
+				self.hierarchical = True
+			else:
+				self.hierarchical = False
+			if self.name[0] != '#':
+				self.parameters = eval(parts[1])
 		else:
 			raise IndexError
 
@@ -136,7 +142,7 @@ class AGGLPlannerAction(object):
 class AGGLPlannerPlan(object):
 	## @brief Parametrized constructor.
 	# @param init is an optional initialization variable. It can be:
-	#	a) string containing a plan; 
+	#	a) string containing a plan;
 	#	b) a filename where such string is to be found,
 	# 	c) a list of tuples where each tuple contains the name of a rule and a dictionary with the variable mapping of the rule.
 	# @param textOrFile This parameter indicates whether 'init' is the name of a file (where is stored the plan code) or the text string with the plan code. By default his value is FALSE
@@ -157,8 +163,8 @@ class AGGLPlannerPlan(object):
 					lines = init.split("\n") #newline
 				else:
 					lines = open(init, 'r').readlines() # take the content of a file
-				
-				# Now, we check the text to find possible errors. 
+
+				# Now, we check the text to find possible errors.
 				# First, we delete the white spaces at the start and the end of each text line.
 				# Second, we check if there are any line with only the character \n.
 				# Finally, is the line have something that is not a commentary, we save it like a grammar rule
@@ -254,7 +260,7 @@ class WorldStateHistory(object):
 	# @param init initialization variable
 	def __init__(self, init):
 		object.__init__(self)
-		
+
 		# If INIT IS A GRAPH
 		if isinstance(init, AGMGraph):
 			# Graph with the current world status.
@@ -282,17 +288,17 @@ class WorldStateHistory(object):
 			self.stop = False
 			self.score = 0
 		else:
-			print 'Human... wat r u doing... stahp... please, stahp'
+			print 'Internal errorr 45343'
 			print type(init)
 			print type(self)
 			sys.exit(1)
 
-	##@brief This method compares two graphs. 
+	##@brief This method compares two graphs.
 	# @param other is the graph with which we compare.
 	# @retval an integer that can be 1 if the current graph is greater, -1 if it is smaller, and 0 if both are equals.
 	def __cmp__(self, other):
 		return self.graph.__cmp__(other.graph)
-	      
+
 	##@brief This method calculates the hashcode of the current graph.
 	# @retval an integer with the hashcode.
 	def __hash__(self):
@@ -373,7 +379,7 @@ class LockableList():
 		self.mutex.release()
 		return ret
 
-	##@brief This method makes a pop on the list. First, it acquires the mutex in order to lock all the process. 
+	##@brief This method makes a pop on the list. First, it acquires the mutex in order to lock all the process.
 	# Then It does a pop of the list (using the heappop class). And finally it releases the mutex.
 	# @retval the pop of the list.
 	def heapqPop(self):
@@ -391,7 +397,7 @@ class LockableList():
 		self.mutex.acquire()
 		heapq.heappush(self.thelist, value)
 		self.mutex.release()
-		
+
 	##@brief The method returns the first element of the list. It needs to acquire the mutex
 	# in order to lock all the process. It doesnt remove the element of the list.
 	# @retval the first element of the list
@@ -400,26 +406,26 @@ class LockableList():
 		ret = self.thelist[0]
 		self.mutex.release()
 		return ret
-	
-	##@brief This method introduces an element at the end of the list. It needs to acquire the 
+
+	##@brief This method introduces an element at the end of the list. It needs to acquire the
 	# mutex in order to lock all the process.
 	# @param v is the new element.
 	def append(self, v):
 		self.mutex.acquire()
 		self.thelist.append(v)
 		self.mutex.release()
-		
+
 	##@brief This method lock the mutex (it acquires him)
 	def lock(self):
 		self.mutex.acquire()
-	
+
 	##@brief This method unlock the mutex (it releases him)
 	def unlock(self):
 		self.mutex.release()
 
 ##@brief This class defines an integer that can be locked and unlocked.
 class LockableInteger(object):
-	##@brief constructor method. This method initializes the value of the integer and the 
+	##@brief constructor method. This method initializes the value of the integer and the
 	# mutex of the class.
 	# @val is the initial value of the integer (it is an optional parameter).
 	def __init__(self, val=0):
@@ -427,7 +433,7 @@ class LockableInteger(object):
 		self.value = val
 		## The mutex associated to the integer.
 		self.mutex = threading.RLock()
-		
+
 	##@brief This method changes the value of the integer. To do this, it needs to
 	# take the mutex in order to lock all the process.
 	# @param val the new value of the integer.
@@ -435,7 +441,7 @@ class LockableInteger(object):
 		self.mutex.acquire()
 		self.value = val
 		self.mutex.release()
-	
+
 	##@brief This method returns the value of the integer. It needs the mutex.
 	# @retval ret is the value of the integer.
 	def get(self):
@@ -443,15 +449,15 @@ class LockableInteger(object):
 		ret = self.value
 		self.mutex.release()
 		return ret
-	      
-	##@brief This method acquires the mutex (it locks him)      
+
+	##@brief This method acquires the mutex (it locks him)
 	def lock(self):
 		self.mutex.acquire()
-		
-	##@brief This method releases the mutex (it unlocks him).	
+
+	##@brief This method releases the mutex (it unlocks him).
 	def unlock(self):
 		self.mutex.release()
-	
+
 	##@brief This method increases the value of the integer by one.
 	# Like always, it needs to take the mutex.
 	def increase(self):
@@ -467,20 +473,29 @@ class PyPlan(object):
 	# @param init is the XML file where is saved the inital status of the world
 	# @param targetPath is the python file where is daved the target status of the world.
 	# @param resultFile is the optional name of the file where the plan result will be stored.
-	def __init__(self, domainPath, init, targetPath, resultFile):
+	def __init__(self, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile):
 		object.__init__(self)
 		# Get initial world mdoel
 		initWorld = WorldStateHistory(xmlModelParser.graphFromXML(init))
 		initWorld.nodeId = 0
-		
+
+		self.symbol_mapping = copy.deepcopy(symbol_mapping)
+		self.excludeList = copy.deepcopy(excludeList)
+		self.indent = copy.deepcopy(indent)
+
 		# Get graph rewriting rules
 		domain = imp.load_source('domain', domainPath).RuleSet()
-		ruleMap = domain.getRules()
-		
+		ruleMap = copy.deepcopy(domain.getRules())
+		for e in excludeList:
+			del ruleMap[e]
+
 		# Get goal-checking code
-		target = imp.load_source('target', targetPath)
-		## This attribute stores the code of the goal status world.
-		self.targetCode = target.CheckTarget
+		if type(targetPath)== type(''):
+			target = imp.load_source('target', targetPath)
+			## This attribute stores the code of the goal status world.
+			self.targetCode = target.CheckTarget
+		else:
+			self.targetCode = targetPath
 
 		# Search initialization
 		## This attribute indicates the maximum size that can reach the graph
@@ -504,16 +519,20 @@ class PyPlan(object):
 		if verbose>1: print 'INIT'.ljust(20), initWorld
 
 		# Create initial state
-		initWorld.score, achieved = self.targetCode(initWorld.graph)
-		
+		if self.symbol_mapping:
+			initWorld.score, achieved = self.targetCode(initWorld.graph, self.symbol_mapping)
+		else:
+			initWorld.score, achieved = self.targetCode(initWorld.graph)
+
 		if achieved:
 			# If the goal is achieved, we save the solution in the result list, the
 			# solution cost in the cheapest solution cost and we put the end_condition
 			# as goal achieved in order to stop the execution.
 			self.results.append(initWorld)
 			self.cheapestSolutionCost.set(self.results.getFirstElement().cost)
-			self.end_condition.set("GoalAchieved")
-			
+			if self.indent == '':
+				self.end_condition.set("GoalAchieved")
+
 		elif number_of_threads>0:
 			# But, if the goal is not achieved and there are more than 0 thread running (1, 2...)
 			# we creates a list where we will save the status of all the threads, take all
@@ -534,7 +553,6 @@ class PyPlan(object):
 		else:
 			# If the solution is not achieved and there arent any thread to execute the programm
 			# we stop it and show an error message.
-			print 'no threading'
 			self.startThreadedWork(ruleMap)
 
 		# We make others checks over the end_condition:
@@ -552,7 +570,7 @@ class PyPlan(object):
 		elif self.end_condition.get() == "BestSolutionFound":
 			if verbose > 0: print 'End: best solution found'
 		elif self.end_condition.get() == "GoalAchieved":
-			if verbose > 0: print 'End: goal achieved'
+			if self.indent == '' and verbose > 0: print 'End: goal achieved'
 		elif self.end_condition.get() == "TimeLimit":
 			if verbose > 0: print 'End: TimeLimit'
 		elif self.end_condition.get() == None:
@@ -567,20 +585,34 @@ class PyPlan(object):
 		else:
 			# But, if the length is greater than zero, it means that we have found a plan.
 			# We go over all the actions of the plan, and we look for the best solution (the minimun cost).
-			if verbose > 0: print 'Got', len(self.results),' plans!'
+			if self.indent=='' and verbose > 0: print 'Got', len(self.results),' plans!'
 			min_idx = 0
 			for i in range(len(self.results)):
 				if self.results[i].cost < self.results[min_idx].cost:
 					min_idx = i
 			i = min_idx
-			printResult(self.results[i]) #the best solution
-			for action in self.results[i].history:
-				if resultFile != None:
+
+			#print self.indent, self.results[i].history
+			for action_index in xrange(len(self.results[i].history)):
+				action = self.results[i].history[action_index]
+				ac = AGGLPlannerAction(action)
+				if ac.hierarchical:
+					print self.indent+str(action)
+					if action_index == 0:
+						self.excludeList.append(ac.name)
+						aaa = PyPlan(domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', ac.parameters, self.excludeList, None)
+						print self.indent
+				else:
+					print self.indent+str(action)
+
+			#printResult(self.results[i]) #the best solution
+			if resultFile != None:
+				for action in self.results[i].history:
 					resultFile.write(str(action)+'\n')
-			if verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
+			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 
 	##@brief This method starts the execution of program threads
-	# @param ruleMap 
+	# @param ruleMap
 	# @param lock this is the clench of the each thread.
 	# @param i is the index of the thread
 	# @param threadPoolStatus this is the status of the thread. The threads have three possible status:
@@ -592,14 +624,14 @@ class PyPlan(object):
 			# If there isnt any lock, we create one and we give it to the thread.
 			lock = thread.allocate_lock()
 			lock.acquire()
-			
+
 		if threadPoolStatus != None:
-			# If the thread status is different of none, we lock the 
+			# If the thread status is different of none, we lock the
 			# code and put the status of the i thread.
 			threadPoolStatus.lock()
 			threadPoolStatus[i] = True # el hilo esta en marcha.
 			threadPoolStatus.unlock()
-		# We take the initial time.	
+		# We take the initial time.
 		timeA = datetime.datetime.now()
 		while True:
 			# Again, we take the time and we calculated the elapsed time
@@ -624,47 +656,8 @@ class PyPlan(object):
 					threadPoolStatus[i] = True # We say that the thread i is active.
 
 					threadPoolStatus.unlock()
-					
-				# HANDLE HIERARCHICAL RULES
-				if hasattr(head, "parentNodeToExplore") and False:
-					# if the current node of the graph has as attribute that it must to explore
-					# its parent node, then it is a Hierarchical rule.
-					try:
-						# we take the parent node.
-						gotFromHead = head.parentNodeToExploreWith(head.parentNodeToExplore, head.stackP, head.equivalencesP)
-						#print 'ueeeeeee', len(gotFromHead)
-						for deriv in gotFromHead:
-							self.explored.increase()
-							deriv.score, achieved = self.targetCode(deriv.graph)
-							if verbose>4: print deriv.score, achieved, deriv
-							if achieved:
-								#print 'Found solution', deriv.cost
-								self.results.append(deriv)
-								# Should we stop with the first plan?
-								if stopWithFirstPlan:
-									self.end_condition.set("GoalAchieved")
-									lock.release()
-									return
-								# Compute cheapest solution
-								self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
-							self.knownNodes.lock()
-							notDerivInKnownNodes = not deriv in self.knownNodes
-							self.knownNodes.unlock()
-							if notDerivInKnownNodes:
-								if deriv.stop == False:
-									if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
-										self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
-						continue
-						#print 'e'
-					except:
-						#print 'f'
-						traceback.print_exc()
-				else:
-					#print 'g'
-					self.knownNodes.append(head)
-					#print 'h'
-					gotFromHead = [head]
-					#print 'i'
+
+				self.knownNodes.append(head)
 			except:
 				#traceback.print_exc()
 				if not threadPoolStatus:
@@ -682,67 +675,71 @@ class PyPlan(object):
 				continue
 
 			#print 'h'
-			for head in gotFromHead: # Bear in mind that if we pop an unexplored node from a hierarchical rule we usually end up fetching serveral nodes
-				#print 'i'
 
-				# Update 'minCostOnOpenNodes', so we can stop when the minimum cost in the queue is bigger than one in the results
-				self.updateMinCostOnOpenNodes(head.cost)
-				# Check if we got to the maximum cost or the minimum solution
-				if head.cost > maxCost:
-					self.end_condition.set("MaxCostReached")
-					lock.release()
-					return
-				elif self.results.size()>0 and head.cost>self.cheapestSolutionCost.value:
-					self.end_condition.set("GoalAchieved")
-					lock.release()
-					return
-				if verbose>5: print 'Expanding'.ljust(5), head
-				for k in ruleMap:
-					# Iterate over rules and generate derivates
-					for deriv in ruleMap[k](head):
-						self.explored.increase()
+			#print 'i'
+
+			# Update 'minCostOnOpenNodes', so we can stop when the minimum cost in the queue is bigger than one in the results
+			self.updateMinCostOnOpenNodes(head.cost)
+			# Check if we got to the maximum cost or the minimum solution
+			if head.cost > maxCost:
+				self.end_condition.set("MaxCostReached")
+				lock.release()
+				return
+			elif self.results.size()>0 and head.cost>self.cheapestSolutionCost.value:
+				self.end_condition.set("GoalAchieved")
+				lock.release()
+				return
+			if verbose>5: print 'Expanding'.ljust(5), head
+			for k in ruleMap:
+				# Iterate over rules and generate derivates
+				for deriv in ruleMap[k](head):
+					self.explored.increase()
+					if self.symbol_mapping:
+						deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
+					else:
 						deriv.score, achieved = self.targetCode(deriv.graph)
-						if verbose>4: print deriv.score, achieved, deriv
-						if achieved:
-							#print 'Found solution', deriv.cost
-							self.results.append(deriv)
-							# Should we stop with the first plan?
-							if stopWithFirstPlan:
-								self.end_condition.set("GoalAchieved")
-								lock.release()
-								return
-							# Compute cheapest solution
-							self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
-						self.knownNodes.lock()
-						notDerivInKnownNodes = not deriv in self.knownNodes
-						self.knownNodes.unlock()
-						if notDerivInKnownNodes:
-							if deriv.stop == False:
-								if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
-									self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
-				if verbose > 0:
-					doIt=False
-					nowNow = datetime.datetime.now()
+					if verbose>4: print deriv.score, achieved, deriv
+					if achieved:
+						#print 'Found solution', deriv.cost
+						self.results.append(deriv)
+						# Should we stop with the first plan?
+						if stopWithFirstPlan:
+							self.end_condition.set("GoalAchieved")
+							lock.release()
+							return
+						# Compute cheapest solution
+						self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
+					self.knownNodes.lock()
+					notDerivInKnownNodes = not deriv in self.knownNodes
+					self.knownNodes.unlock()
+					if notDerivInKnownNodes:
+						if deriv.stop == False:
+							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
+								self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+			if verbose > 0:
+				doIt=False
+				nowNow = datetime.datetime.now()
+				try:
+					elap = (nowNow-self.lastTime).seconds + (nowNow-self.lastTime).microseconds/1e6
+					doIt = elap > 3
+				except:
+					self.lastTime = datetime.datetime.now()
+					doIt = True
+				if doIt:
+					self.lastTime = nowNow
 					try:
-						elap = (nowNow-self.lastTime).seconds + (nowNow-self.lastTime).microseconds/1e6
-						doIt = elap > 3
-					except:
-						self.lastTime = datetime.datetime.now()
-						doIt = True
-					if doIt:
-						self.lastTime = nowNow
-						try:
-							#print nowNow
+						#print nowNow
+						if self.indent == '':
 							print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
-							#rrrr = heapsort(self.openNodes)
-							#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-							#if len(self.openNodes) > 0:
-								#print 'First['+str(rrrr[ 0][0])+'](cost:'+str(rrrr[ 0][1].cost)+', score:'+str(rrrr[ 0][1].score)+', depth:'+str(rrrr[ 0][1].depth)+')'
-								#print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
-							#else:
-								#print 'no open nodes'
-						except:
-							traceback.print_exc()
+						#rrrr = heapsort(self.openNodes)
+						#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
+						#if len(self.openNodes) > 0:
+							#print 'First['+str(rrrr[ 0][0])+'](cost:'+str(rrrr[ 0][1].cost)+', score:'+str(rrrr[ 0][1].score)+', depth:'+str(rrrr[ 0][1].depth)+')'
+							#print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
+						#else:
+							#print 'no open nodes'
+					except:
+						traceback.print_exc()
 
 	def updateCheapestSolutionCostAndCutOpenNodes(self, cost):
 		self.cheapestSolutionCost.lock()
@@ -785,6 +782,6 @@ if __name__ == '__main__': # program domain problem result
 		if len(sys.argv)<4:
 			print 'Usage\n\t', sys.argv[0], ' domain.aggl.py init.xml target.xml.py [result.plan]'
 		elif len(sys.argv)<5:
-			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], None)
+			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], '', None, [], None)
 		else:
-			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], open(sys.argv[4], 'w'))
+			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], '', None, [], open(sys.argv[4], 'w'))

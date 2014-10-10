@@ -22,6 +22,13 @@ sys.path.append('/usr/local/share/agm/')
 from AGGL import *
 from agglplanner import *
 
+def computeMaxScore(a, b, maxScore):
+	s = 0
+	for i in a: s+=i
+	for i in b: s+=i
+	if s > maxScore: return s
+	return maxScore
+
 def getNewIdForSymbol(node):
 	m = 1
 	for k in node.graph.nodes:
@@ -74,6 +81,25 @@ def ruleTriggerDeclaration(agm):
 			ret += "\n		mapping['"+ r.name + "'] = self." + r.name + "_trigger"
 	ret += "\n		return mapping\n\n"
 	return ret
+
+
+## This is the declaration for the getHierarchicalTargets method in the grammar.py file. This method receives as input parameter:
+# @ingroup AGGLGeneration
+# @param agm The grammar
+#
+# @retval the string with the grammar's code
+def hierarchicalTargetsDeclaration(agm):
+	ret = """\tdef getHierarchicalTargets(self):
+		mapping = dict()"""
+	# We write all the names of the trigger that we need after
+	# for the active grammar rules.
+	for r in agm.rules:
+		if isinstance(r, AGMHierarchicalRule):
+			if not r.passive:
+				ret += "\n		mapping['"+ r.name + "'] = self." + r.name + "_target"
+	ret += "\n		return mapping\n\n"
+	return ret
+
 
 # These are the first three methods of the file that has the active grammar rules -- active.py --
 
@@ -150,12 +176,16 @@ def ruleImplementation(rule):
 	ret += indent+"# Rule " + rule.name
 	# We distinguish between normal rules and combo rules.
 	if type(rule) == AGMRule:
+		#print rule.name, 'normal'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMComboRule:
+		#print rule.name, 'combo'
 		ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMHierarchicalRule:
+		#print rule.name, 'hierarchical'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
-		ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
+		ret += generateTarget(rule.rhs, rule.name, rule.lhs)
+		#ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 	else:
 		print 'Unknown rule type'
 		sys.exit(-2346)
@@ -171,21 +201,19 @@ def ruleImplementation(rule):
 # @retval the string with the code
 def comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False):
 	ret = ''
-	if thisIsActuallyAHierarchicalRule: comboInside = "_COMBOINSIDE"
-	else: comboInside = ''
-	ret += indent+"def " + rule.name + comboInside + "(self, snode, stackP=None, equivalencesP=None):"
+	ret += indent+"def " + rule.name + "(self, snode, stackP=None, equivalencesP=None):"
 	indent += "\t"
 	ret += indent+"if stackP == None: stackP=[]"
 	ret += indent+"if equivalencesP == None: equivalencesP=[]"
 	ret += indent+"stack        = "+COPY_OPTION+"(stackP)"
 	ret += indent+"equivalences = "+COPY_OPTION+"(equivalencesP)"
-	ret += indent+"return self." + rule.name + comboInside + "_trigger(snode, dict(), stack, equivalences)"
+	ret += indent+"return self." + rule.name + "_trigger(snode, dict(), stack, equivalences)"
 	ret += indent
 	ret += "\n"
 
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + comboInside + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
 	indent += "\t"
 	ret += indent+"if stack == None: stack=[]"
 	ret += indent+"if equivalences == None: equivalences=[]"
@@ -461,7 +489,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	ret += indent+"newNode.nodeId = lastNodeId"
 	if thisIsActuallyAHierarchicalRule:
 		ret += indent+"newNode.parentNodeToExplore = " + COPY_OPTION + "(snode)"
-		ret += indent+"newNode.parentNodeToExploreWith = self." + rule.name + "_COMBOINSIDE"
+		ret += indent+"newNode.parentNodeToExploreWith = self." + rule.name
 		ret += indent+"newNode.stackP = "+COPY_OPTION+"(stack)"
 		ret += indent+"newNode.equivalencesP = "+COPY_OPTION+"(equivalences)"
 	# Create nodes
@@ -521,7 +549,9 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	ret += indent+"if not inCombo:"
 	ret += indent+"\tnewNode.cost += "+str(rule.cost)
 	ret += indent+"\tnewNode.depth += 1"
-	ret += indent+"newNode.history.append('" + rule.name + "@' + str(n2id) )"
+	if thisIsActuallyAHierarchicalRule: markHierarchical = '*'
+	else: markHierarchical = ''
+	ret += indent+"newNode.history.append('" + markHierarchical + rule.name + "@' + str(n2id) )"
 	ret += indent+"if finish!='': newNode.history.append(finish)"
 	ret += indent+"return newNode"
 	ret += indent+""
@@ -756,12 +786,13 @@ def generate(agm, skipPassiveRules):
 	text += constantHeader()
 	text += ruleDeclaration(agm)
 	text += ruleTriggerDeclaration(agm)
+	text += hierarchicalTargetsDeclaration(agm)
 	for rule in agm.rules:
 		text += ruleImplementation(rule)
 	return text
 
 
-def getOptimalTargetNodeCheckOrder(graph):
+def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 	## Generate Link list
 	linkList = []
 	for link_i in range(len(graph.links)):
@@ -773,10 +804,25 @@ def getOptimalTargetNodeCheckOrder(graph):
 	varbls = []
 	for n_n in graph.nodes:
 		n = str(n_n)
-		if (n[0] in "0123456789"):
-			consts.append(n)
+		if lgraph:
+			#print 'hay left graph.... checking for:      ', n
+			if (n[0] in "0123456789"):
+				#print 'constante por numero'
+				consts.append(n)
+			else:
+				#print n, '>>',lgraph.nodes.keys()
+				if n in lgraph.nodes.keys():
+					#print 'constante porque si esta a la izq', n
+					consts.append(n)
+				else:
+					#print 'variable porque no esta a la izq', n
+					varbls.append(n)
 		else:
-			varbls.append(n)
+			if (n[0] in "0123456789"):
+				consts.append(n)
+			else:
+				varbls.append(n)
+
 	initialSort = consts + varbls
 	## generate points for close-to-optimal list
 	counter = dict()
@@ -804,8 +850,12 @@ def getOptimalTargetNodeCheckOrder(graph):
 # @param The graph used to generate the target
 #
 # @retval The python code used to check the target world state
-def generateTarget(graph):
-	ret = """import copy, sys
+def generateTarget(graph, forHierarchicalRule='', lgraph=None):
+	ret = ''
+	indent = "\n\t"
+
+	if len(forHierarchicalRule)==0:
+		ret += """import copy, sys
 sys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import *
 
 def computeMaxScore(a, b, maxScore):
@@ -815,10 +865,14 @@ def computeMaxScore(a, b, maxScore):
 	if s > maxScore: return s
 	return maxScore
 
-def CheckTarget(graph):"""
-	indent = "\n\t"
-	# Make a copy of the current graph node list
-	ret += indent+"n2id = dict()\n"
+def CheckTarget(graph):
+	n2id = dict()
+"""
+
+	else:
+		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping):'
+		indent += "\t"
+		ret += indent+"n2id = smapping\n"
 	## Generate Link list
 	linkList = []
 	for link_i in range(len(graph.links)):
@@ -827,29 +881,7 @@ def CheckTarget(graph):"""
 	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
 
 	ret += indent+"maxScore = 0"
-	ret += indent+"scoreEasy = 0"
 	ret += '\n'
-	easy = 1
-	if True:
-		ret += indent+"# Easy score"
-		typesDict = dict()
-		for n in graph.nodes:
-			t = graph.nodes[n].sType
-			easy += 1
-			if t in typesDict:
-				typesDict[t] += 1
-			else:
-				typesDict[t] = 1
-		ret += indent+"typesDict = dict()"
-		for t in typesDict:
-			ret += indent+"typesDict['"+t+"'] = " + str(typesDict[t])
-		ret += indent+"for n in graph.nodes:"
-		ret += indent+"	if graph.nodes[n].sType in typesDict:"
-		ret += indent+"		scoreEasy += 1"
-		ret += indent+"		typesDict[graph.nodes[n].sType] -= 1"
-		ret += indent+"		if typesDict[graph.nodes[n].sType] == 0:"
-		ret += indent+"			del typesDict[graph.nodes[n].sType]"
-		ret += '\n'
 
 	conditionsListList = []
 	# Generate the loop that checks the model
@@ -863,16 +895,33 @@ def CheckTarget(graph):"""
 	ret += indent+"scoreLinks = []"
 
 	#for n_n in graph.nodes:
-	for n_n in getOptimalTargetNodeCheckOrder(graph):
+	for n_n in getOptimalTargetNodeCheckOrder(graph, lgraph):
 		n = str(n_n)
 		ret += indent+"# "+n
+		constant = False
 		if (n[0] in "0123456789") and n in graph.nodes: # This checks the node is already in the model
-			ret += indent+"symbol_"+n+"_name = '" + n + "'"
+			constant = True
+		elif lgraph:
+			if n in lgraph.nodes:
+				constant = True
+		if constant:
+			if (n[0] in "0123456789") and n in graph.nodes:
+				ret += indent+"symbol_"+n+" = graph.nodes['"+n+"']"
+			else:
+				ret += indent+"symbol_"+n+" = graph.nodes[smapping['"+n+"']]"
 		else: # otherwise, we're talking about a variable!
+			ret += indent+"symbol_"+n+"_name = '" + n + "'"
 			ret += indent+"for symbol_"+n+"_name in graph.nodes:"
 			indent += "\t"
-		ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
-		ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+			ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
+
+		if len(forHierarchicalRule)>0:
+			ret += indent+"n2id['"+n+"'] = smapping['"+n+"']"
+		else:
+			if constant:
+				ret += indent+"n2id['"+n+"'] = '"+n+"'"
+			else:
+				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 		ret += indent+"linksVal = 0"
 		for cond in newLinkScore(graph.links, n_n, symbols_in_stack):
 			ret += indent+cond
@@ -903,13 +952,14 @@ def CheckTarget(graph):"""
 		if len(cond) > 1:
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
-	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ": return maxScore+scoreEasy, True"
+	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ": return maxScore, True"
 
 
 	# Rule ending
 	while len(pops)>0:
 		ret += pops.pop()
 	indent = "\n\t"
-	ret += indent+"return maxScore+scoreEasy, False"
+	if len(forHierarchicalRule)>0: indent+='\t'
+	ret += indent+"return maxScore, False"
 	ret += "\n"
 	return ret
