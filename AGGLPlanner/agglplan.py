@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env pypy
 
 # -*- coding: utf-8 -*-
 #
@@ -30,9 +30,9 @@
 """@package agglplan
     @ingroup PyAPI
     This file loads the grammar, the initial state of the world and the GOAL status without changing the files extensions of the grammar and the goal.
-    
+
     MODE USE:	agglplan gramatica.aggl init.xml target.xml
-    
+
     Also, we can keep the results in a file with: agglplan gramatica.aggl init.xml target.xml result.plan
 """
 
@@ -53,34 +53,34 @@ if __name__ == '__main__': # program domain problem result
 		print 'Usage\n\t', sys.argv[0], ' domain.aggl init.xml target.xml [result.plan]'
 	else:
 		## the file that contains the grammar rules
-		domainFile = sys.argv[1] 	
+		domainFile = sys.argv[1]
 		## the file that contains the initial world status
-		worldFile  = sys.argv[2] 
+		worldFile  = sys.argv[2]
 		## the goal o target world status
 		targetFile = sys.argv[3]
 		## the file name where we keep the results of the program
 		result = None
 		if len(sys.argv)>4:
 			result = sys.argv[4]
-			
+
 		print '\nGenerating search code...'
 
-		## Generate domain Python file <--- like aggl2agglpy. 
-		# agmData is a variable of AGMFileData class, in AGGL.py file. 
+		## Generate domain Python file <--- like aggl2agglpy.
+		# agmData is a variable of AGMFileData class, in AGGL.py file.
 		# First: we CHECK the grammar. Is a parseAGGL.py's class
 		# and we write the grammar in a python file.
-		agmData = AGMFileDataParsing.fromFile(domainFile) 
-		agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True) 
+		agmData = AGMFileDataParsing.fromFile(domainFile)
+		agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
 
 		## Generate target Python file.
 		# This sentence creates a graph based on the target world status
 		graph = graphFromXML(targetFile)
-		
+
 		## Generate the python code correspondig to the graph and
 		outputText = generateTarget(graph)
 		## Save the python code of the target world status in the file target.py.
 		ofile = open("/tmp/target.py", 'w')
-		ofile.write(outputText) 
+		ofile.write(outputText)
 		ofile.close()
 
 		# Run planner

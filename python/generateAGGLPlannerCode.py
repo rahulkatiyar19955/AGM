@@ -22,6 +22,13 @@ sys.path.append('/usr/local/share/agm/')
 from AGGL import *
 from agglplanner import *
 
+def computeMaxScore(a, b, maxScore):
+	s = 0
+	for i in a: s+=i
+	for i in b: s+=i
+	if s > maxScore: return s
+	return maxScore
+
 def getNewIdForSymbol(node):
 	m = 1
 	for k in node.graph.nodes:
@@ -75,6 +82,25 @@ def ruleTriggerDeclaration(agm):
 	ret += "\n		return mapping\n\n"
 	return ret
 
+
+## This is the declaration for the getHierarchicalTargets method in the grammar.py file. This method receives as input parameter:
+# @ingroup AGGLGeneration
+# @param agm The grammar
+#
+# @retval the string with the grammar's code
+def hierarchicalTargetsDeclaration(agm):
+	ret = """\tdef getHierarchicalTargets(self):
+		mapping = dict()"""
+	# We write all the names of the trigger that we need after
+	# for the active grammar rules.
+	for r in agm.rules:
+		if isinstance(r, AGMHierarchicalRule):
+			if not r.passive:
+				ret += "\n		mapping['"+ r.name + "'] = self." + r.name + "_target"
+	ret += "\n		return mapping\n\n"
+	return ret
+
+
 # These are the first three methods of the file that has the active grammar rules -- active.py --
 
 ## This method creates the part of the code that define the links
@@ -89,9 +115,15 @@ def ruleTriggerDeclaration(agm):
 # - the string with the code
 # - the number of links processed
 # - the debugging code
-def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, debug=False):
+def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, forHierarchicalRule='', debug=False):
 	ret = ''
 	info = []
+	if forHierarchicalRule:
+		hrA = 'smapping['
+		hrB = ']'
+	else:
+		hrA = ''
+		hrB = ''
 	number = 0
 	for link in linkList:
 		if newSymbol == link.a or newSymbol == link.b:
@@ -102,13 +134,13 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, debug=Fa
 				negated = 'not '
 			if newSymbol == link.a:
 				if link.b in alreadyThere:
-					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
-					if debug: info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
+					ret += pre + '[n2id['+hrA+'"'+str(link.a) + '"'+hrB+'],n2id['+hrA+'"'+ str(link.b) + '"'+hrB+'],"'+str(link.linkType)+'"] in snode.graph.links'
+					if debug: info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id['+hrA+'"'+str(link.a) + '"'+hrB+'],n2id['+hrA+'"'+ str(link.b) + '"'+hrB+'],"'+str(link.linkType)+'"] in snode.graph.links')
 					number += 1
 			elif newSymbol == link.b:
 				if link.a in alreadyThere:
-					ret += pre + '[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links'
-					if debug: info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id["'+str(link.a) + '"],n2id["'+ str(link.b) + '"],"'+str(link.linkType)+'"] in snode.graph.links')
+					ret += pre + '[n2id['+hrA+'"'+str(link.a) + '"'+hrB+'],n2id['+hrA+'"'+ str(link.b) + '"'+hrB+'],"'+str(link.linkType)+'"] in snode.graph.links'
+					if debug: info.append('print "'+str(link.a)+'---['+negated+str(link.linkType)+']--->'+str(link.b)+'", '+negated+'[n2id['+hrA+'"'+str(link.a) + '"'+hrB+'],n2id['+hrA+'"'+ str(link.b) + '"'+hrB+'],"'+str(link.linkType)+'"] in snode.graph.links')
 					number += 1
 	return ret, number, info
 
@@ -121,7 +153,7 @@ def extractNewLinkConditionsFromList(linkList, newSymbol, alreadyThere, debug=Fa
 # @param alreadyThere
 #
 # @retval the string with the code
-def newLinkScore(linkList, newSymbol, alreadyThere):
+def newLinkScore(linkList, newSymbol, alreadyThere, forHierarchicalRule=''):
 	ret = []
 	for link in linkList:
 		if newSymbol == link.a or newSymbol == link.b:
@@ -130,7 +162,10 @@ def newLinkScore(linkList, newSymbol, alreadyThere):
 			else: negated = ''
 			# Condition itself
 			if ((newSymbol == link.a) and (link.b in alreadyThere)) or ((newSymbol == link.b) and (link.a in alreadyThere)):
-				ret.append('if [n2id["'+str(link.a)+'"],n2id["'+str(link.b)+'"],"'+str(link.linkType)+'"] ' +negated+'in graph.links: linksVal += 100')
+				if len(forHierarchicalRule)>0:
+					ret.append('if [n2id[smapping["'+str(link.a)+'"]],n2id[smapping["'+str(link.b)+'"]],"'+str(link.linkType)+'"] ' +negated+'in graph.links: linksVal += 100')
+				else:
+					ret.append('if [n2id["'+str(link.a)+'"],n2id["'+str(link.b)+'"],"'+str(link.linkType)+'"] ' +negated+'in graph.links: linksVal += 100')
 	return ret
 
 
@@ -150,15 +185,16 @@ def ruleImplementation(rule):
 	ret += indent+"# Rule " + rule.name
 	# We distinguish between normal rules and combo rules.
 	if type(rule) == AGMRule:
-		print rule.name, 'normal'
+		#print rule.name, 'normal'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMComboRule:
-		print rule.name, 'combo'
+		#print rule.name, 'combo'
 		ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMHierarchicalRule:
-		print rule.name, 'hierarchical'
+		#print rule.name, 'hierarchical'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
-		ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
+		ret += generateTarget(rule.rhs, rule.name)
+		#ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 	else:
 		print 'Unknown rule type'
 		sys.exit(-2346)
@@ -174,21 +210,19 @@ def ruleImplementation(rule):
 # @retval the string with the code
 def comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False):
 	ret = ''
-	if thisIsActuallyAHierarchicalRule: comboInside = "_COMBOINSIDE"
-	else: comboInside = ''
-	ret += indent+"def " + rule.name + comboInside + "(self, snode, stackP=None, equivalencesP=None):"
+	ret += indent+"def " + rule.name + "(self, snode, stackP=None, equivalencesP=None):"
 	indent += "\t"
 	ret += indent+"if stackP == None: stackP=[]"
 	ret += indent+"if equivalencesP == None: equivalencesP=[]"
 	ret += indent+"stack        = "+COPY_OPTION+"(stackP)"
 	ret += indent+"equivalences = "+COPY_OPTION+"(equivalencesP)"
-	ret += indent+"return self." + rule.name + comboInside + "_trigger(snode, dict(), stack, equivalences)"
+	ret += indent+"return self." + rule.name + "_trigger(snode, dict(), stack, equivalences)"
 	ret += indent
 	ret += "\n"
 
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + comboInside + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
 	indent += "\t"
 	ret += indent+"if stack == None: stack=[]"
 	ret += indent+"if equivalences == None: equivalences=[]"
@@ -464,7 +498,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	ret += indent+"newNode.nodeId = lastNodeId"
 	if thisIsActuallyAHierarchicalRule:
 		ret += indent+"newNode.parentNodeToExplore = " + COPY_OPTION + "(snode)"
-		ret += indent+"newNode.parentNodeToExploreWith = self." + rule.name + "_COMBOINSIDE"
+		ret += indent+"newNode.parentNodeToExploreWith = self." + rule.name
 		ret += indent+"newNode.stackP = "+COPY_OPTION+"(stack)"
 		ret += indent+"newNode.equivalencesP = "+COPY_OPTION+"(equivalences)"
 	# Create nodes
@@ -524,7 +558,9 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	ret += indent+"if not inCombo:"
 	ret += indent+"\tnewNode.cost += "+str(rule.cost)
 	ret += indent+"\tnewNode.depth += 1"
-	ret += indent+"newNode.history.append('" + rule.name + "@' + str(n2id) )"
+	if thisIsActuallyAHierarchicalRule: markHierarchical = '*'
+	else: markHierarchical = ''
+	ret += indent+"newNode.history.append('" + markHierarchical + rule.name + "@' + str(n2id) )"
 	ret += indent+"if finish!='': newNode.history.append(finish)"
 	ret += indent+"return newNode"
 	ret += indent+""
@@ -759,6 +795,7 @@ def generate(agm, skipPassiveRules):
 	text += constantHeader()
 	text += ruleDeclaration(agm)
 	text += ruleTriggerDeclaration(agm)
+	text += hierarchicalTargetsDeclaration(agm)
 	for rule in agm.rules:
 		text += ruleImplementation(rule)
 	return text
@@ -807,8 +844,12 @@ def getOptimalTargetNodeCheckOrder(graph):
 # @param The graph used to generate the target
 #
 # @retval The python code used to check the target world state
-def generateTarget(graph):
-	ret = """import copy, sys
+def generateTarget(graph, forHierarchicalRule=''):
+	ret = ''
+	indent = "\n\t"
+
+	if len(forHierarchicalRule)==0:
+		ret += """import copy, sys
 sys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import *
 
 def computeMaxScore(a, b, maxScore):
@@ -819,7 +860,10 @@ def computeMaxScore(a, b, maxScore):
 	return maxScore
 
 def CheckTarget(graph):"""
-	indent = "\n\t"
+
+	else:
+		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping):'
+		indent += "\t"
 	# Make a copy of the current graph node list
 	ret += indent+"n2id = dict()\n"
 	## Generate Link list
@@ -875,9 +919,12 @@ def CheckTarget(graph):"""
 			ret += indent+"for symbol_"+n+"_name in graph.nodes:"
 			indent += "\t"
 		ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
-		ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+		if len(forHierarchicalRule)>0:
+			ret += indent+"n2id[smapping['"+n+"']] = symbol_"+n+"_name"
+		else:
+			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 		ret += indent+"linksVal = 0"
-		for cond in newLinkScore(graph.links, n_n, symbols_in_stack):
+		for cond in newLinkScore(graph.links, n_n, symbols_in_stack, forHierarchicalRule):
 			ret += indent+cond
 		ret += indent+"scoreLinks.append(linksVal)"
 		pops.append(indent+'scoreLinks.pop()')
@@ -885,7 +932,7 @@ def CheckTarget(graph):"""
 		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n_n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
-		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack)
+		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack, forHierarchicalRule)
 		conditions = conditions.replace("snode.graph", "graph")
 		conditionsListList.append( [conditions, number] )
 		ret += conditions
@@ -913,6 +960,7 @@ def CheckTarget(graph):"""
 	while len(pops)>0:
 		ret += pops.pop()
 	indent = "\n\t"
+	if len(forHierarchicalRule)>0: indent+='\t'
 	ret += indent+"return maxScore+scoreEasy, False"
 	ret += "\n"
 	return ret

@@ -10,7 +10,7 @@ longPattern=3
 ===
 include(general.aggl)
 
-calentarJerarquico : active(1)
+hierarchical calentarJerarquico : active(1)
 {
 	{
 		obj:obj(-270,-30)
@@ -23,20 +23,9 @@ calentarJerarquico : active(1)
 		objs:objs(-320,170)
 		obj->objs(caliente)
 	}
-	encenderFuego as enciende optional
-	mover as mover1 optional
-	calentar as calentar
-	mover as mover2 optional
-	where:
-	enciende.fuego = mover1.c2 = calentar.fuego = mover2.c1
-	enciende.fuegos = mover1.c2s = calentar.fuegos = mover2.c1s
-	mover1.objs = calentar.objs = mover2.objs
-	mover1.obj = calentar.obj = mover2.obj
-	mover1.c1 = mover2.c2
-	mover1.c1s = mover2.c2s
 }
 
-enfriarJerarquico : active(1)
+hierarchical enfriarJerarquico : active(1)
 {
 	{
 		obj:obj(-270,-30)
@@ -49,20 +38,9 @@ enfriarJerarquico : active(1)
 		objs:objs(-320,170)
 		obj->objs(frio)
 	}
-	encenderFrigo as enciende optional
-	mover as mover1 optional
-	enfriar as enfriar
-	mover as mover2 optional
-	where:
-	enciende.frigo = mover1.c2 = enfriar.frigo = mover2.c1
-	enciende.frigos = mover1.c2s = enfriar.frigos = mover2.c1s
-	mover1.objs = enfriar.objs = mover2.objs
-	mover1.obj = enfriar.obj = mover2.obj
-	mover1.c1 = mover2.c2
-	mover1.c1s = mover2.c2s
 }
 
-freirJerarquico : active(1)
+hierarchical freirJerarquico : active(1)
 {
 	{
 		obj:obj(-270,-30)
@@ -82,17 +60,5 @@ freirJerarquico : active(1)
 			(not (frio obj objs)))
 		)
 	}
-	encenderFuego as enciende optional
-	mover as mover1 optional
-	calentar as calentar optional
-	freir as freir
-	mover as mover2 optional
-	where:
-	enciende.fuego = mover1.c2 = calentar.fuego = freir.fuego = mover2.c1
-	enciende.fuegos = mover1.c2s = calentar.fuegos = freir.fuegos = mover2.c1s
-	mover1.objs = calentar.objs = freir.objs = mover2.objs
-	mover1.obj = calentar.objs = freir.obj = mover2.obj
-	mover1.c1 = mover2.c2
-	mover1.c1s = mover2.c2s
 }
 
