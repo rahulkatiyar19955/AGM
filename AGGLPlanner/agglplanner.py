@@ -591,7 +591,7 @@ class PyPlan(object):
 					min_idx = i
 			i = min_idx
 
-			print self.indent+'{'
+			#print self.indent+'{'
 			for action_index in xrange(len(self.results[i].history)):
 				action = self.results[i].history[action_index]
 				if action[0] == '*':
@@ -603,13 +603,13 @@ class PyPlan(object):
 						print self.indent, '}'
 				else:
 					print self.indent + action
-			print self.indent+'}'
+			#print self.indent+'}'
 
 			#printResult(self.results[i]) #the best solution
 			if resultFile != None:
 				for action in self.results[i].history:
 					resultFile.write(str(action)+'\n')
-			if indent and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
+			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 
 	##@brief This method starts the execution of program threads
 	# @param ruleMap
