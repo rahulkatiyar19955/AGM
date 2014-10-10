@@ -128,7 +128,8 @@ class AGGLPlannerAction(object):
 				self.hierarchical = True
 			else:
 				self.hierarchical = False
-			self.parameters = eval(parts[1])
+			if self.name[0] != '#':
+				self.parameters = eval(parts[1])
 		else:
 			raise IndexError
 
