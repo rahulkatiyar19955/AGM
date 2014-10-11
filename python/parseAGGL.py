@@ -103,6 +103,7 @@ class AGMFileDataParsing:
 		an = Word(srange("[a-zA-Z0-9_.]"))
 		ids = Word(srange("[a-zA-Z0-9_]"))
 		almostanything = CharsNotIn("{}")
+		incPath = CharsNotIn("()")
 		parameters = Suppress("parameters")
 		precondition = Suppress("precondition")
 		effect = Suppress("effect")
@@ -143,7 +144,7 @@ class AGMFileDataParsing:
 		# HIERARCHICAL RULE
 		rule_hierarchical = Group(Literal("hierarchical").setResultsName("hierarchical") + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 		# indlude
-		include = Group(Suppress("include") + po + an.setResultsName("includefile") + pc)
+		include = Group(Suppress("include") + po + incPath.setResultsName("includefile") + pc)
 		# GENERAL RULE
 		rule = rule_nrm | rule_seq | rule_hierarchical | include
 		# PROPERTY
