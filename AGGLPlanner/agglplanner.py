@@ -120,10 +120,14 @@ class AGGLPlannerAction(object):
 		## Name of the rule parameters (the parameters are in a dictionary)
 		self.parameters = dict()
 		if len(init)>0:
+			#print 'initializing from:', init
 			#we save the the list of all the words in the string, using @ as the separator
 			parts = init.split('@')
 			self.name = parts[0]
+			#print self.name
+			#print self.name[0], self.name[0] == '*'
 			if self.name[0] == '*':
+				#print 'hierarchical'
 				self.name = self.name[1:]
 				self.hierarchical = True
 			else:
@@ -465,10 +469,9 @@ class LockableInteger(object):
 		self.value += 1
 		self.mutex.release()
 
-##@brief This is the main class. This makes all the process in order to create, check and execute the plan.
+## @brief This is the main class. This makes all the process in order to create, check and execute the plan.
 class PyPlan(object):
-	##@brief The constructor method. This initializes all the attributes of the class and makes
-	# the first check of the plan.
+	## @brief The constructor method. This initializes all the attributes of the class and makes the first check of the plan.
 	# @param domainPath is the file name where is saved the grammar rules.
 	# @param init is the XML file where is saved the inital status of the world
 	# @param targetPath is the python file where is daved the target status of the world.
@@ -488,6 +491,8 @@ class PyPlan(object):
 		ruleMap = copy.deepcopy(domain.getRules())
 		for e in excludeList:
 			del ruleMap[e]
+		#for r in ruleMap:
+			#print 'Using', r
 
 		# Get goal-checking code
 		if type(targetPath)== type(''):

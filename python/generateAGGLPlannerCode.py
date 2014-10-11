@@ -156,7 +156,7 @@ def newLinkScore(linkList, newSymbol, alreadyThere):
 			else: negated = ''
 			# Condition itself
 			if ((newSymbol == link.a) and (link.b in alreadyThere)) or ((newSymbol == link.b) and (link.a in alreadyThere)):
-				ret.append('if [n2id["'+str(link.a)+'"],n2id["'+str(link.b)+'"],"'+str(link.linkType)+'"] ' +negated+'in graph.links: linksVal += 100')
+				ret.append('if [n2id["'+str(link.a)+'"],n2id["'+str(link.b)+'"],"'+str(link.linkType)+'"] ' + negated + ' in graph.links: linksVal += 100')
 	return ret
 
 
@@ -872,7 +872,7 @@ def CheckTarget(graph):
 	else:
 		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping):'
 		indent += "\t"
-		ret += indent+"n2id = smapping\n"
+		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 	## Generate Link list
 	linkList = []
 	for link_i in range(len(graph.links)):
@@ -908,7 +908,7 @@ def CheckTarget(graph):
 			if (n[0] in "0123456789") and n in graph.nodes:
 				ret += indent+"symbol_"+n+" = graph.nodes['"+n+"']"
 			else:
-				ret += indent+"symbol_"+n+" = graph.nodes[smapping['"+n+"']]"
+				ret += indent+"symbol_"+n+" = graph.nodes[n2id['"+n+"']]"
 		else: # otherwise, we're talking about a variable!
 			ret += indent+"symbol_"+n+"_name = '" + n + "'"
 			ret += indent+"for symbol_"+n+"_name in graph.nodes:"
@@ -916,7 +916,7 @@ def CheckTarget(graph):
 			ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
 
 		if len(forHierarchicalRule)>0:
-			ret += indent+"n2id['"+n+"'] = smapping['"+n+"']"
+			ret += indent+"n2id['"+n+"'] = n2id['"+n+"']"
 		else:
 			if constant:
 				ret += indent+"n2id['"+n+"'] = '"+n+"'"
