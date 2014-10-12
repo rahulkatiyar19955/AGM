@@ -133,6 +133,7 @@ class AGGLPlannerAction(object):
 			else:
 				self.hierarchical = False
 			if self.name[0] != '#':
+				#print parts[1]
 				self.parameters = eval(parts[1])
 		else:
 			raise IndexError
@@ -190,9 +191,10 @@ class AGGLPlannerPlan(object):
 		elif type(init) == type([]):
 			# we take each element of the list and we save it as a grammar rule.
 			for action in init:
+				#print type(action), len(action), action
 				self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
 		#IF INIT IS A COMPLETE PLAN
-		elif type(init) == type(AGGLPlannerPlan()):
+		elif type(init) == type(AGGLPlannerPlan()) or isinstance(init, AGGLPlannerPlan) or True:
 			# we make a copy of the plan
 			self.data = copy.deepcopy(init.data)
 		else:
@@ -219,6 +221,13 @@ class AGGLPlannerPlan(object):
 					if int(action.parameters[parameter]) >= minCreated:
 						n = str(int(action.parameters[parameter])-len(created))
 						action.parameters[parameter] = n
+		return c
+
+	def removeFirstActionDirect(self):
+		## @internal Create the copy without the first actions.
+		c = AGGLPlannerPlan()
+		for action in self.data[1:]:
+			c.data.append(copy.deepcopy(action))
 		return c
 
 	## @brief This method initializes the iterator of the class.
@@ -476,7 +485,7 @@ class PyPlan(object):
 	# @param init is the XML file where is saved the inital status of the world
 	# @param targetPath is the python file where is daved the target status of the world.
 	# @param resultFile is the optional name of the file where the plan result will be stored.
-	def __init__(self, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile):
+	def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile):
 		object.__init__(self)
 		# Get initial world mdoel
 		initWorld = WorldStateHistory(xmlModelParser.graphFromXML(init))
@@ -597,6 +606,26 @@ class PyPlan(object):
 					min_idx = i
 			i = min_idx
 
+		
+			try:
+				plann = AGGLPlannerPlan([xx.split('@') for xx in self.results[i].history])
+				n = copy.deepcopy(plann)
+				from agglplanchecker import PyPlanChecker
+				while True:
+					n = n.removeFirstActionDirect()
+					try:
+						check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath)
+					except:
+						break
+					if check.achieved:
+						print 'Removing useless action'
+						self.results[i].history = self.results[i].history[1:]
+						plann = copy.deepcopy(n)
+					else:
+						break
+			except:
+				pass
+
 			#print self.indent, self.results[i].history
 			for action_index in xrange(len(self.results[i].history)):
 				action = self.results[i].history[action_index]
@@ -605,7 +634,7 @@ class PyPlan(object):
 					print self.indent+str(action)
 					if action_index == 0:
 						self.excludeList.append(ac.name)
-						aaa = PyPlan(domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', ac.parameters, self.excludeList, None)
+						aaa = PyPlan(domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', ac.parameters, self.excludeList, None)
 						print self.indent
 				else:
 					print self.indent+str(action)
@@ -646,8 +675,10 @@ class PyPlan(object):
 			nResults = self.results.size()
 			# Check if we should give up because it already took too much time
 			if timeElapsed > maxTimeWaitLimit or (timeElapsed > maxTimeWaitAchieved and nResults > 0):
-				if nResults>0: self.end_condition.set("GoalAchieved")
-				else: self.end_condition.set("TimeLimit")
+				if nResults>0:
+					self.end_condition.set("GoalAchieved")
+				else:
+					self.end_condition.set("TimeLimit")
 				lock.release()
 				return
 			# Else, proceed...
@@ -679,10 +710,6 @@ class PyPlan(object):
 				threadPoolStatus.unlock()
 				continue
 
-			#print 'h'
-
-			#print 'i'
-
 			# Update 'minCostOnOpenNodes', so we can stop when the minimum cost in the queue is bigger than one in the results
 			self.updateMinCostOnOpenNodes(head.cost)
 			# Check if we got to the maximum cost or the minimum solution
@@ -690,7 +717,7 @@ class PyPlan(object):
 				self.end_condition.set("MaxCostReached")
 				lock.release()
 				return
-			elif self.results.size()>0 and head.cost>self.cheapestSolutionCost.value:
+			elif self.results.size()>0 and head.cost>self.cheapestSolutionCost.value and stopWithFirstPlan:
 				self.end_condition.set("GoalAchieved")
 				lock.release()
 				return
@@ -733,7 +760,6 @@ class PyPlan(object):
 				if doIt:
 					self.lastTime = nowNow
 					try:
-						#print nowNow
 						if self.indent == '':
 							print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
 						#rrrr = heapsort(self.openNodes)
@@ -784,9 +810,12 @@ if __name__ == '__main__': # program domain problem result
 	#graphviz.output_file = 'basic.png'
 	if True:
 	#with PyCallGraph(output=graphviz):
+		from parseAGGL import AGMFileDataParsing
 		if len(sys.argv)<4:
-			print 'Usage\n\t', sys.argv[0], ' domain.aggl.py init.xml target.xml.py [result.plan]'
+			print 'Usage\n\t', sys.argv[0], ' domain.aggl init.xml target.xml.py [result.plan]'
 		elif len(sys.argv)<5:
-			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], '', None, [], None)
+			agmData = AGMFileDataParsing.fromFile(sys.argv[1])
+			agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
+			p = PyPlan(agmData, "/tmp/domain.py", sys.argv[2], sys.argv[3], '', None, [], None)
 		else:
-			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], '', None, [], open(sys.argv[4], 'w'))
+			p = PyPlan(agmData, "/tmp/domain.py", sys.argv[2], sys.argv[3], '', None, [], open(sys.argv[4], 'w'))

@@ -89,9 +89,9 @@ if __name__ == '__main__': # program domain problem result
 		## We store the initial or start time of the planner and call the agglplaner, the main program that makes all the process...
 		start = time.time()
 		if result:
-			subprocess.call(["agglplanner", "/tmp/domain.py", worldFile, "/tmp/target.py", result])
+			subprocess.call(["agglplanner", domainFile, worldFile, "/tmp/target.py", result])
 		else:
-			subprocess.call(["agglplanner", "/tmp/domain.py", worldFile, "/tmp/target.py"])
+			subprocess.call(["agglplanner", domainFile, worldFile, "/tmp/target.py"])
 		## We store the final time of the planner to calculate the total duration of the program
 		end = time.time()
 		print 'It took', end - start, 'seconds'
