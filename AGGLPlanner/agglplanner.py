@@ -55,7 +55,7 @@ maxWorldIncrement = 14
 maxCost = 200
 stopWithFirstPlan = False
 verbose = 1
-maxTimeWaitAchieved = 10.
+maxTimeWaitAchieved = 5.
 maxTimeWaitLimit = 3000.
 
 ## @brief Method heapsort. This method receives an iterable thing. It stores the iterable thing
@@ -634,7 +634,20 @@ class PyPlan(object):
 					print self.indent+str(action)
 					if action_index == 0:
 						self.excludeList.append(ac.name)
-						aaa = PyPlan(domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', ac.parameters, self.excludeList, None)
+						paramsWithoutNew = copy.deepcopy(ac.parameters)
+						for param in ac.parameters:
+							found = False
+							for arule in agmData.agm.rules:
+								if arule.name == ac.name:
+									if param in arule.lhs.nodes:
+										found = True
+										break
+							if not found:
+								print 'removing fixed goal symbol', param
+								del paramsWithoutNew[param]
+								#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
+						print paramsWithoutNew
+						aaa = PyPlan(domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, None)
 						print self.indent
 				else:
 					print self.indent+str(action)
@@ -760,8 +773,8 @@ class PyPlan(object):
 				if doIt:
 					self.lastTime = nowNow
 					try:
-						if self.indent == '':
-							print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
+						#if self.indent == '':
+						print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
 						#rrrr = heapsort(self.openNodes)
 						#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
 						#if len(self.openNodes) > 0:

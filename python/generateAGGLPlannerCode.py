@@ -867,12 +867,14 @@ def computeMaxScore(a, b, maxScore):
 
 def CheckTarget(graph):
 	n2id = dict()
+	available = copy.deepcopy(graph.nodes)
 """
 
 	else:
 		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping):'
 		indent += "\t"
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
+		ret += indent+"available = copy.deepcopy(graph.nodes)"
 	## Generate Link list
 	linkList = []
 	for link_i in range(len(graph.links)):
@@ -893,8 +895,24 @@ def CheckTarget(graph):
 	ret += indent+"# Hard score"
 	ret += indent+"scoreNodes = []"
 	ret += indent+"scoreLinks = []"
+	
+	for n_n in getOptimalTargetNodeCheckOrder(graph, lgraph):
+		n = str(n_n)
+		constant = False
+		if (n[0] in "0123456789") and n in graph.nodes: # This checks the node is already in the model
+			constant = True
+		elif lgraph:
+			if n in lgraph.nodes:
+				constant = True
+		if constant:
+			if len(forHierarchicalRule)>0:
+ 				#ret += indent+'print '+"n2id['"+n+"']"
+				#ret += indent+'print '+"graph.nodes[n2id['"+n+"']]"
+				ret += indent+"del available[n2id['"+n+"']]"
+			else:
+				ret += indent+"del available['"+n+"']"
+				
 
-	#for n_n in graph.nodes:
 	for n_n in getOptimalTargetNodeCheckOrder(graph, lgraph):
 		n = str(n_n)
 		ret += indent+"# "+n
@@ -911,18 +929,20 @@ def CheckTarget(graph):
 				ret += indent+"symbol_"+n+" = graph.nodes[n2id['"+n+"']]"
 		else: # otherwise, we're talking about a variable!
 			ret += indent+"symbol_"+n+"_name = '" + n + "'"
-			ret += indent+"for symbol_"+n+"_name in graph.nodes:"
+			ret += indent+"for symbol_"+n+"_name in available:"
 			indent += "\t"
 			ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
 
 		if len(forHierarchicalRule)>0:
-			ret += indent+"n2id['"+n+"'] = n2id['"+n+"']"
+			if not constant:
+				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 		else:
 			if constant:
 				ret += indent+"n2id['"+n+"'] = '"+n+"'"
 			else:
 				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 		ret += indent+"linksVal = 0"
+		#ret += indent+"print n2id"
 		for cond in newLinkScore(graph.links, n_n, symbols_in_stack):
 			ret += indent+cond
 		ret += indent+"scoreLinks.append(linksVal)"
