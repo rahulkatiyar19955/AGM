@@ -259,7 +259,7 @@ class AGMEditor(QMainWindow):
 		r = RuleRenamer(self.width()/2, self.height()/2, self.agmData.agm.rules[pos], self)
 		r.setFocus(Qt.OtherFocusReason)
 	def changeRule(self, ruleN):
-		if type(self.agmData.agm.rules[ruleN]) == AGMRule:
+		if type(self.agmData.agm.rules[ruleN]) in [AGMRule, AGMHierarchicalRule]:
 			self.ui.label.show()
 			self.ui.label_2.show()
 			self.ui.spacee.show()

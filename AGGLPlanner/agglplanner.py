@@ -828,7 +828,9 @@ if __name__ == '__main__': # program domain problem result
 			print 'Usage\n\t', sys.argv[0], ' domain.aggl init.xml target.xml.py [result.plan]'
 		elif len(sys.argv)<5:
 			agmData = AGMFileDataParsing.fromFile(sys.argv[1])
-			agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
+			#agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
 			p = PyPlan(agmData, "/tmp/domain.py", sys.argv[2], sys.argv[3], '', None, [], None)
 		else:
+			agmData = AGMFileDataParsing.fromFile(sys.argv[1])
+			#agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
 			p = PyPlan(agmData, "/tmp/domain.py", sys.argv[2], sys.argv[3], '', None, [], open(sys.argv[4], 'w'))
