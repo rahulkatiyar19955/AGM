@@ -611,14 +611,14 @@ class PyPlan(object):
 				plann = AGGLPlannerPlan([xx.split('@') for xx in self.results[i].history])
 				n = copy.deepcopy(plann)
 				from agglplanchecker import PyPlanChecker
-				while True:
+				while len(self.results[i].history)>0:
 					n = n.removeFirstActionDirect()
 					try:
 						check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath)
 					except:
 						break
 					if check.achieved:
-						print 'Removing useless action'
+						print 'Removing useless action', self.results[i].history[0]
 						self.results[i].history = self.results[i].history[1:]
 						plann = copy.deepcopy(n)
 					else:

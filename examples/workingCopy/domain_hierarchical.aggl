@@ -9,7 +9,7 @@ fontSize=12
 longPattern=3
 ===
 
-include(/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/domain_basic.aggl)
+include(domain_basic.aggl)
 
 findGrannyAndDeliver : active(1)
 {
