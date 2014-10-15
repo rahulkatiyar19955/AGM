@@ -105,6 +105,7 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),              self.appClose)
 		self.connect(self.ui.actionGraphmar,                   SIGNAL("triggered(bool)"),              self.about)
 		self.connect(self.ui.passiveCheckBox,                  SIGNAL("stateChanged(int)"),            self.changePassive)
+		self.connect(self.ui.hierarchicalCheckBox,             SIGNAL("stateChanged(int)"),            self.changeHierarchical)
 		self.connect(self.ui.cost,                             SIGNAL("valueChanged(int)"),            self.changeCost)
 		self.ui.actionSaveAs.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_S + Qt.Key_Shift))
 		self.ui.actionSave.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_S))
@@ -236,6 +237,11 @@ class AGMEditor(QMainWindow):
 		if passive == Qt.Unchecked:
 			p = False
 		self.agmData.agm.rules[self.ui.rulesList.currentRow()].passive = p
+	def changeHierarchical(self, hierarchical):
+		h = True
+		if hierarchical == Qt.Unchecked:
+			h = False
+		self.agmData.agm.rules[self.ui.rulesList.currentRow()].hierarchical = h
 	def changeCost(self, v):
 		self.agmData.agm.rules[self.ui.rulesList.currentRow()].cost = v
 	def selectTool(self, tool):
@@ -268,6 +274,7 @@ class AGMEditor(QMainWindow):
 			self.ui.cost.show()
 			self.ui.label_3.show()
 			self.ui.passiveCheckBox.show()
+			self.ui.hierarchicalCheckBox.show()
 			self.ui.comboRuleTextEdit.hide()
 			self.ui.comboRuleLabel.hide()
 			self.ui.label_5.show()
@@ -295,21 +302,28 @@ class AGMEditor(QMainWindow):
 			self.ui.cost.hide()
 			self.ui.label_3.hide()
 			self.ui.passiveCheckBox.hide()
+			self.ui.hierarchicalCheckBox.hide()
 			self.ui.comboRuleTextEdit.show()
 			self.ui.comboRuleLabel.show()
 			self.ui.label_5.hide()
 			self.ui.toolsList.hide()
 			#self.ui.tabWidget.setTabEnabled(1, False)
 			self.ui.comboRuleTextEdit.setPlainText(self.agmData.agm.rules[ruleN].text)
-		self.disconnect(self.ui.passiveCheckBox,    SIGNAL("stateChanged(int)"), self.changePassive)
-		self.disconnect(self.ui.cost,               SIGNAL("valueChanged(int)"), self.changeCost)
+		self.disconnect(self.ui.passiveCheckBox,      SIGNAL("stateChanged(int)"), self.changePassive)
+		self.disconnect(self.ui.hierarchicalCheckBox, SIGNAL("stateChanged(int)"), self.changeHierarchical)
+		self.disconnect(self.ui.cost,                 SIGNAL("valueChanged(int)"), self.changeCost)
 		if self.agmData.agm.rules[ruleN].passive:
 			self.ui.passiveCheckBox.setChecked(True)
 		else:
 			self.ui.passiveCheckBox.setChecked(False)
+		if isinstance(self.agmData.agm.rules[ruleN], AGMHierarchicalRule):
+			self.ui.hierarchicalCheckBox.setChecked(True)
+		else:
+			self.ui.hierarchicalCheckBox.setChecked(False)
 		self.ui.cost.setValue(int(self.agmData.agm.rules[ruleN].cost))
-		self.connect(self.ui.passiveCheckBox,    SIGNAL("stateChanged(int)"), self.changePassive)
-		self.connect(self.ui.cost,               SIGNAL("valueChanged(int)"), self.changeCost)
+		self.connect(self.ui.passiveCheckBox,      SIGNAL("stateChanged(int)"), self.changePassive)
+		self.connect(self.ui.hierarchicalCheckBox, SIGNAL("stateChanged(int)"), self.changeHierarchical)
+		self.connect(self.ui.cost,                 SIGNAL("valueChanged(int)"), self.changeCost)
 
 		currRule = self.ui.rulesList.currentItem().text()
 		self.setWindowTitle('AGGLEditor - ['+currRule+']')
