@@ -211,6 +211,27 @@ apagarFrigo : active(1)
 	}
 }
 
+encuentraHuevo : active(1)
+{
+	{
+		c1s:objs(-285,185)
+		c1:obj(-135,80)
+		c1->c1s(contenedor)
+	}
+	=>
+	{
+		obj:obj(10,-85)
+		objs:objs(10,-255)
+		c1:obj(-95,25)
+		c1s:objs(-270,140)
+		c1->c1s(contenedor)
+		obj->objs(movible)
+		obj->objs(huevo)
+		obj->objs(frio)
+		obj->c1(en)
+	}
+}
+
 estorbo : active(1)
 {
 	{

@@ -646,7 +646,7 @@ class PyPlan(object):
 								print 'removing fixed goal symbol', param
 								del paramsWithoutNew[param]
 								#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
-						print paramsWithoutNew
+						#print paramsWithoutNew
 						aaa = PyPlan(domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, None)
 						print self.indent
 				else:
@@ -743,7 +743,7 @@ class PyPlan(object):
 						deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
 					else:
 						deriv.score, achieved = self.targetCode(deriv.graph)
-					if verbose>4: print deriv.score, achieved, deriv
+					#if verbose>4: print deriv.score, achieved, deriv
 					if achieved:
 						#print 'Found solution', deriv.cost
 						self.results.append(deriv)
@@ -772,9 +772,9 @@ class PyPlan(object):
 					doIt = True
 				if doIt:
 					self.lastTime = nowNow
-					try:
+					#try:
 						#if self.indent == '':
-						print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
+						#print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
 						#rrrr = heapsort(self.openNodes)
 						#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
 						#if len(self.openNodes) > 0:
@@ -782,8 +782,8 @@ class PyPlan(object):
 							#print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
 						#else:
 							#print 'no open nodes'
-					except:
-						traceback.print_exc()
+					#except:
+						#traceback.print_exc()
 
 	def updateCheapestSolutionCostAndCutOpenNodes(self, cost):
 		self.cheapestSolutionCost.lock()
