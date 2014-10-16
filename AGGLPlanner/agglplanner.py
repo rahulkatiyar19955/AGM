@@ -53,7 +53,7 @@ import inspect
 number_of_threads = 0
 maxWorldIncrement = 14
 maxCost = 200
-stopWithFirstPlan = False
+stopWithFirstPlan = True
 verbose = 1
 maxTimeWaitAchieved = 5.
 maxTimeWaitLimit = 3000.
