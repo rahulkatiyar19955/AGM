@@ -114,18 +114,16 @@ class PyPlanChecker(object):
 			score, achieved = self.targetCode(world.graph)
 			## We store the result to check the plan
 			self.valid = achieved
-			# By one hand, if we achieve the target world status, we will print all the  correct actions of the plan.
-			# By the other hand, if we dont achieve the goal, we will print an error message.
-			if achieved:
-				print 'GOAL ACHIEVED'
+			if achieved:               # On the one hand, if we achieve the target world status, we will print all the  correct actions of the plan.
+				if debug: print 'GOAL ACHIEVED'
 				self.achieved = True
 				for action in self.plan:
 					if verbose: print action
-			else:
+			else:                      # Otherwise, if we dont achieve the goal, we will print an error message.
 				self.achieved = False
-				print 'Not achieved (didn\'t get to the goal)'
-				
-		# If we have thrown an exception (because a parameter of an action does not exist), 
+				if debug: print 'Not achieved (didn\'t get to the goal)'
+
+		# If we have thrown an exception (because a parameter of an action does not exist),
 		# we handle part of the exception in this code.
 		except WrongRuleExecution, e:
 			if verbose: print 'Invalid rule execution', action
@@ -133,12 +131,14 @@ class PyPlanChecker(object):
 			if verbose: print 'Line: ', line
 			if verbose: print 'Not achieved'
 			self.valid = False
+			self.achieved = False
 			#traceback.print_exc()
 		except:
 			self.valid = False
+			self.achieved = False
 			if verbose: print 'Not achieved (error)'
 			#traceback.print_exc()
-		# If there is a XML file where we must save the result, we store the result... 
+		# If there is a XML file where we must save the result, we store the result...
 		if resultPath!='':
 			world.graph.toXML(resultPath)
 
@@ -163,13 +163,13 @@ if __name__ == '__main__': # program domain problem result
 	plan   = sys.argv[3]
 	## The target or goal world status.
 	target = sys.argv[4]
-	
+
 	if len(sys.argv)==6:
 		## We save the name of the file where the result will be stored.
 		result = sys.argv[5]
 	else:
 		result = ''
-  
+
 	# If the grammar is stored in a .aggl file, we must generate the domain python file.
 	if domain.endswith('.aggl'):
 		## The domain python file is stored in agmData
@@ -192,7 +192,7 @@ if __name__ == '__main__': # program domain problem result
 			print 'TARGET WRITING IS DISABLED WARNING!!'
 			print 'TARGET WRITING IS DISABLED WARNING!!'
 		else:
-			## graph contains the state of the target world become a graph 
+			## graph contains the state of the target world become a graph
 			graph = graphFromXML(target)
 			## outputText get the python code of the target world graph.
 			outputText = generateTarget(graph)

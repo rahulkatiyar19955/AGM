@@ -606,15 +606,16 @@ class PyPlan(object):
 					min_idx = i
 			i = min_idx
 
-		
+
 			try:
 				plann = AGGLPlannerPlan([xx.split('@') for xx in self.results[i].history])
 				n = copy.deepcopy(plann)
 				from agglplanchecker import PyPlanChecker
 				while len(self.results[i].history)>0:
+					print 'check remove', self.results[i].history[0]
 					n = n.removeFirstActionDirect()
 					try:
-						check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath)
+						check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath, verbose=False)
 					except:
 						break
 					if check.achieved:
@@ -624,33 +625,36 @@ class PyPlan(object):
 					else:
 						break
 			except:
+				traceback.print_exc()
 				pass
 
 			#print self.indent, self.results[i].history
 			for action_index in xrange(len(self.results[i].history)):
 				action = self.results[i].history[action_index]
 				ac = AGGLPlannerAction(action)
+				print self.indent+str(action)
+
+			if len(self.results[i].history) > 0:
+				action = self.results[i].history[0]
+				ac = AGGLPlannerAction(action)
 				if ac.hierarchical:
-					print self.indent+str(action)
-					if action_index == 0:
-						self.excludeList.append(ac.name)
-						paramsWithoutNew = copy.deepcopy(ac.parameters)
-						for param in ac.parameters:
-							found = False
-							for arule in agmData.agm.rules:
-								if arule.name == ac.name:
-									if param in arule.lhs.nodes:
-										found = True
-										break
-							if not found:
-								print 'removing fixed goal symbol', param
-								del paramsWithoutNew[param]
-								#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
-						#print paramsWithoutNew
-						aaa = PyPlan(domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, None)
-						print self.indent
-				else:
-					print self.indent+str(action)
+					self.excludeList.append(ac.name)
+					paramsWithoutNew = copy.deepcopy(ac.parameters)
+					for param in ac.parameters:
+						found = False
+						for arule in agmData.agm.rules:
+							if arule.name == ac.name:
+								if param in arule.lhs.nodes:
+									found = True
+									break
+						if not found:
+							print 'removing fixed goal symbol', param
+							del paramsWithoutNew[param]
+							#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
+					#print paramsWithoutNew
+					print '\nDecomposing hierarchical rule ', ac.name, paramsWithoutNew
+					aaa = PyPlan(domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, None)
+					print self.indent
 
 			#printResult(self.results[i]) #the best solution
 			if resultFile != None:
