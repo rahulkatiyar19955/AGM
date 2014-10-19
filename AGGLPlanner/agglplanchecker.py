@@ -28,7 +28,7 @@
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
 """@package agglplanchecker
     @ingroup PyAPI
-    This file contains a class that checks that the rules of a grammar are correct
+    This file contains agglplannerchecker and PyPlanChecker, a stand-alone program and a class, respectively, used to verify plans.
 """
 
 
@@ -51,12 +51,11 @@ from generateAGGLPlannerCode import *
 
 ##@brief This class is responsible for checking the plan that is generated in python.
 class PyPlanChecker(object):
-
 	##@brief Constructor method: It initializes all class attributes and checks the plan
 	# @param domainPath Python version of the grammar
 	# @param init XML-version of the initial world state
 	# @param planPath Path of the plan
-	# @param targetPath Python-version of the target state
+	# @param targetPath Python-version of the target state OR an instance of a function
 	# Also, there are two optionals parameters:
 	# @param resultPath is the path of the result is stored. By default it's empty
 	# @param verbose is a parameter that shows additional information
@@ -68,13 +67,17 @@ class PyPlanChecker(object):
 		if verbose: print 'domainPath:', domainPath
 		domain = imp.load_source('domain', domainPath)
 		## We save the grammar rules
-		self.domain     = domain.RuleSet()
+		self.domain = domain.RuleSet()
 		# Get goal-checking code
-		if len(targetPath) > 0:
+
+		if type(targetPath)== type(''):
 			if verbose: print 'targetPath:', targetPath
 			target = imp.load_source('target', targetPath)
-			## We get the python code of the target world status
 			self.targetCode = target.CheckTarget
+		else:
+			self.targetCode = targetPath
+
+
 		## We get the plan code
 		self.plan = AGGLPlannerPlan(planPath)
 
@@ -117,8 +120,9 @@ class PyPlanChecker(object):
 			if achieved:               # On the one hand, if we achieve the target world status, we will print all the  correct actions of the plan.
 				if debug: print 'GOAL ACHIEVED'
 				self.achieved = True
-				for action in self.plan:
-					if verbose: print action
+				if verbose:
+					for action in self.plan:
+						print action
 			else:                      # Otherwise, if we dont achieve the goal, we will print an error message.
 				self.achieved = False
 				if debug: print 'Not achieved (didn\'t get to the goal)'
@@ -132,12 +136,12 @@ class PyPlanChecker(object):
 			if verbose: print 'Not achieved'
 			self.valid = False
 			self.achieved = False
-			#traceback.print_exc()
+			if verbose: traceback.print_exc()
 		except:
 			self.valid = False
 			self.achieved = False
 			if verbose: print 'Not achieved (error)'
-			#traceback.print_exc()
+			if verbose: traceback.print_exc()
 		# If there is a XML file where we must save the result, we store the result...
 		if resultPath!='':
 			world.graph.toXML(resultPath)

@@ -54,7 +54,7 @@ number_of_threads = 0
 maxWorldIncrement = 14
 maxCost = 200
 stopWithFirstPlan = True
-verbose = 1
+verbose = 4
 maxTimeWaitAchieved = 5.
 maxTimeWaitLimit = 3000.
 
@@ -492,6 +492,7 @@ class PyPlan(object):
 		initWorld.nodeId = 0
 
 		self.symbol_mapping = copy.deepcopy(symbol_mapping)
+		#print self.symbol_mapping
 		self.excludeList = copy.deepcopy(excludeList)
 		self.indent = copy.deepcopy(indent)
 
@@ -530,7 +531,7 @@ class PyPlan(object):
 		self.end_condition = EndCondition()
 		# We save in the list of the open nodes, the initial status of the world
 		self.openNodes.heapqPush((0, copy.deepcopy(initWorld)))
-		if verbose>1: print 'INIT'.ljust(20), initWorld
+		if verbose>1 and indent=='': print 'INIT'.ljust(20), initWorld
 
 		# Create initial state
 		if self.symbol_mapping:
@@ -610,19 +611,26 @@ class PyPlan(object):
 			try:
 				plann = AGGLPlannerPlan([xx.split('@') for xx in self.results[i].history])
 				n = copy.deepcopy(plann)
-				from agglplanchecker import PyPlanChecker
 				while len(self.results[i].history)>0:
-					print 'check remove', self.results[i].history[0]
+					#n = n.removeFirstAction(initWorld.graph)
 					n = n.removeFirstActionDirect()
 					try:
+						print  'check', self.results[i].history[0]
+						print 'with plan'
+						print n
+						from agglplanchecker import PyPlanChecker
 						check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath, verbose=False)
 					except:
+						print 'dddd'
+						traceback.print_exc()
 						break
 					if check.achieved:
-						print 'Removing useless action', self.results[i].history[0]
+						print  '  (removed)', self.results[i].history[0]
+						#print 'Removing useless action', self.results[i].history[0]
 						self.results[i].history = self.results[i].history[1:]
 						plann = copy.deepcopy(n)
 					else:
+						print  '  (not removed)', self.results[i].history[0]
 						break
 			except:
 				traceback.print_exc()
@@ -642,13 +650,13 @@ class PyPlan(object):
 					paramsWithoutNew = copy.deepcopy(ac.parameters)
 					for param in ac.parameters:
 						found = False
-						for arule in agmData.agm.rules:
+						for arule in domainAGM.agm.rules:
 							if arule.name == ac.name:
 								if param in arule.lhs.nodes:
 									found = True
 									break
 						if not found:
-							print 'removing fixed goal symbol', param
+							#print 'removing fixed goal symbol', param
 							del paramsWithoutNew[param]
 							#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
 					#print paramsWithoutNew
@@ -838,3 +846,5 @@ if __name__ == '__main__': # program domain problem result
 			agmData = AGMFileDataParsing.fromFile(sys.argv[1])
 			#agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
 			p = PyPlan(agmData, "/tmp/domain.py", sys.argv[2], sys.argv[3], '', None, [], open(sys.argv[4], 'w'))
+
+
