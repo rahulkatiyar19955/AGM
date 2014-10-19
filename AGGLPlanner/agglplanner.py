@@ -594,26 +594,29 @@ class PyPlan(object):
 			print 'UNKNOWN ERROR'
 			print self.end_condition.get()
 
-		if len(self.results)==0:
-			# If the length of the list is zero, it means that we have not found a plan.
+		if len(self.results)==0: # If the length of the list is zero, it means that we have not found a plan.
 			if verbose > 0: print 'No plan found.'
-		else:
-			# But, if the length is greater than zero, it means that we have found a plan.
-			# We go over all the actions of the plan, and we look for the best solution (the minimun cost).
+		else: # But, if the length is greater than zero, it means that we have found a plan.
 			if self.indent=='' and verbose > 0: print 'Got', len(self.results),' plans!'
 			min_idx = 0
-			for i in range(len(self.results)):
+			for i in range(len(self.results)): # We go over all the actions of the plan, and we look for the best solution (the minimun cost).
 				if self.results[i].cost < self.results[min_idx].cost:
 					min_idx = i
 			i = min_idx
 
+			print '<<'
+			for action_index in xrange(len(self.results[i].history)):
+				action = self.results[i].history[action_index]
+				ac = AGGLPlannerAction(action)
+				print self.indent+str(action)
+			print '>>'
 
 			try:
 				plann = AGGLPlannerPlan([xx.split('@') for xx in self.results[i].history])
 				n = copy.deepcopy(plann)
 				while len(self.results[i].history)>0:
-					#n = n.removeFirstAction(initWorld.graph)
-					n = n.removeFirstActionDirect()
+					n = n.removeFirstAction(initWorld.graph)
+					#n = n.removeFirstActionDirect()
 					try:
 						print  'check', self.results[i].history[0]
 						print 'with plan'
@@ -626,7 +629,6 @@ class PyPlan(object):
 						break
 					if check.achieved:
 						print  '  (removed)', self.results[i].history[0]
-						#print 'Removing useless action', self.results[i].history[0]
 						self.results[i].history = self.results[i].history[1:]
 						plann = copy.deepcopy(n)
 					else:
