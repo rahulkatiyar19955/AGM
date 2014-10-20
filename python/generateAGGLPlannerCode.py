@@ -213,7 +213,7 @@ def comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish='', verbose=False):"
 	indent += "\t"
 	ret += indent+"if stack == None: stack=[]"
 	ret += indent+"if equivalences == None: equivalences=[]"
@@ -454,7 +454,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	# TRIGGER
 	# TRIGGER
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, inCombo=False, equivalences=None, checked=True, finish=''):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, inCombo=False, equivalences=None, checked=True, finish='', verbose=False):"
 	indent += "\t"
 	ret += indent+"if stack == None: stack=[]"
 	ret += indent+"if equivalences == None: equivalences=[]"
@@ -468,7 +468,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 			lelele += 1
 			ret += indent+"test_symbol_"+n+" = snode.graph.nodes[n2id['"+n+"']]"
 			ret += indent+"if not (test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
-			moreErrorInformation = "print 'test_symbol_"+n+"(',"+"n2id['"+n+"'],').sType == "+nodesPlusParameters[n].sType+"' , test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
+			moreErrorInformation = "if verbose: print 'test_symbol_"+n+"(',"+"n2id['"+n+"'],').sType == "+nodesPlusParameters[n].sType+"' , test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
 			for other in symbols_in_stack:
 				ret += " and test_symbol_"+n+".name!=test_symbol_" + str(other) + ".name"
 			conditions, number, linksInfo = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
@@ -872,7 +872,7 @@ def CheckTarget(graph):
 """
 
 	else:
-		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping):'
+		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping=dict()):'
 		indent += "\t"
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 		ret += indent+"available = copy.deepcopy(graph.nodes)"

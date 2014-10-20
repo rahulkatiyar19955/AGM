@@ -54,7 +54,7 @@ number_of_threads = 0
 maxWorldIncrement = 14
 maxCost = 200
 stopWithFirstPlan = True
-verbose = 4
+verbose = 1
 maxTimeWaitAchieved = 5.
 maxTimeWaitLimit = 3000.
 
@@ -191,8 +191,9 @@ class AGGLPlannerPlan(object):
 		elif type(init) == type([]):
 			# we take each element of the list and we save it as a grammar rule.
 			for action in init:
-				#print type(action), len(action), action
-				self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
+				if action[0][0] != '#':
+					#print type(action), len(action), action
+					self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
 		#IF INIT IS A COMPLETE PLAN
 		elif type(init) == type(AGGLPlannerPlan()) or isinstance(init, AGGLPlannerPlan) or True:
 			# we make a copy of the plan
@@ -604,35 +605,39 @@ class PyPlan(object):
 					min_idx = i
 			i = min_idx
 
-			print '<<'
-			for action_index in xrange(len(self.results[i].history)):
-				action = self.results[i].history[action_index]
-				ac = AGGLPlannerAction(action)
-				print self.indent+str(action)
-			print '>>'
+			#print '<<'
+			#for action in self.results[i].history:
+				#print self.indent+str(action)
+			#print '>>'
 
 			try:
+				#unalista = []
+				#for xx in self.results[i].history:
+					#print xx
+					#unalista.append(xx.split('@'))
+				#unalista = [xx.split('@') for xx in self.results[i].history]
+				#plann = AGGLPlannerPlan(unalista)
 				plann = AGGLPlannerPlan([xx.split('@') for xx in self.results[i].history])
 				n = copy.deepcopy(plann)
 				while len(self.results[i].history)>0:
 					n = n.removeFirstAction(initWorld.graph)
 					#n = n.removeFirstActionDirect()
 					try:
-						print  'check', self.results[i].history[0]
-						print 'with plan'
-						print n
+						#print  'check', self.results[i].history[0]
+						#print 'with plan'
+						#print n
 						from agglplanchecker import PyPlanChecker
-						check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath, verbose=False)
+						check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath, symbol_mapping, verbose=False)
 					except:
-						print 'dddd'
+						#print 'dddd'
 						traceback.print_exc()
 						break
 					if check.achieved:
-						print  '  (removed)', self.results[i].history[0]
+						#print  '  (removed)', self.results[i].history[0]
 						self.results[i].history = self.results[i].history[1:]
 						plann = copy.deepcopy(n)
 					else:
-						print  '  (not removed)', self.results[i].history[0]
+						#print  '  (not removed)', self.results[i].history[0]
 						break
 			except:
 				traceback.print_exc()
