@@ -5,7 +5,7 @@
     <tab type="mainpage" visible="yes" title="main"/>
 	<tab type="user" url="@ref installation" visible="yes" title="installation"/>
 	<tab type="user" url="@ref tutorials" visible="yes" title="tutorials"/>
-	<tab type="modules" visible="yes" title="API" intro="There is a C++ and a Python API:"/>
+	<tab type="modules" visible="yes" title="API" intro="There is a C++ and a Python API. The Python version is designed for planning purposes, while the C++ version is designed to use the planner:"/>
     <tab type="namespaces" visible="yes" title="">
       <tab type="namespacelist" visible="yes" title="" intro=""/>
       <tab type="namespacemembers" visible="yes" title="" intro=""/>

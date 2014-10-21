@@ -848,8 +848,6 @@ if __name__ == '__main__': # program domain problem result
 	#with PyCallGraph(output=graphviz):
 		from parseAGGL import AGMFileDataParsing
 		
-		print '\n INICIO: '+sys.argv.__str__()+' '+sys.argv.__len__().__str__()+'\n'
-		
 		if len(sys.argv)<5:
 			print 'Usage\n\t', sys.argv[0], ' domain.aggl activeRules.py init.xml target.xml.py [result.plan]'
 			

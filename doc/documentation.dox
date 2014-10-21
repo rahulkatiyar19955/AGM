@@ -74,11 +74,11 @@ git clone git://github.com/ljmanso/AGM.git
 
 \section install Install
 
-In addition the regular C++ requirements for the library, you will need to install some dependencies for the editor. Some of them are mandatory (PySide, pyparsing) and others are optional, depending on what you intend to do, specially if you want to export AGGL rules to PNG files (numpy, ImageOps). In Debian-based GNU/Linux distributions these dependencies can be installed using the following commands (as root):
+In addition the regular C++ requirements for the library, you will need to install some dependencies for the editor. Some of them are mandatory (PySide) and others are optional, depending on what you intend to do, specially if you want to export AGGL rules to PNG files (numpy, ImageOps). In Debian-based GNU/Linux distributions these dependencies can be installed using the following commands (as root):
 
 Mandatory dependencies:
 \code{.sh}
-apt-get install cmake ppython python-pyside python-pyparsing
+apt-get install cmake ppython python-pyside
 \endcode
 
 Optional dependencies:
@@ -102,7 +102,6 @@ Lack of required dependencies is the most common issue when compiling, make sure
 - g++
 - python
 - PyPy
-- PyParsing
 - PySide
 - RoboComp: Optional. Required if it is desired to use AGM with RoboComp.
 - libboost-python: Optional. Required for libAGM Python bindings.

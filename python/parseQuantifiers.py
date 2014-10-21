@@ -1,5 +1,5 @@
-from pyparsing import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn, Literal, Combine
-from pyparsing import Suppress, ZeroOrMore, Group, StringEnd, srange, Forward, Optional, Or
+from pyparsinglocal import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn, Literal, Combine
+from pyparsinglocal import Suppress, ZeroOrMore, Group, StringEnd, srange, Forward, Optional, Or
 from AGGL import *
 #from PySide.QtCore import *
 #from PySide.QtGui import *
