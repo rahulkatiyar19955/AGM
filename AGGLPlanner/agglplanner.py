@@ -441,7 +441,7 @@ class LockableList():
 class LockableInteger(object):
 	##@brief constructor method. This method initializes the value of the integer and the
 	# mutex of the class.
-	# @val is the initial value of the integer (it is an optional parameter).
+	# @param val is the initial value of the integer (it is an optional parameter).
 	def __init__(self, val=0):
 		## The value of the integer
 		self.value = val
@@ -482,9 +482,13 @@ class LockableInteger(object):
 ## @brief This is the main class. This makes all the process in order to create, check and execute the plan.
 class PyPlan(object):
 	## @brief The constructor method. This initializes all the attributes of the class and makes the first check of the plan.
+	# @param domainAGM  is the file name where is saved the grammar rules.
 	# @param domainPath is the file name where is saved the grammar rules.
 	# @param init is the XML file where is saved the inital status of the world
 	# @param targetPath is the python file where is daved the target status of the world.
+	# @param indent The intentation for the output plan
+	# @param symbol_mapping mapping that should be used while planning (mainly used internally in recursive rules)
+	# @param excludeList grammar rule black list  (those which can't be used for planning)
 	# @param resultFile is the optional name of the file where the plan result will be stored.
 	def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile):
 		object.__init__(self)

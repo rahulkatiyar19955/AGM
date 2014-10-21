@@ -52,11 +52,12 @@ from generateAGGLPlannerCode import *
 ##@brief This class is responsible for checking the plan that is generated in python.
 class PyPlanChecker(object):
 	##@brief Constructor method: It initializes all class attributes and checks the plan
+	# @param agmData AGMFileDataParsing instance
 	# @param domainPath Python version of the grammar
 	# @param init XML-version of the initial world state
 	# @param planPath Path of the plan
 	# @param targetPath Python-version of the target state OR an instance of a function
-	# Also, there are two optionals parameters:
+	# @param symbolMapping mapping that should be used while planning (mainly used internally in recursive rules)
 	# @param resultPath is the path of the result is stored. By default it's empty
 	# @param verbose is a parameter that shows additional information
 	def __init__(self, agmData, domainPath, init, planPath, targetPath, symbolMapping=dict(), resultPath='', verbose=False):

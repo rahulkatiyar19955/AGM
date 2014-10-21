@@ -10,7 +10,7 @@ def distance(x1, y1, x2, y2):
 #
 # @param name The identifier of the symbol
 # @param sType The type of the symbol
-# @attributes An optional attribute map
+# @param attributes An optional attribute map
 class AGMSymbol(object):
 	def __init__(self, name, sType, pos=None, attributes=None):
 		object.__init__(self)
