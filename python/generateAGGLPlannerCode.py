@@ -867,6 +867,7 @@ def computeMaxScore(a, b, maxScore):
 	return maxScore
 
 def CheckTarget(graph):
+	#No hierarchical Rule
 	n2id = dict()
 	available = copy.deepcopy(graph.nodes)
 """

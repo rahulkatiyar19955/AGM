@@ -847,15 +847,19 @@ if __name__ == '__main__': # program domain problem result
 	if True:
 	#with PyCallGraph(output=graphviz):
 		from parseAGGL import AGMFileDataParsing
-		if len(sys.argv)<4:
-			print 'Usage\n\t', sys.argv[0], ' domain.aggl init.xml target.xml.py [result.plan]'
-		elif len(sys.argv)<5:
-			agmData = AGMFileDataParsing.fromFile(sys.argv[1])
-			#agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
-			p = PyPlan(agmData, "/tmp/domain.py", sys.argv[2], sys.argv[3], '', None, [], None)
+		
+		print '\n INICIO: '+sys.argv.__str__()+' '+sys.argv.__len__().__str__()+'\n'
+		
+		if len(sys.argv)<5:
+			print 'Usage\n\t', sys.argv[0], ' domain.aggl activeRules.py init.xml target.xml.py [result.plan]'
+			
 		else:
-			agmData = AGMFileDataParsing.fromFile(sys.argv[1])
-			#agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
-			p = PyPlan(agmData, "/tmp/domain.py", sys.argv[2], sys.argv[3], '', None, [], open(sys.argv[4], 'w'))
-
+			domainAGM = AGMFileDataParsing.fromFile(sys.argv[1])
+			domainPath = sys.argv[2]
+			init = sys.argv[3]
+			targetPath = sys.argv[4]
+			resultFile = None
+			if len(sys.argv)>=6: resultFile = open(sys.argv[5], 'w')
+			
+			p = PyPlan(domainAGM, domainPath, init, targetPath, '', dict(), [], resultFile)
 
