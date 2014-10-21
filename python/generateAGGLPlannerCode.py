@@ -213,7 +213,7 @@ def comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 
 	indent = "\n\t"
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish=''):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish='', verbose=False):"
 	indent += "\t"
 	ret += indent+"if stack == None: stack=[]"
 	ret += indent+"if equivalences == None: equivalences=[]"
@@ -454,7 +454,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	# TRIGGER
 	# TRIGGER
 	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, inCombo=False, equivalences=None, checked=True, finish=''):"
+	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, inCombo=False, equivalences=None, checked=True, finish='', verbose=False):"
 	indent += "\t"
 	ret += indent+"if stack == None: stack=[]"
 	ret += indent+"if equivalences == None: equivalences=[]"
@@ -468,7 +468,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 			lelele += 1
 			ret += indent+"test_symbol_"+n+" = snode.graph.nodes[n2id['"+n+"']]"
 			ret += indent+"if not (test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
-			moreErrorInformation = "print 'test_symbol_"+n+".sType == "+nodesPlusParameters[n].sType+"' , test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
+			moreErrorInformation = "if verbose: print 'test_symbol_"+n+"(',"+"n2id['"+n+"'],').sType == "+nodesPlusParameters[n].sType+"' , test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
 			for other in symbols_in_stack:
 				ret += " and test_symbol_"+n+".name!=test_symbol_" + str(other) + ".name"
 			conditions, number, linksInfo = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
@@ -482,7 +482,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 			ret += indent+"raise WrongRuleExecution('"+rule.name+"_trigger"+str(lelele)+"')"
 			indent = indent[:-1]
 		indent = indent[:-1]
-        #ret += indent+"smap = "+COPY_OPTION+"(n2id)"
+	#ret += indent+"smap = "+COPY_OPTION+"(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
@@ -496,9 +496,10 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	newNodes, deleteNodes, retypeNodes = rule.lhs.getNodeChanges(rule.rhs, rule.parametersAST)
 	ret += indent+"# Create nodes"
 	for newNode in newNodes:
-		ret += indent+"newName = str(getNewIdForSymbol(newNode))"
-                ret += indent+"n2id['"+newNode.name+"'] = newName"
-		ret += indent+"newNode.graph.nodes[newName] = AGMSymbol(newName, '"+newNode.sType+"')"
+		ret += indent+"if not '"+newNode.name+"' in n2id:"
+		ret += indent+"\tnewName = str(getNewIdForSymbol(newNode))"
+		ret += indent+"\tn2id['"+newNode.name+"'] = newName"
+		ret += indent+"newNode.graph.nodes[n2id['"+newNode.name+"']] = AGMSymbol(n2id['"+newNode.name+"'], '"+newNode.sType+"')"
 	ret += indent+"# Retype nodes"
 	# Retype nodes
 	for retypeNode in retypeNodes:
@@ -506,7 +507,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	ret += indent+"# Remove nodes"
 	# Remove nodes
 	for deleteNode in deleteNodes:
-                ret += indent+"del newNode.graph.nodes[n2id['"+deleteNode.name+"']]"
+		ret += indent+"del newNode.graph.nodes[n2id['"+deleteNode.name+"']]"
 	if len(deleteNodes)>0:
 		ret += indent+"newNode.graph.removeDanglingEdges()"
 	# Remove links
@@ -521,7 +522,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	# Create links
 	ret += indent+"# Create links"
 	for newLink in newLinks:
-                ret += indent+"l = AGMLink(n2id['"+newLink.a+"'], n2id['"+newLink.b+"'], '"+newLink.linkType+"')"
+		ret += indent+"l = AGMLink(n2id['"+newLink.a+"'], n2id['"+newLink.b+"'], '"+newLink.linkType+"')"
 		ret += indent+"if not l in newNode.graph.links:"
 		ret += indent+"\tnewNode.graph.links.append(l)"
 	# Quantifier-related code (EFFECT)
@@ -872,7 +873,7 @@ def CheckTarget(graph):
 """
 
 	else:
-		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping):'
+		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping=dict()):'
 		indent += "\t"
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 		ret += indent+"available = copy.deepcopy(graph.nodes)"
@@ -896,7 +897,7 @@ def CheckTarget(graph):
 	ret += indent+"# Hard score"
 	ret += indent+"scoreNodes = []"
 	ret += indent+"scoreLinks = []"
-	
+
 	for n_n in getOptimalTargetNodeCheckOrder(graph, lgraph):
 		n = str(n_n)
 		constant = False
@@ -912,7 +913,7 @@ def CheckTarget(graph):
 				ret += indent+"del available[n2id['"+n+"']]"
 			else:
 				ret += indent+"del available['"+n+"']"
-				
+
 
 	for n_n in getOptimalTargetNodeCheckOrder(graph, lgraph):
 		n = str(n_n)

@@ -222,6 +222,7 @@ INSTALL(PROGRAMS "AGGLPlanner/agglplanchecker.py" DESTINATION ${INST_BIN_PATH}/ 
 INSTALL(PROGRAMS "AGGLPlanner/agglplanchecker.py" DESTINATION ${INST_SHARE_PATH}/ RENAME agglplanchecker.py )
 INSTALL(PROGRAMS "AGGLPlanner/agglplan.py" DESTINATION ${INST_BIN_PATH}/ RENAME agglplan )
 INSTALL(PROGRAMS "AGGLPlanner/agglplan.py" DESTINATION ${INST_SHARE_PATH}/ RENAME agglplan.py )
+INSTALL(PROGRAMS "AGGLPlanner/agglcheckhierarchical.py" DESTINATION ${INST_BIN_PATH}/ RENAME agglcheckhierarchical )
 
 if (ROBOCOMP_SUPPORT)
 	INSTALL(FILES     AGMWorldModel.h DESTINATION ${INST_INCL_PATH}/ )

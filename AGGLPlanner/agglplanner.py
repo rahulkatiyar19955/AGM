@@ -191,8 +191,9 @@ class AGGLPlannerPlan(object):
 		elif type(init) == type([]):
 			# we take each element of the list and we save it as a grammar rule.
 			for action in init:
-				#print type(action), len(action), action
-				self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
+				if action[0][0] != '#':
+					#print type(action), len(action), action
+					self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
 		#IF INIT IS A COMPLETE PLAN
 		elif type(init) == type(AGGLPlannerPlan()) or isinstance(init, AGGLPlannerPlan) or True:
 			# we make a copy of the plan
@@ -492,6 +493,7 @@ class PyPlan(object):
 		initWorld.nodeId = 0
 
 		self.symbol_mapping = copy.deepcopy(symbol_mapping)
+		#print self.symbol_mapping
 		self.excludeList = copy.deepcopy(excludeList)
 		self.indent = copy.deepcopy(indent)
 
@@ -530,7 +532,7 @@ class PyPlan(object):
 		self.end_condition = EndCondition()
 		# We save in the list of the open nodes, the initial status of the world
 		self.openNodes.heapqPush((0, copy.deepcopy(initWorld)))
-		if verbose>1: print 'INIT'.ljust(20), initWorld
+		if verbose>1 and indent=='': print 'INIT'.ljust(20), initWorld
 
 		# Create initial state
 		if self.symbol_mapping:
@@ -593,64 +595,81 @@ class PyPlan(object):
 			print 'UNKNOWN ERROR'
 			print self.end_condition.get()
 
-		if len(self.results)==0:
-			# If the length of the list is zero, it means that we have not found a plan.
+		if len(self.results)==0: # If the length of the list is zero, it means that we have not found a plan.
 			if verbose > 0: print 'No plan found.'
-		else:
-			# But, if the length is greater than zero, it means that we have found a plan.
-			# We go over all the actions of the plan, and we look for the best solution (the minimun cost).
+		else: # But, if the length is greater than zero, it means that we have found a plan.
 			if self.indent=='' and verbose > 0: print 'Got', len(self.results),' plans!'
 			min_idx = 0
-			for i in range(len(self.results)):
+			for i in range(len(self.results)): # We go over all the actions of the plan, and we look for the best solution (the minimun cost).
 				if self.results[i].cost < self.results[min_idx].cost:
 					min_idx = i
 			i = min_idx
 
-		
+			#print '<<'
+			#for action in self.results[i].history:
+				#print self.indent+str(action)
+			#print '>>'
+
 			try:
+				#unalista = []
+				#for xx in self.results[i].history:
+					#print xx
+					#unalista.append(xx.split('@'))
+				#unalista = [xx.split('@') for xx in self.results[i].history]
+				#plann = AGGLPlannerPlan(unalista)
 				plann = AGGLPlannerPlan([xx.split('@') for xx in self.results[i].history])
 				n = copy.deepcopy(plann)
-				from agglplanchecker import PyPlanChecker
 				while len(self.results[i].history)>0:
-					n = n.removeFirstActionDirect()
+					n = n.removeFirstAction(initWorld.graph)
+					#n = n.removeFirstActionDirect()
 					try:
-						check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath)
+						#print  'check', self.results[i].history[0]
+						#print 'with plan'
+						#print n
+						from agglplanchecker import PyPlanChecker
+						check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath, symbol_mapping, verbose=False)
 					except:
+						#print 'dddd'
+						traceback.print_exc()
 						break
 					if check.achieved:
-						print 'Removing useless action', self.results[i].history[0]
+						#print  '  (removed)', self.results[i].history[0]
 						self.results[i].history = self.results[i].history[1:]
 						plann = copy.deepcopy(n)
 					else:
+						#print  '  (not removed)', self.results[i].history[0]
 						break
 			except:
+				traceback.print_exc()
 				pass
 
 			#print self.indent, self.results[i].history
 			for action_index in xrange(len(self.results[i].history)):
 				action = self.results[i].history[action_index]
 				ac = AGGLPlannerAction(action)
+				print self.indent+str(action)
+
+			if len(self.results[i].history) > 0:
+				action = self.results[i].history[0]
+				ac = AGGLPlannerAction(action)
 				if ac.hierarchical:
-					print self.indent+str(action)
-					if action_index == 0:
-						self.excludeList.append(ac.name)
-						paramsWithoutNew = copy.deepcopy(ac.parameters)
-						for param in ac.parameters:
-							found = False
-							for arule in agmData.agm.rules:
-								if arule.name == ac.name:
-									if param in arule.lhs.nodes:
-										found = True
-										break
-							if not found:
-								print 'removing fixed goal symbol', param
-								del paramsWithoutNew[param]
-								#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
-						#print paramsWithoutNew
-						aaa = PyPlan(domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, None)
-						print self.indent
-				else:
-					print self.indent+str(action)
+					self.excludeList.append(ac.name)
+					paramsWithoutNew = copy.deepcopy(ac.parameters)
+					for param in ac.parameters:
+						found = False
+						for arule in domainAGM.agm.rules:
+							if arule.name == ac.name:
+								if param in arule.lhs.nodes:
+									found = True
+									break
+						if not found:
+							#print 'removing fixed goal symbol', param
+							del paramsWithoutNew[param]
+							#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
+					#print paramsWithoutNew
+					print '\nDecomposing hierarchical rule ', ac.name, paramsWithoutNew
+					aaa = PyPlan(domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, None)
+					print self.indent
 
 			#printResult(self.results[i]) #the best solution
 			if resultFile != None:
@@ -833,6 +852,12 @@ if __name__ == '__main__': # program domain problem result
 		else:
 			#agmData = AGMFileDataParsing.fromFile(sys.argv[1])
 			#agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
+<<<<<<< HEAD
 			p = PyPlan(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], '', None, [], open(sys.argv[5], 'w'))
 
     #def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile):
+=======
+			p = PyPlan(agmData, "/tmp/domain.py", sys.argv[2], sys.argv[3], '', None, [], open(sys.argv[4], 'w'))
+
+
+>>>>>>> 9cdc299187413c120f2e617fba462f189caaca2a
