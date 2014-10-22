@@ -204,12 +204,7 @@ It is described in a separate page (\ref executive).
 \tableofcontents
 
 \section AGGLEditor_intro Introduction
-
-AGGLEditor is the tool that AGM provides for developing AGGL domain files.
-
-\section AGGLEditor_why Why another language?
-
-AGGLEditor is a visual editor for AGGL files. Writing graph-grammar rules in other languages such as PDDL can be daunting, specially if the context of the rule is of a considerable size. Take the following rule as an example:
+Writing planning domains where actions allow resizing the world model at planning-time in regular languages can be daunting, specially if the context of the actions is of a considerable size. AGGL is a planning domain specification language that aims for making this task easier. AGGLEditor is a visual editor used for writing AGGL domain files. Take the following rule as an example:
 
 \image html AGGLEditor.png
 
