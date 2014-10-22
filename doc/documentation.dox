@@ -78,7 +78,7 @@ In addition the regular C++ requirements for the library, you will need to insta
 
 Mandatory dependencies:
 \code{.sh}
-apt-get install cmake ppython python-pyside
+apt-get install cmake python python-pyside
 \endcode
 
 Optional dependencies:
