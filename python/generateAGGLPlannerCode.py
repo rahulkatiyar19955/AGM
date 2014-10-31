@@ -867,7 +867,9 @@ def computeMaxScore(a, b, maxScore):
 	return maxScore
 
 def CheckTarget(graph):
-	#No hierarchical Rule
+
+	starting_point = time.time()  # Guardamos tiempo inicial
+
 	n2id = dict()
 	available = copy.deepcopy(graph.nodes)
 """
@@ -974,14 +976,16 @@ def CheckTarget(graph):
 		if len(cond) > 1:
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
-	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ": return maxScore, True"
-
+	# aniadidos de mercedes:
+	space=indent+'	'
+	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"+space+"finalTime = time.time()-starting_point"+space+"print 'SI hemos llegado: '+maxScore.__str__()+' con tiempo '+finalTime.__str__()"+space+"return maxScore, True"
 
 	# Rule ending
 	while len(pops)>0:
 		ret += pops.pop()
 	indent = "\n\t"
 	if len(forHierarchicalRule)>0: indent+='\t'
-	ret += indent+"return maxScore, False"
+	# aniadidos de mercedes
+	ret += indent+"finalTime = time.time()-starting_point"+indent+"print 'NO hemos llegado: '+maxScore.__str__()+' con tiempo '+finalTime.__str__()"+indent+"return maxScore, False"
 	ret += "\n"
 	return ret
