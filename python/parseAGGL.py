@@ -91,7 +91,7 @@ class AGMFileDataParsing:
 	## This method makes the analysis of the .aggl file where is stored the grammar that we will use.
 	# It returns agmFD, a variable with the grammar file, the properties, symbols and rules of the grammar.
 	@staticmethod
-	def fromFile(filename, verbose=False):
+	def fromFile(filename, verbose=False, includeIncludes=True):
 		if verbose: print 'Verbose:', verbose
 		# Clear previous data
 		agmFD = AGMFileData()
@@ -186,10 +186,11 @@ class AGMFileDataParsing:
 		number = 0
 		for i in result.rules:
 			if i.includefile:
-				inc = AGMFileDataParsing.fromFile(i.includefile)
-				for incr in inc.agm.rules:
-					agmFD.addRule(incr)
-					number = number + 1
+				if includeIncludes:
+					inc = AGMFileDataParsing.fromFile(i.includefile)
+					for incr in inc.agm.rules:
+						agmFD.addRule(incr)
+						number = number + 1
 			else:
 				preconditionRec = None
 				parametersList = None
