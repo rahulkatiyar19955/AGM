@@ -7,7 +7,8 @@
 	<symbol id="105" type="object" />
 	<link src="5" dst="105" label="eq" />
 
-<!--	
+
+<!--
 	<symbol id="obj1r"  type="object" />
 	<symbol id="stt1r"  type="objectSt" />
 	<link  src="obj1r"   dst="stt1r"    label="milkpot" />
@@ -21,6 +22,7 @@
 	<link  src="obj1h"  dst="105"      label="in" />
 	<link  src="obj1r"  dst="obj1h"    label="eq" />
 -->
+
 
 	<symbol id="obj2r" type="object" />
 	<symbol id="stt2r" type="objectSt" />

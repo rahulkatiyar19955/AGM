@@ -1,14 +1,13 @@
 spacePattern=3
 lineThickness=2
 fontName=Arial
-name=domain
+name=domain_basic
 vertexDiameter=40
 shortPattern=1
 nodeThickness=2
 fontSize=12
 longPattern=3
 ===
-
 changeRoom : active(1)
 {
 	{
@@ -65,10 +64,10 @@ findObjectVisuallyInTable : active(1)
 	=>
 	{
 		status:objectSt(95,0)
-		object:object(-130,0)
+		contst:objectSt(95,110)
 		container:object(-130,110)
 		room:object(-325,110)
-		contst:objectSt(95,110)
+		object:object(-130,0)
 		robot:robot(-325,0)
 		container->contst(explored)*
 		container->contst(table)
@@ -385,6 +384,71 @@ setObjectNotReachable : passive(1)
 graspObject : active(1)
 {
 	{
+		room:object(-130,0)
+		object:object(130,0)
+		ost:objectSt(290,0)
+		robot:robot(0,-110)
+		table:object(0,110)
+		robot->object(know)
+		object->table(in)
+		robot->room(in)
+		table->room(in)
+		object->ost(reach)
+	}
+	=>
+	{
+		room:object(-130,0)
+		object:object(130,0)
+		ost:objectSt(290,0)
+		robot:robot(0,-110)
+		table:object(0,110)
+		robot->object(know)
+		object->robot(in)
+		robot->room(in)
+		table->room(in)
+		object->ost(reach)
+	}
+}
+
+handObject : active(1)
+{
+	{
+		person:person(0,110)
+		object:object(130,0)
+		robot:robot(0,-110)
+		room:object(-130,0)
+		robot->object(know)
+		object->robot(in)
+		robot->room(in)
+		person->room(in)
+	}
+	=>
+	{
+		person:person(0,110)
+		object:object(130,0)
+		robot:robot(0,-110)
+		room:object(-130,0)
+		robot->object(know)
+		object->person(in)
+		robot->room(in)
+		person->room(in)
+	}
+}
+
+leaveObject : active(1)
+{
+	{
+		table:object(0,110)
+		object:object(130,0)
+		robot:robot(0,-110)
+		room:object(-130,0)
+		robot->object(know)
+		object->robot(in)
+		robot->room(in)
+		table->room(in)
+	}
+	=>
+	{
 		table:object(0,110)
 		object:object(130,0)
 		robot:robot(0,-110)
@@ -393,57 +457,6 @@ graspObject : active(1)
 		object->table(in)
 		robot->room(in)
 		table->room(in)
-	}
-	=>
-	{
-		table:object(0,110)
-		object:object(130,0)
-		robot:robot(0,-110)
-		room:object(-130,0)
-		robot->object(know)
-		object->robot(in)
-		robot->room(in)
-		table->room(in)
-	}
-}
-
-deliverObject : active(1)
-{
-	{
-		person:person(0,115)
-		object:object(160,0)
-		room:object(-160,0)
-		robot:robot(0,-115)
-		robot->object(know)
-		object->robot(in)
-		robot->room(in)
-		person->room(in)
-	}
-	=>
-	{
-		person:person(0,115)
-		object:object(160,0)
-		room:object(-160,0)
-		robot:robot(0,-115)
-		robot->object(know)
-		object->person(in)
-		robot->room(in)
-		person->room(in)
-	}
-}
-
-handObject : active(1)
-{
-	{
-		status:objectSt(250,0)
-		object:object(0,0)
-		object->status(reach)
-	}
-	=>
-	{
-		status:objectSt(250,0)
-		object:object(0,0)
-		object->status(noReach)
 	}
 }
 
@@ -519,11 +532,11 @@ tellHumanAboutMug : active(1)
 {
 	{
 		statusr:objectSt(-425,55)
+		conth:object(-45,120)
 		robot:robot(-295,-135)
 		person:person(45,-135)
 		objectr:object(-235,-30)
 		contr:object(-180,125)
-		conth:object(-45,120)
 		robot->objectr(know)
 		robot->person(interacting)
 		objectr->statusr(hasStatus)
@@ -538,10 +551,10 @@ tellHumanAboutMug : active(1)
 		statusr:objectSt(-445,70)
 		objecth:object(0,-10)
 		robot:robot(-295,-135)
+		conth:object(-45,175)
 		person:person(45,-135)
 		objectr:object(-235,-10)
 		contr:object(-185,175)
-		conth:object(-45,175)
 		statush:objectSt(205,85)
 		robot->objectr(know)
 		robot->person(interacting)
@@ -568,11 +581,11 @@ tellHumanAboutMilk : active(1)
 {
 	{
 		statusr:objectSt(-425,55)
+		conth:object(-45,120)
 		robot:robot(-295,-135)
 		person:person(45,-135)
 		objectr:object(-235,-30)
 		contr:object(-180,125)
-		conth:object(-45,120)
 		robot->objectr(know)
 		robot->person(interacting)
 		objectr->statusr(hasStatus)
@@ -587,10 +600,10 @@ tellHumanAboutMilk : active(1)
 		statusr:objectSt(-445,70)
 		objecth:object(0,-10)
 		robot:robot(-295,-135)
+		conth:object(-45,175)
 		person:person(45,-135)
 		objectr:object(-235,-10)
 		contr:object(-185,175)
-		conth:object(-45,175)
 		statush:objectSt(205,85)
 		robot->objectr(know)
 		robot->person(interacting)
@@ -617,11 +630,11 @@ tellHumanAboutCoffeePot : active(1)
 {
 	{
 		statusr:objectSt(-425,55)
+		conth:object(-45,120)
 		robot:robot(-295,-135)
 		person:person(45,-135)
 		objectr:object(-235,-30)
 		contr:object(-180,125)
-		conth:object(-45,120)
 		robot->objectr(know)
 		robot->person(interacting)
 		objectr->statusr(hasStatus)
@@ -636,10 +649,10 @@ tellHumanAboutCoffeePot : active(1)
 		statusr:objectSt(-445,70)
 		objecth:object(0,-10)
 		robot:robot(-295,-135)
+		conth:object(-45,175)
 		person:person(45,-135)
 		objectr:object(-235,-10)
 		contr:object(-185,175)
-		conth:object(-45,175)
 		statush:objectSt(205,85)
 		robot->objectr(know)
 		robot->person(interacting)
@@ -666,11 +679,11 @@ tellHumanAboutTable : active(1)
 {
 	{
 		statusr:objectSt(-425,55)
+		conth:object(-45,120)
 		robot:robot(-295,-135)
 		person:person(45,-135)
 		objectr:object(-235,-30)
 		contr:object(-180,125)
-		conth:object(-45,120)
 		robot->objectr(know)
 		robot->person(interacting)
 		objectr->statusr(hasStatus)
@@ -685,10 +698,10 @@ tellHumanAboutTable : active(1)
 		statusr:objectSt(-445,70)
 		objecth:object(0,-10)
 		robot:robot(-295,-135)
+		conth:object(-45,175)
 		person:person(45,-135)
 		objectr:object(-235,-10)
 		contr:object(-185,175)
-		conth:object(-45,175)
 		statush:objectSt(205,85)
 		robot->objectr(know)
 		robot->person(interacting)
@@ -715,8 +728,8 @@ tellHumanAboutUnknownObject : active(1)
 {
 	{
 		statusr:objectSt(-490,-25)
-		conth:object(-90,100)
 		robot:robot(-295,-135)
+		conth:object(-90,100)
 		person:person(-90,-135)
 		objectr:object(-295,-25)
 		contr:object(-295,100)
@@ -732,8 +745,8 @@ tellHumanAboutUnknownObject : active(1)
 	{
 		statusr:objectSt(-490,-25)
 		objecth:object(-100,-25)
-		conth:object(-100,100)
 		robot:robot(-295,-135)
+		conth:object(-100,100)
 		person:person(-100,-135)
 		objectr:object(-295,-25)
 		contr:object(-300,100)

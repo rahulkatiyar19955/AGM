@@ -9,7 +9,7 @@ fontSize=12
 longPattern=3
 ===
 
-include(/home/robocomp/robocomp/components/robocomp-ursus-rockin/etc/domain_basic.aggl)
+include(/home/robocomp/AGM/examples/makeMeCoffee/domain_basic.aggl)
 
 hierarchical hierarchicalFindMilkInTable : active(1)
 {
@@ -169,7 +169,6 @@ hierarchical robotMovesObjectFromContainer : active(1)
 		robot->c2(know)
 		robot->c1(know)
 		object->c1(in)
-		object->os(reach)
 		room->roomst(room)
 		c1->room(in)
 		c2->room(in)
@@ -193,6 +192,59 @@ hierarchical robotMovesObjectFromContainer : active(1)
 		c1->room(in)
 		c2->room(in)
 		robot->room(in)
+	}
+}
+
+
+hierarchical robotDeliversObject : active(1)
+{
+	{
+		roomst:roomSt(-950,0)
+		room:object(-755,0)
+		object:object(-390,0)
+		robot:robot(-575,0)
+		person:person(-650,100)
+		robot->object(know)
+		room->roomst(room)
+		person->room(in)
+	}
+	=>
+	{
+		roomst:roomSt(-950,0)
+		room:object(-755,0)
+		object:object(-390,0)
+		robot:robot(-575,0)
+		person:person(-650,100)
+		robot->object(know)
+		object->person(in)
+		room->roomst(room)
+		person->room(in)
+		robot->room(in)
+	}
+	effect
+	{
+		(and
+			(forall
+				previousroom:object
+				(when
+					(and
+						(not (= previousroom room))
+						(in previousroom robot)
+					)
+					(not (in previousroom robot))
+				)
+			)
+			(forall
+				previouscontainer:object
+				(when
+					(and
+						(not (= previouscontainer person))
+						(in previouscontainer object)
+					)
+					(not (in previouscontainer object))
+				)
+			)
+		)
 	}
 }
 
