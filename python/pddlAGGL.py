@@ -112,6 +112,7 @@ class AGMRulePDDL:
 		string += AGMRulePDDL.listHandlingPDDLEffects(rule, forgetList, newList, agmlist, nodeDict) # List handling
 		string += AGMRulePDDL.newAndForgetNodesTypesPDDLEffects(rule, newList, forgetList, nodeDict) # TYPE assignment for created nod
 		string += AGMRulePDDL.linkPatternsPDDLEffects(rule, nodeDict)
+		string += AGMRulePDDL.explicitEffectsPDDLEffects(rule, nodeDict)
 		string += ' (increase (total-cost) '
 		string += rule.cost
 		string += ') )\n'
@@ -255,6 +256,10 @@ class AGMRulePDDL:
 				ret += ' (not ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + '))'
 			else:
 				ret += ' ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + ')'
+		return ret
+	@staticmethod
+	def explicitEffectsPDDLEffects(rule, nodeDict, pddlVerbose=False):
+		ret = str(rule.effect)
 		return ret
 	@staticmethod
 	def linkPatternsPDDLPreconditions(rule, nodeDict, pddlVerbose=False):
