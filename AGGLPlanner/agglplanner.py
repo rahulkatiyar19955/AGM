@@ -51,7 +51,7 @@ import inspect
 
 # C O N F I G U R A T I O N
 number_of_threads = 0
-maxWorldIncrement = 14
+maxWorldIncrement = 10
 maxCost = 200
 stopWithFirstPlan = True
 verbose = 1
@@ -847,10 +847,10 @@ if __name__ == '__main__': # program domain problem result
 	if True:
 	#with PyCallGraph(output=graphviz):
 		from parseAGGL import AGMFileDataParsing
-		
+
 		if len(sys.argv)<5:
 			print 'Usage\n\t', sys.argv[0], ' domain.aggl activeRules.py init.xml target.xml.py [result.plan]'
-			
+
 		else:
 			domainAGM = AGMFileDataParsing.fromFile(sys.argv[1])
 			domainPath = sys.argv[2]
@@ -858,6 +858,6 @@ if __name__ == '__main__': # program domain problem result
 			targetPath = sys.argv[4]
 			resultFile = None
 			if len(sys.argv)>=6: resultFile = open(sys.argv[5], 'w')
-			
+
 			p = PyPlan(domainAGM, domainPath, init, targetPath, '', dict(), [], resultFile)
 

@@ -138,7 +138,7 @@ class AGMEditor(QMainWindow):
 		self.selectTool(4)
 		self.ui.toolsList.setCurrentRow(4)
 		self.selectTool(4)
-		
+
 		global vertexDiameter
 		global fontName
 		global fontSize
@@ -208,7 +208,7 @@ class AGMEditor(QMainWindow):
 		ruleN = self.ui.rulesList.currentRow()
 		if type(self.agmData.agm.rules[ruleN]) != AGMRule:
 			self.agmData.agm.rules[ruleN].text = self.ui.comboRuleTextEdit.toPlainText()
-	
+
 	# Manages close events
 	def appClose(self):
 		if self.modified:
@@ -419,13 +419,13 @@ class AGMEditor(QMainWindow):
 		y2 = max(a[3], b[3])
 		ret = (0, y1, w, y2)
 		return ret
-		
+
 	def open(self):
 		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.aggl")[0])
 		self.openFromFile(path)
 	def openFromFile(self, path):
 		if path[-5:] != '.aggl': path = path + '.aggl'
-		self.agmData = AGMFileDataParsing.fromFile(path) # , verbose=True
+		self.agmData = AGMFileDataParsing.fromFile(path, verbose=False, includeIncludes=False)
 
 		self.ui.rulesList.clear()
 		for rule in self.agmData.agm.rules:
@@ -462,7 +462,7 @@ class AGMEditor(QMainWindow):
 		self.agmData.properties['fontName'] = fontName
 		global fontSize
 		self.agmData.properties['fontSize'] = fontSize
-	
+
 		self.agmData.toFile(path)
 		self.modified = False
 
