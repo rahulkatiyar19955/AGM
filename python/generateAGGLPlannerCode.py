@@ -881,9 +881,19 @@ def CheckTarget(graph):
 		ret += indent+"starting_point = time.time()  # Guardamos tiempo inicial"
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 		ret += indent+"available = copy.deepcopy(graph.nodes)"
-		
-	ramasGrafo = graphBranchs(graph)
-	
+
+	if forHierarchicalRule=='':
+		ramasGrafo = graphBranchs(graph)
+
+		print '--------------------------'
+		print 'ramas:', len(ramasGrafo)
+		for r in ramasGrafo:
+			print 'rama'
+			print r
+			print '_____'
+		import sys
+		sys.exit(0)
+
 	## Generate Link list
 	linkList = []
 	for link_i in range(len(graph.links)):
@@ -1006,81 +1016,46 @@ def CheckTarget(graph):
 def graphBranchs(graph):
 	# Creamos las listas que vamos a necesitar.
 	constantes = []
-	ramas      = []
-	
+
 	# Sacamos simbolos constantes y variables del grafo:
 	for symbol in graph.nodes:
-		symbolStr = symbol.__str__()
+		symbolStr = symbol
 		if (symbolStr[0] in "0123456789") and symbolStr in graph.nodes:
 			constantes.append(symbolStr)
-	
+
 	# Hacemos copia del grafo, en la que poder modificar lo que queramos con toda seguridad
 	# Eliminamos de migrafo todas las constantes y aquellos enlaces que unan variables con constantes
 	# o constantes con constantes,
 	migrafo = copy.deepcopy(graph)
-		
 	for constante in constantes:
 		migrafo.removeNodeByName(constante)
-		
-		for link in graph.links:
-			if link.a==constante or link.b==constante:
-				migrafo.removeEdge(link.a, link.b)
 
 	# Ahora tenemos solo las variables. Hay que sacar ramas separadas:
-	ramas = sacarRamas(migrafo)
-		
-	return ramas
+	return sacarRamas(migrafo)
 
 
 def sacarRamas(migrafo):
-	# Tenemos que recorrer el grafo para ver que ramas estan unidas y cuales estan separadas
-	bandera = False
-	visitados = []
-	nodos = dict()
-	links = []
-	vectorGrafos=[]
+	# Inicializamos una rama para cada nodo
+	ramas = []
+	for symbol in migrafo.nodes:
+		ramas.append([symbol])
 
-	# Sacamos los simbolos variables del grafo recortado que hemos creado:
-	for symbolName in migrafo.nodes:
-		symbol = migrafo.nodes[symbolName]
-		
-		# Si el simbolo no ha sido visitado antes, lo guardamos en un vector de visitados
-		# para no repetir la busqueda o atascarnos en un bucle, y miramos que nodos enlaza.
-		if visitados.__contains__(symbolName)==False:
-			visitados.append(symbolName)
-			nodos[symbol.name] = AGMSymbol(symbol.name, symbol.sType)
-			
-			# Recorremos todos los links que nos quedan en el grafo recortado
-			for link in migrafo.links:
-				# Vamos creando un grafo donde este la variable symbol con todos sus enlaces y
-				# los demas simbolos a los que este unida. Marcamos estos simbolos como visitados
-				# para evitar bucles:
-				if symbolName==link.a: 
-					bandera = True
-					variableName = link.b
-				if symbolName==link.b: 
-					bandera = True
-					variableName = link.a
-					
-				if bandera==True:
-					# Si la bandera esta levantada, es que hemos encontrado un link que une nuestro symbol
-					# actual con otro simbolo variable. Borramos el link actual para evitar bucles, metemos
-					# el nuevo simbolo en visitados para evitar mas bucles, metemos la nueva variable en
-					# el diccionario de nodos y el link en la lista de links.
-					migrafo.removeEdge(link.a, link.b) 
-					visitados.append(variableName)
-					variable = migrafo.nodes[variableName]
-					nodos[variable.name] = AGMSymbol(variable.name, variable.sType)
-					links.append(link)
-					
-			# Cuando terminamos de recorrer los links creamos el grafo y lo guardamos en el vector de
-			# grafos, vectorGrafos, y limpiamos el diccionario de nodos y la lista de enlaces.
-			grafo = AGMGraph(nodos, links)
-			vectorGrafos.append(grafo)
+	# Para cada enlace, comprobamos si debemos unir dos ramas
+	for link in migrafo.links:
+		# Para cada combinacion de pares de ramas distintas...
+		rama1Idx = 0
+		while rama1Idx < len(ramas):
+			rama1 = ramas[rama1Idx]
+			rama2Idx = 0
+			while rama2Idx < len(ramas):
+				if rama1Idx != rama2Idx:
+					rama2 = ramas[rama2Idx]
+					# Si un enlace une nodos de dos ramas, las unimos
+					if link.a in rama1 and link.b in rama2:
+						rama1 += rama2
+						ramas.remove(rama2)
+						break
+				rama2Idx += 1
+			rama1Idx += 1
+	return ramas
 
-			nodos = dict()
-			links = []
-		else:
-			print 'Ya ha sido visitado'
-			
-	return vectorGrafos

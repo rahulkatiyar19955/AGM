@@ -163,7 +163,7 @@ class AGMGraph(object):
 			ret += ' '+str(l)+' '
 		ret += ']\n'
 		return ret
-	
+
 	def __repr__(self):
 		return self.__str__()
 	def __cmp__(self):
@@ -308,16 +308,25 @@ class AGMGraph(object):
 		if attributes==None: attributes=dict()
 		if not name in self.nodes.keys():
 			self.nodes[name] = AGMSymbol(str(name), str(stype), [x,y], attributes)
+
 	def removeNode(self, x, y, diameter):
 		name, found = self.getName(x, y, diameter)
 		if found:
 			del self.nodes[name]
+			self.removeEdgesRelatedTo(name)
 		else:
 			pass
-		
+
 	def removeNodeByName(self, name):
 		del self.nodes[name]
-		
+		self.removeEdgesRelatedTo(name)
+
+	def removeEdgesRelatedTo(self, name):
+		for link in self.links:
+			if link.a == name or link.b == name:
+				self.removeEdge(link.a, link.b)
+
+
 	def moveNode(self, name, x, y, diameter):
 		if name in self.nodes:
 			self.nodes[name].pos = [x, y]
