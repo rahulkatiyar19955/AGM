@@ -1,4 +1,5 @@
 import itertools
+import re
 
 global useDiff
 useDiff = False
@@ -259,7 +260,34 @@ class AGMRulePDDL:
 		return ret
 	@staticmethod
 	def explicitEffectsPDDLEffects(rule, nodeDict, pddlVerbose=False):
+		if len(rule.effect) == 0: return ''
+
 		ret = str(rule.effect)
+
+		ret = str(rule.effect)
+		#print 'ORIGINAL', rule.effect
+		#print '\n'
+		for i in nodeDict:
+			#print i,
+			ret = ret.replace(' '+i+' ', ' ?'+i+' ')
+			ret = ret.replace(' '+i+')', ' ?'+i+')')
+		#print '\n'
+
+		pattern = "\(forall[\t\n ]+(\w+):(\w+)[\t\n ]+\(when([\t\n ]+)"
+		m = re.search(pattern, ret)
+		if m:
+			#print m.endpos
+			symbol_name = m.group(1)
+			#print symbol_name
+			symbol_type = m.group(2)
+			#print symbol_type
+			blank_space = m.group(3)
+			ret = ret[:m.end(3)] + '(IS' + symbol_type + ' ?v' + symbol_name + ')' + blank_space + ret[m.end(3):]
+			ret = ret.replace(symbol_name+':'+symbol_type, '( ?v'+symbol_name+' )')
+			ret = ret.replace(' '+symbol_name, ' ?v'+symbol_name)
+
+		#print '\nRESULT', ret
+
 		return ret
 	@staticmethod
 	def linkPatternsPDDLPreconditions(rule, nodeDict, pddlVerbose=False):
