@@ -310,4 +310,3 @@ class AGMRulePDDL:
 				#if pddlVerbose: print 'EFFECTS modify', n
 				ret += ' (not(IS'+typeL + ' ?v' + nodeDict[n] +')) (IS'+typeR + ' ?v' + nodeDict[n] +')'
 		return ret
-
