@@ -163,6 +163,7 @@ class AGMGraph(object):
 			ret += ' '+str(l)+' '
 		ret += ']\n'
 		return ret
+	
 	def __repr__(self):
 		return self.__str__()
 	def __cmp__(self):
@@ -313,6 +314,10 @@ class AGMGraph(object):
 			del self.nodes[name]
 		else:
 			pass
+		
+	def removeNodeByName(self, name):
+		del self.nodes[name]
+		
 	def moveNode(self, name, x, y, diameter):
 		if name in self.nodes:
 			self.nodes[name].pos = [x, y]
