@@ -1033,8 +1033,6 @@ def graphBranchs(graph):
 
 
 def sacarRamas(migrafo):
-
-	print 'MIGRAFO: \n'+migrafo.__str__()
 	# Tenemos que recorrer el grafo para ver que ramas estan unidas y cuales estan separadas
 	bandera = False
 	visitados = []
@@ -1084,8 +1082,5 @@ def sacarRamas(migrafo):
 			links = []
 		else:
 			print 'Ya ha sido visitado'
-
-	#print'Mi vector de grafos: '+vectorGrafos.__str__()
-	print vectorGrafos.__len__().__str__()	
-	print vectorGrafos.__str__()
+			
 	return vectorGrafos
