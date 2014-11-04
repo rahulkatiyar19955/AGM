@@ -1089,11 +1089,3 @@ def sacarRamas(migrafo):
 	print vectorGrafos.__len__().__str__()	
 	print vectorGrafos.__str__()
 	return vectorGrafos
-		
-		
-		
-	
-
-		
-	
-	
