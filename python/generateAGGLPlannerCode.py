@@ -535,6 +535,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 			effectCode, indent, effectId, stuff = normalRuleImplementation_EFFECT(rule.effectAST, indent)
 		except:
 			print 'Error in the "effects" section of rule', rule.name
+			print traceback.format_exc()
 			sys.exit(-1)
 		ret += indentP+'backVars = n2id.keys()'
 		ret += effectCode
@@ -690,13 +691,10 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 	if effectType == "not":
 		effectBody = effectBody[0]
 		if stuff['mode'] == 'condition':
-			print 'CONDITION NOT EFFECT inside not, the body is', effectBody
+			#print 'CONDITION NOT EFFECT inside not, the body is', effectBody
 			text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody, indent, 'not', stuff)
 			ret += text
-			ret += indent+'if effect'+str(formulaIdRet)+' == False: # inside not'
-			ret += indent+'\teffect'+str(formulaId)+'is TRUE! [because '+str(formulaIdRet)+' is False] # not'
-			ret += indent+'else: # inside not is false'
-			ret += indent+'\teffect'+str(formulaId)+'is FALSE! [because '+str(formulaIdRet)+' is True] # not'
+			ret += indent+'condition'+str(formulaId) + ' = not condition'+str(formulaIdRet)
 		else:
 			text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody, indent, 'not', stuff)
 			ret += text
@@ -706,20 +704,20 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 	# Partially done, the conditional mode is not tested
 	elif effectType == "and":
 		if stuff['mode'] == "condition":
-			ret += indent+'effect'+str(formulaId)+' = True # AND initialization as true'
+			ret += indent+'condition'+str(formulaId)+' = True # AND initialization as true'
 			first = True
 			for part in effectBody[0]:
 				if first: first = False
 				else:
-					ret += indent+'if effect'+str(formulaId)+': # if still true'
+					ret += indent+'if condition'+str(formulaId)+': # if still true'
 					indent += '\t'
 				text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(part, indent, 'and', stuff)
 				ret += text
-				ret += indent+'if effect'+str(formulaIdRet)+' == False: # if what\'s inside the AND is false'
-				ret += indent+'\teffect'+str(formulaId)+' = False # make the AND false'
+				ret += indent+'if condition'+str(formulaIdRet)+' == False: # if what\'s inside the AND is false'
+				ret += indent+'\tcondition'+str(formulaId)+' = False # make the AND false'
 		else:
 			for part in effectBody[0]:
-				text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(part, indent, 'and', stuff)
+				text, idt, formulaIdRet, stuff = normalRuleImplementation_EFFECT(part, indent, 'and', stuff)
 				ret += text
 	elif effectType == "forall":
 		for V in effectBody[0]:
@@ -742,8 +740,11 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 		text, indent, formulaIdRet2, stuff = normalRuleImplementation_EFFECT(effectBody[1], indent+'\t', 'whenB', stuff)
 		ret += text
 	elif effectType == "=":
-		print '\'=\' statements are not allowed in effects'
-		sys.exit(1)
+		if stuff['mode'] == "condition":
+			ret += indent+'condition'+str(formulaId) + ' = (n2id["'+effectBody[0]+'"] == n2id["'+effectBody[1]+'"])'
+		else:
+			print '\'=\' statements are not allowed in effects'
+			sys.exit(1)
 	elif effectType == "create":
 		ret += indent+"newName = str(getNewIdForSymbol(newNode))"
 		ret += indent+"smap['"+effectBody[0]+"'] = newName"
@@ -877,6 +878,7 @@ def CheckTarget(graph):
 	else:
 		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping=dict()):'
 		indent += "\t"
+		ret += indent+"starting_point = time.time()  # Guardamos tiempo inicial"
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 		ret += indent+"available = copy.deepcopy(graph.nodes)"
 	## Generate Link list
@@ -977,8 +979,10 @@ def CheckTarget(graph):
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
 	# aniadidos de mercedes:
-	space=indent+'	'
-	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"+space+"finalTime = time.time()-starting_point"+space+"print 'SI hemos llegado: '+maxScore.__str__()+' con tiempo '+finalTime.__str__()"+space+"return maxScore, True"
+	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
+	ret += indent+"\tfinalTime = time.time()-starting_point"
+	#ret += indent+"\tprint 'SI hemos llegado: ', maxScore, 'con tiempo', finalTime"
+	ret += indent+"\treturn maxScore, True"
 
 	# Rule ending
 	while len(pops)>0:
@@ -986,6 +990,8 @@ def CheckTarget(graph):
 	indent = "\n\t"
 	if len(forHierarchicalRule)>0: indent+='\t'
 	# aniadidos de mercedes
-	ret += indent+"finalTime = time.time()-starting_point"+indent+"print 'NO hemos llegado: '+maxScore.__str__()+' con tiempo '+finalTime.__str__()"+indent+"return maxScore, False"
+	ret += indent+"finalTime = time.time()-starting_point"
+	#ret += indent+"print 'NO hemos llegado: ', maxScore, 'con tiempo', finalTime"
+	ret += indent+"return maxScore, False"
 	ret += "\n"
 	return ret
