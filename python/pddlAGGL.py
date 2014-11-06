@@ -3,6 +3,10 @@ import re
 
 global useDiff
 useDiff = False
+
+global splitActionModif
+splitActionModif = True
+
 AGMListLastUsedName = 'ListAGMInternal'
 
 def translateList(alist, dictionary):
@@ -15,25 +19,31 @@ class AGMPDDL:
 	@staticmethod
 	def toPDDL(agm, name, skipPassive):
 		writeString  = '(define (domain AGGL)\n\n'
-		#writeString += '\t(:requirements :strips :typing :fluents)\n'
-		#writeString += '\t(:types unknown)\n'
+		typeStr = ''
+		global splitActionModif
+		if splitActionModif:
+			typeStr = ' - tipo'
+			writeString += '\t(:requirements :strips :typing )\n' # :fluents
+			writeString += '\t(:types tipo)\n'
+
 		writeString += '\t(:predicates\n'
 		global useDiff
 		if useDiff:
-			writeString += '\t\t(diff ?a ?b)\n'
-		writeString += '\t\t(firstunknown ?u)\n'
-		writeString += '\t\t(unknownorder ?ua ?ub)\n\n'
-		writeString += AGMPDDL.typePredicatesPDDL(agm)
-		writeString += AGMPDDL.linkPredicatesPDDL(agm)
+			writeString += '\t\t(diff ?a ?b'+typeStr+')\n'
+		writeString += '\t\t(firstunknown ?u'+typeStr+')\n'
+		writeString += '\t\t(unknownorder ?ua ?ub'+typeStr+')\n\n'
+		writeString += AGMPDDL.typePredicatesPDDL(agm, typeStr)
+		writeString += AGMPDDL.linkPredicatesPDDL(agm, typeStr)
 		writeString += '\t)\n\n'
-		writeString += '\t(:functions\n\t\t(total-cost)\n\t)\n\n'
+		if not splitActionModif:
+			writeString += '\t(:functions\n\t\t(total-cost)\n\t)\n\n'
 		for r in agm.rules:
 			if hasattr(r, 'newNodesList'):
 				writeString += AGMRulePDDL.toPDDL(r, skipPassive=skipPassive) + '\n'
 		writeString += ')\n'
 		return writeString
 	@staticmethod
-	def linkPredicatesPDDL(agm):
+	def linkPredicatesPDDL(agm, typeStr):
 		writeString = ''
 		linkSet = set()
 		for r in agm.rules:
@@ -41,10 +51,10 @@ class AGMPDDL:
 				linkSet = linkSet.union(r.linkTypes())
 		writeString += '\n'
 		for t in linkSet:
-			writeString += '\t\t('+t+' ?u ?v)\n'
+			writeString += '\t\t('+t+' ?u ?v'+typeStr+')\n'
 		return writeString
 	@staticmethod
-	def typePredicatesPDDL(agm):
+	def typePredicatesPDDL(agm, typeStr):
 		writeString = ''
 		typeSet = set()
 		for r in agm.rules:
@@ -53,7 +63,7 @@ class AGMPDDL:
 			#else:
 				#raise Exception("Combo rule")
 		for t in typeSet:
-			writeString += '\t\t(IS'+t+' ?n)\n'
+			writeString += '\t\t(IS'+t+' ?n'+typeStr+')\n'
 		return writeString
 
 #
@@ -100,6 +110,9 @@ class AGMRulePDDL:
 		string += '\t\t:parameters ('
 		for n in rule.stayingNodeList()+agmlist+forgetList:
 			string += ' ?v' + n
+		global splitActionModif
+		if splitActionModif:
+			string += ' - tipo'
 		string += ' )\n'
 		string += '\t\t:precondition (and'
 		string += AGMRulePDDL.existingNodesPDDLTypes(rule, nodeDict) # TYPE preconditions
@@ -113,12 +126,14 @@ class AGMRulePDDL:
 		string += AGMRulePDDL.listHandlingPDDLEffects(rule, forgetList, newList, agmlist, nodeDict) # List handling
 		string += AGMRulePDDL.newAndForgetNodesTypesPDDLEffects(rule, newList, forgetList, nodeDict) # TYPE assignment for created nod
 		string += AGMRulePDDL.linkPatternsPDDLEffects(rule, nodeDict)
+		if not splitActionModif:
+			string += ' (increase (total-cost) '
+			string += rule.cost
+			string += ')'
 		string += AGMRulePDDL.explicitEffectsPDDLEffects(rule, nodeDict)
-		string += ' (increase (total-cost) '
-		string += rule.cost
-		string += ') )\n'
+		string += '\n\t\t)\n'
 		string += '\t)\n'
-		
+
 		return string
 
 	#
@@ -239,56 +254,42 @@ class AGMRulePDDL:
 			link.a = nodeDict[link.a]
 			link.b = nodeDict[link.b]
 			posteriorLinkSet.add(link)
-		#print 'L', initialLinkSet
-		#print 'R', posteriorLinkSet
 		createLinks =  posteriorLinkSet.difference(initialLinkSet)
-		#print 'create', createLinks
 		for link in createLinks:
-			#print 'NEWLINK', str(link)
 			if link.enabled:
 				ret += ' ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + ')'
 			else:
 				ret += ' (not ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + '))'
 		deleteLinks = initialLinkSet.difference(posteriorLinkSet)
-		#print 'delete', deleteLinks
 		for link in deleteLinks:
-			#print 'REMOVELINK', str(link)
 			if link.enabled:
 				ret += ' (not ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + '))'
 			else:
 				ret += ' ('+link.linkType + ' ?v'+ link.a +' ?v'+ link.b + ')'
 		return ret
+
 	@staticmethod
 	def explicitEffectsPDDLEffects(rule, nodeDict, pddlVerbose=False):
+		global splitActionModif
+		if splitActionModif: typeStr = ' - tipo'
+		else: typeStr = ''
+
 		if len(rule.effect) == 0: return ''
-
 		ret = str(rule.effect)
-
-		ret = str(rule.effect)
-		#print 'ORIGINAL', rule.effect
-		#print '\n'
 		for i in nodeDict:
-			#print i,
 			ret = ret.replace(' '+i+' ', ' ?'+i+' ')
 			ret = ret.replace(' '+i+')', ' ?'+i+')')
-		#print '\n'
-
 		pattern = "\(forall[\t\n ]+(\w+):(\w+)[\t\n ]+\(when([\t\n ]+)"
 		m = re.search(pattern, ret)
 		if m:
-			#print m.endpos
 			symbol_name = m.group(1)
-			#print symbol_name
 			symbol_type = m.group(2)
-			#print symbol_type
 			blank_space = m.group(3)
 			ret = ret[:m.end(3)] + '(IS' + symbol_type + ' ?v' + symbol_name + ')' + blank_space + ret[m.end(3):]
-			ret = ret.replace(symbol_name+':'+symbol_type, '( ?v'+symbol_name+' )')
-			ret = ret.replace(' '+symbol_name, ' ?v'+symbol_name)
-
-		#print '\nRESULT', ret
-
+			ret = ret.replace(symbol_name+':'+symbol_type, '( ?v' + symbol_name + typeStr + ' )')
+			ret = ret.replace(' ' + symbol_name, ' ?v' + symbol_name)
 		return ret
+
 	@staticmethod
 	def linkPatternsPDDLPreconditions(rule, nodeDict, pddlVerbose=False):
 		ret = ''
