@@ -51,7 +51,7 @@ import inspect
 
 # C O N F I G U R A T I O N
 number_of_threads = 0
-maxWorldIncrement = 10
+maxWorldIncrement = 16
 maxCost = 200
 stopWithFirstPlan = True
 verbose = 1
@@ -797,7 +797,7 @@ class PyPlan(object):
 					self.lastTime = nowNow
 					#try:
 						#if self.indent == '':
-						#print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
+					print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
 						#rrrr = heapsort(self.openNodes)
 						#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
 						#if len(self.openNodes) > 0:

@@ -185,7 +185,8 @@ def ruleImplementation(rule):
 		#print rule.name, 'hierarchical'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 		ret += generateTarget(rule.rhs, rule.name, rule.lhs)
-		#ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
+
+#ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 	else:
 		print 'Unknown rule type'
 		sys.exit(-2346)
@@ -845,14 +846,162 @@ def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 	## return!
 	return optimal_node_list
 
-## Generates target
+
+##@brief This is the second version of the method that generates the target s code.
+#
+# @ingroup AGGLGeneration
+#
+# @param graph is the target graph used to generate the target code.
+# @param forHierarchicalRule is a condition. It means that the target uses hierarchical rules.
+# @param lgraph I dont have any idea of this param... It is the graph of the left hand?
+#
+# @retval ret is the python code used to chek the target world state.
+def generateTarget(graph, forHierarchicalRule='', lgraph=None):
+	return generateTarget_VersionLUIS(graph, forHierarchicalRule, lgraph)
+
+def generateTarget_VersionMERCEDES(graph, forHierarchicalRule='', lgraph=None):
+	# Variables del programa
+	linkList = []   # vector de enlaces del grafo.
+	constantes, listaNodos = encontrarOrden(graph, lgraph)
+	
+	ret = ''
+	indent = "\n\t"
+		
+	if len(forHierarchicalRule)==0:
+		ret += """import copy, sys \nsys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import * \n
+def computeMaxScore(a, b, maxScore):
+	s = 0
+	for i in a: s+=i
+	for i in b: s+=i
+	if s > maxScore: return s
+	return maxScore \n
+def CheckTarget(graph): \n
+	starting_point = time.time()              # Guardamos tiempo inicial
+	n2id = dict()                             # diccionario 
+	available = copy.deepcopy(graph.nodes)    # lista de nodos del grafo inicial.
+"""
+	else:
+		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping=dict()):'
+		indent += "\t"
+		ret += indent+"starting_point = time.time()  # Guardamos tiempo inicial"
+		ret += indent+"n2id = copy.deepcopy(smapping)\n"
+		ret += indent+"available = copy.deepcopy(graph.nodes)"
+		
+	ret += indent+"maxScore = 0"
+	ret += indent+"totalScore = "+calcularTotalScore(graph).__str__()+'\n'
+	
+	# Sacamos los enlaces y los transformamos de AGMLink a tuplas de string [origen, enlace, destino]
+	# y los ordenamos de menor a mayor con el metodo sorted
+	for link_i in range(len(graph.links)):
+		link = graph.links[link_i]
+		linkList.append([link.a, link.b, link.linkType])
+	linkList = sorted(linkList, key=itemgetter(0, 1, 2))	
+	
+	# Eliminamos las constantes de la lista de nodos 'available', de forma ordenada.
+	for symbol in constantes:
+		if len(forHierarchicalRule)>0:
+			ret += indent+"del available[n2id['"+symbol+"']]"
+		else:
+			ret += indent+"del available['"+symbol+"']"
+	
+	conditionsListList = []
+	# Generate the loop that checks the model
+	symbols_in_stack = []
+	score = 0
+
+	pops = []
+
+	ret += indent+"# Hard score"
+	ret += indent+"scoreNodes = []"
+	ret += indent+"scoreLinks = []"
+	
+	for n_n in listaNodos:
+		n = str(n_n)
+		ret += indent+"# "+n
+		constant = False
+		if (n[0] in "0123456789") and n in graph.nodes: # This checks the node is already in the model
+			constant = True
+		elif lgraph:
+			if n in lgraph.nodes:
+				constant = True
+		if constant:
+			if (n[0] in "0123456789") and n in graph.nodes:
+				ret += indent+"symbol_"+n+" = graph.nodes['"+n+"']"
+			else:
+				ret += indent+"symbol_"+n+" = graph.nodes[n2id['"+n+"']]"
+		else: # otherwise, we're talking about a variable!
+			ret += indent+"symbol_"+n+"_name = '" + n + "'"
+			ret += indent+"for symbol_"+n+"_name in available:"
+			indent += "\t"
+			ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
+
+		if len(forHierarchicalRule)>0:
+			if not constant:
+				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+		else:
+			if constant:
+				ret += indent+"n2id['"+n+"'] = '"+n+"'"
+			else:
+				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+		ret += indent+"linksVal = 0"
+		#ret += indent+"print n2id"
+		for cond in newLinkScore(graph.links, n_n, symbols_in_stack):
+			ret += indent+cond
+		ret += indent+"scoreLinks.append(linksVal)"
+		pops.append(indent+'scoreLinks.pop()')
+		ret += indent+"maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)"
+		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n_n].sType+"'"
+		for other in symbols_in_stack:
+			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
+		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack)
+		conditions = conditions.replace("snode.graph", "graph")
+		conditionsListList.append( [conditions, number] )
+		ret += conditions
+		ret += ":"
+		symbols_in_stack.append(n_n)
+		indent += "\t"
+		score += scorePerContition
+		ret += indent + "scoreNodes.append(100)"
+		pops.append(indent+'scoreNodes.pop()')
+		ret += indent + "maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)"
+
+	allConditionsStr = ''
+	for c in conditionsListList:
+		allConditionsStr += c[0]
+	conditionsSeparated = allConditionsStr.split("and ")
+	realCond = 0
+	for cond in conditionsSeparated:
+		if len(cond) > 1:
+			realCond += 1
+			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
+	# aniadidos de mercedes:
+	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
+	ret += indent+"\tfinalTime = time.time()-starting_point"
+	#ret += indent+"\tprint 'SI hemos llegado: ', maxScore, 'con tiempo', finalTime"
+	ret += indent+"\treturn maxScore, True"
+
+	# Rule ending
+	while len(pops)>0:
+		ret += pops.pop()
+	indent = "\n\t"
+	if len(forHierarchicalRule)>0: indent+='\t'
+	# aniadidos de mercedes
+	ret += indent+"finalTime = time.time()-starting_point"
+	#ret += indent+"print 'NO hemos llegado: ', maxScore, 'con tiempo', finalTime"
+	ret += indent+"return maxScore, False"
+	ret += "\n"
+	
+	return ret	
+	
+	
+##@brief This method generates the code of the target.xml file. Is the first version (Luis Version)
 #
 # @ingroup AGGLGeneration
 #
 # @param The graph used to generate the target
 #
 # @retval The python code used to check the target world state
-def generateTarget(graph, forHierarchicalRule='', lgraph=None):
+def generateTarget_VersionLUIS(graph, forHierarchicalRule='', lgraph=None):	
 	ret = ''
 	indent = "\n\t"
 
@@ -891,8 +1040,8 @@ def CheckTarget(graph):
 			print 'rama'
 			print r
 			print '_____'
-		import sys
-		sys.exit(0)
+		#import sys
+		#sys.exit(0) # me da error.
 
 	## Generate Link list
 	linkList = []
@@ -914,7 +1063,7 @@ def CheckTarget(graph):
 	ret += indent+"# Hard score"
 	ret += indent+"scoreNodes = []"
 	ret += indent+"scoreLinks = []"
-
+		
 	for n_n in getOptimalTargetNodeCheckOrder(graph, lgraph):
 		n = str(n_n)
 		constant = False
@@ -930,8 +1079,8 @@ def CheckTarget(graph):
 				ret += indent+"del available[n2id['"+n+"']]"
 			else:
 				ret += indent+"del available['"+n+"']"
-
-
+	
+	
 	for n_n in getOptimalTargetNodeCheckOrder(graph, lgraph):
 		n = str(n_n)
 		ret += indent+"# "+n
@@ -1011,13 +1160,81 @@ def CheckTarget(graph):
 
 
 
+#---------------------------------------------------------------------------------------------------
+#		METODOS AUXILIARES NUEVOS PARA EL NUEVO GENERATE TARGET CODE
+#---------------------------------------------------------------------------------------------------
+##@brief Este metodo calcula la puntuacion total del grafo objetivo. Por cada enlace del grafo
+# objetivo y por cada nodo que tenga, se suma 100 a la puntuacion.
+#
+# @param grafo es el grafo objetivo.
+#
+# @retval totalScore es la puntuacion maxima del grafo objetivo.
+def calcularTotalScore(grafo):
+	totalScore = 0
+	# Calculamos heuristica por el numero de simbolos:
+	nodes = len(grafo.nodes)
+	totalScore = nodes*100
+	# Calculamos heuristica por el numero de enlaces:
+	links = len(grafo.links)	
+	totalScore += (links*100)
+	
+	return totalScore
 
-#---------------------------------------------------------------------------
+##@brief Este metodo se encarga de ordenar los simbolos del grafo objetivo en un orden optimo. Para
+# ello hace la separacion entre simbolos constantes y simbolos variables. Para las constantes, las 
+# saca ya ordenadas del metodo getOptimalTargetNodeCheckOrder y las guarda en un vector de constantes.
+# Para las variables saca, primero, las ramas que forman en el grafo, y crea subgrafos con ellas para
+# despues ordenar cada subgrafo de forma optima con getOptimalTargetNodeCheckOrder y guardar el orden
+# en un vector de variables.
+#
+# @param grafo es el grafo objetivo.
+# @param lgrafo creo que es el grafo de la mano izquierda pero no estoy segura.
+#
+# @retval constantesOrdenadas es el vector con los simbolos constantes ordenados de forma optima.
+# @retval variablesOrdenadas es el vector que contiene vectores (uno por rama) con los simbolos variables 
+# ordenados de forma optima.
+def encontrarOrden(grafo, lgrafo):
+	# Variables del metodo:
+	constantesOrdenadas = []
+	variablesOrdenadas = []
+	vectorSubgrafos = []
+		
+	# Vamos a sacar primero las constantes en un orden optimo:
+	for n_n in getOptimalTargetNodeCheckOrder(grafo, lgrafo):
+		n = str(n_n)
+		constant = False
+		if (n[0] in "0123456789") and n in grafo.nodes: # This checks the node is already in the model
+			constantesOrdenadas.append(n_n)
+		elif lgrafo:
+			if n in lgrafo.nodes:
+				constantesOrdenadas.append(n_n)
+				
+	# Del grafo sacamos las ramas de variables y creamos un vector con todos los subgrafos de 
+	# variables del grafo original.
+	ramasGrafo = graphBranchs(grafo)
+	vectorSubgrafos = componerSubgrafos(grafo, ramasGrafo, constantesOrdenadas)
+	#print '\n VECTOR DE SUBGRAFOS: ', vectorSubgrafos
+		
+	i = 0
+	while i < len(vectorSubgrafos):
+		variablesOrdenadas.append(getOptimalTargetNodeCheckOrder(vectorSubgrafos[i], lgrafo))
+		i = i+1;
+
+
+	lista = list(constantesOrdenadas)
+	for v in variablesOrdenadas:
+		for v2 in v:
+			lista.append(v2)
+			
+	return constantesOrdenadas, lista
+
 ##@brief Este metodo se encarga de podar el grafo, de eliminar los simbolos
 # constantes con sus links y quedar solamente los simbolos variables con sus
 # links. Despues pasa el grafo podado a otra funcion que se encargara de sacar 
 # las ramas de variables que tiene el grafo.
+#
 # @param graph es el grafo objetivo.
+#
 # @retval un vector con los subgrafos de variables que componen el grafo original.
 def graphBranchs(graph):
 	# Creamos las listas que vamos a necesitar.
@@ -1039,11 +1256,13 @@ def graphBranchs(graph):
 	# Ahora tenemos solo las variables. Hay que sacar ramas separadas:
 	return sacarRamas(migrafo)
 
-
-##@brief Este metodo se encarga de sacar los subgrafos de variables que componen
+##@brief Este metodo se encarga de sacar las de simbolos variables que componen
 # el grafo original podado de simbolos constantes.
+#
 # @param migrafo es el grafo podado de constantes.
-# @retval ramas es l vector de subgrafos.
+#
+# @retval ramas es el vector de ramas (subvectores con los simbolos variables
+# que forman una rama del grafo podado).
 def sacarRamas(migrafo):
 	# Inicializamos una rama para cada nodo. Estamos metiendo los simbolos
 	# variables en el vector de ramas.
@@ -1070,3 +1289,40 @@ def sacarRamas(migrafo):
 			rama1Idx += 1
 	return ramas
 
+##@brief Este metodo se encarga de crear subgrafos a partir de las ramas de simbolos
+# variables que se han encontrado en el grafo objetivo original.
+#
+# @param grafo es el grafo objetivo original.
+# @param ramasGrafo es el vector con las ramas de simbolos variables del grafo original.
+# @param constantes es el vector de simbolos constantes del grafo original.
+#
+# @retval vectorSubgrafos es un vector que tiene en cada celda un subgrafo hecho con las
+# ramas del grafo original.
+def componerSubgrafos(grafo, ramasGrafo, constantes):
+	vectorSubgrafos = []
+	i=0
+	while i < len(ramasGrafo):
+		# Creamos un subgrafo en cada rama:
+		nodos = dict()
+		links = []
+		
+		# Creamos simbolos del subgrafo i
+		for symbol_name in ramasGrafo[i]:
+			symbol = grafo.nodes[symbol_name]
+			nodos[symbol.name] = AGMSymbol(symbol.name, symbol.sType)
+		
+		# Ahora sacamos los links que unen los nodos
+		for sym in nodos:
+			for link in grafo.links:
+				if link.a==sym and constantes.__contains__(link.b)==False and links.__contains__(link)==False:
+					links.append(link)
+				if link.b==sym and constantes.__contains__(link.a)==False and links.__contains__(link)==False:
+					links.append(link)	
+		# Creamos subgrafo y lo guardamos en el vector de grafos. Despues limpiamos las variables para
+		# comenzar otra iteracion de forma limpia...
+		vectorSubgrafos.append(AGMGraph(nodos, links))
+		nodos = dict()
+		links = []
+		i = i+1
+	
+	return vectorSubgrafos

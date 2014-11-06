@@ -577,6 +577,55 @@ tellHumanAboutMug : active(1)
 	}
 }
 
+tellHumanAboutGlasses : active(1)
+{
+	{
+		statusr:objectSt(-425,55)
+		conth:object(-45,120)
+		robot:robot(-295,-135)
+		person:person(45,-135)
+		objectr:object(-235,-30)
+		contr:object(-180,125)
+		robot->objectr(know)
+		robot->person(interacting)
+		objectr->statusr(hasStatus)
+		objectr->contr(in)
+		contr->conth(eq)
+		objectr->statusr(position)
+		objectr->statusr(classified)
+		objectr->statusr(glasses)
+	}
+	=>
+	{
+		statusr:objectSt(-445,70)
+		objecth:object(0,-10)
+		robot:robot(-295,-135)
+		conth:object(-45,175)
+		person:person(45,-135)
+		objectr:object(-235,-10)
+		contr:object(-185,175)
+		statush:objectSt(205,85)
+		robot->objectr(know)
+		robot->person(interacting)
+		objectr->statusr(hasStatus)
+		person->objecth(know)
+		objecth->statush(hasStatus)
+		objectr->objecth(eq)
+		objecth->conth(in)
+		objectr->statusr(position)
+		objectr->statusr(classified)
+		objectr->statusr(glasses)
+		objecth->statush(position)
+		objecth->statush(classified)
+		objecth->statush(glasses)
+		objecth->statush(see)
+		objecth->statush(reach)
+		objecth->statush(reachable)
+		objectr->contr(in)
+		contr->conth(eq)
+	}
+}
+
 tellHumanAboutMilk : active(1)
 {
 	{
