@@ -1012,7 +1012,13 @@ def CheckTarget(graph):
 
 
 
-#----------------------------------------------------------------------
+#---------------------------------------------------------------------------
+##@brief Este metodo se encarga de podar el grafo, de eliminar los simbolos
+# constantes con sus links y quedar solamente los simbolos variables con sus
+# links. Despues pasa el grafo podado a otra funcion que se encargara de sacar 
+# las ramas de variables que tiene el grafo.
+# @param graph es el grafo objetivo.
+# @retval un vector con los subgrafos de variables que componen el grafo original.
 def graphBranchs(graph):
 	# Creamos las listas que vamos a necesitar.
 	constantes = []
