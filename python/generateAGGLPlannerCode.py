@@ -884,7 +884,7 @@ def CheckTarget(graph):
 
 	if forHierarchicalRule=='':
 		ramasGrafo = graphBranchs(graph)
-
+		
 		print '--------------------------'
 		print 'ramas:', len(ramasGrafo)
 		for r in ramasGrafo:
@@ -1040,8 +1040,13 @@ def graphBranchs(graph):
 	return sacarRamas(migrafo)
 
 
+##@brief Este metodo se encarga de sacar los subgrafos de variables que componen
+# el grafo original podado de simbolos constantes.
+# @param migrafo es el grafo podado de constantes.
+# @retval ramas es l vector de subgrafos.
 def sacarRamas(migrafo):
-	# Inicializamos una rama para cada nodo
+	# Inicializamos una rama para cada nodo. Estamos metiendo los simbolos
+	# variables en el vector de ramas.
 	ramas = []
 	for symbol in migrafo.nodes:
 		ramas.append([symbol])
@@ -1051,11 +1056,11 @@ def sacarRamas(migrafo):
 		# Para cada combinacion de pares de ramas distintas...
 		rama1Idx = 0
 		while rama1Idx < len(ramas):
-			rama1 = ramas[rama1Idx]
+			rama1 = ramas[rama1Idx] #sacamos una variable.
 			rama2Idx = 0
 			while rama2Idx < len(ramas):
 				if rama1Idx != rama2Idx:
-					rama2 = ramas[rama2Idx]
+					rama2 = ramas[rama2Idx] # sacamos otra variable.
 					# Si un enlace une nodos de dos ramas, las unimos
 					if link.a in rama1 and link.b in rama2:
 						rama1 += rama2
