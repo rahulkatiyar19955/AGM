@@ -22,7 +22,6 @@ std::string int2str(const int32_t &i);
 
 
 
-#if ROBOCOMP_SUPPORT == 1
 
 /*!
  * \class AGMMisc
@@ -35,13 +34,14 @@ std::string int2str(const int32_t &i);
 class AGMMisc
 {
 public:
+#if ROBOCOMP_SUPPORT == 1
 	/*! Publish a new world model (<em>worldModel</em>) using the proxy <em>agmagenttopic</em> using <em>oldModel</em> as the old model. */
 	static void publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel, std::string sender="unspecified");
 	static void publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMAgentTopicPrx &agmagenttopic);
+#endif
 	static inline float str2float(const std::string &s);
 	static inline int32_t str2int(const std::string &s);
 	static inline std::string float2str(const float &f);
 	static inline std::string int2str(const int32_t &i);
 };
 
-#endif
