@@ -857,16 +857,17 @@ def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 #
 # @retval ret is the python code used to chek the target world state.
 def generateTarget(graph, forHierarchicalRule='', lgraph=None):
-	return generateTarget_VersionLUIS(graph, forHierarchicalRule, lgraph)
+	return generateTarget_VersionMERCEDES(graph, forHierarchicalRule, lgraph)
 
 def generateTarget_VersionMERCEDES(graph, forHierarchicalRule='', lgraph=None):
+	print 'version mercedes'
 	# Variables del programa
 	linkList = []   # vector de enlaces del grafo.
 	constantes, listaNodos = encontrarOrden(graph, lgraph)
-	
+
 	ret = ''
 	indent = "\n\t"
-		
+
 	if len(forHierarchicalRule)==0:
 		ret += """import copy, sys \nsys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import * \n
 def computeMaxScore(a, b, maxScore):
@@ -877,7 +878,7 @@ def computeMaxScore(a, b, maxScore):
 	return maxScore \n
 def CheckTarget(graph): \n
 	starting_point = time.time()              # Guardamos tiempo inicial
-	n2id = dict()                             # diccionario 
+	n2id = dict()                             # diccionario
 	available = copy.deepcopy(graph.nodes)    # lista de nodos del grafo inicial.
 """
 	else:
@@ -886,24 +887,24 @@ def CheckTarget(graph): \n
 		ret += indent+"starting_point = time.time()  # Guardamos tiempo inicial"
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 		ret += indent+"available = copy.deepcopy(graph.nodes)"
-		
+
 	ret += indent+"maxScore = 0"
 	ret += indent+"totalScore = "+calcularTotalScore(graph).__str__()+'\n'
-	
+
 	# Sacamos los enlaces y los transformamos de AGMLink a tuplas de string [origen, enlace, destino]
 	# y los ordenamos de menor a mayor con el metodo sorted
 	for link_i in range(len(graph.links)):
 		link = graph.links[link_i]
 		linkList.append([link.a, link.b, link.linkType])
-	linkList = sorted(linkList, key=itemgetter(0, 1, 2))	
-	
+	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
+
 	# Eliminamos las constantes de la lista de nodos 'available', de forma ordenada.
 	for symbol in constantes:
 		if len(forHierarchicalRule)>0:
 			ret += indent+"del available[n2id['"+symbol+"']]"
 		else:
 			ret += indent+"del available['"+symbol+"']"
-	
+
 	conditionsListList = []
 	# Generate the loop that checks the model
 	symbols_in_stack = []
@@ -914,7 +915,7 @@ def CheckTarget(graph): \n
 	ret += indent+"# Hard score"
 	ret += indent+"scoreNodes = []"
 	ret += indent+"scoreLinks = []"
-	
+
 	for n_n in listaNodos:
 		n = str(n_n)
 		ret += indent+"# "+n
@@ -990,10 +991,10 @@ def CheckTarget(graph): \n
 	#ret += indent+"print 'NO hemos llegado: ', maxScore, 'con tiempo', finalTime"
 	ret += indent+"return maxScore, False"
 	ret += "\n"
-	
-	return ret	
-	
-	
+
+	return ret
+
+
 ##@brief This method generates the code of the target.xml file. Is the first version (Luis Version)
 #
 # @ingroup AGGLGeneration
@@ -1001,7 +1002,8 @@ def CheckTarget(graph): \n
 # @param The graph used to generate the target
 #
 # @retval The python code used to check the target world state
-def generateTarget_VersionLUIS(graph, forHierarchicalRule='', lgraph=None):	
+def generateTarget_VersionLUIS(graph, forHierarchicalRule='', lgraph=None):
+	print 'version luis'
 	ret = ''
 	indent = "\n\t"
 
@@ -1031,18 +1033,6 @@ def CheckTarget(graph):
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 		ret += indent+"available = copy.deepcopy(graph.nodes)"
 
-	if forHierarchicalRule=='':
-		ramasGrafo = graphBranchs(graph)
-		
-		print '--------------------------'
-		print 'ramas:', len(ramasGrafo)
-		for r in ramasGrafo:
-			print 'rama'
-			print r
-			print '_____'
-		#import sys
-		#sys.exit(0) # me da error.
-
 	## Generate Link list
 	linkList = []
 	for link_i in range(len(graph.links)):
@@ -1063,7 +1053,7 @@ def CheckTarget(graph):
 	ret += indent+"# Hard score"
 	ret += indent+"scoreNodes = []"
 	ret += indent+"scoreLinks = []"
-		
+
 	for n_n in getOptimalTargetNodeCheckOrder(graph, lgraph):
 		n = str(n_n)
 		constant = False
@@ -1079,8 +1069,8 @@ def CheckTarget(graph):
 				ret += indent+"del available[n2id['"+n+"']]"
 			else:
 				ret += indent+"del available['"+n+"']"
-	
-	
+
+
 	for n_n in getOptimalTargetNodeCheckOrder(graph, lgraph):
 		n = str(n_n)
 		ret += indent+"# "+n
@@ -1175,13 +1165,13 @@ def calcularTotalScore(grafo):
 	nodes = len(grafo.nodes)
 	totalScore = nodes*100
 	# Calculamos heuristica por el numero de enlaces:
-	links = len(grafo.links)	
+	links = len(grafo.links)
 	totalScore += (links*100)
-	
+
 	return totalScore
 
 ##@brief Este metodo se encarga de ordenar los simbolos del grafo objetivo en un orden optimo. Para
-# ello hace la separacion entre simbolos constantes y simbolos variables. Para las constantes, las 
+# ello hace la separacion entre simbolos constantes y simbolos variables. Para las constantes, las
 # saca ya ordenadas del metodo getOptimalTargetNodeCheckOrder y las guarda en un vector de constantes.
 # Para las variables saca, primero, las ramas que forman en el grafo, y crea subgrafos con ellas para
 # despues ordenar cada subgrafo de forma optima con getOptimalTargetNodeCheckOrder y guardar el orden
@@ -1191,14 +1181,14 @@ def calcularTotalScore(grafo):
 # @param lgrafo creo que es el grafo de la mano izquierda pero no estoy segura.
 #
 # @retval constantesOrdenadas es el vector con los simbolos constantes ordenados de forma optima.
-# @retval variablesOrdenadas es el vector que contiene vectores (uno por rama) con los simbolos variables 
+# @retval variablesOrdenadas es el vector que contiene vectores (uno por rama) con los simbolos variables
 # ordenados de forma optima.
 def encontrarOrden(grafo, lgrafo):
 	# Variables del metodo:
 	constantesOrdenadas = []
 	variablesOrdenadas = []
 	vectorSubgrafos = []
-		
+
 	# Vamos a sacar primero las constantes en un orden optimo:
 	for n_n in getOptimalTargetNodeCheckOrder(grafo, lgrafo):
 		n = str(n_n)
@@ -1208,13 +1198,13 @@ def encontrarOrden(grafo, lgrafo):
 		elif lgrafo:
 			if n in lgrafo.nodes:
 				constantesOrdenadas.append(n_n)
-				
-	# Del grafo sacamos las ramas de variables y creamos un vector con todos los subgrafos de 
+
+	# Del grafo sacamos las ramas de variables y creamos un vector con todos los subgrafos de
 	# variables del grafo original.
 	ramasGrafo = graphBranchs(grafo)
 	vectorSubgrafos = componerSubgrafos(grafo, ramasGrafo, constantesOrdenadas)
 	#print '\n VECTOR DE SUBGRAFOS: ', vectorSubgrafos
-		
+
 	i = 0
 	while i < len(vectorSubgrafos):
 		variablesOrdenadas.append(getOptimalTargetNodeCheckOrder(vectorSubgrafos[i], lgrafo))
@@ -1225,12 +1215,12 @@ def encontrarOrden(grafo, lgrafo):
 	for v in variablesOrdenadas:
 		for v2 in v:
 			lista.append(v2)
-			
+
 	return constantesOrdenadas, lista
 
 ##@brief Este metodo se encarga de podar el grafo, de eliminar los simbolos
 # constantes con sus links y quedar solamente los simbolos variables con sus
-# links. Despues pasa el grafo podado a otra funcion que se encargara de sacar 
+# links. Despues pasa el grafo podado a otra funcion que se encargara de sacar
 # las ramas de variables que tiene el grafo.
 #
 # @param graph es el grafo objetivo.
@@ -1305,24 +1295,24 @@ def componerSubgrafos(grafo, ramasGrafo, constantes):
 		# Creamos un subgrafo en cada rama:
 		nodos = dict()
 		links = []
-		
+
 		# Creamos simbolos del subgrafo i
 		for symbol_name in ramasGrafo[i]:
 			symbol = grafo.nodes[symbol_name]
 			nodos[symbol.name] = AGMSymbol(symbol.name, symbol.sType)
-		
+
 		# Ahora sacamos los links que unen los nodos
 		for sym in nodos:
 			for link in grafo.links:
 				if link.a==sym and constantes.__contains__(link.b)==False and links.__contains__(link)==False:
 					links.append(link)
 				if link.b==sym and constantes.__contains__(link.a)==False and links.__contains__(link)==False:
-					links.append(link)	
+					links.append(link)
 		# Creamos subgrafo y lo guardamos en el vector de grafos. Despues limpiamos las variables para
 		# comenzar otra iteracion de forma limpia...
 		vectorSubgrafos.append(AGMGraph(nodos, links))
 		nodos = dict()
 		links = []
 		i = i+1
-	
+
 	return vectorSubgrafos
