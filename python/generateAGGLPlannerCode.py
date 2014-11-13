@@ -1,5 +1,5 @@
 from operator import *
-import collections, sys
+import collections, sys, time #aniadida libreria TIME
 
 sys.path.append('/usr/local/share/agm/')
 
@@ -857,7 +857,8 @@ def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 #
 # @retval ret is the python code used to chek the target world state.
 def generateTarget(graph, forHierarchicalRule='', lgraph=None):
-	return generateTarget_VersionMERCEDES(graph, forHierarchicalRule, lgraph)
+	return generateTarget_VersionLUIS(graph, forHierarchicalRule, lgraph)
+	#return generateTarget_VersionMERCEDES(graph, forHierarchicalRule, lgraph)
 
 def generateTarget_VersionMERCEDES(graph, forHierarchicalRule='', lgraph=None):
 	print 'branched targets'
@@ -877,6 +878,7 @@ def computeMaxScore(a, b, maxScore):
 	if s > maxScore: return s
 	return maxScore \n
 def CheckTarget(graph): \n
+	t0 = time.time()			  # tiempo inicial
 	n2id = dict()                             # diccionario
 	available = copy.deepcopy(graph.nodes)    # lista de nodos del grafo inicial.
 """
@@ -974,6 +976,8 @@ def CheckTarget(graph): \n
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
 	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
+	ret += indent+"\tt1=time.time()"
+	ret += indent+"\tprint 'Tiempo en llegar: ', (t1-t0).__str__()"
 	ret += indent+"\treturn maxScore, True"
 
 	# Rule ending
@@ -981,6 +985,8 @@ def CheckTarget(graph): \n
 		ret += pops.pop()
 	indent = "\n\t"
 	if len(forHierarchicalRule)>0: indent+='\t'
+	ret += indent+"\tt1=time.time()"
+	ret += indent+"\tprint '...', (t1-t0).__str__()"
 	ret += indent+"return maxScore, False"
 	ret += "\n"
 
@@ -1011,6 +1017,7 @@ def computeMaxScore(a, b, maxScore):
 	return maxScore
 
 def CheckTarget(graph):
+	t0 = time.time()			  # tiempo inicial
 	n2id = dict()
 	available = copy.deepcopy(graph.nodes)
 """
@@ -1119,6 +1126,8 @@ def CheckTarget(graph):
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
 	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
+	ret += indent+"\tt1=time.time()"
+	ret += indent+"\tprint 'Tiempo en llegar: ', (t1-t0).__str__()"
 	ret += indent+"\treturn maxScore, True"
 
 	# Rule ending
@@ -1126,6 +1135,8 @@ def CheckTarget(graph):
 		ret += pops.pop()
 	indent = "\n\t"
 	if len(forHierarchicalRule)>0: indent+='\t'
+	ret += indent+"\tt1=time.time()"
+	ret += indent+"\tprint '...', (t1-t0).__str__()"
 	ret += indent+"return maxScore, False"
 	ret += "\n"
 
