@@ -857,8 +857,7 @@ def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 #
 # @retval ret is the python code used to chek the target world state.
 def generateTarget(graph, forHierarchicalRule='', lgraph=None):
-	return generateTarget_VersionLUIS(graph, forHierarchicalRule, lgraph)
-	#return generateTarget_VersionMERCEDES(graph, forHierarchicalRule, lgraph)
+	return generateTarget_VersionMERCEDES(graph, forHierarchicalRule, lgraph)
 
 def generateTarget_VersionMERCEDES(graph, forHierarchicalRule='', lgraph=None):
 	print 'branched targets'

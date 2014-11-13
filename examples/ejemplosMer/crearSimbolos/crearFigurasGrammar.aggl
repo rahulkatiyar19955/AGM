@@ -77,10 +77,10 @@ pentagono : active(1)
 	=>
 	{
 		a:A(-275,80)
+		c:C(-20,-65)
 		b:B(-65,85)
 		e:E(-330,-70)
 		d:D(-170,-155)
-		c:C(-20,-65)
 		a->b(unido)
 		b->c(unido)
 		c->d(unido)
