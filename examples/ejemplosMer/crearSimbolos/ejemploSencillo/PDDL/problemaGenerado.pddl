@@ -3,10 +3,19 @@
 	(:domain AGGL )
 	(:objects
 		A_1
+		A_2
 		unknown_0
 		unknown_1
 		unknown_2
 		unknown_3
+		unknown_4
+		unknown_5
+		unknown_6
+		unknown_7
+		unknown_8
+		unknown_9
+		unknown_10
+		unknown_11
 	)
 
 	(:init
@@ -15,25 +24,50 @@
 		(unknownorder unknown_0 unknown_1)
 		(unknownorder unknown_1 unknown_2)
 		(unknownorder unknown_2 unknown_3)
-		(ISA A_1)
+		(unknownorder unknown_3 unknown_4)
+		(unknownorder unknown_4 unknown_5)
+		(unknownorder unknown_5 unknown_6)
+		(unknownorder unknown_6 unknown_7)
+		(unknownorder unknown_7 unknown_8)
+		(unknownorder unknown_8 unknown_9)
+		(unknownorder unknown_9 unknown_10)
+		(unknownorder unknown_10 unknown_11)
+		(isA A_1)
+		(isA A_2)
 	)
 	
 	(:goal
-		(exists ( ?A_1001 ?B_1002 ?C_1003 ?D_1004 ?E_1005 )
+		(exists ( ?B_1001 ?C_1002 ?D_1003 ?E_1004 ?F_1005 ?B_1006 ?C_1007 ?D_1008 ?E_1009 ?F_1010 )
 			(and
-				(ISA ?A_1001)
-				(ISB ?B_1002)
-				(ISC ?C_1003)
-				(ISD ?D_1004)
-				(ISE ?E_1005)
-				(unido ?A_1001 ?B_1002)
-				(unido ?B_1002 ?C_1003)
-				(unido ?C_1003 ?D_1004)
-				(unido ?D_1004 ?E_1005)
-				(unido ?E_1005 ?A_1001)
+				(isA A_1)
+				(isB ?B_1001)
+				(isC ?C_1002)
+				(isD ?D_1003)
+				(isE ?E_1004)
+				(isF ?F_1005)
+				(isA A_2)
+				(isB ?B_1006)
+				(isC ?C_1007)
+				(isD ?D_1008)
+				(isE ?E_1009)
+				(isF ?F_1010)
+				(unido A_1 ?B_1001)
+				(unido ?B_1001 ?C_1002)
+				(unido ?C_1002 ?D_1003)
+				(unido ?D_1003 ?E_1004)
+				(unido ?E_1004 ?F_1005)
+				(unido ?F_1005 A_1)
+				(unido A_2 ?B_1006)
+				(unido ?B_1006 ?C_1007)
+				(unido ?C_1007 ?D_1008)
+				(unido ?D_1008 ?E_1009)
+				(unido ?E_1009 ?F_1010)
+				(unido ?F_1010 A_2)
 			)
 		)
 	)
 
 	(:metric minimize (total-cost))
+
+
 )

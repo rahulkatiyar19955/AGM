@@ -43,7 +43,7 @@ cuadrado : active(1)
 {
 	{
 		a:A(-385,80)
-		c:C(-265,-125)
+		c:C(-245,-125)
 		b:B(-105,80)
 		a->b(unido)
 		b->c(unido)
@@ -86,6 +86,37 @@ pentagono : active(1)
 		c->d(unido)
 		d->e(unido)
 		e->a(unido)
+	}
+}
+
+hexagono : active(1)
+{
+	{
+		a:A(-200,25)
+		c:C(70,-140)
+		b:B(-5,25)
+		e:E(-275,-155)
+		d:D(-95,-285)
+		a->b(unido)
+		b->c(unido)
+		c->d(unido)
+		d->e(unido)
+		e->a(unido)
+	}
+	=>
+	{
+		a:A(-240,90)
+		b:B(-55,180)
+		e:E(-65,-220)
+		d:D(130,-120)
+		f:F(-240,-115)
+		c:C(130,85)
+		a->b(unido)
+		b->c(unido)
+		c->d(unido)
+		d->e(unido)
+		e->f(unido)
+		f->a(unido)
 	}
 }
 

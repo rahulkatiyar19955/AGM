@@ -31,6 +31,7 @@ class RuleSet(object):
 		mapping['triangulo'] = self.triangulo
 		mapping['cuadrado'] = self.cuadrado
 		mapping['pentagono'] = self.pentagono
+		mapping['hexagono'] = self.hexagono
 		return mapping
 
 	def getTriggers(self):
@@ -39,6 +40,7 @@ class RuleSet(object):
 		mapping['triangulo'] = self.triangulo_trigger
 		mapping['cuadrado'] = self.cuadrado_trigger
 		mapping['pentagono'] = self.pentagono_trigger
+		mapping['hexagono'] = self.hexagono_trigger
 		return mapping
 
 	def getHierarchicalTargets(self):
@@ -528,6 +530,174 @@ class RuleSet(object):
 			newNode.cost += 1
 			newNode.depth += 1
 		newNode.history.append('pentagono@' + str(n2id) )
+		if finish!='': newNode.history.append(finish)
+		return newNode
+		
+		
+
+	# Rule hexagono
+	def hexagono(self, snode, stackP=None, equivalencesP=None):
+		if stackP == None: stackP=[]
+		if equivalencesP == None: equivalencesP=[]
+		stack        = copy.deepcopy(stackP)
+		equivalences = copy.deepcopy(equivalencesP)
+		symbol_nodes_copy = copy.deepcopy(snode.graph.nodes)
+		finishesCombo = ''
+		if len(stack) > 0:
+			inCombo = True
+			pop = stack.pop()
+			me = pop[0]
+			if len(pop)>2:
+				finishesCombo = copy.deepcopy(pop[2])
+				fina = copy.deepcopy(pop[2])
+			# Find equivalence for a
+			symbol_a_nodes = symbol_nodes_copy
+			for equiv in equivalences:
+				if [me, 'a'] in equiv[0] and equiv[1] != None:
+					symbol_a_nodes = [equiv[1]]
+			# Find equivalence for c
+			symbol_c_nodes = symbol_nodes_copy
+			for equiv in equivalences:
+				if [me, 'c'] in equiv[0] and equiv[1] != None:
+					symbol_c_nodes = [equiv[1]]
+			# Find equivalence for b
+			symbol_b_nodes = symbol_nodes_copy
+			for equiv in equivalences:
+				if [me, 'b'] in equiv[0] and equiv[1] != None:
+					symbol_b_nodes = [equiv[1]]
+			# Find equivalence for e
+			symbol_e_nodes = symbol_nodes_copy
+			for equiv in equivalences:
+				if [me, 'e'] in equiv[0] and equiv[1] != None:
+					symbol_e_nodes = [equiv[1]]
+			# Find equivalence for d
+			symbol_d_nodes = symbol_nodes_copy
+			for equiv in equivalences:
+				if [me, 'd'] in equiv[0] and equiv[1] != None:
+					symbol_d_nodes = [equiv[1]]
+		else:
+			inCombo = False
+			symbol_a_nodes = symbol_nodes_copy
+			symbol_c_nodes = symbol_nodes_copy
+			symbol_b_nodes = symbol_nodes_copy
+			symbol_e_nodes = symbol_nodes_copy
+			symbol_d_nodes = symbol_nodes_copy
+		ret = []
+		nodes = copy.deepcopy(snode.graph.nodes)
+		n2id = dict()
+		for symbol_e_name in symbol_e_nodes:
+			symbol_e = nodes[symbol_e_name]
+			n2id['e'] = symbol_e_name
+			if symbol_e.sType == 'E':
+				for symbol_d_name in symbol_d_nodes:
+					symbol_d = nodes[symbol_d_name]
+					n2id['d'] = symbol_d_name
+					if symbol_d.sType == 'D' and symbol_d.name!=symbol_e.name and [n2id["d"],n2id["e"],"unido"] in snode.graph.links:
+						for symbol_c_name in symbol_c_nodes:
+							symbol_c = nodes[symbol_c_name]
+							n2id['c'] = symbol_c_name
+							if symbol_c.sType == 'C' and symbol_c.name!=symbol_e.name and symbol_c.name!=symbol_d.name and [n2id["c"],n2id["d"],"unido"] in snode.graph.links:
+								for symbol_b_name in symbol_b_nodes:
+									symbol_b = nodes[symbol_b_name]
+									n2id['b'] = symbol_b_name
+									if symbol_b.sType == 'B' and symbol_b.name!=symbol_e.name and symbol_b.name!=symbol_d.name and symbol_b.name!=symbol_c.name and [n2id["b"],n2id["c"],"unido"] in snode.graph.links:
+										for symbol_a_name in symbol_a_nodes:
+											symbol_a = nodes[symbol_a_name]
+											n2id['a'] = symbol_a_name
+											if symbol_a.sType == 'A' and symbol_a.name!=symbol_e.name and symbol_a.name!=symbol_d.name and symbol_a.name!=symbol_c.name and symbol_a.name!=symbol_b.name and [n2id["a"],n2id["b"],"unido"] in snode.graph.links and [n2id["e"],n2id["a"],"unido"] in snode.graph.links:
+												# At this point we meet all the conditions.
+												stack2        = copy.deepcopy(stack)
+												equivalences2 = copy.deepcopy(equivalences)
+												r1 = self.hexagono_trigger(snode, n2id, stack2, inCombo, equivalences2, copy.deepcopy(finishesCombo))
+												c = copy.deepcopy(r1)
+												if 'fina' in locals():
+													c.history.append(finishesCombo)
+												if len(stack2) > 0: c.stop = True
+												ret.append(c)
+												if len(stack2) > 0:
+													# Set symbol for e...
+													for equiv in equivalences2:
+														if [me, 'e'] in equiv[0]:
+															equiv[1] = symbol_e_name
+													# Set symbol for d...
+													for equiv in equivalences2:
+														if [me, 'd'] in equiv[0]:
+															equiv[1] = symbol_d_name
+													# Set symbol for c...
+													for equiv in equivalences2:
+														if [me, 'c'] in equiv[0]:
+															equiv[1] = symbol_c_name
+													# Set symbol for b...
+													for equiv in equivalences2:
+														if [me, 'b'] in equiv[0]:
+															equiv[1] = symbol_b_name
+													# Set symbol for a...
+													for equiv in equivalences2:
+														if [me, 'a'] in equiv[0]:
+															equiv[1] = symbol_a_name
+													newNode = WorldStateHistory(r1)
+													global lastNodeId
+													lastNodeId += 1
+													newNode.nodeId = lastNodeId
+													derivsx = self.getRules()[stack2[-1][1]](newNode, stack2, equivalences2)
+													if 'fina' in locals():
+														for n in derivsx: n.history.append(finishesCombo)
+														for n in derivsx: n.history.append(fina)
+													ret.extend(derivsx)
+		return ret
+		
+		
+
+	# Rule hexagono
+	def hexagono_trigger(self, snode, n2id, stack=None, inCombo=False, equivalences=None, checked=True, finish='', verbose=False):
+		if stack == None: stack=[]
+		if equivalences == None: equivalences=[]
+		if not checked:
+			test_symbol_e = snode.graph.nodes[n2id['e']]
+			if not (test_symbol_e.sType == 'E'):
+				if verbose: print 'test_symbol_e(',n2id['e'],').sType == E' , test_symbol_e.sType == 'E'
+				raise WrongRuleExecution('hexagono_trigger1')
+			test_symbol_d = snode.graph.nodes[n2id['d']]
+			if not (test_symbol_d.sType == 'D' and test_symbol_d.name!=test_symbol_e.name and [n2id["d"],n2id["e"],"unido"] in snode.graph.links):
+				if verbose: print 'test_symbol_d(',n2id['d'],').sType == D' , test_symbol_d.sType == 'D'
+				raise WrongRuleExecution('hexagono_trigger2')
+			test_symbol_c = snode.graph.nodes[n2id['c']]
+			if not (test_symbol_c.sType == 'C' and test_symbol_c.name!=test_symbol_e.name and test_symbol_c.name!=test_symbol_d.name and [n2id["c"],n2id["d"],"unido"] in snode.graph.links):
+				if verbose: print 'test_symbol_c(',n2id['c'],').sType == C' , test_symbol_c.sType == 'C'
+				raise WrongRuleExecution('hexagono_trigger3')
+			test_symbol_b = snode.graph.nodes[n2id['b']]
+			if not (test_symbol_b.sType == 'B' and test_symbol_b.name!=test_symbol_e.name and test_symbol_b.name!=test_symbol_d.name and test_symbol_b.name!=test_symbol_c.name and [n2id["b"],n2id["c"],"unido"] in snode.graph.links):
+				if verbose: print 'test_symbol_b(',n2id['b'],').sType == B' , test_symbol_b.sType == 'B'
+				raise WrongRuleExecution('hexagono_trigger4')
+			test_symbol_a = snode.graph.nodes[n2id['a']]
+			if not (test_symbol_a.sType == 'A' and test_symbol_a.name!=test_symbol_e.name and test_symbol_a.name!=test_symbol_d.name and test_symbol_a.name!=test_symbol_c.name and test_symbol_a.name!=test_symbol_b.name and [n2id["a"],n2id["b"],"unido"] in snode.graph.links and [n2id["e"],n2id["a"],"unido"] in snode.graph.links):
+				if verbose: print 'test_symbol_a(',n2id['a'],').sType == A' , test_symbol_a.sType == 'A'
+				raise WrongRuleExecution('hexagono_trigger5')
+		newNode = WorldStateHistory(snode)
+		global lastNodeId
+		lastNodeId += 1
+		newNode.nodeId = lastNodeId
+		# Create nodes
+		if not 'f' in n2id:
+			newName = str(getNewIdForSymbol(newNode))
+			n2id['f'] = newName
+		newNode.graph.nodes[n2id['f']] = AGMSymbol(n2id['f'], 'F')
+		# Retype nodes
+		# Remove nodes
+		# Remove links
+		newNode.graph.links = [x for x in newNode.graph.links if [x.a, x.b, x.linkType] not in [ [n2id['e'], n2id['a'], 'unido'] ]]
+		# Create links
+		l = AGMLink(n2id['e'], n2id['f'], 'unido')
+		if not l in newNode.graph.links:
+			newNode.graph.links.append(l)
+		l = AGMLink(n2id['f'], n2id['a'], 'unido')
+		if not l in newNode.graph.links:
+			newNode.graph.links.append(l)
+		# Misc stuff
+		if not inCombo:
+			newNode.cost += 1
+			newNode.depth += 1
+		newNode.history.append('hexagono@' + str(n2id) )
 		if finish!='': newNode.history.append(finish)
 		return newNode
 		
