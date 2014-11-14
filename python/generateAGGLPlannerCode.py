@@ -1,5 +1,5 @@
 from operator import *
-import collections, sys
+import collections, sys, time #aniadida libreria TIME
 
 sys.path.append('/usr/local/share/agm/')
 
@@ -860,7 +860,7 @@ def generateTarget(graph, forHierarchicalRule='', lgraph=None):
 	return generateTarget_VersionMERCEDES(graph, forHierarchicalRule, lgraph)
 
 def generateTarget_VersionMERCEDES(graph, forHierarchicalRule='', lgraph=None):
-	print 'version mercedes'
+	print 'branched targets'
 	# Variables del programa
 	linkList = []   # vector de enlaces del grafo.
 	constantes, listaNodos = encontrarOrden(graph, lgraph)
@@ -877,19 +877,18 @@ def computeMaxScore(a, b, maxScore):
 	if s > maxScore: return s
 	return maxScore \n
 def CheckTarget(graph): \n
-	starting_point = time.time()              # Guardamos tiempo inicial
+	t0 = time.time()			  # tiempo inicial
 	n2id = dict()                             # diccionario
 	available = copy.deepcopy(graph.nodes)    # lista de nodos del grafo inicial.
 """
 	else:
 		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping=dict()):'
 		indent += "\t"
-		ret += indent+"starting_point = time.time()  # Guardamos tiempo inicial"
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 		ret += indent+"available = copy.deepcopy(graph.nodes)"
 
 	ret += indent+"maxScore = 0"
-	ret += indent+"totalScore = "+calcularTotalScore(graph).__str__()+'\n'
+	ret += indent+"totalScore = " + str(calcularTotalScore(graph)) + '\n'
 
 	# Sacamos los enlaces y los transformamos de AGMLink a tuplas de string [origen, enlace, destino]
 	# y los ordenamos de menor a mayor con el metodo sorted
@@ -975,10 +974,9 @@ def CheckTarget(graph): \n
 		if len(cond) > 1:
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
-	# aniadidos de mercedes:
 	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
-	ret += indent+"\tfinalTime = time.time()-starting_point"
-	#ret += indent+"\tprint 'SI hemos llegado: ', maxScore, 'con tiempo', finalTime"
+	ret += indent+"\tt1=time.time()"
+	ret += indent+"\tprint 'Tiempo en llegar: ', (t1-t0).__str__()"
 	ret += indent+"\treturn maxScore, True"
 
 	# Rule ending
@@ -986,9 +984,8 @@ def CheckTarget(graph): \n
 		ret += pops.pop()
 	indent = "\n\t"
 	if len(forHierarchicalRule)>0: indent+='\t'
-	# aniadidos de mercedes
-	ret += indent+"finalTime = time.time()-starting_point"
-	#ret += indent+"print 'NO hemos llegado: ', maxScore, 'con tiempo', finalTime"
+	ret += indent+"\tt1=time.time()"
+	ret += indent+"\tprint '...', (t1-t0).__str__()"
 	ret += indent+"return maxScore, False"
 	ret += "\n"
 
@@ -1003,7 +1000,7 @@ def CheckTarget(graph): \n
 #
 # @retval The python code used to check the target world state
 def generateTarget_VersionLUIS(graph, forHierarchicalRule='', lgraph=None):
-	print 'version luis'
+	print 'non-branched targets'
 	ret = ''
 	indent = "\n\t"
 
@@ -1019,9 +1016,7 @@ def computeMaxScore(a, b, maxScore):
 	return maxScore
 
 def CheckTarget(graph):
-
-	starting_point = time.time()  # Guardamos tiempo inicial
-
+	t0 = time.time()			  # tiempo inicial
 	n2id = dict()
 	available = copy.deepcopy(graph.nodes)
 """
@@ -1029,7 +1024,6 @@ def CheckTarget(graph):
 	else:
 		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping=dict()):'
 		indent += "\t"
-		ret += indent+"starting_point = time.time()  # Guardamos tiempo inicial"
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 		ret += indent+"available = copy.deepcopy(graph.nodes)"
 
@@ -1130,10 +1124,9 @@ def CheckTarget(graph):
 		if len(cond) > 1:
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
-	# aniadidos de mercedes:
 	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
-	ret += indent+"\tfinalTime = time.time()-starting_point"
-	#ret += indent+"\tprint 'SI hemos llegado: ', maxScore, 'con tiempo', finalTime"
+	ret += indent+"\tt1=time.time()"
+	ret += indent+"\tprint 'Tiempo en llegar: ', (t1-t0).__str__()"
 	ret += indent+"\treturn maxScore, True"
 
 	# Rule ending
@@ -1141,11 +1134,11 @@ def CheckTarget(graph):
 		ret += pops.pop()
 	indent = "\n\t"
 	if len(forHierarchicalRule)>0: indent+='\t'
-	# aniadidos de mercedes
-	ret += indent+"finalTime = time.time()-starting_point"
-	#ret += indent+"print 'NO hemos llegado: ', maxScore, 'con tiempo', finalTime"
+	ret += indent+"\tt1=time.time()"
+	ret += indent+"\tprint '...', (t1-t0).__str__()"
 	ret += indent+"return maxScore, False"
 	ret += "\n"
+
 	return ret
 
 
@@ -1304,9 +1297,9 @@ def componerSubgrafos(grafo, ramasGrafo, constantes):
 		# Ahora sacamos los links que unen los nodos
 		for sym in nodos:
 			for link in grafo.links:
-				if link.a==sym and constantes.__contains__(link.b)==False and links.__contains__(link)==False:
+				if (link.a==sym) and (not link.b in constantes) and (not link in links):
 					links.append(link)
-				if link.b==sym and constantes.__contains__(link.a)==False and links.__contains__(link)==False:
+				if (link.b==sym) and (not link.a in constantes) and (not link in links):
 					links.append(link)
 		# Creamos subgrafo y lo guardamos en el vector de grafos. Despues limpiamos las variables para
 		# comenzar otra iteracion de forma limpia...

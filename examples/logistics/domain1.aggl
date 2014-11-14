@@ -8,122 +8,122 @@ nodeThickness=2
 fontSize=14
 longPattern=3
 ===
-LOADTRUCK : active(1)
+loadtruck : active(1)
 {
 	{
-		loc:LCTN(-85,70)
-		obj:OBJ(-230,-45)
-		truck:TRCK(70,-45)
+		loc:lctn(-85,70)
+		obj:obj(-230,-45)
+		truck:trck(70,-45)
 		truck->loc(at)
 		obj->loc(at)
 	}
 	=>
 	{
-		loc:LCTN(-85,70)
-		obj:OBJ(-230,-45)
-		truck:TRCK(70,-45)
+		loc:lctn(-85,70)
+		obj:obj(-230,-45)
+		truck:trck(70,-45)
 		truck->loc(at)
 		obj->truck(at)
 	}
 }
 
-UNLOADTRUCK : active(1)
+unloadtruck : active(1)
 {
 	{
-		loc:LCTN(-85,70)
-		obj:OBJ(-230,-45)
-		truck:TRCK(70,-45)
+		loc:lctn(-85,70)
+		obj:obj(-230,-45)
+		truck:trck(70,-45)
 		truck->loc(at)
 		obj->truck(at)
 	}
 	=>
 	{
-		loc:LCTN(-85,70)
-		obj:OBJ(-230,-45)
-		truck:TRCK(70,-45)
+		loc:lctn(-85,70)
+		obj:obj(-230,-45)
+		truck:trck(70,-45)
 		truck->loc(at)
 		obj->loc(at)
 	}
 }
 
-DRIVETRUCK : active(1)
+drivetruck : active(1)
 {
 	{
-		lo2:LCTN(110,-30)
-		ci:CITY(10,85)
-		lo1:LCTN(-105,-30)
-		tr:TRCK(5,-135)
+		lo2:lctn(110,-30)
+		ci:city(10,85)
+		lo1:lctn(-105,-30)
+		tr:trck(5,-135)
 		tr->lo1(at)
 		lo1->ci(inCity)
 		lo2->ci(inCity)
 	}
 	=>
 	{
-		lo2:LCTN(110,-30)
-		ci:CITY(10,85)
-		lo1:LCTN(-105,-30)
-		tr:TRCK(5,-135)
+		lo2:lctn(110,-30)
+		ci:city(10,85)
+		lo1:lctn(-105,-30)
+		tr:trck(5,-135)
 		tr->lo2(at)
 		lo1->ci(inCity)
 		lo2->ci(inCity)
 	}
 }
 
-LOADAIRPLANE : active(1)
+loadairplane : active(1)
 {
 	{
-		loc:LCTN(-85,70)
-		obj:OBJ(-230,-45)
-		ap:ARPL(70,-45)
+		loc:lctn(-85,70)
+		obj:obj(-230,-45)
+		ap:arpl(70,-45)
 		ap->loc(at)
 		obj->loc(at)
 	}
 	=>
 	{
-		loc:LCTN(-85,70)
-		obj:OBJ(-230,-45)
-		ap:ARPL(70,-45)
+		loc:lctn(-85,70)
+		obj:obj(-230,-45)
+		ap:arpl(70,-45)
 		ap->loc(at)
 		obj->ap(at)
 	}
 }
 
-UNLOADAIRPLANE : active(1)
+unloadairplane : active(1)
 {
 	{
-		loc:LCTN(-85,70)
-		obj:OBJ(-230,-45)
-		ap:ARPL(70,-45)
+		loc:lctn(-85,70)
+		obj:obj(-230,-45)
+		ap:arpl(70,-45)
 		ap->loc(at)
 		obj->ap(at)
 	}
 	=>
 	{
-		loc:LCTN(-85,70)
-		obj:OBJ(-230,-45)
-		ap:ARPL(70,-45)
+		loc:lctn(-85,70)
+		obj:obj(-230,-45)
+		ap:arpl(70,-45)
 		ap->loc(at)
 		obj->loc(at)
 	}
 }
 
-FLYAIRPLANE : active(1)
+flyairplane : active(1)
 {
 	{
-		lo2:LCTN(160,0)
-		ap:ARPL(0,-100)
+		lo2:lctn(160,0)
+		ap:arpl(0,-100)
 		airport:ARPT(0,100)
-		lo1:LCTN(-160,0)
+		lo1:lctn(-160,0)
 		ap->lo1(at)
 		lo1->airport(has)
 		lo2->airport(has)
 	}
 	=>
 	{
-		lo2:LCTN(160,0)
-		ap:ARPL(0,-100)
+		lo2:lctn(160,0)
+		ap:arpl(0,-100)
 		airport:ARPT(0,100)
-		lo1:LCTN(-160,0)
+		lo1:lctn(-160,0)
 		ap->lo2(at)
 		lo1->airport(has)
 		lo2->airport(has)

@@ -41,7 +41,7 @@
 	</symbol>
 	<link src="9" dst="10" label="noSee" />
 	<link src="9" dst="10" label="hasStatus" />
-	<link src="9" dst="10" label="noReach" />
+	<link src="9" dst="10" label="reach" />
 	<link src="9" dst="10" label="reachable" />
 	<link src="9" dst="10" label="position" />
 	<link src="9" dst="10" label="classified" />

@@ -1,0 +1,91 @@
+spacePattern=3
+lineThickness=2.0
+fontName=Arial
+name=crearFigurasGrammar
+vertexDiameter=40.0
+shortPattern=1
+nodeThickness=2.0
+fontSize=14
+longPattern=3
+===
+recta : active(1)
+{
+	{
+		a:A(-175,-15)
+	}
+	=>
+	{
+		a:A(-415,-5)
+		b:B(-150,-5)
+		a->b(unido)
+	}
+}
+
+triangulo : active(1)
+{
+	{
+		a:A(-330,-10)
+		b:B(-70,-15)
+		a->b(unido)
+	}
+	=>
+	{
+		a:A(-440,170)
+		c:C(-270,10)
+		b:B(-70,170)
+		a->b(unido)
+		b->c(unido)
+		c->a(unido)
+	}
+}
+
+cuadrado : active(1)
+{
+	{
+		a:A(-385,80)
+		c:C(-265,-125)
+		b:B(-105,80)
+		a->b(unido)
+		b->c(unido)
+		c->a(unido)
+	}
+	=>
+	{
+		a:A(-460,125)
+		c:C(-155,-45)
+		b:B(-150,125)
+		d:D(-460,-40)
+		a->b(unido)
+		b->c(unido)
+		c->d(unido)
+		d->a(unido)
+	}
+}
+
+pentagono : active(1)
+{
+	{
+		a:A(-215,-45)
+		c:C(50,-200)
+		b:B(65,-50)
+		d:D(-215,-205)
+		a->b(unido)
+		b->c(unido)
+		c->d(unido)
+		d->a(unido)
+	}
+	=>
+	{
+		a:A(-275,80)
+		c:C(-20,-65)
+		b:B(-65,85)
+		e:E(-330,-70)
+		d:D(-170,-155)
+		a->b(unido)
+		b->c(unido)
+		c->d(unido)
+		d->e(unido)
+		e->a(unido)
+	}
+}
+

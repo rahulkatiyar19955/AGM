@@ -64,7 +64,7 @@ class AGMPDDL:
 			#else:
 				#raise Exception("Combo rule")
 		for t in typeSet:
-			writeString += '\t\t(IS'+t+' ?n'+typeStr+')\n'
+			writeString += '\t\t(is'+t+' ?n'+typeStr+')\n'
 		return writeString
 
 #
@@ -144,7 +144,7 @@ class AGMRulePDDL:
 	def existingNodesPDDLTypes(rule, nodeDict, pddlVerbose=False):
 		ret  = ''
 		for name,node in rule.lhs.nodes.items():
-			ret += ' (IS'+node.sType+' ?v'+nodeDict[name]+')'
+			ret += ' (is'+node.sType+' ?v'+nodeDict[name]+')'
 		return ret
 	@staticmethod
 	def listPDDLPreconditions(rule, agmlist, forgetList, newList, nodeDict, pddlVerbose=False):
@@ -224,7 +224,7 @@ class AGMRulePDDL:
 			while len(forgetList)>0:
 				nextn = forgetList.pop()
 				for tip in typeSet:
-					ret += ' (not (IS' + tip + ' ' + nextn + '))'
+					ret += ' (not (is' + tip + ' ' + nextn + '))'
 		# Internal error :-D
 		else:
 			raise Exception(":-)")
@@ -234,10 +234,10 @@ class AGMRulePDDL:
 		ret = ''
 		# Handle new nodes
 		for node in newList:
-			ret += ' (IS' + rule.rhs.nodes[node].sType + ' ?v' + nodeDict[node] + ')'
+			ret += ' (is' + rule.rhs.nodes[node].sType + ' ?v' + nodeDict[node] + ')'
 		# Handle forget nodes
 		for node in forgetList:
-			ret += ' (not (IS' + rule.lhs.nodes[node].sType + ' ?v' + nodeDict[node] + '))'
+			ret += ' (not (is' + rule.lhs.nodes[node].sType + ' ?v' + nodeDict[node] + '))'
 		return ret
 	@staticmethod
 	def linkPatternsPDDLEffects(rule, nodeDict, pddlVerbose=False):
@@ -286,7 +286,7 @@ class AGMRulePDDL:
 			symbol_name = m.group(1)
 			symbol_type = m.group(2)
 			blank_space = m.group(3)
-			ret = ret[:m.end(3)] + '(IS' + symbol_type + ' ?v' + symbol_name + ')' + blank_space + ret[m.end(3):]
+			ret = ret[:m.end(3)] + '(is' + symbol_type + ' ?v' + symbol_name + ')' + blank_space + ret[m.end(3):]
 			ret = ret.replace(symbol_name+':'+symbol_type, '( ?v' + symbol_name + typeStr + ' )')
 			ret = ret.replace(' ' + symbol_name, ' ?v' + symbol_name)
 		return ret
@@ -310,5 +310,5 @@ class AGMRulePDDL:
 			typeR = rule.rhs.nodes[n].sType
 			if typeL != typeR:
 				#if pddlVerbose: print 'EFFECTS modify', n
-				ret += ' (not(IS'+typeL + ' ?v' + nodeDict[n] +')) (IS'+typeR + ' ?v' + nodeDict[n] +')'
+				ret += ' (not(is'+typeL + ' ?v' + nodeDict[n] +')) (is'+typeR + ' ?v' + nodeDict[n] +')'
 		return ret
