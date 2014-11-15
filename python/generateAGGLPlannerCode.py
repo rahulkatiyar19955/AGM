@@ -184,7 +184,7 @@ def ruleImplementation(rule):
 	elif type(rule) == AGMHierarchicalRule:
 		#print rule.name, 'hierarchical'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
-		ret += generateTarget(rule.rhs, rule.name, rule.lhs)
+		ret += generateTarget(rule.rhs, rule.name, rule.lhs, verbose=(rule.name=="hierarchicalFindMugInTable"))
 
 #ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 	else:
@@ -856,27 +856,30 @@ def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 # @param lgraph I dont have any idea of this param... It is the graph of the left hand?
 #
 # @retval ret is the python code used to chek the target world state.
-def generateTarget(graph, forHierarchicalRule='', lgraph=None):
-	return generateTarget_VersionMERCEDES(graph, forHierarchicalRule, lgraph)
+def generateTarget(graph, forHierarchicalRule='', lgraph=None, verbose=False):
+	return generateTarget_VersionMERCEDES(graph, forHierarchicalRule, lgraph, verbose=verbose)
 
-def generateTarget_VersionMERCEDES(graph, forHierarchicalRule='', lgraph=None):
-	print 'branched targets'
+def generateTarget_VersionMERCEDES(graph, forHierarchicalRule='', lgraph=None, verbose=False):
+	#print 'branched targets'
 	# Variables del programa
 	linkList = []   # vector de enlaces del grafo.
-	constantes, listaNodos = encontrarOrden(graph, lgraph)
+
+	if verbose: print 'AAA\nAAA\nAAA\n',graph
+	if verbose: print 'BBB\nBBB\nBBB\n',lgraph
+	constantes, listaNodos = encontrarOrden(graph, lgraph, verbose)
 
 	ret = ''
 	indent = "\n\t"
 
 	if len(forHierarchicalRule)==0:
-		ret += """import copy, sys \nsys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import * \n
+		ret += """import copy, sys\nsys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import *\n
 def computeMaxScore(a, b, maxScore):
 	s = 0
 	for i in a: s+=i
 	for i in b: s+=i
 	if s > maxScore: return s
-	return maxScore \n
-def CheckTarget(graph): \n
+	return maxScore\n
+def CheckTarget(graph):\n
 	n2id = dict()                             # diccionario
 	available = copy.deepcopy(graph.nodes)    # lista de nodos del grafo inicial.
 """
@@ -914,9 +917,13 @@ def CheckTarget(graph): \n
 	ret += indent+"scoreNodes = []"
 	ret += indent+"scoreLinks = []"
 
+	if verbose: print 'hierarchical\nhierarchical'
+	if verbose: print 'constantes', constantes
+	if verbose: print 'nodos', listaNodos
 	for n_n in listaNodos:
 		n = str(n_n)
 		ret += indent+"# "+n
+
 		constant = False
 		if (n[0] in "0123456789") and n in graph.nodes: # This checks the node is already in the model
 			constant = True
@@ -995,7 +1002,7 @@ def CheckTarget(graph): \n
 #
 # @retval The python code used to check the target world state
 def generateTarget_VersionLUIS(graph, forHierarchicalRule='', lgraph=None):
-	print 'non-branched targets'
+	#print 'non-branched targets'
 	ret = ''
 	indent = "\n\t"
 
@@ -1166,7 +1173,7 @@ def calcularTotalScore(grafo):
 # @retval constantesOrdenadas es el vector con los simbolos constantes ordenados de forma optima.
 # @retval variablesOrdenadas es el vector que contiene vectores (uno por rama) con los simbolos variables
 # ordenados de forma optima.
-def encontrarOrden(grafo, lgrafo):
+def encontrarOrden(grafo, lgrafo, verbose=False):
 	# Variables del metodo:
 	constantesOrdenadas = []
 	variablesOrdenadas = []
@@ -1175,6 +1182,7 @@ def encontrarOrden(grafo, lgrafo):
 	# Vamos a sacar primero las constantes en un orden optimo:
 	for n_n in getOptimalTargetNodeCheckOrder(grafo, lgrafo):
 		n = str(n_n)
+		#if verbose: print 'XXX', n
 		constant = False
 		if (n[0] in "0123456789") and n in grafo.nodes: # This checks the node is already in the model
 			constantesOrdenadas.append(n_n)
@@ -1184,9 +1192,10 @@ def encontrarOrden(grafo, lgrafo):
 
 	# Del grafo sacamos las ramas de variables y creamos un vector con todos los subgrafos de
 	# variables del grafo original.
-	ramasGrafo = graphBranchs(grafo)
+	ramasGrafo = graphBranchs(grafo, lgrafo, verbose)
+	if verbose: print 'ramas grafo', ramasGrafo
 	vectorSubgrafos = componerSubgrafos(grafo, ramasGrafo, constantesOrdenadas)
-	#print '\n VECTOR DE SUBGRAFOS: ', vectorSubgrafos
+	if verbose: print '\n VECTOR DE SUBGRAFOS: ', vectorSubgrafos
 
 	i = 0
 	while i < len(vectorSubgrafos):
@@ -1209,15 +1218,22 @@ def encontrarOrden(grafo, lgrafo):
 # @param graph es el grafo objetivo.
 #
 # @retval un vector con los subgrafos de variables que componen el grafo original.
-def graphBranchs(graph):
+def graphBranchs(graph, lgraph, verbose):
 	# Creamos las listas que vamos a necesitar.
 	constantes = []
 
 	# Sacamos simbolos constantes y variables del grafo:
 	for symbol in graph.nodes:
 		symbolStr = symbol
+		constant = False
 		if (symbolStr[0] in "0123456789") and symbolStr in graph.nodes:
+			constant = True
+		elif lgraph:
+			if symbolStr in lgraph.nodes:
+				constant = True
+		if constant:
 			constantes.append(symbolStr)
+	if verbose: print 'CONSTANTES', constantes
 
 	# Hacemos copia del grafo, en la que poder modificar lo que queramos con toda seguridad
 	# Eliminamos de migrafo todas las constantes y aquellos enlaces que unan variables con constantes

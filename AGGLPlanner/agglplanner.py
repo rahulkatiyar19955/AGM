@@ -672,6 +672,15 @@ class PyPlan(object):
 							#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
 					#print paramsWithoutNew
 					print '\nDecomposing hierarchical rule ', ac.name, paramsWithoutNew
+					print 'PyPlan'
+					print '\tdomain:     ', domainAGM
+					print '\tdomain path:', domainPath
+					print '\tinit:       ', init
+					print '\ttargetPath: ', domain.getHierarchicalTargets()[ac.name]
+					print '\tsymbol map: ', paramsWithoutNew
+					print '\texclude:    ', self.excludeList
+
+					#def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile):
 					aaa = PyPlan(domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, None)
 					print self.indent
 
