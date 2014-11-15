@@ -654,6 +654,7 @@ class PyPlan(object):
 				ac = AGGLPlannerAction(action)
 				print self.indent+str(action)
 
+			rList = []
 			if len(self.results[i].history) > 0:
 				action = self.results[i].history[0]
 				ac = AGGLPlannerAction(action)
@@ -673,22 +674,29 @@ class PyPlan(object):
 							#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
 					#print paramsWithoutNew
 					print '\nDecomposing hierarchical rule ', ac.name, paramsWithoutNew
-					print 'PyPlan'
-					print '\tdomain:     ', domainAGM
-					print '\tdomain path:', domainPath
-					print '\tinit:       ', init
-					print '\ttargetPath: ', domain.getHierarchicalTargets()[ac.name]
-					print '\tsymbol map: ', paramsWithoutNew
-					print '\texclude:    ', self.excludeList
+					#print 'PyPlan'
+					#print '\tdomain:     ', domainAGM
+					#print '\tdomain path:', domainPath
+					#print '\tinit:       ', init
+					#print '\ttargetPath: ', domain.getHierarchicalTargets()[ac.name]
+					#print '\tsymbol map: ', paramsWithoutNew
+					#print '\texclude:    ', self.excludeList
 
-					#def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile):
-					aaa = PyPlan(domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, None)
-					print self.indent
+					#deff PyPlan(self, domainAGM, domainPath, init,                               targetPath,      indent,   symbol_mapping,      excludeList, resultFile):
+					aaa = PyPlan(      domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, rList)
+					#if type(resultFile) == type([]):
+						#resultFile = rList + resultFile[1:]
+					#print self.indent
+					self.results[i].history = self.results[i].history[1:]
 
 			#printResult(self.results[i]) #the best solution
+			total = rList + self.results[i].history
 			if resultFile != None:
-				for action in self.results[i].history:
-					resultFile.write(str(action)+'\n')
+				for action in total:
+					if type(resultFile) == type([]):
+						resultFile.append(action)
+					else:
+						resultFile.write(str(action)+'\n')
 			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 
 	##@brief This method starts the execution of program threads

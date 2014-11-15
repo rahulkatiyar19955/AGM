@@ -58,6 +58,7 @@ hierarchical hierarchicalFindMilkInTable : active(1)
 		)
 	}
 }
+
 hierarchical hierarchicalFindMilkInTable_noReach : active(1)
 {
 	{
@@ -129,6 +130,7 @@ hierarchical hierarchicalFindMugInTable : active(1)
 		robot:robot(-325,0)
 		container->contst(explored)*
 		container->contst(table)
+		container->contst(reach)
 		robot->object(know)
 		object->status(see)
 		object->status(classified)
@@ -163,6 +165,7 @@ hierarchical hierarchicalFindMugInTable_noReach : active(1)
 		room:object(-325,110)
 		container->contst(explored)*
 		container->contst(table)
+		container->contst(reach)
 		robot->container(know)
 		robot->room(in)
 		container->room(in)
@@ -177,6 +180,7 @@ hierarchical hierarchicalFindMugInTable_noReach : active(1)
 		robot:robot(-325,0)
 		container->contst(explored)*
 		container->contst(table)
+		container->contst(reach)
 		robot->object(know)
 		object->status(see)
 		object->status(classified)
