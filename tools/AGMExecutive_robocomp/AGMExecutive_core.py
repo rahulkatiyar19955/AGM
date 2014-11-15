@@ -38,7 +38,7 @@ import RoboCompPlanning
 import AGMModelConversion
 
 #ret, stepsFwd, planMonitoring =
-def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0):
+def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, plan, stepsFwd=0):
 	try:
 		currentPlan = AGGLPlannerPlan(plan)
 	except:
@@ -51,7 +51,7 @@ def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0)
 			try:
 				#print 'Trying one step ahead...', stepsFwd
 				newPlan = currentPlan.removeFirstAction(currentModel)
-				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domain, init, currentModel, target, newPlan, stepsFwd+1)
+				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, newPlan, stepsFwd+1)
 			except:
 				#print steps, 'steps ahead did not work'
 				traceback.print_exc()
@@ -63,7 +63,7 @@ def AGMExecutiveMonitoring(domain, init, currentModel, target, plan, stepsFwd=0)
 			try:
 				#print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
 				#print plan
-				p = PyPlanChecker(domain, init, currentPlan, target, '', verbose=False)
+				p = PyPlanChecker(domainClass, domainPath, init, currentPlan, target, '', verbose=False)
 				if p.valid:
 					#print 'GOT PLAN FROM MONITORING!!!'
 					#print currentPlan
@@ -167,7 +167,7 @@ class Executive(object):
 		stored = False
 		stepsFwd = 0
 		print 'Trying with the last steps of the current plan...'
-		domain = '/tmp/domainActive.py'
+		domainPath = '/tmp/domainActive.py'
 		init   = '/tmp/lastWorld'+peid+'.xml'
 		target = '/tmp/target.py'
 		try:
@@ -176,7 +176,9 @@ class Executive(object):
 			#print self.plan
 			#print '   Call Monitoring>>>'
 			#print '   Call Monitoring>>>'
-			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(domain, init, self.currentModel, target, AGGLPlannerPlan(self.plan))
+			#print 'aa', type(self.plan), self.plan
+			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel, target, AGGLPlannerPlan(self.plan))
+			#print 'bb'
 			print ret, stepsFwd, planMonitoring
 			if ret:
 				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
@@ -220,7 +222,9 @@ class Executive(object):
 			self.currentModel.toXML("/tmp/lastWorld"+peid+".xml")
 			self.pypyKillMutex.release()
 			#CALL
-			subprocess.call(["agglplanner", "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"])
+			argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
+			print argsss
+			subprocess.call(argsss)
 			#POST Check if the planner was killed
 			self.pypyKillMutex.acquire()
 			self.pypyInProgress -= 1
@@ -238,9 +242,10 @@ class Executive(object):
 				ofile = open("/tmp/result"+peid+".txt", 'r')
 				lines = self.ignoreCommentsInPlan(ofile.readlines())
 				ofile.close()
-				self.plan = AGGLPlannerPlan('\n'.join(lines), direct=True)
+				self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
 				stored, stepsFwd = self.callMonitoring(peid)
 			except: # The planner was probably killed
+				traceback.print_exc()
 				return
 		else:
 			print 'Got plan from monitorization'

@@ -63,6 +63,7 @@ class PyPlanChecker(object):
 	def __init__(self, agmData, domainPath, init, planPath, targetPath, symbolMapping=dict(), resultPath='', verbose=False):
 		object.__init__(self)
 		## We get the initial world model graph
+		#print 'booo -1'
 		self.initWorld  = WorldStateHistory(xmlModelParser.graphFromXML(init))
 		# Get graph rewriting rules
 		if verbose: print 'domainPath:', domainPath
@@ -78,20 +79,26 @@ class PyPlanChecker(object):
 		else:
 			self.targetCode = targetPath
 
+		#print 'boo 0'
 
 		## We get the plan code
 		self.plan = AGGLPlannerPlan(planPath)
 
+		#print 'boo 1'
+
 		# Apply plan
 		if verbose: print "PyPlanChecker applying plan"
 		try:
+			#print 'boo 2'
 			world = copy.deepcopy(self.initWorld) # we copy the initial world status.
+			#print 'boo 3'
 			#if verbose: print world
 			line = 0 # This is the actions lines counter. It saves the lines of actions contained in a plan
 			if verbose: print '<<plan'
 			if verbose: print self.plan
 			if verbose: print 'plan>>'
 			# We check all the actions in a plan.
+			#print 'boo 4'
 			for action in self.plan:
 				if verbose: print 'Executing action', line
 				line += 1
@@ -112,6 +119,7 @@ class PyPlanChecker(object):
 					print world
 				world.graph.toXML('after_plan_step'+str(line)+".xml")
 
+			#print 'boo 5'
 			if verbose: print 'Done executing actions. Let\'s see what we\'ve got (computing score and checking if the goal was achieved).'
 			if verbose: print targetPath
 			# Get result
@@ -128,6 +136,7 @@ class PyPlanChecker(object):
 				self.achieved = False
 				if debug: print 'Not achieved (didn\'t get to the goal)'
 
+			#print 'boo 6'
 		# If we have thrown an exception (because a parameter of an action does not exist),
 		# we handle part of the exception in this code.
 		except WrongRuleExecution, e:
@@ -144,6 +153,7 @@ class PyPlanChecker(object):
 			if verbose: print 'Not achieved (error)'
 			if verbose: traceback.print_exc()
 		# If there is a XML file where we must save the result, we store the result...
+		#print 'boo 7'
 		if resultPath!='':
 			world.graph.toXML(resultPath)
 

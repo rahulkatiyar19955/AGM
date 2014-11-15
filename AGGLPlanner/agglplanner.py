@@ -150,9 +150,9 @@ class AGGLPlannerPlan(object):
 	#	a) string containing a plan;
 	#	b) a filename where such string is to be found,
 	# 	c) a list of tuples where each tuple contains the name of a rule and a dictionary with the variable mapping of the rule.
-	# @param textOrFile This parameter indicates whether 'init' is the name of a file (where is stored the plan code) or the text string with the plan code. By default his value is FALSE
-	def __init__(self, init='', textOrFile=False):
-		object.__init__(self) #se puede quitar
+	# @param planFromText This parameter indicates whether 'init' is the name of a file (where is stored the plan code) or the text string with the plan code. By default his value is FALSE
+	def __init__(self, init='', planFromText=False):
+		object.__init__(self)
 
 		## Data of the plan file
 		self.data = []
@@ -164,7 +164,7 @@ class AGGLPlannerPlan(object):
 				 # If the string is all the plan code, we separate in lines with \n, but,
 				 # if the string is the name of the file where is stored all the plan code, we read and save
 				 # the file content in a local variable.
-				if textOrFile:
+				if planFromText:
 					lines = init.split("\n") #newline
 				else:
 					lines = open(init, 'r').readlines() # take the content of a file
@@ -195,12 +195,13 @@ class AGGLPlannerPlan(object):
 					#print type(action), len(action), action
 					self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
 		#IF INIT IS A COMPLETE PLAN
-		elif type(init) == type(AGGLPlannerPlan()) or isinstance(init, AGGLPlannerPlan) or True:
-			# we make a copy of the plan
-			self.data = copy.deepcopy(init.data)
 		else:
-			print 'Unknown plan type ('+str(type(init))+')! (internal error)'
-			sys.exit(-321)
+			if init.__class__.__name__ == 'AGGLPlannerPlan':
+				# we make a copy of the plan
+				self.data = copy.deepcopy(init.data)
+			else:
+				print 'Unknown plan type ('+str(type(init))+')! (internal error)'
+				sys.exit(-321)
 
 	## @brief Returns a copy of the plan without the first action assuming the action was executed. It's used for monitorization purposes.
 	# @param currentModel Model associated to the current state of the world
