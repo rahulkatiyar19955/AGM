@@ -55,7 +55,15 @@ class AGMWorldModelParser(xmllib.XMLParser):
 		if not dst in self.nodes:
 			print 'No node', dst
 			sys.exit(-1)
-		self.links.append(AGMLink(src, dst, attrs['label'], enabled=True))
+		enabled = False
+
+		enabled = True
+		try:
+			if attrs['enabled'].lower() in ["false", "f", "fa", "fal", "fals", "0", "n", "no"]:
+				enabled = False
+		except:
+			pass
+		self.links.append(AGMLink(src, dst, attrs['label'], enabled=enabled))
 
 	def end_link(self):
 		pass

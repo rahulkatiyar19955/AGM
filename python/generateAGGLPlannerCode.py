@@ -864,9 +864,9 @@ def generateTarget_VersionMERCEDES(graph, forHierarchicalRule='', lgraph=None, v
 	# Variables del programa
 	linkList = []   # vector de enlaces del grafo.
 
-	if verbose: print 'AAA\nAAA\nAAA\n',graph
-	if verbose: print 'BBB\nBBB\nBBB\n',lgraph
 	constantes, listaNodos = encontrarOrden(graph, lgraph, verbose)
+	#if verbose: print forHierarchicalRule, constantes
+	#if verbose: print forHierarchicalRule, listaNodos
 
 	ret = ''
 	indent = "\n\t"
@@ -917,9 +917,9 @@ def CheckTarget(graph):\n
 	ret += indent+"scoreNodes = []"
 	ret += indent+"scoreLinks = []"
 
-	if verbose: print 'hierarchical\nhierarchical'
-	if verbose: print 'constantes', constantes
-	if verbose: print 'nodos', listaNodos
+	#if verbose: print 'hierarchical\nhierarchical'
+	#if verbose: print 'constantes', constantes
+	#if verbose: print 'nodos', listaNodos
 	for n_n in listaNodos:
 		n = str(n_n)
 		ret += indent+"# "+n
@@ -931,15 +931,21 @@ def CheckTarget(graph):\n
 			if n in lgraph.nodes:
 				constant = True
 		if constant:
+			#if verbose: print forHierarchicalRule, 'CONSTANTE', n
 			if (n[0] in "0123456789") and n in graph.nodes:
 				ret += indent+"symbol_"+n+" = graph.nodes['"+n+"']"
 			else:
 				ret += indent+"symbol_"+n+" = graph.nodes[n2id['"+n+"']]"
+				#ret += indent+"print '"+n+"', n2id['"+n+"'], graph.nodes[n2id['"+n+"']]"
 		else: # otherwise, we're talking about a variable!
+			#if verbose: print forHierarchicalRule, 'VARIABLE', n
+			#if len(forHierarchicalRule) > 0:
+				#ret += indent+"print '" + n + "', available, n2id"
 			ret += indent+"symbol_"+n+"_name = '" + n + "'"
 			ret += indent+"for symbol_"+n+"_name in available:"
 			indent += "\t"
 			ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
+			#ret += indent+"print symbol_"+n
 
 		if len(forHierarchicalRule)>0:
 			if not constant:
@@ -1193,9 +1199,7 @@ def encontrarOrden(grafo, lgrafo, verbose=False):
 	# Del grafo sacamos las ramas de variables y creamos un vector con todos los subgrafos de
 	# variables del grafo original.
 	ramasGrafo = graphBranchs(grafo, lgrafo, verbose)
-	if verbose: print 'ramas grafo', ramasGrafo
 	vectorSubgrafos = componerSubgrafos(grafo, ramasGrafo, constantesOrdenadas)
-	if verbose: print '\n VECTOR DE SUBGRAFOS: ', vectorSubgrafos
 
 	i = 0
 	while i < len(vectorSubgrafos):
@@ -1233,7 +1237,6 @@ def graphBranchs(graph, lgraph, verbose):
 				constant = True
 		if constant:
 			constantes.append(symbolStr)
-	if verbose: print 'CONSTANTES', constantes
 
 	# Hacemos copia del grafo, en la que poder modificar lo que queramos con toda seguridad
 	# Eliminamos de migrafo todas las constantes y aquellos enlaces que unan variables con constantes
