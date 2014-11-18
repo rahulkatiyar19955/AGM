@@ -8,6 +8,7 @@ from parseAGGL import *
 from generateAGGLPlannerCode import *
 from agglplanner import *
 from agglplanchecker import *
+from agglplanningcache import *
 
 import xmlModelParser
 
@@ -93,6 +94,7 @@ class Executive(object):
 		self.plan = None
 		self.modifications = 0
 		self.lastPypyKill = time.time()
+		
 		# Set proxies
 		self.executiveTopic = executiveTopic
 		self.executiveVisualizationTopic = executiveVisualizationTopic
