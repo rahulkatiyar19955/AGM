@@ -157,6 +157,195 @@ int32_t AGMModel::indexOfFirstSymbolByType(const std::string &value, int32_t fro
 }
 
 
+
+#define SPLIT
+#ifdef SPLIT
+// Tenemos que usar el generatePDDLProblem con el tipado
+#else
+// Tenemos que usar el generatePDDLProblem sin el tipado
+#endif
+
+std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t unknowns, std::string domainName, std::string problemName) const
+{
+	for (uint32_t i=0; i<domainName.size(); ++i)
+	{
+		if (domainName[i] == '.')
+		{
+			domainName.resize(i);
+			break;
+		}
+	}
+
+	for (uint32_t i=0; i<problemName.size(); ++i)
+	{
+		if (problemName[i] == '.')
+		{
+			problemName.resize(i);
+			break;
+		}
+	}
+
+	std::ostringstream stringStream;
+	if (target->symbols.size() == 0) return "";
+
+	// H E A D E R
+	stringStream << "(define (problem " << problemName << ")\n";
+	stringStream << "\n";
+
+	// D O M A I N
+	stringStream << "	(:domain AGGL )\n";
+
+	// D E C L A R E   O B J E C T S
+	stringStream << "	(:objects\n";
+	std::list <std::string> originalObjects;
+	// Symbols that are present in the original model
+	for (uint32_t s=0; s<symbols.size(); ++s)
+	{
+		originalObjects.push_back(symbols[s]->toString());
+		stringStream << "		" << symbols[s]->toString() << " - tipo \n";
+	}
+
+	// Symbols that are only in the target model (not in the original model)
+	std::list <std::string> targetObjects;
+	for (uint32_t s=0; s<target->symbols.size(); ++s)
+	{
+		bool found = false;
+		for (std::list<std::string>::iterator it=originalObjects.begin(); it!=originalObjects.end(); ++it)
+		{
+			if (*it == target->symbols[s]->toString())
+			{
+				found = true;
+				break;
+			}
+		}
+		if (not found)
+		{
+			targetObjects.push_back(target->symbols[s]->toString());
+// 			unknowns++;
+// 			stringStream << "		" << target->symbols[s]->toString() << "\n";
+		}
+	}
+
+	// Unknown symbols that allow us to include new stuff in the model
+	std::list <std::string> unknownObjectsVec;
+	for (int32_t u=0; u<unknowns; ++u)
+	{
+		stringStream << "		unknown_" << u << " - tipo \n";
+		std::ostringstream sstr;
+		sstr << "unknown_" << u;
+		unknownObjectsVec.push_back(sstr.str());
+	}
+	stringStream << "	)\n";
+	stringStream << "\n";
+
+	// I N I T I A L   W O R L D
+	stringStream << "	(:init\n";
+	// Initial cost
+	//stringStream << "		(= (total-cost) 0)\n";
+	// Unknown temporary objects we are going to artificially inject
+	if (unknowns>0)
+		stringStream << "		(firstunknown unknown_0)\n";
+	for (int32_t u=1; u<unknowns; ++u)
+	{
+		stringStream << "		(unknownorder unknown_" << u-1 << " unknown_" << u << ")\n";
+	}
+	// Set not='s
+	std::vector<std::string> allObjects;
+	allObjects.insert(allObjects.end(),   originalObjects.begin(),   originalObjects.end());
+	//allObjects.insert(allObjects.end(),     targetObjects.begin(),     targetObjects.end());
+	allObjects.insert(allObjects.end(), unknownObjectsVec.begin(), unknownObjectsVec.end());
+	bool useDiff = false;
+	for (uint32_t ind1=0; ind1<allObjects.size() and useDiff; ind1++)
+	{
+		for (uint32_t ind2=0; ind2<allObjects.size(); ind2++)
+		{
+			if (ind1 != ind2)
+			{
+				stringStream << "		(diff " << allObjects[ind1] << " " << allObjects[ind2] << ")\n";
+			}
+		}
+	}
+
+	// Known symbols type for the objects in the initial world
+	for (uint32_t s=0; s<symbols.size(); ++s)
+	{
+		stringStream << "		(IS" << symbols[s]->typeString() << " " << symbols[s]->toString() << ")\n";
+	}
+	// Introduce edges themselves
+	for (uint32_t e=0; e<edges.size(); ++e)
+	{
+		stringStream << "		(" << edges[e].toString(this) << ")\n";
+	}
+	stringStream << "	)\n";
+
+	// T A R G E T    W O R L D
+	// T A R G E T    W O R L D
+	stringStream << "	\n";
+	stringStream << "	(:goal\n";
+	if (targetObjects.size()>0)
+	{
+		stringStream << "		(exists (";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			stringStream << " ?" << *it;
+		}
+		stringStream << " )\n";
+	}
+	stringStream << "			(and\n";
+
+	// Known symbols type for the objects in the target world
+	for (uint32_t s=0; s<target->symbols.size(); ++s)
+	{
+		std::string kStr = " ";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			if (target->symbols[s]->toString() == *it)
+				kStr = " ?";
+		}
+		stringStream << "				(IS" << target->symbols[s]->typeString() << kStr << target->symbols[s]->toString() << ")\n";
+	}
+	for (uint32_t e=0; e<target->edges.size(); ++e)
+	{
+		std::string label, a, b, kStr;
+		target->edges[e].getStrings(target, label, a, b);
+		stringStream << "				(" << label;
+
+		kStr = " ";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			if (a == *it)
+				kStr = " ?";
+		}
+		stringStream << kStr << a;
+
+		kStr = " ";
+		for (std::list< std::string>::iterator it=targetObjects.begin(); it!=targetObjects.end(); ++it)
+		{
+			if (b == *it)
+				kStr = " ?";
+		}
+		stringStream << kStr << b;
+
+		stringStream << ")\n";
+	}
+
+	stringStream << "			)\n";
+	if (targetObjects.size()>0)
+		stringStream << "		)\n";
+	stringStream << "	)\n";
+	stringStream << "\n";
+
+	// M E T R I C   D E F I N I T I O N
+	//stringStream << "	(:metric minimize (total-cost))\n";
+	stringStream << "\n";
+	stringStream << "\n";
+	stringStream << ")\n";
+
+//   stringStream << symbolType << "_" << identifier;
+  return stringStream.str();
+}
+
+/*
 std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t unknowns, std::string domainName, std::string problemName) const
 {
 	for (uint32_t i=0; i<domainName.size(); ++i)
@@ -336,6 +525,7 @@ std::string AGMModel::generatePDDLProblem(const AGMModel::SPtr &target, int32_t 
 //   stringStream << symbolType << "_" << identifier;
   return stringStream.str();
 }
+*/
 
 std::vector<AGMModelSymbol::SPtr> AGMModel::getSymbols() const
 {

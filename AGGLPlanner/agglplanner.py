@@ -36,7 +36,7 @@
     Also, we can keep the results in a file with: agglplanner gramatica.aggl init.xml target.py result.plan
 """
 
-
+import time
 import signal
 import thread
 signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -865,6 +865,7 @@ if __name__ == '__main__': # program domain problem result
 	if True:
 	#with PyCallGraph(output=graphviz):
 		from parseAGGL import AGMFileDataParsing
+		t0 = time.time()
 
 		if len(sys.argv)<5:
 			print 'Usage\n\t', sys.argv[0], ' domain.aggl activeRules.py init.xml target.xml.py [result.plan]'
@@ -878,4 +879,5 @@ if __name__ == '__main__': # program domain problem result
 			if len(sys.argv)>=6: resultFile = open(sys.argv[5], 'w')
 
 			p = PyPlan(domainAGM, domainPath, init, targetPath, '', dict(), [], resultFile)
+		print 'Tiempo Total: ', (time.time()-t0).__str__()
 
