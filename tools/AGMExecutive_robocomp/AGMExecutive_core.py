@@ -250,6 +250,7 @@ class Executive(object):
 					return
 				end = time.time()
 				print 'It took', end - start, 'seconds'
+				print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
 				self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
 				ofile = open("/tmp/result"+peid+".txt", 'r')
 				lines = self.ignoreCommentsInPlan(ofile.readlines())
@@ -342,7 +343,7 @@ class Executive(object):
 		#
 		sup = self.modifications
 		self.modifications += 1
-		print "<<<<<<<<<<<modificationProposal(self, modification)", sup
+		print "<<<<<<<<<<<modificationProposal(self, modification) (", sup, ') by', modification.sender
 		print 'Tryin...'
 		while self.mutex.acquire(0)==False:
 			now = time.time()

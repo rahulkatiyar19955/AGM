@@ -24,9 +24,10 @@ class PlanningCache:
 				G    = open('cache_G'+str(self.availableId)+'.py', 'r').read()
 				plan = open('cache_plan'+str(self.availableId)+'.agglp', 'r').read()
 				ret = True
-				if plan=='fail':
+				success = (plan=='fail')
+				if not success:
 					ret = False
-				self.include(D, I, G, plan, False)
+				self.include(D, I, G, plan, success, False)
 				#print 'Read planning context', self.availableId
 		except IOError:
 			print 'can\'t open', self.availableId
