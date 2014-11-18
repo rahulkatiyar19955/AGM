@@ -1,4 +1,16 @@
 import string
+import md5
+import sys
+import traceback
+
+
+def digest(pp):
+	md = md5.new()
+	md.update(pp)
+	checksum = md.hexdigest()
+	return str(checksum)
+
+
 class PlanningCache:
 	def __init__(self):
 		print 'PlanningCache::init()'
@@ -6,45 +18,49 @@ class PlanningCache:
 		self.availableId = 0
 		try:
 			while True:
-				D = open('D'+str(self.availableId)+'.py', 'r').read()
-				I = open('I'+str(self.availableId)+'.xml', 'r').read()
-				G = open('G'+str(self.availableId)+'.py', 'r').read()
-				plan = open('plan'+str(self.availableId)+'.agglp', 'r').read()
-				cost = float(open('cost'+str(self.availableId)+'.txt', 'r').read())
+				print 'Try including', self.availableId
+				D    = open('cache_D'+str(self.availableId)+'.py', 'r').read()
+				I    = open('cache_I'+str(self.availableId)+'.xml', 'r').read()
+				G    = open('cache_G'+str(self.availableId)+'.py', 'r').read()
+				plan = open('cache_plan'+str(self.availableId)+'.agglp', 'r').read()
 				ret = True
 				if plan=='fail':
 					ret = False
-				self.include(PlanningContext(ret, D, I, G, plan, cost), False)
+				self.include(D, I, G, plan, False)
 				#print 'Read planning context', self.availableId
 		except IOError:
+			print 'can\'t open', self.availableId
 			pass
 		except:
 			traceback.print_exc()
 	def include(self, domain, initialstate, goalstate, plan, success, shouldIWrite=True):
+		domain = string.rstrip(domain, '\n')
+		initialstate = string.rstrip(initialstate, '\n')
+		goalstate = string.rstrip(goalstate, '\n')
 		#try:
 		if shouldIWrite:
 			try:
 				#print 'PLAN: ', plan
-				D = open('D'+str(self.availableId)+'.py', 'w')
+				D = open('cache_D'+str(self.availableId)+'.py', 'w')
 				D.write(domain)
 				D.close()
-				I = open('I'+str(self.availableId)+'.xml', 'w')
+				I = open('cache_I'+str(self.availableId)+'.xml', 'w')
 				I.write(initialstate)
 				I.close()
-				G = open('G'+str(self.availableId)+'.py', 'w')
+				G = open('cache_G'+str(self.availableId)+'.py', 'w')
 				G.write(goalstate)
 				G.close()
-				plan = open('plan'+str(self.availableId)+'.agglp', 'w')
-				if success: plan.write(plan)
-				else: plan.write('fail')
-				plan.close()
+				P = open('cache_plan'+str(self.availableId)+'.agglp', 'w')
+				if success: P.write(plan)
+				else: P.write('fail')
+				P.close()
 			except:
 				print 'Can\'t write cache'
+				traceback.print_exc()
 				sys.exit(-1)
 		self.availableId += 1
 		md = md5.new()
-		string = string.rstrip(domain, '\n')+'\n'+string.rstrip(initialstate, '\n')+'\n'+string.rstrip(goalstate, '\n')
-		md.update(string)
+		md.update(domain+initialstate+goalstate)
 		checksum = md.hexdigest()
 		print 'Including planning context with checksum', checksum
 		try:
@@ -54,12 +70,11 @@ class PlanningCache:
 			self.data[checksum].append((domain, initialstate, goalstate, plan, success))
 
 	def getPlan(self, domain, initialstate, goalstate):
+		domain = string.rstrip(domain, '\n')
+		initialstate = string.rstrip(initialstate, '\n')
+		goalstate = string.rstrip(goalstate, '\n')
 		md = md5.new()
-		domain[-1] = string.rstrip(domain, '\n')
-		initialstate[-1] = string.rstrip(initialstate, '\n')
-		goalstate[-1] = string.rstrip(goalstate, '\n')
-		string = domain+'\n'+initialstate+'\n'+goalstate
-		md.update(string)
+		md.update(domain+initialstate+goalstate)
 		checksum = md.hexdigest()
 		print 'Query cache, checksum', checksum
 		if checksum in self.data.keys():
@@ -84,4 +99,11 @@ class PlanningCache:
 		initialstate = open(initialstateF, 'r').read()
 		goalstate    = open(goalstateF,    'r').read()
 		return self.getPlan(domain, initialstate, goalstate)
+
+	def includeFromFiles(self, domainF, initialstateF, goalstateF, planF, success, shouldIWrite=True):
+		domain       = open(domainF,       'r').read()
+		initialstate = open(initialstateF, 'r').read()
+		goalstate    = open(goalstateF,    'r').read()
+		plan         = open(planF,         'r').read()
+		return self.include(domain, initialstate, goalstate, plan, success, shouldIWrite)
 

@@ -94,6 +94,7 @@ class Executive(object):
 		self.plan = None
 		self.modifications = 0
 		self.lastPypyKill = time.time()
+		self.cache = PlanningCache()
 		
 		# Set proxies
 		self.executiveTopic = executiveTopic
@@ -225,20 +226,31 @@ class Executive(object):
 			self.pypyKillMutex.release()
 			#CALL
 			argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
-			print argsss
-			subprocess.call(argsss)
-			#POST Check if the planner was killed
-			self.pypyKillMutex.acquire()
-			self.pypyInProgress -= 1
-			if self.pypyInProgress == 0: plannerWasKilled = False
-			else: plannerWasKilled = True
-			self.pypyKillMutex.release()
-			#CONTINUE?
-			if plannerWasKilled:
-				print 'There\'s another planning process running... abort'
-				return
-			end = time.time()
-			print 'It took', end - start, 'seconds'
+			cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
+			if cacheResult:
+				cacheSuccess = cacheResult[0]
+				cachePlan = cacheResult[1]
+				print ''
+				print cacheSuccess
+				print cacheSuccess
+				print cacheSuccess
+				print cachePlan
+				print ''
+			else:
+				subprocess.call(argsss)
+				#POST Check if the planner was killed
+				self.pypyKillMutex.acquire()
+				self.pypyInProgress -= 1
+				if self.pypyInProgress == 0: plannerWasKilled = False
+				else: plannerWasKilled = True
+				self.pypyKillMutex.release()
+				#CONTINUE?
+				if plannerWasKilled:
+					print 'There\'s another planning process running... abort'
+					return
+				end = time.time()
+				print 'It took', end - start, 'seconds'
+				self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
 			# Get the output
 			try:
 				ofile = open("/tmp/result"+peid+".txt", 'r')

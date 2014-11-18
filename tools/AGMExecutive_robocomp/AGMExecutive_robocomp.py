@@ -54,6 +54,7 @@ import RoboCompAGMWorldModel
 import RoboCompSpeech
 
 from AGGL import *
+from agglplanningcache import *
 
 class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 	def __init__(self, _handler):
