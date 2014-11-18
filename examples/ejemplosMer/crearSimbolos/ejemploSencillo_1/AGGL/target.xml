@@ -1,0 +1,17 @@
+<AGMModel>
+  
+  <symbol id="a" type="A" />
+  <symbol id="b" type="B" />
+  <symbol id="c" type="C" />
+  <symbol id="d" type="D" />
+  <symbol id="e" type="E" />
+  <symbol id="f" type="F" />
+  
+  <link src="a" dst="b" label="unido" />
+  <link src="b" dst="c" label="unido" />
+  <link src="c" dst="d" label="unido" />
+  <link src="d" dst="e" label="unido" />
+  <link src="e" dst="f" label="unido" />
+  <link src="f" dst="a" label="unido" />
+  
+</AGMModel>
