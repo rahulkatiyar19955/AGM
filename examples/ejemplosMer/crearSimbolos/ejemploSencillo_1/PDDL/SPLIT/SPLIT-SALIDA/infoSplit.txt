@@ -1,0 +1,34 @@
+#Lit=9              #Lit'=30            #%Lit=233.33                                                                    
+#Acc=5              #Acc'=19            #%Acc=280                                                                       
+#avgGr=5            #avgGr'=2.68        #%avgGr=-46.32                                                                  
+#desvGr=1.41        #desvGr'=.46        #%desvGr=-67.13                                                                 
+                                                                                                                        
+#Map=                                                                                                                   
+<recta VAR:3 PRE:4 ADD:3 DEL:2> --------------------------> <recta_1 VAR:2 PRE:2 ADD:1 DEL:0>                           
+                                                            <recta_2 VAR:2 PRE:2 ADD:2 DEL:2>                           
+<triangulo VAR:4 PRE:6 ADD:4 DEL:2> ----------------------> <triangulo_1 VAR:2 PRE:1 ADD:0 DEL:0>                       
+                                                            <triangulo_2 VAR:2 PRE:2 ADD:1 DEL:0>                       
+                                                            <triangulo_3 VAR:2 PRE:1 ADD:2 DEL:0>                       
+                                                            <triangulo_4 VAR:2 PRE:2 ADD:1 DEL:2>                       
+<cuadrado VAR:5 PRE:9 ADD:4 DEL:3> -----------------------> <cuadrado_1 VAR:3 PRE:5 ADD:0 DEL:0>                        
+                                                            <cuadrado_2 VAR:3 PRE:4 ADD:2 DEL:2>                        
+                                                            <cuadrado_3 VAR:3 PRE:0 ADD:2 DEL:1>                        
+<pentagono VAR:6 PRE:11 ADD:4 DEL:3> ---------------------> <pentagono_1 VAR:3 PRE:2 ADD:0 DEL:0>                       
+                                                            <pentagono_2 VAR:3 PRE:3 ADD:0 DEL:0>                       
+                                                            <pentagono_3 VAR:3 PRE:3 ADD:0 DEL:0>                       
+                                                            <pentagono_4 VAR:3 PRE:0 ADD:2 DEL:1>                       
+                                                            <pentagono_5 VAR:3 PRE:3 ADD:2 DEL:2>                       
+<hexagono VAR:7 PRE:13 ADD:4 DEL:3> ----------------------> <hexagono_1 VAR:3 PRE:4 ADD:2 DEL:2>                        
+                                                            <hexagono_2 VAR:3 PRE:2 ADD:0 DEL:0>                        
+                                                            <hexagono_3 VAR:3 PRE:3 ADD:0 DEL:0>                        
+                                                            <hexagono_4 VAR:3 PRE:3 ADD:0 DEL:0>                        
+                                                            <hexagono_5 VAR:3 PRE:1 ADD:2 DEL:1>                        
+                                                                                                                        
+Grado               Ocurrencias         Partes              AvgPartes           DesvPartes                              
+3                   1                   {2}                 2                   0                                       
+4                   1                   {4}                 4                   0                                       
+5                   1                   {3}                 3                   0                                       
+6                   1                   {5}                 5                   0                                       
+7                   1                   {5}                 5                   0                                       
+                                                                                                                        
+                                                                                                                        

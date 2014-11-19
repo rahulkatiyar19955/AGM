@@ -5,8 +5,8 @@ global useDiff
 useDiff = False
 
 global splitActionModif
-splitActionModif = False
-#splitActionModif = True
+#splitActionModif = False
+splitActionModif = True
 
 AGMListLastUsedName = 'ListAGMInternal'
 

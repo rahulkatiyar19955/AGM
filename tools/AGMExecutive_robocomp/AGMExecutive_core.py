@@ -8,6 +8,7 @@ from parseAGGL import *
 from generateAGGLPlannerCode import *
 from agglplanner import *
 from agglplanchecker import *
+from agglplanningcache import *
 
 import xmlModelParser
 
@@ -93,6 +94,8 @@ class Executive(object):
 		self.plan = None
 		self.modifications = 0
 		self.lastPypyKill = time.time()
+		self.cache = PlanningCache()
+		
 		# Set proxies
 		self.executiveTopic = executiveTopic
 		self.executiveVisualizationTopic = executiveVisualizationTopic
@@ -212,7 +215,6 @@ class Executive(object):
 		print 'Running the planner?', stored==False
 		if stored == False:
 			# Run planner
-			print 'Running the planner...'
 			start = time.time()
 			#PRE
 			self.pypyKillMutex.acquire()
@@ -223,25 +225,38 @@ class Executive(object):
 			self.pypyKillMutex.release()
 			#CALL
 			argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
-			print argsss
-			subprocess.call(argsss)
-			#POST Check if the planner was killed
-			self.pypyKillMutex.acquire()
-			self.pypyInProgress -= 1
-			if self.pypyInProgress == 0: plannerWasKilled = False
-			else: plannerWasKilled = True
-			self.pypyKillMutex.release()
-			#CONTINUE?
-			if plannerWasKilled:
-				print 'There\'s another planning process running... abort'
-				return
-			end = time.time()
-			print 'It took', end - start, 'seconds'
-			# Get the output
-			try:
+			print 'Ask cache'
+			cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
+			if cacheResult:
+				print 'Got plan from cache'
+				print '<<<'
+				print cacheResult[1]
+				print '>>>'
+				cacheSuccess = cacheResult[0]
+				cachePlan = cacheResult[1]
+				lines = cacheResult[1].split('\n')
+			else:
+				print 'Running the planner...'
+				subprocess.call(argsss)
+				#POST Check if the planner was killed
+				self.pypyKillMutex.acquire()
+				self.pypyInProgress -= 1
+				if self.pypyInProgress == 0: plannerWasKilled = False
+				else: plannerWasKilled = True
+				self.pypyKillMutex.release()
+				#CONTINUE?
+				if plannerWasKilled:
+					print 'There\'s another planning process running... abort'
+					return
+				end = time.time()
+				print 'It took', end - start, 'seconds'
+				print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
+				self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
 				ofile = open("/tmp/result"+peid+".txt", 'r')
 				lines = self.ignoreCommentsInPlan(ofile.readlines())
 				ofile.close()
+			# Get the output
+			try:
 				self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
 				stored, stepsFwd = self.callMonitoring(peid)
 			except: # The planner was probably killed
@@ -328,7 +343,7 @@ class Executive(object):
 		#
 		sup = self.modifications
 		self.modifications += 1
-		print "<<<<<<<<<<<modificationProposal(self, modification)", sup
+		print "<<<<<<<<<<<modificationProposal(self, modification) (", sup, ') by', modification.sender
 		print 'Tryin...'
 		while self.mutex.acquire(0)==False:
 			now = time.time()
