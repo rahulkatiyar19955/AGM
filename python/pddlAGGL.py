@@ -131,7 +131,7 @@ class AGMRulePDDL:
 			string += ' (increase (total-cost) '
 			string += rule.cost
 			string += ')'
-		string += AGMRulePDDL.explicitEffectsPDDLEffects(rule, nodeDict)
+			string += AGMRulePDDL.explicitEffectsPDDLEffects(rule, nodeDict)
 		string += '\n\t\t)\n'
 		string += '\t)\n'
 
