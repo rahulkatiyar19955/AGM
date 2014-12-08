@@ -56,7 +56,7 @@ maxCost = 200
 stopWithFirstPlan = True
 verbose = 1
 maxTimeWaitAchieved = 5.
-maxTimeWaitLimit = 300.
+maxTimeWaitLimit = 500.
 
 ## @brief Method heapsort. This method receives an iterable thing. It stores the iterable thing
 # in a list and sorts the list.
