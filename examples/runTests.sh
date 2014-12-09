@@ -1,4 +1,95 @@
 echo
+planningTest="makeMeCoffee/hri/coffee 0"
+echo "Next: $planningTest"
+cd $planningTest
+agglplan ../../domain.aggl initialModel.xml target0.xml
+cd -
+echo "######################################################################"
+sleep 1
+cp /tmp/domain.py domainCoffee0.py
+cp /tmp/target.py targetCoffee0.py
+
+echo
+planningTest="makeMeCoffee/hri/coffee 1"
+echo "Next: $planningTest"
+cd $planningTest
+agglplan ../../domain.aggl initialModel.xml target1.xml
+cd -
+echo "######################################################################"
+sleep 1
+cp /tmp/domain.py domainCoffee1.py
+cp /tmp/target.py targetCoffee1.py
+
+# echo
+# planningTest="makeMeCoffee/hri/coffee 2"
+# echo "Next: $planningTest"
+# cd $planningTest
+# agglplan ../../domain.aggl initialModel.xml target2.xml
+# cd -
+# echo "######################################################################"
+# sleep 1
+# cp /tmp/domain.py domainCoffee2.py
+
+
+# echo
+# planningTest="makeMeCoffee/hri/coffee 3"
+# echo "Next: $planningTest"
+# cd $planningTest
+# agglplan ../../domain.aggl initialModel.xml target3.xml
+# cd -
+# echo "######################################################################"
+# sleep 1
+# cp /tmp/domain.py domainCoffee3.py
+# cp /tmp/target.py targetCoffee3.py
+
+# echo
+# planningTest="makeMeCoffee/hri/coffee 4"
+# echo "Next: $planningTest"
+# cd $planningTest
+# agglplan ../../domain.aggl initialModel.xml target4.xml
+# cd -
+# echo "######################################################################"
+# sleep 1
+# cp /tmp/domain.py domainCoffee4.py
+# cp /tmp/target.py targetCoffee4.py
+
+
+echo
+planningTest="makeMeCoffee/hri/coffee 5"
+echo "Next: $planningTest"
+cd $planningTest
+agglplan ../../domain.aggl initialModel.xml target5.xml
+cd -
+echo "######################################################################"
+sleep 1
+cp /tmp/domain.py domainCoffee5.py
+cp /tmp/target.py targetCoffee5.py
+
+echo
+planningTest="makeMeCoffee/hri/coffee 6"
+echo "Next: $planningTest"
+cd $planningTest
+agglplan ../../domain.aggl initialModel.xml target6.xml
+cd -
+echo "######################################################################"
+sleep 1
+cp /tmp/domain.py domainCoffee6.py
+cp /tmp/target.py targetCoffee6.py
+
+
+echo
+planningTest="makeMeCoffee/experiment"
+echo "Next: $planningTest"
+cd $planningTest
+agglplan ../domain.aggl initialModelCOFFEE.xml targetModelCOFFEE.xml
+cd -
+echo "######################################################################"
+sleep 1
+cp /tmp/domain.py domainCoffee1.py
+cp /tmp/target.py targetCoffee1.py
+
+
+echo
 planningTest="basic"
 echo "Next: $planningTest"
 cd $planningTest
@@ -152,85 +243,5 @@ echo "######################################################################"
 sleep 1
 cp /tmp/domain.py domainDeliver2.py
 cp /tmp/target.py targetDeliver2.py
-
-
-echo
-planningTest="makeMeCoffee/hri/coffee 0"
-echo "Next: $planningTest"
-cd $planningTest
-agglplan ../../domain.aggl initialModel.xml target0.xml
-cd -
-echo "######################################################################"
-sleep 1
-cp /tmp/domain.py domainCoffee0.py
-cp /tmp/target.py targetCoffee0.py
-
-echo
-planningTest="makeMeCoffee/hri/coffee 1"
-echo "Next: $planningTest"
-cd $planningTest
-agglplan ../../domain.aggl initialModel.xml target1.xml
-cd -
-echo "######################################################################"
-sleep 1
-cp /tmp/domain.py domainCoffee1.py
-cp /tmp/target.py targetCoffee1.py
-
-# echo
-# planningTest="makeMeCoffee/hri/coffee 2"
-# echo "Next: $planningTest"
-# cd $planningTest
-# agglplan ../../domain.aggl initialModel.xml target2.xml
-# cd -
-# echo "######################################################################"
-# sleep 1
-# cp /tmp/domain.py domainCoffee2.py
-
-
-# echo
-# planningTest="makeMeCoffee/hri/coffee 3"
-# echo "Next: $planningTest"
-# cd $planningTest
-# agglplan ../../domain.aggl initialModel.xml target3.xml
-# cd -
-# echo "######################################################################"
-# sleep 1
-# cp /tmp/domain.py domainCoffee3.py
-# cp /tmp/target.py targetCoffee3.py
-
-# echo
-# planningTest="makeMeCoffee/hri/coffee 4"
-# echo "Next: $planningTest"
-# cd $planningTest
-# agglplan ../../domain.aggl initialModel.xml target4.xml
-# cd -
-# echo "######################################################################"
-# sleep 1
-# cp /tmp/domain.py domainCoffee4.py
-# cp /tmp/target.py targetCoffee4.py
-
-
-echo
-planningTest="makeMeCoffee/hri/coffee 5"
-echo "Next: $planningTest"
-cd $planningTest
-agglplan ../../domain.aggl initialModel.xml target5.xml
-cd -
-echo "######################################################################"
-sleep 1
-cp /tmp/domain.py domainCoffee5.py
-cp /tmp/target.py targetCoffee5.py
-
-echo
-planningTest="makeMeCoffee/hri/coffee 6"
-echo "Next: $planningTest"
-cd $planningTest
-agglplan ../../domain.aggl initialModel.xml target6.xml
-cd -
-echo "######################################################################"
-sleep 1
-cp /tmp/domain.py domainCoffee6.py
-cp /tmp/target.py targetCoffee6.py
-
 
 
