@@ -120,6 +120,14 @@ class Executive(object):
 
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
+	def broadcastPlan(self):
+		self.mutex.acquire()
+		try:
+			self.sendParams()
+		except:
+			print 'There was some problem broadcasting the plan'
+			sys.exit(1)
+		self.mutex.release()
 	def broadcastModel(self):
 		self.mutex.acquire()
 		try:
@@ -135,7 +143,7 @@ class Executive(object):
 			self.backModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 			#print 'broadcastinnn>>>'
 		except:
-			print 'There was some problem broadcasting'
+			print 'There was some problem broadcasting the model'
 			sys.exit(1)
 		self.mutex.release()
 	def reset(self):
@@ -291,15 +299,8 @@ class Executive(object):
 			params[p].value = parameterMap[p]
 			params[p].type = 'string'
 		# Send plan
-		print 'Send plan to'
-		for agent in self.agents:
-			print '\t', agent,
-			try:
-				self.agents[agent].activateAgent(params)
-			except:
-				print '     (can\'t connect to', agent, '!!!)',
-			print ''
-
+		self.lastParamsSent = copy.deepcopy(params)
+		self.sendParams()
 		# Publish new information using the executiveVisualizationTopic
 		try:
 			print self.plan
@@ -321,6 +322,16 @@ class Executive(object):
 			traceback.print_exc()
 			print "can't publish executiveVisualizationTopic.update"
 		print 'done'
+	def sendParams(self):
+		print 'Send plan to'
+		for agent in self.agents:
+			print '\t', agent,
+			try:
+				self.agents[agent].activateAgent(self.lastParamsSent)
+			except:
+				print '     (can\'t connect to', agent, '!!!)',
+			print ''
+
 	def modificationProposal(self, modification):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D

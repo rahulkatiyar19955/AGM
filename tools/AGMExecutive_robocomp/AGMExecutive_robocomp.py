@@ -61,6 +61,8 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 		self.handler = _handler
 	def broadcastModel(self, current=None):
 		self.handler.broadcastModel()
+	def broadcastPlan(self, current=None):
+		self.handler.broadcastPlan()
 	def activate(self, current=None):
 		pass
 	def deactivate(self, current=None):
