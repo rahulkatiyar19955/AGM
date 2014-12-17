@@ -95,7 +95,7 @@ class Executive(object):
 		self.modifications = 0
 		self.lastPypyKill = time.time()
 		self.cache = PlanningCache()
-		
+
 		# Set proxies
 		self.executiveTopic = executiveTopic
 		self.executiveVisualizationTopic = executiveVisualizationTopic
@@ -244,10 +244,10 @@ class Executive(object):
 				if self.pypyInProgress == 0: plannerWasKilled = False
 				else: plannerWasKilled = True
 				self.pypyKillMutex.release()
-				#CONTINUE?
-				if plannerWasKilled:
-					print 'There\'s another planning process running... abort'
-					return
+				#CONTINUE?                       Probably i'ts better just to try to open the file and consider it was killed if there's no result file...
+				#if plannerWasKilled:
+					#print 'There\'s another planning process running... abort'
+					#return
 				end = time.time()
 				print 'It took', end - start, 'seconds'
 				print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
