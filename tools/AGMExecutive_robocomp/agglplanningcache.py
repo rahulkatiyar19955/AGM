@@ -2,7 +2,7 @@ import string
 import md5
 import sys
 import traceback
-
+import re
 
 def digest(pp):
 	md = md5.new()
@@ -97,8 +97,8 @@ class PlanningCache:
 
 	def getPlanFromFiles(self, domainF, initialstateF, goalstateF):
 		domain       = open(domainF,       'r').read()
-		initialstate = open(initialstateF, 'r').read()
-		goalstate    = open(goalstateF,    'r').read()
+		initialstate = re.sub('<attribute [^>]*>', '', open(initialstateF, 'r').read())
+		goalstate    = re.sub('<attribute [^>]*>', '', open(goalstateF,    'r').read())
 		return self.getPlan(domain, initialstate, goalstate)
 
 	def includeFromFiles(self, domainF, initialstateF, goalstateF, planF, success, shouldIWrite=True):
