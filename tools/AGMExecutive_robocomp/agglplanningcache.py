@@ -103,8 +103,8 @@ class PlanningCache:
 
 	def includeFromFiles(self, domainF, initialstateF, goalstateF, planF, success, shouldIWrite=True):
 		domain       = open(domainF,       'r').read()
-		initialstate = open(initialstateF, 'r').read()
-		goalstate    = open(goalstateF,    'r').read()
+		initialstate = re.sub('<attribute [^>]*>', '', open(initialstateF, 'r').read())
+		goalstate    = re.sub('<attribute [^>]*>', '', open(goalstateF,    'r').read())
 		plan         = open(planF,         'r').read()
 		return self.include(domain, initialstate, goalstate, plan, success, shouldIWrite)
 
