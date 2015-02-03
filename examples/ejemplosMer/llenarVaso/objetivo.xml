@@ -1,0 +1,22 @@
+<AGMModel>
+
+	<symbol id="aa" type="Agua" />
+	<symbol id="aaa" type="Agua" />
+
+	<symbol id="vv" type="Vaso" />
+	<symbol id="vvv" type="Vaso" />
+
+	<symbol id="333" type="Mesa" />
+	
+	
+	<link src="aa" dst="vv" label="en"/> <!-- Aguna aa en vaso vv--> 
+	<link src="aaa" dst="vvv" label="en"/> <!-- Aguna aaa en vaso vvv--> 
+	
+	<link src="vv" dst="333" label="en"/> <!-- Vaso vv en mesa 333--> 
+	<link src="vv" dst="333" label="lleno"/>  <!-- Vaso vv lleno mesa 333--> 
+	
+	<link src="vvv" dst="333" label="en"/> <!-- Vaso vvv en mesa 333--> 
+	<link src="vvv" dst="333" label="lleno"/>  <!-- Vaso vvv lleno mesa 333--> 
+	
+
+</AGMModel>

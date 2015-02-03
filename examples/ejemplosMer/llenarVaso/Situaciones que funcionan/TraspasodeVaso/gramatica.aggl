@@ -1,0 +1,56 @@
+spacePattern=3
+lineThickness=2.0
+fontName=Arial
+name=gramatica
+vertexDiameter=40.0
+shortPattern=1
+nodeThickness=2.0
+fontSize=14
+longPattern=3
+===
+ServirAgua : active(1)
+{
+	{
+		a:Agua(-575,-120)
+		j:Jarra(-370,-120)
+		m:Mesa(-380,15)
+		v:Vaso(-585,15)
+		a->j(en)
+		j->m(en)
+		j->m(lleno)
+		v->m(en)
+		v->m(vacio)
+	}
+	=>
+	{
+		a:Agua(-240,-235)
+		j:Jarra(-70,-240)
+		m:Mesa(-75,-80)
+		v:Vaso(-240,-80)
+		j->m(en)
+		j->m(vacio)
+		v->m(en)
+		a->v(en)
+		v->m(lleno)
+	}
+}
+
+MoverVaso : active(1)
+{
+	{
+		v:Vaso(-1075,-215)
+		m1:Mesa(-1065,-420)
+		m2:Mesa(-795,-420)
+		v->m1(en)
+		v->m1(lleno)
+	}
+	=>
+	{
+		m2:Mesa(145,-10)
+		m1:Mesa(-115,-15)
+		v:Vaso(145,160)
+		v->m2(en)
+		v->m2(lleno)
+	}
+}
+

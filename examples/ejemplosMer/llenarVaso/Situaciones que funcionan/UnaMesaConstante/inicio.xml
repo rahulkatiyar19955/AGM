@@ -1,0 +1,23 @@
+<AGMModel>
+	<symbol id="11" type="Agua" />
+	<symbol id="12" type="Jarra" />
+	<symbol id="13" type="Mesa" />
+	<symbol id="14" type="Vaso" />
+	
+	<link src="11" dst="12" label="en"/>
+	<link src="12" dst="13" label="en"/>
+	<link src="12" dst="13" label="lleno"/>
+	<link src="14" dst="13" label="en"/>
+	<link src="14" dst="13" label="vacio"/>
+	
+<!--	<symbol id="21" type="Agua" />
+	<symbol id="22" type="Jarra" />
+	<symbol id="23" type="Mesa" />
+	<symbol id="24" type="Vaso" />
+	
+	<link src="21" dst="24" label="en"/>
+	<link src="22" dst="23" label="en"/>
+	<link src="22" dst="23" label="lleno"/>
+	<link src="24" dst="23" label="en"/>
+	<link src="24" dst="23" label="vacio"/>-->
+</AGMModel>

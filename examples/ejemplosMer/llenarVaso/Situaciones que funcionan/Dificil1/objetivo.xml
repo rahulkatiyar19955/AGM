@@ -1,0 +1,12 @@
+<AGMModel>
+
+	<symbol id="aa" type="Agua" />
+	<symbol id="15" type="Mesa" />
+	<symbol id="vv" type="Vaso" />
+	
+	<link src="aa" dst="vv" label="en"/>
+	<link src="vv" dst="15" label="en"/>
+	<link src="vv" dst="15" label="lleno"/>
+	
+
+</AGMModel>
