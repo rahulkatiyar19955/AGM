@@ -146,6 +146,8 @@ class PyPlanChecker(object):
 		if resultPath!='':
 			world.graph.toXML(resultPath)
 
+"----------------------------------------------------------------------"
+"----------------------------------------------------------------------"
 ## @brief This method prints the USER MODE of the PyPlanChecker class.
 # " Usage
 #   PROGRAM_NAME domain.[py/aggl] init.xml plan.plan target.[py/xml] [result.xml]
@@ -153,24 +155,24 @@ def printUsage():
 	print 'Usage\n\t', sys.argv[0], ' domain.[py/aggl] init.xml plan.plan target.[py/xml]   [result.xml]'
 	sys.exit(0)
 
-# Procedure.
+
+"------------------------------------------------------------------------------------------"
+"------------------------------------------------------------------------------------------"
+# PRINCIPAL PROCEDURE --> MAIN PROGRAM 
+"------------------------------------------------------------------------------------------"
+"------------------------------------------------------------------------------------------"
 if __name__ == '__main__': # program domain problem result
 	# We check the correct number of arguments
 	if len(sys.argv)<5 or len(sys.argv)>6:
 		printUsage()
 	# If everything is correct, we save the arguments in local variables.
-	## The grammar rules
-	domain = sys.argv[1]
-	## The initial world status
-	init   = sys.argv[2]
-	## The plan genetared by the planner.
-	plan   = sys.argv[3]
-	## The target or goal world status.
-	target = sys.argv[4]
+	domain = sys.argv[1] ## The grammar rules
+	init   = sys.argv[2] ## The initial world status
+	plan   = sys.argv[3] ## The plan genetared by the planner
+	target = sys.argv[4] ## The target or goal world status.
 
 	if len(sys.argv)==6:
-		## We save the name of the file where the result will be stored.
-		result = sys.argv[5]
+		result = sys.argv[5] ## We save the name of the file where the result will be stored.
 	else:
 		result = ''
 

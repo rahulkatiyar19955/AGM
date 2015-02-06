@@ -1,23 +1,23 @@
 <AGMModel>
 
-	<symbol id="7" type="object" />   <!--container-->
-	<symbol id="3" type="object" />   <!--room-->
-	<symbol id="8" type="objectSt" /> <!--contst-->
-	<symbol id="1" type="robot" />    <!--robot-->
+	<symbol id="mesa" type="object" />   <!--container-->
+	<symbol id="habitacion" type="object" />   <!--room-->
+	<symbol id="estado" type="objectSt" /> <!--contst-->
+	<symbol id="robot" type="robot" />    <!--robot-->
 
-	<link  src="1"      dst="3"     label="in" />
-	<link  src="1"      dst="7"     label="know" />
-	<link  src="7"      dst="3"     label="in" />
+	<link  src="robot"      dst="habitacion"     label="in" />
+	<link  src="robot"      dst="mesa"     label="know" />
+	<link  src="mesa"      dst="habitacion"     label="in" />
 	
-	<link  src="7"      dst="8"     label="table" />
-	<link  src="7"      dst="8"     label="explored" />
+	<link  src="mesa"      dst="estado"     label="table" />
+	<link  src="mesa"      dst="estado"     label="explored" />
 
 	<symbol id="object" type="object" />
 	<symbol id="status" type="objectSt" />
 
-	<link  src="1" dst="object" label="know" />
+	<link  src="robot" dst="object" label="know" />
 	<link  src="object" dst="status" label="mug" />
-	<link src="object" dst="7" label="in" />
+	<link src="object" dst="mesa" label="in" />
 <!--
 	<link  src="object" dst="status" label="see" />
 	<link  src="object" dst="status" label="classified" />
