@@ -22,7 +22,7 @@ hierarchical hierarchicalFindMilkInTable : active(1)
 		robot->container(know)
 		robot->room(in)
 		container->room(in)
-		container->contst(explored)*
+		container->contst(noExplored)
 	}
 	=>
 	{
@@ -45,7 +45,7 @@ hierarchical hierarchicalFindMilkInTable : active(1)
 		robot->container(know)
 		robot->room(in)
 		container->room(in)
-		container->contst(explored)*
+		container->contst(noExplored)
 	}
 	effect
 	{
@@ -70,7 +70,7 @@ hierarchical hierarchicalFindMilkInTable_noReach : active(1)
 		robot->container(know)
 		robot->room(in)
 		container->room(in)
-		container->contst(explored)*
+		container->contst(noExplored)
 	}
 	=>
 	{
@@ -93,7 +93,7 @@ hierarchical hierarchicalFindMilkInTable_noReach : active(1)
 		robot->container(know)
 		robot->room(in)
 		container->room(in)
-		container->contst(explored)*
+		container->contst(noExplored)
 	}
 	effect
 	{
@@ -114,7 +114,7 @@ hierarchical hierarchicalFindMugInTable : active(1)
 		container:object(-130,110)
 		robot:robot(-325,0)
 		room:object(-325,110)
-		container->contst(explored)*
+		container->contst(noExplored)
 		container->contst(table)
 		robot->container(know)
 		robot->room(in)
@@ -128,7 +128,7 @@ hierarchical hierarchicalFindMugInTable : active(1)
 		room:object(-325,110)
 		contst:objectSt(95,110)
 		robot:robot(-325,0)
-		container->contst(explored)*
+		container->contst(noExplored)
 		container->contst(table)
 		container->contst(reach)
 		robot->object(know)
@@ -163,7 +163,7 @@ hierarchical hierarchicalFindMugInTable_noReach : active(1)
 		container:object(-130,110)
 		robot:robot(-325,0)
 		room:object(-325,110)
-		container->contst(explored)*
+		container->contst(noExplored)
 		container->contst(table)
 		container->contst(reach)
 		robot->container(know)
@@ -178,7 +178,7 @@ hierarchical hierarchicalFindMugInTable_noReach : active(1)
 		room:object(-325,110)
 		contst:objectSt(95,110)
 		robot:robot(-325,0)
-		container->contst(explored)*
+		container->contst(noExplored)
 		container->contst(table)
 		container->contst(reach)
 		robot->object(know)
@@ -213,7 +213,7 @@ hierarchical hierarchicalFindGlassesInTable : active(1)
 		container:object(-130,110)
 		robot:robot(-325,0)
 		room:object(-325,110)
-		container->contst(explored)*
+		container->contst(noExplored)
 		container->contst(table)
 		robot->container(know)
 		robot->room(in)
@@ -227,7 +227,7 @@ hierarchical hierarchicalFindGlassesInTable : active(1)
 		room:object(-325,110)
 		contst:objectSt(95,110)
 		robot:robot(-325,0)
-		container->contst(explored)*
+		container->contst(noExplored)
 		container->contst(table)
 		robot->object(know)
 		object->status(see)
@@ -261,7 +261,7 @@ hierarchical hierarchicalFindGlassesInTable_noReach : active(1)
 		container:object(-130,110)
 		robot:robot(-325,0)
 		room:object(-325,110)
-		container->contst(explored)*
+		container->contst(noExplored)
 		container->contst(table)
 		robot->container(know)
 		robot->room(in)
@@ -275,7 +275,7 @@ hierarchical hierarchicalFindGlassesInTable_noReach : active(1)
 		room:object(-325,110)
 		contst:objectSt(95,110)
 		robot:robot(-325,0)
-		container->contst(explored)*
+		container->contst(noExplored)
 		container->contst(table)
 		robot->object(know)
 		object->status(see)
@@ -313,7 +313,7 @@ hierarchical hierarchicalFindCoffeePotInTable : active(1)
 		robot->container(know)
 		robot->room(in)
 		container->room(in)
-		container->contst(explored)*
+		container->contst(noExplored)
 	}
 	=>
 	{
@@ -336,7 +336,7 @@ hierarchical hierarchicalFindCoffeePotInTable : active(1)
 		robot->container(know)
 		robot->room(in)
 		container->room(in)
-		container->contst(explored)*
+		container->contst(noExplored)
 	}
 	effect
 	{
@@ -361,7 +361,7 @@ hierarchical hierarchicalFindCoffeePotInTable_noReach : active(1)
 		robot->container(know)
 		robot->room(in)
 		container->room(in)
-		container->contst(explored)*
+		container->contst(noExplored)
 	}
 	=>
 	{
@@ -384,7 +384,7 @@ hierarchical hierarchicalFindCoffeePotInTable_noReach : active(1)
 		robot->container(know)
 		robot->room(in)
 		container->room(in)
-		container->contst(explored)*
+		container->contst(noExplored)
 	}
 	effect
 	{

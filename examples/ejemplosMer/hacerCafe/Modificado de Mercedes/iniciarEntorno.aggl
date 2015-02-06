@@ -8,124 +8,46 @@ nodeThickness=2.0
 fontSize=14
 longPattern=3
 ===
-searchHuman : active(1)
+knowHuman : active(1)
 {
 	{
-		person:Human(-175,-1005)
-		robot:Robot(-425,-1175)
-		room:Object(-425,-1005)
+		person:Human(-35,10)
+		robotST:Status(-175,-355)
+		room:Object(-355,10)
+		robot:Robot(-180,-180)
 		robot->room(in)
 		person->room(in)
+		robot->robotST(init)
 	}
 	=>
 	{
-		person:Human(215,-195)
-		room:Object(-85,-200)
-		robot:Robot(-85,-380)
-		robot->person(know)
+		person:Human(130,15)
+		robotST:Status(-30,-340)
+		room:Object(-200,15)
+		robot:Robot(-35,-180)
 		robot->room(in)
 		person->room(in)
+		robot->person(interact)
+		robot->robotST(free)
 	}
 }
 
-knowRoom : active(1)
+changeRoom : active(1)
 {
 	{
-		person:Human(-250,10)
-		roomR:Object(25,-180)
-		robot:Robot(-255,-180)
-		roomH:Object(30,10)
-		roomH_ST:Status(280,15)
-		robot->roomR(in)
-		robot->person(know)
-		person->roomR(in)
-		person->roomH(in)
-		roomR->roomH(equals)
-		roomH->roomH_ST(room)
+		robot:Robot(-40,-250)
+		room2:Object(95,-90)
+		room1:Object(-180,-90)
+		robot->room1(in)
+		room1->room2(transitable)
 	}
 	=>
 	{
-		roomH_ST:Status(295,20)
-		robot:Robot(-215,-140)
-		roomH:Object(65,20)
-		person:Human(-210,20)
-		roomR:Object(65,-140)
-		roomR_ST:Status(295,-140)
-		robot->person(know)
-		person->roomR(in)
-		robot->roomR(in)
-		roomR->roomH(equals)
-		person->roomH(in)
-		roomH->roomH_ST(room)
-		roomR->roomR_ST(room)
-		roomR->roomR_ST(noExplored)
-	}
-}
-
-knowObject : active(1)
-{
-	{
-		object:Object(-5,-15)
-		room:Object(-310,-15)
-		robot:Robot(-145,-150)
-		robot->room(in)
-		object->room(in)
-	}
-	=>
-	{
-		objectSt:Status(170,75)
-		object:Object(-125,75)
-		room:Object(-405,75)
-		robot:Robot(-250,-95)
-		robot->room(in)
-		object->room(in)
-		robot->object(know)
-		object->objectSt(unclassified)
-	}
-}
-
-rule3 : active(1)
-{
-	{
-		objectSt:Status(-635,90)
-		room:Object(-230,-60)
-		object1:Object(-45,80)
-		object:Object(-395,80)
-		robot:Robot(-385,-205)
-		object1St:Status(180,80)
-		person:Human(-40,-200)
-		robot->room(in)
-		person->room(in)
-		robot->person(know)
-		robot->object(know)
-		person->object1(know)
-		object1->object1St(classified)
-		object->objectSt(unclassified)
-		object->object1(equals)
-		object->room(in)
-		object1->room(in)
-		object1->object1St(table)
-	}
-	=>
-	{
-		objectSt:Status(-615,100)
-		room:Object(-250,-60)
-		object1:Object(-70,110)
-		object:Object(-410,105)
-		object1St:Status(145,115)
-		robot:Robot(-410,-190)
-		person:Human(-70,-185)
-		robot->room(in)
-		person->room(in)
-		robot->person(know)
-		person->object1(know)
-		object1->object1St(classified)
-		object->objectSt(classified)
-		object->room(in)
-		object1->room(in)
-		robot->object(know)
-		object->object1(equals)
-		object->objectSt(table)
+		robot:Robot(-30,-180)
+		room2:Object(100,-25)
+		room1:Object(-150,-25)
+		room1->room2(transitable)
+		robot->room2(in)
 	}
 }
 

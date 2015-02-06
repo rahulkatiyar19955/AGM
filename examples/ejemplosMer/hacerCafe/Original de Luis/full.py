@@ -35,6 +35,8 @@ class RuleSet(object):
 		mapping['recognizeObjGlasses'] = self.recognizeObjGlasses
 		mapping['recognizeObjCoffeePot'] = self.recognizeObjCoffeePot
 		mapping['recognizeObjFails'] = self.recognizeObjFails
+		mapping['setRoomExplored'] = self.setRoomExplored
+		mapping['setTableExplored'] = self.setTableExplored
 		mapping['setObjectReach'] = self.setObjectReach
 		mapping['graspObject'] = self.graspObject
 		mapping['handObject'] = self.handObject
@@ -77,6 +79,8 @@ class RuleSet(object):
 		mapping['recognizeObjGlasses'] = self.recognizeObjGlasses_trigger
 		mapping['recognizeObjCoffeePot'] = self.recognizeObjCoffeePot_trigger
 		mapping['recognizeObjFails'] = self.recognizeObjFails_trigger
+		mapping['setRoomExplored'] = self.setRoomExplored_trigger
+		mapping['setTableExplored'] = self.setTableExplored_trigger
 		mapping['setObjectReach'] = self.setObjectReach_trigger
 		mapping['graspObject'] = self.graspObject_trigger
 		mapping['handObject'] = self.handObject_trigger
@@ -356,7 +360,7 @@ class RuleSet(object):
 						for symbol_contst_name in symbol_contst_nodes:
 							symbol_contst = nodes[symbol_contst_name]
 							n2id['contst'] = symbol_contst_name
-							if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"reach"] in snode.graph.links:
+							if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"reach"] in snode.graph.links:
 								for symbol_room_name in symbol_room_nodes:
 									symbol_room = nodes[symbol_room_name]
 									n2id['room'] = symbol_room_name
@@ -414,7 +418,7 @@ class RuleSet(object):
 				if verbose: print 'test_symbol_robot(',n2id['robot'],').sType == robot' , test_symbol_robot.sType == 'robot'
 				raise WrongRuleExecution('findObjectVisuallyInTable_trigger2')
 			test_symbol_contst = snode.graph.nodes[n2id['contst']]
-			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"reach"] in snode.graph.links):
+			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"reach"] in snode.graph.links):
 				if verbose: print 'test_symbol_contst(',n2id['contst'],').sType == objectSt' , test_symbol_contst.sType == 'objectSt'
 				raise WrongRuleExecution('findObjectVisuallyInTable_trigger3')
 			test_symbol_room = snode.graph.nodes[n2id['room']]
@@ -1307,6 +1311,220 @@ class RuleSet(object):
 			newNode.cost += 1
 			newNode.depth += 1
 		newNode.history.append('recognizeObjFails@' + str(n2id) )
+		if finish!='': newNode.history.append(finish)
+		return newNode
+		
+		
+
+	# Rule setRoomExplored
+	def setRoomExplored(self, snode, stackP=None, equivalencesP=None):
+		if stackP == None: stackP=[]
+		if equivalencesP == None: equivalencesP=[]
+		stack        = copy.deepcopy(stackP)
+		equivalences = copy.deepcopy(equivalencesP)
+		symbol_nodes_copy = copy.deepcopy(snode.graph.nodes)
+		finishesCombo = ''
+		if len(stack) > 0:
+			inCombo = True
+			pop = stack.pop()
+			me = pop[0]
+			if len(pop)>2:
+				finishesCombo = copy.deepcopy(pop[2])
+				fina = copy.deepcopy(pop[2])
+			# Find equivalence for status
+			symbol_status_nodes = symbol_nodes_copy
+			for equiv in equivalences:
+				if [me, 'status'] in equiv[0] and equiv[1] != None:
+					symbol_status_nodes = [equiv[1]]
+			# Find equivalence for object
+			symbol_object_nodes = symbol_nodes_copy
+			for equiv in equivalences:
+				if [me, 'object'] in equiv[0] and equiv[1] != None:
+					symbol_object_nodes = [equiv[1]]
+		else:
+			inCombo = False
+			symbol_status_nodes = symbol_nodes_copy
+			symbol_object_nodes = symbol_nodes_copy
+		ret = []
+		nodes = copy.deepcopy(snode.graph.nodes)
+		n2id = dict()
+		for symbol_object_name in symbol_object_nodes:
+			symbol_object = nodes[symbol_object_name]
+			n2id['object'] = symbol_object_name
+			if symbol_object.sType == 'object':
+				for symbol_status_name in symbol_status_nodes:
+					symbol_status = nodes[symbol_status_name]
+					n2id['status'] = symbol_status_name
+					if symbol_status.sType == 'roomSt' and symbol_status.name!=symbol_object.name and [n2id["object"],n2id["status"],"noExplored"] in snode.graph.links:
+						# At this point we meet all the conditions.
+						stack2        = copy.deepcopy(stack)
+						equivalences2 = copy.deepcopy(equivalences)
+						r1 = self.setRoomExplored_trigger(snode, n2id, stack2, inCombo, equivalences2, copy.deepcopy(finishesCombo))
+						c = copy.deepcopy(r1)
+						if 'fina' in locals():
+							c.history.append(finishesCombo)
+						if len(stack2) > 0: c.stop = True
+						ret.append(c)
+						if len(stack2) > 0:
+							# Set symbol for object...
+							for equiv in equivalences2:
+								if [me, 'object'] in equiv[0]:
+									equiv[1] = symbol_object_name
+							# Set symbol for status...
+							for equiv in equivalences2:
+								if [me, 'status'] in equiv[0]:
+									equiv[1] = symbol_status_name
+							newNode = WorldStateHistory(r1)
+							global lastNodeId
+							lastNodeId += 1
+							newNode.nodeId = lastNodeId
+							derivsx = self.getRules()[stack2[-1][1]](newNode, stack2, equivalences2)
+							if 'fina' in locals():
+								for n in derivsx: n.history.append(finishesCombo)
+								for n in derivsx: n.history.append(fina)
+							ret.extend(derivsx)
+		return ret
+		
+		
+
+	# Rule setRoomExplored
+	def setRoomExplored_trigger(self, snode, n2id, stack=None, inCombo=False, equivalences=None, checked=True, finish='', verbose=False):
+		if stack == None: stack=[]
+		if equivalences == None: equivalences=[]
+		if not checked:
+			test_symbol_object = snode.graph.nodes[n2id['object']]
+			if not (test_symbol_object.sType == 'object'):
+				if verbose: print 'test_symbol_object(',n2id['object'],').sType == object' , test_symbol_object.sType == 'object'
+				raise WrongRuleExecution('setRoomExplored_trigger1')
+			test_symbol_status = snode.graph.nodes[n2id['status']]
+			if not (test_symbol_status.sType == 'roomSt' and test_symbol_status.name!=test_symbol_object.name and [n2id["object"],n2id["status"],"noExplored"] in snode.graph.links):
+				if verbose: print 'test_symbol_status(',n2id['status'],').sType == roomSt' , test_symbol_status.sType == 'roomSt'
+				raise WrongRuleExecution('setRoomExplored_trigger2')
+		newNode = WorldStateHistory(snode)
+		global lastNodeId
+		lastNodeId += 1
+		newNode.nodeId = lastNodeId
+		# Create nodes
+		# Retype nodes
+		# Remove nodes
+		# Remove links
+		newNode.graph.links = [x for x in newNode.graph.links if [x.a, x.b, x.linkType] not in [ [n2id['object'], n2id['status'], 'noExplored'] ]]
+		# Create links
+		l = AGMLink(n2id['object'], n2id['status'], 'explored')
+		if not l in newNode.graph.links:
+			newNode.graph.links.append(l)
+		# Misc stuff
+		if not inCombo:
+			newNode.cost += 1
+			newNode.depth += 1
+		newNode.history.append('setRoomExplored@' + str(n2id) )
+		if finish!='': newNode.history.append(finish)
+		return newNode
+		
+		
+
+	# Rule setTableExplored
+	def setTableExplored(self, snode, stackP=None, equivalencesP=None):
+		if stackP == None: stackP=[]
+		if equivalencesP == None: equivalencesP=[]
+		stack        = copy.deepcopy(stackP)
+		equivalences = copy.deepcopy(equivalencesP)
+		symbol_nodes_copy = copy.deepcopy(snode.graph.nodes)
+		finishesCombo = ''
+		if len(stack) > 0:
+			inCombo = True
+			pop = stack.pop()
+			me = pop[0]
+			if len(pop)>2:
+				finishesCombo = copy.deepcopy(pop[2])
+				fina = copy.deepcopy(pop[2])
+			# Find equivalence for status
+			symbol_status_nodes = symbol_nodes_copy
+			for equiv in equivalences:
+				if [me, 'status'] in equiv[0] and equiv[1] != None:
+					symbol_status_nodes = [equiv[1]]
+			# Find equivalence for object
+			symbol_object_nodes = symbol_nodes_copy
+			for equiv in equivalences:
+				if [me, 'object'] in equiv[0] and equiv[1] != None:
+					symbol_object_nodes = [equiv[1]]
+		else:
+			inCombo = False
+			symbol_status_nodes = symbol_nodes_copy
+			symbol_object_nodes = symbol_nodes_copy
+		ret = []
+		nodes = copy.deepcopy(snode.graph.nodes)
+		n2id = dict()
+		for symbol_object_name in symbol_object_nodes:
+			symbol_object = nodes[symbol_object_name]
+			n2id['object'] = symbol_object_name
+			if symbol_object.sType == 'object':
+				for symbol_status_name in symbol_status_nodes:
+					symbol_status = nodes[symbol_status_name]
+					n2id['status'] = symbol_status_name
+					if symbol_status.sType == 'objectSt' and symbol_status.name!=symbol_object.name and [n2id["object"],n2id["status"],"table"] in snode.graph.links and [n2id["object"],n2id["status"],"noExplored"] in snode.graph.links:
+						# At this point we meet all the conditions.
+						stack2        = copy.deepcopy(stack)
+						equivalences2 = copy.deepcopy(equivalences)
+						r1 = self.setTableExplored_trigger(snode, n2id, stack2, inCombo, equivalences2, copy.deepcopy(finishesCombo))
+						c = copy.deepcopy(r1)
+						if 'fina' in locals():
+							c.history.append(finishesCombo)
+						if len(stack2) > 0: c.stop = True
+						ret.append(c)
+						if len(stack2) > 0:
+							# Set symbol for object...
+							for equiv in equivalences2:
+								if [me, 'object'] in equiv[0]:
+									equiv[1] = symbol_object_name
+							# Set symbol for status...
+							for equiv in equivalences2:
+								if [me, 'status'] in equiv[0]:
+									equiv[1] = symbol_status_name
+							newNode = WorldStateHistory(r1)
+							global lastNodeId
+							lastNodeId += 1
+							newNode.nodeId = lastNodeId
+							derivsx = self.getRules()[stack2[-1][1]](newNode, stack2, equivalences2)
+							if 'fina' in locals():
+								for n in derivsx: n.history.append(finishesCombo)
+								for n in derivsx: n.history.append(fina)
+							ret.extend(derivsx)
+		return ret
+		
+		
+
+	# Rule setTableExplored
+	def setTableExplored_trigger(self, snode, n2id, stack=None, inCombo=False, equivalences=None, checked=True, finish='', verbose=False):
+		if stack == None: stack=[]
+		if equivalences == None: equivalences=[]
+		if not checked:
+			test_symbol_object = snode.graph.nodes[n2id['object']]
+			if not (test_symbol_object.sType == 'object'):
+				if verbose: print 'test_symbol_object(',n2id['object'],').sType == object' , test_symbol_object.sType == 'object'
+				raise WrongRuleExecution('setTableExplored_trigger1')
+			test_symbol_status = snode.graph.nodes[n2id['status']]
+			if not (test_symbol_status.sType == 'objectSt' and test_symbol_status.name!=test_symbol_object.name and [n2id["object"],n2id["status"],"table"] in snode.graph.links and [n2id["object"],n2id["status"],"noExplored"] in snode.graph.links):
+				if verbose: print 'test_symbol_status(',n2id['status'],').sType == objectSt' , test_symbol_status.sType == 'objectSt'
+				raise WrongRuleExecution('setTableExplored_trigger2')
+		newNode = WorldStateHistory(snode)
+		global lastNodeId
+		lastNodeId += 1
+		newNode.nodeId = lastNodeId
+		# Create nodes
+		# Retype nodes
+		# Remove nodes
+		# Remove links
+		newNode.graph.links = [x for x in newNode.graph.links if [x.a, x.b, x.linkType] not in [ [n2id['object'], n2id['status'], 'noExplored'] ]]
+		# Create links
+		l = AGMLink(n2id['object'], n2id['status'], 'explored')
+		if not l in newNode.graph.links:
+			newNode.graph.links.append(l)
+		# Misc stuff
+		if not inCombo:
+			newNode.cost += 1
+			newNode.depth += 1
+		newNode.history.append('setTableExplored@' + str(n2id) )
 		if finish!='': newNode.history.append(finish)
 		return newNode
 		
@@ -4930,7 +5148,7 @@ class RuleSet(object):
 								for symbol_contst_name in symbol_contst_nodes:
 									symbol_contst = nodes[symbol_contst_name]
 									n2id['contst'] = symbol_contst_name
-									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links:
+									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links:
 										# At this point we meet all the conditions.
 										stack2        = copy.deepcopy(stack)
 										equivalences2 = copy.deepcopy(equivalences)
@@ -4988,7 +5206,7 @@ class RuleSet(object):
 				if verbose: print 'test_symbol_room(',n2id['room'],').sType == object' , test_symbol_room.sType == 'object'
 				raise WrongRuleExecution('hierarchicalFindMilkInTable_trigger3')
 			test_symbol_contst = snode.graph.nodes[n2id['contst']]
-			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links):
+			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links):
 				if verbose: print 'test_symbol_contst(',n2id['contst'],').sType == objectSt' , test_symbol_contst.sType == 'objectSt'
 				raise WrongRuleExecution('hierarchicalFindMilkInTable_trigger4')
 		newNode = WorldStateHistory(snode)
@@ -5098,10 +5316,10 @@ class RuleSet(object):
 				symbol_contst = graph.nodes[n2id['contst']]
 				linksVal = 0
 				if [n2id["container"],n2id["contst"],"table"]  in graph.links: linksVal += 100
-				if [n2id["container"],n2id["contst"],"explored"] not in graph.links: linksVal += 100
+				if [n2id["container"],n2id["contst"],"noExplored"]  in graph.links: linksVal += 100
 				scoreLinks.append(linksVal)
 				maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
-				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in graph.links and not [n2id["container"],n2id["contst"],"explored"] in graph.links:
+				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in graph.links and [n2id["container"],n2id["contst"],"noExplored"] in graph.links:
 					scoreNodes.append(100)
 					maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
 					# robot
@@ -5220,7 +5438,7 @@ class RuleSet(object):
 								for symbol_contst_name in symbol_contst_nodes:
 									symbol_contst = nodes[symbol_contst_name]
 									n2id['contst'] = symbol_contst_name
-									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links:
+									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links:
 										# At this point we meet all the conditions.
 										stack2        = copy.deepcopy(stack)
 										equivalences2 = copy.deepcopy(equivalences)
@@ -5278,7 +5496,7 @@ class RuleSet(object):
 				if verbose: print 'test_symbol_room(',n2id['room'],').sType == object' , test_symbol_room.sType == 'object'
 				raise WrongRuleExecution('hierarchicalFindMilkInTable_noReach_trigger3')
 			test_symbol_contst = snode.graph.nodes[n2id['contst']]
-			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links):
+			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links):
 				if verbose: print 'test_symbol_contst(',n2id['contst'],').sType == objectSt' , test_symbol_contst.sType == 'objectSt'
 				raise WrongRuleExecution('hierarchicalFindMilkInTable_noReach_trigger4')
 		newNode = WorldStateHistory(snode)
@@ -5388,10 +5606,10 @@ class RuleSet(object):
 				symbol_contst = graph.nodes[n2id['contst']]
 				linksVal = 0
 				if [n2id["container"],n2id["contst"],"table"]  in graph.links: linksVal += 100
-				if [n2id["container"],n2id["contst"],"explored"] not in graph.links: linksVal += 100
+				if [n2id["container"],n2id["contst"],"noExplored"]  in graph.links: linksVal += 100
 				scoreLinks.append(linksVal)
 				maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
-				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in graph.links and not [n2id["container"],n2id["contst"],"explored"] in graph.links:
+				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in graph.links and [n2id["container"],n2id["contst"],"noExplored"] in graph.links:
 					scoreNodes.append(100)
 					maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
 					# robot
@@ -5510,7 +5728,7 @@ class RuleSet(object):
 								for symbol_contst_name in symbol_contst_nodes:
 									symbol_contst = nodes[symbol_contst_name]
 									n2id['contst'] = symbol_contst_name
-									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links:
+									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links:
 										# At this point we meet all the conditions.
 										stack2        = copy.deepcopy(stack)
 										equivalences2 = copy.deepcopy(equivalences)
@@ -5568,7 +5786,7 @@ class RuleSet(object):
 				if verbose: print 'test_symbol_room(',n2id['room'],').sType == object' , test_symbol_room.sType == 'object'
 				raise WrongRuleExecution('hierarchicalFindMugInTable_trigger3')
 			test_symbol_contst = snode.graph.nodes[n2id['contst']]
-			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links):
+			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links):
 				if verbose: print 'test_symbol_contst(',n2id['contst'],').sType == objectSt' , test_symbol_contst.sType == 'objectSt'
 				raise WrongRuleExecution('hierarchicalFindMugInTable_trigger4')
 		newNode = WorldStateHistory(snode)
@@ -5680,12 +5898,12 @@ class RuleSet(object):
 				# contst
 				symbol_contst = graph.nodes[n2id['contst']]
 				linksVal = 0
-				if [n2id["container"],n2id["contst"],"explored"] not in graph.links: linksVal += 100
+				if [n2id["container"],n2id["contst"],"noExplored"]  in graph.links: linksVal += 100
 				if [n2id["container"],n2id["contst"],"table"]  in graph.links: linksVal += 100
 				if [n2id["container"],n2id["contst"],"reach"]  in graph.links: linksVal += 100
 				scoreLinks.append(linksVal)
 				maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
-				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and not [n2id["container"],n2id["contst"],"explored"] in graph.links and [n2id["container"],n2id["contst"],"table"] in graph.links and [n2id["container"],n2id["contst"],"reach"] in graph.links:
+				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"noExplored"] in graph.links and [n2id["container"],n2id["contst"],"table"] in graph.links and [n2id["container"],n2id["contst"],"reach"] in graph.links:
 					scoreNodes.append(100)
 					maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
 					# robot
@@ -5800,7 +6018,7 @@ class RuleSet(object):
 						for symbol_contst_name in symbol_contst_nodes:
 							symbol_contst = nodes[symbol_contst_name]
 							n2id['contst'] = symbol_contst_name
-							if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"reach"] in snode.graph.links:
+							if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"reach"] in snode.graph.links:
 								for symbol_room_name in symbol_room_nodes:
 									symbol_room = nodes[symbol_room_name]
 									n2id['room'] = symbol_room_name
@@ -5858,7 +6076,7 @@ class RuleSet(object):
 				if verbose: print 'test_symbol_robot(',n2id['robot'],').sType == robot' , test_symbol_robot.sType == 'robot'
 				raise WrongRuleExecution('hierarchicalFindMugInTable_noReach_trigger2')
 			test_symbol_contst = snode.graph.nodes[n2id['contst']]
-			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"reach"] in snode.graph.links):
+			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"reach"] in snode.graph.links):
 				if verbose: print 'test_symbol_contst(',n2id['contst'],').sType == objectSt' , test_symbol_contst.sType == 'objectSt'
 				raise WrongRuleExecution('hierarchicalFindMugInTable_noReach_trigger3')
 			test_symbol_room = snode.graph.nodes[n2id['room']]
@@ -5971,12 +6189,12 @@ class RuleSet(object):
 				# contst
 				symbol_contst = graph.nodes[n2id['contst']]
 				linksVal = 0
-				if [n2id["container"],n2id["contst"],"explored"] not in graph.links: linksVal += 100
+				if [n2id["container"],n2id["contst"],"noExplored"]  in graph.links: linksVal += 100
 				if [n2id["container"],n2id["contst"],"table"]  in graph.links: linksVal += 100
 				if [n2id["container"],n2id["contst"],"reach"]  in graph.links: linksVal += 100
 				scoreLinks.append(linksVal)
 				maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
-				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and not [n2id["container"],n2id["contst"],"explored"] in graph.links and [n2id["container"],n2id["contst"],"table"] in graph.links and [n2id["container"],n2id["contst"],"reach"] in graph.links:
+				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"noExplored"] in graph.links and [n2id["container"],n2id["contst"],"table"] in graph.links and [n2id["container"],n2id["contst"],"reach"] in graph.links:
 					scoreNodes.append(100)
 					maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
 					# robot
@@ -6095,7 +6313,7 @@ class RuleSet(object):
 								for symbol_contst_name in symbol_contst_nodes:
 									symbol_contst = nodes[symbol_contst_name]
 									n2id['contst'] = symbol_contst_name
-									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links:
+									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links:
 										# At this point we meet all the conditions.
 										stack2        = copy.deepcopy(stack)
 										equivalences2 = copy.deepcopy(equivalences)
@@ -6153,7 +6371,7 @@ class RuleSet(object):
 				if verbose: print 'test_symbol_room(',n2id['room'],').sType == object' , test_symbol_room.sType == 'object'
 				raise WrongRuleExecution('hierarchicalFindGlassesInTable_trigger3')
 			test_symbol_contst = snode.graph.nodes[n2id['contst']]
-			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links):
+			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links):
 				if verbose: print 'test_symbol_contst(',n2id['contst'],').sType == objectSt' , test_symbol_contst.sType == 'objectSt'
 				raise WrongRuleExecution('hierarchicalFindGlassesInTable_trigger4')
 		newNode = WorldStateHistory(snode)
@@ -6262,11 +6480,11 @@ class RuleSet(object):
 				# contst
 				symbol_contst = graph.nodes[n2id['contst']]
 				linksVal = 0
-				if [n2id["container"],n2id["contst"],"explored"] not in graph.links: linksVal += 100
+				if [n2id["container"],n2id["contst"],"noExplored"]  in graph.links: linksVal += 100
 				if [n2id["container"],n2id["contst"],"table"]  in graph.links: linksVal += 100
 				scoreLinks.append(linksVal)
 				maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
-				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and not [n2id["container"],n2id["contst"],"explored"] in graph.links and [n2id["container"],n2id["contst"],"table"] in graph.links:
+				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"noExplored"] in graph.links and [n2id["container"],n2id["contst"],"table"] in graph.links:
 					scoreNodes.append(100)
 					maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
 					# robot
@@ -6385,7 +6603,7 @@ class RuleSet(object):
 								for symbol_contst_name in symbol_contst_nodes:
 									symbol_contst = nodes[symbol_contst_name]
 									n2id['contst'] = symbol_contst_name
-									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links:
+									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links:
 										# At this point we meet all the conditions.
 										stack2        = copy.deepcopy(stack)
 										equivalences2 = copy.deepcopy(equivalences)
@@ -6443,7 +6661,7 @@ class RuleSet(object):
 				if verbose: print 'test_symbol_room(',n2id['room'],').sType == object' , test_symbol_room.sType == 'object'
 				raise WrongRuleExecution('hierarchicalFindGlassesInTable_noReach_trigger3')
 			test_symbol_contst = snode.graph.nodes[n2id['contst']]
-			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links):
+			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links and [n2id["container"],n2id["contst"],"table"] in snode.graph.links):
 				if verbose: print 'test_symbol_contst(',n2id['contst'],').sType == objectSt' , test_symbol_contst.sType == 'objectSt'
 				raise WrongRuleExecution('hierarchicalFindGlassesInTable_noReach_trigger4')
 		newNode = WorldStateHistory(snode)
@@ -6552,11 +6770,11 @@ class RuleSet(object):
 				# contst
 				symbol_contst = graph.nodes[n2id['contst']]
 				linksVal = 0
-				if [n2id["container"],n2id["contst"],"explored"] not in graph.links: linksVal += 100
+				if [n2id["container"],n2id["contst"],"noExplored"]  in graph.links: linksVal += 100
 				if [n2id["container"],n2id["contst"],"table"]  in graph.links: linksVal += 100
 				scoreLinks.append(linksVal)
 				maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
-				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and not [n2id["container"],n2id["contst"],"explored"] in graph.links and [n2id["container"],n2id["contst"],"table"] in graph.links:
+				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"noExplored"] in graph.links and [n2id["container"],n2id["contst"],"table"] in graph.links:
 					scoreNodes.append(100)
 					maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
 					# robot
@@ -6675,7 +6893,7 @@ class RuleSet(object):
 								for symbol_contst_name in symbol_contst_nodes:
 									symbol_contst = nodes[symbol_contst_name]
 									n2id['contst'] = symbol_contst_name
-									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links:
+									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links:
 										# At this point we meet all the conditions.
 										stack2        = copy.deepcopy(stack)
 										equivalences2 = copy.deepcopy(equivalences)
@@ -6733,7 +6951,7 @@ class RuleSet(object):
 				if verbose: print 'test_symbol_room(',n2id['room'],').sType == object' , test_symbol_room.sType == 'object'
 				raise WrongRuleExecution('hierarchicalFindCoffeePotInTable_trigger3')
 			test_symbol_contst = snode.graph.nodes[n2id['contst']]
-			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links):
+			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links):
 				if verbose: print 'test_symbol_contst(',n2id['contst'],').sType == objectSt' , test_symbol_contst.sType == 'objectSt'
 				raise WrongRuleExecution('hierarchicalFindCoffeePotInTable_trigger4')
 		newNode = WorldStateHistory(snode)
@@ -6843,10 +7061,10 @@ class RuleSet(object):
 				symbol_contst = graph.nodes[n2id['contst']]
 				linksVal = 0
 				if [n2id["container"],n2id["contst"],"table"]  in graph.links: linksVal += 100
-				if [n2id["container"],n2id["contst"],"explored"] not in graph.links: linksVal += 100
+				if [n2id["container"],n2id["contst"],"noExplored"]  in graph.links: linksVal += 100
 				scoreLinks.append(linksVal)
 				maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
-				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in graph.links and not [n2id["container"],n2id["contst"],"explored"] in graph.links:
+				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in graph.links and [n2id["container"],n2id["contst"],"noExplored"] in graph.links:
 					scoreNodes.append(100)
 					maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
 					# robot
@@ -6965,7 +7183,7 @@ class RuleSet(object):
 								for symbol_contst_name in symbol_contst_nodes:
 									symbol_contst = nodes[symbol_contst_name]
 									n2id['contst'] = symbol_contst_name
-									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links:
+									if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_robot.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links:
 										# At this point we meet all the conditions.
 										stack2        = copy.deepcopy(stack)
 										equivalences2 = copy.deepcopy(equivalences)
@@ -7023,7 +7241,7 @@ class RuleSet(object):
 				if verbose: print 'test_symbol_room(',n2id['room'],').sType == object' , test_symbol_room.sType == 'object'
 				raise WrongRuleExecution('hierarchicalFindCoffeePotInTable_noReach_trigger3')
 			test_symbol_contst = snode.graph.nodes[n2id['contst']]
-			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and not [n2id["container"],n2id["contst"],"explored"] in snode.graph.links):
+			if not (test_symbol_contst.sType == 'objectSt' and test_symbol_contst.name!=test_symbol_container.name and test_symbol_contst.name!=test_symbol_robot.name and test_symbol_contst.name!=test_symbol_room.name and [n2id["container"],n2id["contst"],"table"] in snode.graph.links and [n2id["container"],n2id["contst"],"noExplored"] in snode.graph.links):
 				if verbose: print 'test_symbol_contst(',n2id['contst'],').sType == objectSt' , test_symbol_contst.sType == 'objectSt'
 				raise WrongRuleExecution('hierarchicalFindCoffeePotInTable_noReach_trigger4')
 		newNode = WorldStateHistory(snode)
@@ -7133,10 +7351,10 @@ class RuleSet(object):
 				symbol_contst = graph.nodes[n2id['contst']]
 				linksVal = 0
 				if [n2id["container"],n2id["contst"],"table"]  in graph.links: linksVal += 100
-				if [n2id["container"],n2id["contst"],"explored"] not in graph.links: linksVal += 100
+				if [n2id["container"],n2id["contst"],"noExplored"]  in graph.links: linksVal += 100
 				scoreLinks.append(linksVal)
 				maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
-				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in graph.links and not [n2id["container"],n2id["contst"],"explored"] in graph.links:
+				if symbol_contst.sType == 'objectSt' and symbol_contst.name!=symbol_container.name and symbol_contst.name!=symbol_room.name and [n2id["container"],n2id["contst"],"table"] in graph.links and [n2id["container"],n2id["contst"],"noExplored"] in graph.links:
 					scoreNodes.append(100)
 					maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)
 					# robot

@@ -46,6 +46,7 @@
 	<link src="9" dst="10" label="position" />
 	<link src="9" dst="10" label="classified" />
 	<link src="9" dst="10" label="coffeepot" />
+	
 
 
 	<!-- Non-explored table -->
@@ -62,6 +63,7 @@
 	<link src="7" dst="8" label="noReach" />
 	<link src="7" dst="8" label="position" />
 	<link src="7" dst="8" label="reachable" />
+	<link src="7" dst="8" label="noExplored" />
 
 
 	<!-- Person -->

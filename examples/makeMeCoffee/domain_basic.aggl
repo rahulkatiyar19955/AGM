@@ -55,7 +55,7 @@ findObjectVisuallyInTable : active(1)
 		container:object(-130,110)
 		robot:robot(-325,0)
 		room:object(-325,110)
-		container->contst(explored)*
+		container->contst(noExplored)
 		container->contst(table)
 		container->contst(reach)
 		robot->container(know)
@@ -70,7 +70,7 @@ findObjectVisuallyInTable : active(1)
 		room:object(-325,110)
 		object:object(-130,0)
 		robot:robot(-325,0)
-		container->contst(explored)*
+		container->contst(noExplored)
 		container->contst(table)
 		container->contst(reach)
 		robot->object(know)
@@ -275,7 +275,7 @@ recognizeObjFails : active(1)
 	}
 }
 
-setRoomExplored : passive(1)
+setRoomExplored : active(1)
 {
 	{
 		status:roomSt(250,0)
@@ -304,6 +304,41 @@ setRoomNotExplored : passive(1)
 		object->status(noExplored)
 	}
 }
+
+setTableExplored : active(1)
+{
+	{
+		status:objectSt(250,0)
+		object:object(0,0)
+		object->status(table)
+		object->status(noExplored)
+	}
+	=>
+	{
+		status:objectSt(250,0)
+		object:object(0,0)
+		object->status(table)
+		object->status(explored)
+	}
+}
+
+setTableNotExplored : passive(1)
+{
+	{
+		status:objectSt(250,0)
+		object:object(0,0)
+		object->status(table)
+		object->status(explored)
+	}
+	=>
+	{
+		status:objectSt(250,0)
+		object:object(0,0)
+		object->status(table)
+		object->status(noExplored)
+	}
+}
+
 
 setObjectReach : active(1)
 {

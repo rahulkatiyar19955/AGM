@@ -9,6 +9,6 @@
 	<link  src="1"      dst="7"     label="know" />
 	<link  src="7"      dst="3"     label="in" />
 	<link  src="7"      dst="8"     label="table" />
-	<link  src="7"      dst="8"     label="explored" enabled="false" />
+	<link  src="7"      dst="8"     label="explored" />
 
 </AGMModel>
