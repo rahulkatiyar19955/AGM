@@ -1,0 +1,26 @@
+<AGMModel>
+
+	<!-- R O O M -->
+	<symbol id="3" type="object" />
+
+	<!-- R O B O T -->
+	<symbol id="1" type="robot" />
+	<link src="1" dst="3" label="in" />
+
+	<!-- Non-explored table -->
+	<symbol id="7" type="object">
+	</symbol>
+	<link src="1" dst="7" label="know" />
+	<link src="7" dst="3" label="in" />
+	<symbol id="8" type="objectSt">
+	</symbol>
+	<link src="7" dst="8" label="table" />
+	<link src="7" dst="8" label="hasStatus" />
+	<link src="7" dst="8" label="see" />
+	<link src="7" dst="8" label="classified" />
+	<link src="7" dst="8" label="noReach" />
+	<link src="7" dst="8" label="position" />
+	<link src="7" dst="8" label="reachable" />
+<!-- 	<link src="7" dst="8" label="explored" /> -->
+
+</AGMModel>
