@@ -1,26 +1,13 @@
 <AGMModel>
+	<!--<symbol id="3" type="object" /> -->	<!-- R O O M -->
+	<!--<symbol id="1" type="robot" />	-->	<!-- R O B O T -->
+	<symbol id="7" type="object"/>		<!-- T A B L E -->
+	<symbol id="8" type="objectSt" />	<!-- T A B L E   S T A T U S -->
 
-	<!-- R O O M -->
-	<symbol id="3" type="object" />
-
-	<!-- R O B O T -->
-	<symbol id="1" type="robot" />
-	<link src="1" dst="3" label="in" />
-
-	<!-- Non-explored table -->
-	<symbol id="7" type="object">
-	</symbol>
-	<link src="1" dst="7" label="know" />
-	<link src="7" dst="3" label="in" />
-	<symbol id="8" type="objectSt">
-	</symbol>
-	<link src="7" dst="8" label="table" />
-	<link src="7" dst="8" label="hasStatus" />
-	<link src="7" dst="8" label="see" />
-	<link src="7" dst="8" label="classified" />
-	<link src="7" dst="8" label="noReach" />
-	<link src="7" dst="8" label="position" />
-	<link src="7" dst="8" label="reachable" />
-<!-- 	<link src="7" dst="8" label="explored" /> -->
+	<!--<link src="1" dst="3" label="in" />-->	<!-- Robot en la habitacion -->
+	<!--<link src="7" dst="3" label="in" />-->	<!-- Mesa en la habitacion -->
+	<!--<link src="1" dst="7" label="know" />-->	<!-- Robot conoce la mesa -->
+	<link src="7" dst="8" label="table" />	<!-- Mesa es una mesa -->
+	<link src="7" dst="8" label="explored" /> <!-- Mesa explorada -->
 
 </AGMModel>
