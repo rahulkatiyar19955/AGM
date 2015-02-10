@@ -1,21 +1,21 @@
 <AGMModel>
 
-	<!--<symbol id="robot" type="robot" />-->		<!-- R O B O T -->
+	<symbol id="robot" type="robot" />		<!-- R O B O T -->
 	<symbol id="mesa" type="object" />		<!-- T A B L E -->
 	<symbol id="estado" type="objectSt" />		<!-- T A B L E   S T A T U S -->
-	<!--<symbol id="habitacion" type="object" /> -->	<!-- R O O M -->
+	<symbol id="habitacion" type="object" /> 	<!-- R O O M -->
 
-	<!--<link  src="robot"	dst="habitacion"	label="in" />-->	<!-- Robot en habitacion-->
-	<!--<link  src="mesa"	dst="habitacion"	label="in" />-->	<!-- Mesa en la habitacion -->
-	<!--<link  src="robot"	dst="mesa"     		label="know" />-->	<!-- Robot conoce mesa -->
+	<link  src="robot"	dst="habitacion"	label="in" />	<!-- Robot en habitacion-->
+	<link  src="mesa"	dst="habitacion"	label="in" />	<!-- Mesa en la habitacion -->
+	<link  src="robot"	dst="mesa"     		label="know" />	<!-- Robot conoce mesa -->
 	<link  src="mesa"	dst="estado"		label="table" /><!-- Mesa es una table -->
-	<link  src="mesa"      	dst="estado"     	label="noExplored" />
+	<link  src="mesa"      	dst="estado"     	label="explored" />
 
-<!--	<symbol id="object" type="object" />		
+	<symbol id="object" type="object" />		
 	<symbol id="status" type="objectSt" />		
 
 	<link  src="robot" dst="object" label="know" />
 	<link  src="object" dst="status" label="mug" />	
-	<link src="object" dst="mesa" label="in" />-->	
+	<link src="object" dst="mesa" label="in" />	
 
 </AGMModel>

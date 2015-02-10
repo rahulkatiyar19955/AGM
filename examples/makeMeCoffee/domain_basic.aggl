@@ -322,7 +322,7 @@ setTableExplored : active(1)
 	}
 }
 
-setTableNotExplored : passive(1)
+setTableNotExplored : active(1)
 {
 	{
 		status:objectSt(250,0)

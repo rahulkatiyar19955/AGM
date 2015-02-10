@@ -114,7 +114,7 @@ class PyPlanChecker(object):
 			if verbose: print 'Done executing actions. Let\'s see what we\'ve got (computing score and checking if the goal was achieved).'
 			if verbose: print targetPath
 			# Get result
-			score, achieved = self.targetCode(world.graph, symbolMapping)
+			score, achieved = self.targetCode(world.graph) # , symbolMapping
 			## We store the result to check the plan
 			self.valid = achieved
 			if achieved:               # On the one hand, if we achieve the target world status, we will print all the  correct actions of the plan.
