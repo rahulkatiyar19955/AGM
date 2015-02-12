@@ -1,0 +1,14 @@
+<AGMModel>
+
+	<symbol id="7" type="object" />   <!--container-->
+	<symbol id="3" type="object" />   <!--room-->
+	<symbol id="8" type="objectSt" /> <!--contst-->
+	<symbol id="1" type="robot" />    <!--robot-->
+
+	<link  src="1"      dst="3"     label="in" />
+	<link  src="1"      dst="7"     label="know" />
+	<link  src="7"      dst="3"     label="in" />
+	<link  src="7"      dst="8"     label="table" />
+	<link  src="7"      dst="8"     label="explored" />
+
+</AGMModel>
