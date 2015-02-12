@@ -50,7 +50,7 @@ from AGGL import *
 import inspect
 
 # C O N F I G U R A T I O N
-number_of_threads = 0
+number_of_threads = 0 #4
 maxWorldIncrement = 16
 maxCost = 200
 stopWithFirstPlan = True
@@ -495,23 +495,22 @@ class PyPlan(object):
 		object.__init__(self)
 		# Get initial world mdoel
 		initWorld = WorldStateHistory(xmlModelParser.graphFromXML(init))
-		initWorld.nodeId = 0
+		initWorld.nodeId = 0 
 
-		self.symbol_mapping = copy.deepcopy(symbol_mapping)
-		#print self.symbol_mapping
+		self.symbol_mapping = copy.deepcopy(symbol_mapping) 
 		self.excludeList = copy.deepcopy(excludeList)
 		self.indent = copy.deepcopy(indent)
 
 		# Get graph rewriting rules
-		domain = imp.load_source('domain', domainPath).RuleSet()
-		ruleMap = copy.deepcopy(domain.getRules())
-		for e in excludeList:
-			del ruleMap[e]
+		domain = imp.load_source('domain', domainPath).RuleSet() # activeRules.py
+		ruleMap = copy.deepcopy(domain.getRules()) #get all the active rules of the grammar
+		for e in excludeList: 
+			del ruleMap[e]  # delete the rules in excludeList from ruleMap
 		#for r in ruleMap:
 			#print 'Using', r
 
 		# Get goal-checking code
-		if type(targetPath)== type(''):
+		if type(targetPath)== type(''):  # type str
 			target = imp.load_source('target', targetPath)
 			## This attribute stores the code of the goal status world.
 			self.targetCode = target.CheckTarget
@@ -700,7 +699,7 @@ class PyPlan(object):
 			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 
 	##@brief This method starts the execution of program threads
-	# @param ruleMap
+	# @param ruleMap all the actives rules of the grammar
 	# @param lock this is the clench of the each thread.
 	# @param i is the index of the thread
 	# @param threadPoolStatus this is the status of the thread. The threads have three possible status:
@@ -765,7 +764,7 @@ class PyPlan(object):
 				continue
 
 			# Update 'minCostOnOpenNodes', so we can stop when the minimum cost in the queue is bigger than one in the results
-			self.updateMinCostOnOpenNodes(head.cost)
+			self.updateMinCostOnOpenNodes(head.cost)			
 			# Check if we got to the maximum cost or the minimum solution
 			if head.cost > maxCost:
 				self.end_condition.set("MaxCostReached")
@@ -784,7 +783,7 @@ class PyPlan(object):
 						deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
 					else:
 						deriv.score, achieved = self.targetCode(deriv.graph)
-					#if verbose>4: print deriv.score, achieved, deriv
+					#print deriv.score, achieved, k
 					if achieved:
 						#print 'Found solution', deriv.cost
 						self.results.append(deriv)
@@ -864,18 +863,18 @@ if __name__ == '__main__': # program domain problem result
 	#graphviz.output_file = 'basic.png'
 	if True:
 	#with PyCallGraph(output=graphviz):
-		from parseAGGL import AGMFileDataParsing
+		from parseAGGL import AGMFileDataParsing   #AGMFileDataParsing en fichero parseAGGL.py
 		t0 = time.time()
 
 		if len(sys.argv)<5:
 			print 'Usage\n\t', sys.argv[0], ' domain.aggl activeRules.py init.xml target.xml.py [result.plan]'
 
 		else:
-			domainAGM = AGMFileDataParsing.fromFile(sys.argv[1])
-			domainPath = sys.argv[2]
-			init = sys.argv[3]
-			targetPath = sys.argv[4]
-			resultFile = None
+			domainAGM = AGMFileDataParsing.fromFile(sys.argv[1]) #From domain.aggl
+			domainPath = sys.argv[2] # Get the activeRules.py path
+			init = sys.argv[3]       # Get the inital model or world.
+			targetPath = sys.argv[4] # Get the target model or world.
+			resultFile = None        
 			if len(sys.argv)>=6: resultFile = open(sys.argv[5], 'w')
 
 			p = PyPlan(domainAGM, domainPath, init, targetPath, '', dict(), [], resultFile)
