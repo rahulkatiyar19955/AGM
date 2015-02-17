@@ -125,7 +125,7 @@ class PyPlanChecker(object):
 						print action
 			else:                      # Otherwise, if we dont achieve the goal, we will print an error message.
 				self.achieved = False
-				print 'Not achieved (didn\'t get to the goal)'
+				if verbose: print 'Not achieved (didn\'t get to the goal)'
 
 		# If we have thrown an exception (because a parameter of an action does not exist),
 		# we handle part of the exception in this code.

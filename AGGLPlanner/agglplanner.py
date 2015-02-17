@@ -783,10 +783,7 @@ class PyPlan(object):
 						deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
 					else:
 						deriv.score, achieved = self.targetCode(deriv.graph)
-					if deriv.score==1200: 
-						print deriv.score, achieved, k #QUITAR DESPUES
-						print deriv.graph
-						break
+						
 					if achieved:
 						#print 'Found solution', deriv.cost
 						self.results.append(deriv)
