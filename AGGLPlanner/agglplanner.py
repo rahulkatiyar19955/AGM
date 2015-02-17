@@ -56,7 +56,7 @@ maxCost = 200
 stopWithFirstPlan = True
 verbose = 1
 maxTimeWaitAchieved = 5.
-maxTimeWaitLimit = 1000.
+maxTimeWaitLimit = 5000.#1000.
 
 ## @brief Method heapsort. This method receives an iterable thing. It stores the iterable thing
 # in a list and sorts the list.
@@ -783,7 +783,10 @@ class PyPlan(object):
 						deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
 					else:
 						deriv.score, achieved = self.targetCode(deriv.graph)
-					#print deriv.score, achieved, k
+					if deriv.score==1200: 
+						print deriv.score, achieved, k #QUITAR DESPUES
+						print deriv.graph
+						break
 					if achieved:
 						#print 'Found solution', deriv.cost
 						self.results.append(deriv)
