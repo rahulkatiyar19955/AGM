@@ -16,6 +16,54 @@ from AGGL import *
 from parseAGGL import AGMFileDataParsing
 from agglplanner import *
 
+def eliminar_Regla(ficheroDominio, nombreRegla):
+	f = open(ficheroDominio)
+	#cadena = f.read()   
+	#f.close()
+	"""Como podemos eliminar una regla del fichero. Veamos su estructura:
+	hierarchical nombre de la regla : active (1)
+	{
+		{
+			PRECONDICIONES
+		}
+		{
+			POSTCONDICIONES
+		}
+		effect
+		{
+			OPCIONAL
+		}
+	}
+	Podemos recorrer el fichero desde la regla que queremos hasta que aparezca
+	la siguiente regla o finalice el fichero"""
+	hierarchical = 0
+	encontrado = False
+	linea = f.readline()
+	while linea !="":
+		if linea == 'hierarchical '+nombreRegla+' : active(1)\n':
+			encontrado = True
+			print 'Encontrada'
+		if linea == 'hierarchical .*?' and encontrado == True:
+			print "REPETIDO"
+			break
+		linea = f.readline()
+	f.close()
+	
+	"""if hierarchical>1: 
+		print "No es la ultima"
+	if hierarchical==1:
+		print "Es la ultima"
+		
+	import re
+	patter = re.compile('hierarchical '+nombreRegla+' : .*?}', re.I | re.S)
+	cadenaLimpia = patter.sub("aaa", cadena)
+ 
+	otro = open("/home/mercedes/Software/AGM/AGGLPlanner/hi.txt",'w')    #abrimos el fichero con permisos de escritura
+	otro.write(cadenaLimpia)    #escribimos la cadena y aactualizada y sin la palabra juan
+	otro.close()    #cerramos el fichero"""
+	
+
+
 if __name__ == '__main__': 
 	"""
 	 COSAS QUE DEBEMOS PASARLE AL PROGRAMA:
@@ -65,7 +113,6 @@ if __name__ == '__main__':
 		for resultado in mapaReglas[nombreRegla](mundoInicio): print ' '
 		resultado.graph.toXML("/tmp/result.xml")
 		
-		"AHORA, una vez que tenemos el resultado de plicar esa regla, la quitamos del dominio de reglas"
-		
-		
+		"AHORA, una vez que tenemos el resultado de aplicar esa regla, la quitamos del dominio de reglas"		
+		eliminar_Regla(ficheroDominio, nombreRegla)
 		
