@@ -8,6 +8,7 @@
  ejecutar. Este programa debugea ese tipo de reglas.
 """
 import sys, traceback
+
 sys.path.append('/usr/local/share/agm/')
 
 import xmlModelParser
@@ -40,26 +41,31 @@ def eliminar_Regla(ficheroDominio, nombreRegla):
 	encontrado = False
 	linea = f.readline()
 	while linea !="":
-		if linea == 'hierarchical '+nombreRegla+' : active(1)\n':
+		if linea=='hierarchical '+nombreRegla+' : active(1)\n':
 			encontrado = True
-			print 'Encontrada'
-		if linea == 'hierarchical .*?' and encontrado == True:
-			print "REPETIDO"
+		elif linea.find('hierarchical')!=-1 and encontrado==True and hierarchical==0:
+			hierarchical = hierarchical+1;
 			break
 		linea = f.readline()
+
 	f.close()
 	
-	"""if hierarchical>1: 
-		print "No es la ultima"
-	if hierarchical==1:
-		print "Es la ultima"
+	f = open(ficheroDominio)
+	cadena = f.read()
+	f.close()
+	
+	if hierarchical>0: 
+		"""Si hierarchical es mayor que 0 es que la regla que queremos eliminar
+		no es la ultima, entonces buscamos y reemplazamos"""
+		import re
+		patter = re.compile('hierarchical '+nombreRegla+' : .*?hierarchical ', re.I | re.S)
+		cadenaLimpia = patter.sub("hierarchical ", cadena)
+	else:
+		inicio = cadena.find('hierarchical '+nombreRegla) #inicio de la regla	
+		cadenaLimpia=cadena[0:inicio]
 		
-	import re
-	patter = re.compile('hierarchical '+nombreRegla+' : .*?}', re.I | re.S)
-	cadenaLimpia = patter.sub("aaa", cadena)
- 
-	otro = open("/home/mercedes/Software/AGM/AGGLPlanner/hi.txt",'w')    #abrimos el fichero con permisos de escritura
-	otro.write(cadenaLimpia)    #escribimos la cadena y aactualizada y sin la palabra juan
+	otro = open("/tmp/copiaDominio.aggl",'w')    #abrimos el fichero con permisos de escritura
+	otro.write(cadenaLimpia)    #escribimos la cadena ya actualizada y sin la regla jerarquica
 	otro.close()    #cerramos el fichero"""
 	
 
@@ -111,8 +117,14 @@ if __name__ == '__main__':
 		
 		"4) Del mapa de reglas buscamos nuestra regla jerarquica y la aplicamos. Guardamos el resultado en un XML"
 		for resultado in mapaReglas[nombreRegla](mundoInicio): print ' '
-		resultado.graph.toXML("/tmp/result.xml")
+		resultado.graph.toXML("/tmp/resultado.xml")
 		
-		"AHORA, una vez que tenemos el resultado de aplicar esa regla, la quitamos del dominio de reglas"		
+		"AHORA, una vez que tenemos el resultado de aplicar esa regla, la quitamos del dominio de reglas"	
 		eliminar_Regla(ficheroDominio, nombreRegla)
+		"Guardamos la ruta del fichero de dominio modificado sin la regla"
+		ficheroDominioSinRegla = "/tmp/copiaDominio.aggl"
 		
+		"Llamamos al plan para que mire si el target guardado en result.xml es alcanzable sin la regla jerarquica"
+		import subprocess
+		#subprocess.call(["agglplanner", ficheroDominioSinRegla, dominioPython, ficheroMundo, "/tmp/target.py"])
+		subprocess.call(["agglplan", ficheroDominioSinRegla, ficheroMundo, "/tmp/resultado.xml"])
