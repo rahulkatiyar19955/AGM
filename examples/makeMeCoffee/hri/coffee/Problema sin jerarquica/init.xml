@@ -9,5 +9,7 @@
 	<link src="1" dst="7" label="know" />	<!-- Robot conoce la mesa -->
 	<link src="7" dst="8" label="table" />	<!-- Mesa es una mesa -->
 	<link src="7" dst="8" label="noExplored" /> <!-- Mesa explorada -->
+	<link src="7" dst="8" label="reach" /> <!-- Mesa explorada -->
+
 
 </AGMModel>
