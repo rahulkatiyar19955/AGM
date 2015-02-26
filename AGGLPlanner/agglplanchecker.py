@@ -92,7 +92,7 @@ class PyPlanChecker(object):
 			if verbose: print 'plan>>'
 			# We check all the actions in a plan.
 			for action in self.plan:
-				print 'Executing action', line
+				print 'Executing action', line,' ',action
 				line += 1
 				if verbose: print action
 				# We check that the actions parameters are into the world.

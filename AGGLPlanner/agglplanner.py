@@ -49,6 +49,9 @@ import xmlModelParser
 from AGGL import *
 import inspect
 
+from generateAGGLPlannerCode import *
+
+
 # C O N F I G U R A T I O N
 number_of_threads = 0 #4
 maxWorldIncrement = 16
@@ -57,6 +60,80 @@ stopWithFirstPlan = True
 verbose = 1
 maxTimeWaitAchieved = 5.
 maxTimeWaitLimit = 5000.#1000.
+
+
+
+
+
+def quitar_Constantes_Creadas(ficheroMundo):
+	constantes = []
+	constante = []
+	"""Abrimos el fichero del mundo origen y sacamos todos los numeros enteros (variables constantes) del fichero.  Para ello solo nos quedaremos con
+	las declaraciones del tipo: <symbol id="1" type="object">"""
+	init = open(ficheroMundo)
+	linea = init.readline()
+	while linea !="":
+		if linea.find('<symbol')!=-1:
+			"""Sacamos la parte id="1" que define el nodo como constante o variable. Minimo, esta parte mide 6
+			de longitud. El identificador numerico empieza en la posicion 4.
+			Su longitud depende del numero que tenga dentro de las comillas"""
+			vector = linea.split()
+			i = 4
+			while i<int(len(vector[1])-1):
+				constante.append(vector[1][i])
+				i=i+1
+			"""Pasamos a entero la cadena con el id del nodo, lo guardamos en el vector de constantes
+			y limpiamos las variables usadas."""
+			T2 = int(''.join(constante)) 
+			constantes.append(T2)
+			constante = []				
+		linea = init.readline()
+	init.close()
+	
+	eliminar = []
+	correspondencia = False
+	contenido=""
+	"""Abrimos el fichero target y vamos comparando todas las lineas  <symbol id="1" type="object">
+	con el vector de constantes que hemos sacado antes. Si hay una constante que no esta recogida en el
+	vector de constantes es que es nueva y debemos cambiar su nombre para hacerla variable."""
+	target = open("/tmp/estadoIntermedio.xml")
+	linea = target.readline()
+	while linea !="":
+		if linea.find('<symbol')!=-1:
+			"""Si hemos encontrado una linea que define un nuevo nodo, comparamos el identificador
+			del nodo con todas las constantes originales """
+			for const in constantes:
+				if linea.find('id="'+const.__str__()+'"')!=-1:
+					correspondencia = True
+			"""Si no hemos encontrado correspondencia ninguna, es que es un nuevo nodo creado a partir
+			de la ejecucion de la regla jerarquica. Guardamos su identificador para despues cambiarlo por
+			otro valor (lo pasaremos de constante a variable)"""
+			if correspondencia==False:
+				vector = linea.split()
+				i = 4
+				while i<int(len(vector[1])-1):
+					constante.append(vector[1][i])
+					i=i+1
+				T2 = int(''.join(constante)) 
+				eliminar.append(T2)
+				constante = []		
+		contenido = contenido+linea
+		linea = target.readline()
+	target.close()
+
+	if len(eliminar)>0:
+		"""Si hay elementos a eliminar/cambiar, buscamos sus apariciones y las modificamos"""
+		cadenaLimpia=[contenido]
+		import re
+		target = open("/tmp/estadoIntermedio.xml",'w')    #abrimos el fichero con permisos de escritura
+		i=0
+		for el in eliminar:
+			patter = re.compile('"'+el.__str__()+'"', re.I | re.S)
+			cadenaLimpia.append(patter.sub('"AA'+el.__str__()+'"', cadenaLimpia[i]))
+			i = i+1
+		target.write(cadenaLimpia[len(cadenaLimpia)-1])    #escribimos la cadena ya actualizada y sin la regla jerarquica
+		target.close() 
+
 
 ## @brief Method heapsort. This method receives an iterable thing. It stores the iterable thing
 # in a list and sorts the list.
@@ -491,7 +568,7 @@ class PyPlan(object):
 	# @param symbol_mapping mapping that should be used while planning (mainly used internally in recursive rules)
 	# @param excludeList grammar rule black list  (those which can't be used for planning)
 	# @param resultFile is the optional name of the file where the plan result will be stored.
-	def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile):
+	def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile, descomponiendo=False, estadoIntermedio=''):
 		object.__init__(self)
 		# Get initial world mdoel
 		initWorld = WorldStateHistory(xmlModelParser.graphFromXML(init))
@@ -609,11 +686,6 @@ class PyPlan(object):
 					min_idx = i
 			i = min_idx
 
-			#print '<<'
-			#for action in self.results[i].history:
-				#print self.indent+str(action)
-			#print '>>'
-
 			try:
 				#unalista = []
 				#for xx in self.results[i].history:
@@ -627,21 +699,41 @@ class PyPlan(object):
 					n = n.removeFirstAction(initWorld.graph)
 					#n = n.removeFirstActionDirect()
 					try:
-						#print  'check', self.results[i].history[0]
-						#print 'with plan'
-						#print n
-						from agglplanchecker import PyPlanChecker
-						check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath, symbol_mapping, verbose=False)
+						print 'QUITADA REGLA: ', self.results[i].history[0]
+						print 'RESTO DEL PLAN: ', n
+						"""ANIADIDO DE MERCEDES, YEAH!
+						Si estamos descomponiendo una regla jerarquica (estamos buscando un plan para
+						llegar al estado que nos indica la regla jerarquica) debemos crear el estado intermedio
+						generado por la regla jerarquica y llamar con el al PyPlanChecker"""
+						if descomponiendo==True:
+							print 'Hay que crear estado intermedio'
+							"""Pasamos de xml a py"""
+							graph = graphFromXML(estadoIntermedio)
+							## outputText get the python code of the target world graph.
+							outputText = generateTarget(graph)
+							## ofile is the file where we will store the python code of the target world graph.
+							ofile = open("/tmp/estadoIntermedio.py", 'w')
+							ofile.write(outputText)
+							ofile.close()
+							# We save the name of the file where we will store the python code of the target world graph.
+							estadoIntermedio = "/tmp/estadoIntermedio.py"
+							from agglplanchecker import PyPlanChecker
+							check = PyPlanChecker(domainAGM, domainPath, init, n, estadoIntermedio,symbol_mapping, verbose=False)
+							
+						else:
+							print 'No hay que crear estado intermedio'
+							from agglplanchecker import PyPlanChecker
+							check = PyPlanChecker(domainAGM, domainPath, init, n,targetPath,symbol_mapping, verbose=False)
 					except:
-						#print 'dddd'
+						print 'dddd'
 						traceback.print_exc()
 						break
 					if check.achieved:
-						#print  '  (removed)', self.results[i].history[0]
+						print  '  (removed)', self.results[i].history[0]
 						self.results[i].history = self.results[i].history[1:]
 						plann = copy.deepcopy(n)
 					else:
-						#print  '  (not removed)', self.results[i].history[0]
+						print  '  (not removed)', self.results[i].history[0]
 						break
 			except:
 				traceback.print_exc()
@@ -673,6 +765,11 @@ class PyPlan(object):
 							#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
 					#print paramsWithoutNew
 					print '\nDecomposing hierarchical rule ', ac.name, paramsWithoutNew
+					"""ANIADIDO DE MERCEDES:
+					Creamos estado intermedio"""
+					for estadoIntermedio in ruleMap[ac.name](initWorld): print ''
+					estadoIntermedio.graph.toXML("/tmp/estadoIntermedio.xml")
+					quitar_Constantes_Creadas(init)
 					#print 'PyPlan'
 					#print '\tdomain:     ', domainAGM
 					#print '\tdomain path:', domainPath
@@ -682,12 +779,12 @@ class PyPlan(object):
 					#print '\texclude:    ', self.excludeList
 
 					#deff PyPlan(self, domainAGM, domainPath, init,                               targetPath,      indent,   symbol_mapping,      excludeList, resultFile):
-					aaa = PyPlan(      domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, rList)
+					aaa = PyPlan(      domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, rList, True, "/tmp/estadoIntermedio.xml")
 					#if type(resultFile) == type([]):
 						#resultFile = rList + resultFile[1:]
 					#print self.indent
 					self.results[i].history = self.results[i].history[1:]
-
+				
 			#printResult(self.results[i]) #the best solution
 			total = rList + self.results[i].history
 			if resultFile != None:
@@ -697,7 +794,7 @@ class PyPlan(object):
 					else:
 						resultFile.write(str(action)+'\n')
 			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
-
+		
 	##@brief This method starts the execution of program threads
 	# @param ruleMap all the actives rules of the grammar
 	# @param lock this is the clench of the each thread.

@@ -168,7 +168,7 @@ if __name__ == '__main__':
 		ficheroPlan    = sys.argv[3] # Fichero P con el plan para alcanzar el mundo target.
 		
 		"""
-		Sacamos el nombre de la regla jerarquica y los parametros sobre los que actua (primera linea del plan.p)
+		Sacamos el nombre de la regla jerarquica
 		nombreRegla @  {   x:y x:y ...}      \n
 		            n n+1  n+2        len-2  len-1
 		"""
@@ -178,7 +178,6 @@ if __name__ == '__main__':
 
 		finNombre = reglaJerarquica.find("@")
 		nombreRegla = reglaJerarquica[:finNombre]
-		parametros = reglaJerarquica[finNombre+2:len(reglaJerarquica)-2]
 		
 		""" Aplicamos la regla sobre el mundo de origen y guardamos el resultado en un fichero temporal. Para ello, debemos... """
 		"1) pasar el dominio de AGGL a PY" 
