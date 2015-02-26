@@ -1,0 +1,31 @@
+<AGMModel>
+	<symbol id="10" type="object">
+	</symbol>
+	<symbol id="1" type="robot">
+	</symbol>
+	<symbol id="3" type="object">
+	</symbol>
+	<symbol id="7" type="object">
+	</symbol>
+	<symbol id="9" type="objectSt">
+	</symbol>
+	<symbol id="8" type="objectSt">
+	</symbol>
+	<link src="1" dst="3" label="in" />
+	<link src="7" dst="3" label="in" />
+	<link src="1" dst="7" label="know" />
+	<link src="7" dst="8" label="table" />
+	<link src="7" dst="8" label="noExplored" />
+	<link src="7" dst="8" label="reach" />
+	<link src="1" dst="10" label="know" />
+	<link src="10" dst="9" label="see" />
+	<link src="10" dst="9" label="classified" />
+	<link src="10" dst="9" label="mug" />
+	<link src="10" dst="9" label="reach" />
+	<link src="10" dst="9" label="position" />
+	<link src="10" dst="9" label="reachable" />
+	<link src="10" dst="9" label="hasStatus" />
+	<link src="10" dst="7" label="in" />
+	<link src="10" dst="3" label="in" />
+</AGMModel>
+

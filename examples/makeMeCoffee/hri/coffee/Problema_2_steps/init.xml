@@ -1,0 +1,13 @@
+<AGMModel>
+	<symbol id="333" type="object" /> 	<!-- R O O M -->
+	<symbol id="1" type="robot" />		<!-- R O B O T -->
+	<symbol id="7" type="object"/>		<!-- T A B L E -->
+	<symbol id="8" type="objectSt" />	<!-- T A B L E   S T A T U S -->
+
+	<link src="1" dst="333" label="in" />	<!-- Robot en la habitacion -->
+	<link src="7" dst="333" label="in" />	<!-- Mesa en la habitacion -->
+	<link src="1" dst="7" label="know" />	<!-- Robot conoce la mesa -->
+	<link src="7" dst="8" label="table" />	<!-- Mesa es una mesa -->
+	<link src="7" dst="8" label="noExplored" /> <!-- Mesa explorada -->
+
+</AGMModel>
