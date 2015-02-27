@@ -568,6 +568,8 @@ class PyPlan(object):
 	# @param symbol_mapping mapping that should be used while planning (mainly used internally in recursive rules)
 	# @param excludeList grammar rule black list  (those which can't be used for planning)
 	# @param resultFile is the optional name of the file where the plan result will be stored.
+	# @param descomponiendo: added whe we are descomposing a jerarchical rule
+	# @param estadoIntermedio: python file with the intermediate status of the world, after whe apply the jerarchical rule
 	def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile, descomponiendo=False, estadoIntermedio=''):
 		object.__init__(self)
 		# Get initial world mdoel
@@ -699,52 +701,35 @@ class PyPlan(object):
 					n = n.removeFirstAction(initWorld.graph)
 					#n = n.removeFirstActionDirect()
 					try:
-						print 'QUITADA REGLA: ', self.results[i].history[0]
-						print 'RESTO DEL PLAN: ', n
+						#print 'QUITADA REGLA: ', self.results[i].history[0], '\nRESTO DEL PLAN: ', n
 						"""ANIADIDO DE MERCEDES, YEAH!
 						Si estamos descomponiendo una regla jerarquica (estamos buscando un plan para
 						llegar al estado que nos indica la regla jerarquica) debemos crear el estado intermedio
 						generado por la regla jerarquica y llamar con el al PyPlanChecker"""
 						if descomponiendo==True:
-							print 'Hay que crear estado intermedio'
-							"""Pasamos de xml a py"""
-							graph = graphFromXML(estadoIntermedio)
-							## outputText get the python code of the target world graph.
-							outputText = generateTarget(graph)
-							## ofile is the file where we will store the python code of the target world graph.
-							ofile = open("/tmp/estadoIntermedio.py", 'w')
-							ofile.write(outputText)
-							ofile.close()
-							# We save the name of the file where we will store the python code of the target world graph.
-							estadoIntermedio = "/tmp/estadoIntermedio.py"
+							#print 'Hay que crear estado intermedio'
 							from agglplanchecker import PyPlanChecker
 							check = PyPlanChecker(domainAGM, domainPath, init, n, estadoIntermedio,symbol_mapping, verbose=False)
 							
 						else:
-							print 'No hay que crear estado intermedio'
+							#print 'No hay que crear estado intermedio'
 							from agglplanchecker import PyPlanChecker
 							check = PyPlanChecker(domainAGM, domainPath, init, n,targetPath,symbol_mapping, verbose=False)
 					except:
-						print 'dddd'
+						print 'Excepction!!'
 						traceback.print_exc()
 						break
 					if check.achieved:
-						print  '  (removed)', self.results[i].history[0]
+						#print  '  (removed)', self.results[i].history[0]
 						self.results[i].history = self.results[i].history[1:]
 						plann = copy.deepcopy(n)
 					else:
-						print  '  (not removed)', self.results[i].history[0]
+						#print  '  (not removed)', self.results[i].history[0]
 						break
 			except:
 				traceback.print_exc()
 				pass
-
-			#print self.indent, self.results[i].history
-			for action_index in xrange(len(self.results[i].history)):
-				action = self.results[i].history[action_index]
-				ac = AGGLPlannerAction(action)
-				print self.indent+str(action)
-
+			#MOVIDO MENSAJE AL FINAL DEL METODO
 			rList = []
 			if len(self.results[i].history) > 0:
 				action = self.results[i].history[0]
@@ -766,20 +751,29 @@ class PyPlan(object):
 					#print paramsWithoutNew
 					print '\nDecomposing hierarchical rule ', ac.name, paramsWithoutNew
 					"""ANIADIDO DE MERCEDES:
-					Creamos estado intermedio"""
+					Creamos estado intermedio, primero lo creamos en fichero .xml para poder quitarle los nuevos nodos creados
+					al aplicar la regla jerarquica"""
 					for estadoIntermedio in ruleMap[ac.name](initWorld): print ''
 					estadoIntermedio.graph.toXML("/tmp/estadoIntermedio.xml")
+					"""Quitamos los nodos constantes creados por la regla jerarquica: los volvemos variables para evitar
+					errores cuando se genere el codigo target en python."""
 					quitar_Constantes_Creadas(init)
+					"""Generamos el codigo en python para pasarselo directamente al PyPlan"""
+					graph = graphFromXML("/tmp/estadoIntermedio.xml")
+					outputText = generateTarget(graph)
+					ofile = open("/tmp/estadoIntermedio.py", 'w')
+					ofile.write(outputText)
+					ofile.close()
 					#print 'PyPlan'
 					#print '\tdomain:     ', domainAGM
 					#print '\tdomain path:', domainPath
 					#print '\tinit:       ', init
-					#print '\ttargetPath: ', domain.getHierarchicalTargets()[ac.name]
+					#print '\ttargetPath: ', domain.getHierarchicalTargets()[ac.name].__str__
 					#print '\tsymbol map: ', paramsWithoutNew
 					#print '\texclude:    ', self.excludeList
 
 					#deff PyPlan(self, domainAGM, domainPath, init,                               targetPath,      indent,   symbol_mapping,      excludeList, resultFile):
-					aaa = PyPlan(      domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, rList, True, "/tmp/estadoIntermedio.xml")
+					aaa = PyPlan(      domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, rList, True, "/tmp/estadoIntermedio.py")
 					#if type(resultFile) == type([]):
 						#resultFile = rList + resultFile[1:]
 					#print self.indent
@@ -792,7 +786,12 @@ class PyPlan(object):
 					if type(resultFile) == type([]):
 						resultFile.append(action)
 					else:
-						resultFile.write(str(action)+'\n')
+						resultFile.write(str(action)+'\n')			
+			if descomponiendo == False:
+				print 'FINAL PLAN WITH: ',len(total),' ACTIONS:'
+				for action in total:
+					print '--> ',action
+			
 			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 		
 	##@brief This method starts the execution of program threads
