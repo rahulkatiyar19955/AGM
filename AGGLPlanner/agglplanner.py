@@ -681,13 +681,18 @@ class PyPlan(object):
 		if len(self.results)==0: # If the length of the list is zero, it means that we have not found a plan.
 			if verbose > 0: print 'No plan found.'
 		else: # But, if the length is greater than zero, it means that we have found a plan.
-			if self.indent=='' and verbose > 0: print 'Got', len(self.results),' plans!'
 			min_idx = 0
 			for i in range(len(self.results)): # We go over all the actions of the plan, and we look for the best solution (the minimun cost).
 				if self.results[i].cost < self.results[min_idx].cost:
 					min_idx = i
 			i = min_idx
-
+			
+			if self.indent=='' and verbose > 0: 
+				print 'Got', len(self.results),' plans!'
+				print 'ORIGINAL PLAN: '
+				for action in self.results[i].history:
+					print '    ', action
+		
 			try:
 				#unalista = []
 				#for xx in self.results[i].history:
@@ -764,6 +769,8 @@ class PyPlan(object):
 					ofile = open("/tmp/estadoIntermedio.py", 'w')
 					ofile.write(outputText)
 					ofile.close()
+					"""Ponemos una bandera para pintar despues el plan completa una vez descompuesta la primera regla jerarquica"""
+					planConDescomposicion = True
 					#print 'PyPlan'
 					#print '\tdomain:     ', domainAGM
 					#print '\tdomain path:', domainPath
@@ -778,6 +785,8 @@ class PyPlan(object):
 						#resultFile = rList + resultFile[1:]
 					#print self.indent
 					self.results[i].history = self.results[i].history[1:]
+				else:
+					planConDescomposicion = False
 				
 			#printResult(self.results[i]) #the best solution
 			total = rList + self.results[i].history
@@ -787,10 +796,10 @@ class PyPlan(object):
 						resultFile.append(action)
 					else:
 						resultFile.write(str(action)+'\n')			
-			if descomponiendo == False:
+			if descomponiendo == False and planConDescomposicion == True:
 				print 'FINAL PLAN WITH: ',len(total),' ACTIONS:'
 				for action in total:
-					print '--> ',action
+					print '    ',action
 			
 			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 		
