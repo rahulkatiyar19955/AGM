@@ -687,11 +687,8 @@ class PyPlan(object):
 					min_idx = i
 			i = min_idx
 			
-			if self.indent=='' and verbose > 0: 
-				print 'Got', len(self.results),' plans!'
-				print 'ORIGINAL PLAN: '
-				for action in self.results[i].history:
-					print '    ', action
+			if self.indent=='' and verbose > 0: print 'Got', len(self.results),' plans!'
+				
 		
 			try:
 				#unalista = []
@@ -725,12 +722,16 @@ class PyPlan(object):
 						traceback.print_exc()
 						break
 					if check.achieved:
-						#print  '  (removed)', self.results[i].history[0]
+						print  '  (removed)', self.results[i].history[0]
 						self.results[i].history = self.results[i].history[1:]
 						plann = copy.deepcopy(n)
 					else:
-						#print  '  (not removed)', self.results[i].history[0]
+						print  '  (not removed)', self.results[i].history[0]
 						break
+				if descomponiendo==False:
+					print 'ORIGINAL PLAN: '
+					for action in self.results[i].history:
+						print '    ', action
 			except:
 				traceback.print_exc()
 				pass
