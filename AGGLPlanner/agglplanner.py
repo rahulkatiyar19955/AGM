@@ -72,16 +72,18 @@ def quitar_Constantes_Creadas(ficheroMundo):
 	las declaraciones del tipo: <symbol id="1" type="object">"""
 	init = open(ficheroMundo)
 	linea = init.readline()
-	while linea !="":
-		if linea.find('<symbol')!=-1:
+	while linea != "":
+		if linea.find('<symbol') != -1:
 			"""Sacamos la parte id="1" que define el nodo como constante o variable. Minimo, esta parte mide 6
 			de longitud. El identificador numerico empieza en la posicion 4.
 			Su longitud depende del numero que tenga dentro de las comillas"""
 			vector = linea.split()
-			i = 4
-			while i<int(len(vector[1])-1):
-				constante.append(vector[1][i])
-				i=i+1
+			for partI in xrange(len(vector)):
+				if vector[partI] == '<symbol':
+					i = 4
+					while i<int(len(vector[partI+1])-1):
+						constante.append(vector[partI+1][i])
+						i=i+1
 			"""Pasamos a entero la cadena con el id del nodo, lo guardamos en el vector de constantes
 			y limpiamos las variables usadas."""
 			T2 = int(''.join(constante)) 
