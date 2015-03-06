@@ -815,6 +815,7 @@ class PyPlan(object):
 	#	2) Active. They are expanding a node.
 	#	3) All the threads are idle because all of them have finished his executions.
 	def startThreadedWork(self, ruleMap, lock=None, i=0, threadPoolStatus=None):
+		historico = []
 		if lock == None:
 			# If there isnt any lock, we create one and we give it to the thread.
 			lock = thread.allocate_lock()
@@ -828,7 +829,8 @@ class PyPlan(object):
 			threadPoolStatus.unlock()
 		# We take the initial time.
 		timeA = datetime.datetime.now()
-		while True:
+		
+		while True:	
 			# Again, we take the time and we calculated the elapsed time
 			timeB = datetime.datetime.now()
 			timeElapsed = float((timeB-timeA).seconds) + float((timeB-timeA).microseconds)/1e6
@@ -846,8 +848,7 @@ class PyPlan(object):
 			# Try to pop a node from the queue
 			try:
 				# We take the head of the openNodes list: the first open node.
-				head = self.openNodes.heapqPop()[1] # P O P   POP   p o p   pop
-
+				head = self.openNodes.heapqPop()[1] # P O P   POP   p o p   pop		
 				if threadPoolStatus:
 					threadPoolStatus.lock()
 					threadPoolStatus[i] = True # We say that the thread i is active.
