@@ -11,6 +11,104 @@ longPattern=3
 
 include(/home/robocomp/AGM/examples/makeMeCoffee/domain_basic.aggl)
 
+hierarchical hierarchicalFindUnknowObjectInTable : active(1)
+{
+	{
+		contst:objectSt(95,110)
+		container:object(-130,110)
+		robot:robot(-325,0)
+		room:object(-325,110)
+		container->contst(table)
+		container->contst(reach)
+		robot->container(know)
+		robot->room(in)
+		container->room(in)
+		container->contst(noExplored)
+	}
+	=>
+	{
+		status:objectSt(95,0)
+		object:object(-130,0)
+		container:object(-130,110)
+		room:object(-325,110)
+		contst:objectSt(95,110)
+		robot:robot(-325,0)
+		container->contst(table)
+		container->contst(reach)
+		robot->object(know)
+		object->status(see)
+		object->status(classifailed)
+		object->status(reach)
+		object->status(position)
+		object->status(reachable)
+		object->status(hasStatus)
+		object->container(in)
+		robot->container(know)
+		robot->room(in)
+		container->room(in)
+		container->contst(noExplored)
+	}
+	effect
+	{
+		(forall
+			something:object
+			(when
+				(in container something)
+				(in object something)
+			)
+		)
+	}
+}
+
+hierarchical hierarchicalFindUnknowObjectInTable_noReach : active(1)
+{
+	{
+		contst:objectSt(95,110)
+		container:object(-130,110)
+		robot:robot(-325,0)
+		room:object(-325,110)
+		container->contst(table)
+		container->contst(reach)
+		robot->container(know)
+		robot->room(in)
+		container->room(in)
+		container->contst(noExplored)
+	}
+	=>
+	{
+		status:objectSt(95,0)
+		object:object(-130,0)
+		container:object(-130,110)
+		room:object(-325,110)
+		contst:objectSt(95,110)
+		robot:robot(-325,0)
+		container->contst(table)
+		container->contst(reach)
+		robot->object(know)
+		object->status(see)
+		object->status(classifailed)
+		object->status(noReach)
+		object->status(position)
+		object->status(reachable)
+		object->status(hasStatus)
+		object->container(in)
+		robot->container(know)
+		robot->room(in)
+		container->room(in)
+		container->contst(noExplored)
+	}
+	effect
+	{
+		(forall
+			something:object
+			(when
+				(in container something)
+				(in object something)
+			)
+		)
+	}
+}
+
 hierarchical hierarchicalFindMilkInTable : active(1)
 {
 	{

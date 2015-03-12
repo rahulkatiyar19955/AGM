@@ -815,7 +815,6 @@ class PyPlan(object):
 	#	2) Active. They are expanding a node.
 	#	3) All the threads are idle because all of them have finished his executions.
 	def startThreadedWork(self, ruleMap, lock=None, i=0, threadPoolStatus=None):
-		historico = []
 		if lock == None:
 			# If there isnt any lock, we create one and we give it to the thread.
 			lock = thread.allocate_lock()
