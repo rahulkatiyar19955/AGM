@@ -40,7 +40,7 @@ void AGMModelPrinter::printWorld(const RoboCompAGMWorldModel::World &w)
 
 void AGMModelPrinter::printWorld(FILE *fd, const RoboCompAGMWorldModel::World &w)
 {
-	printf("World: %d nodes, %d links\n", w.nodes.size(), w.edges.size());
+	printf("World: %ld nodes, %ld links\n", w.nodes.size(), w.edges.size());
 	for (uint32_t i=0; i<w.nodes.size(); ++i)
 	{
 		fprintf(fd, "(%d): %s\n", w.nodes[i].nodeIdentifier, w.nodes[i].nodeType.c_str());
