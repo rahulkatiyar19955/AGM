@@ -145,7 +145,15 @@ void AGMModelSymbol::setAttribute(std::string a, std::string v)
 
 std::string AGMModelSymbol::getAttribute(std::string a)
 {
-	return attributes[a];
+	if (attributes.find(a) != attributes.end())
+	{
+		return attributes[a];
+	}
+	else
+	{
+		printf("couldn't find attribute %s\n", a.c_str());
+		throw ("couldn't find attribute");
+	}
 }
 
 
