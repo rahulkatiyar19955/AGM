@@ -63,4 +63,6 @@ def CheckTarget(graph):
 			scoreLinks.pop()
 		scoreNodes.pop()
 	scoreLinks.pop()
+	if maxScore==200:
+		print graph.__str__
 	return maxScore, False
