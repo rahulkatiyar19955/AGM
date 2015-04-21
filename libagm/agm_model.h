@@ -221,8 +221,8 @@ public:
 // 	worldModel->getSymbolsMap(params, "person", "objectr", "conth");
 #endif
 
-	/// Returns a reference to the edge vector. Use with care. <strong>DEPRECATED</STRONG>1
-	std::vector<AGMModelEdge> getEdges() const;
+	/// Returns a reference to the edge vector. Use with care. <strong>DEPRECATED</STRONG>
+// 	std::vector<AGMModelEdge> getEdges() const;
 
 
 	/*! \brief Returns a reference to the symbol located in position <em>'index'</em> within the symbol vector.

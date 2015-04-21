@@ -50,27 +50,27 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 		ret2 = False
 		if len(currentPlan)>0:
 			try:
-				#print 'Trying one step ahead...', stepsFwd
+				print 'Trying one step ahead...', stepsFwd
 				newPlan = currentPlan.removeFirstAction(currentModel)
 				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, newPlan, stepsFwd+1)
 			except:
-				#print steps, 'steps ahead did not work'
+				print steps, 'steps ahead did not work'
 				traceback.print_exc()
 				ret2 = False
 		if ret2:
-			#print 'ok', stepsFwd
+			print 'ok', stepsFwd
 			return ret2, stepsFwd2, planMonitoring2
 		else:
 			try:
-				#print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
-				#print plan
+				print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
+				print plan
 				p = PyPlanChecker(domainClass, domainPath, init, currentPlan, target, '', verbose=False)
 				if p.valid:
-					#print 'GOT PLAN FROM MONITORING!!!'
-					#print currentPlan
+					print 'GOT PLAN FROM MONITORING!!!'
+					print currentPlan
 					return True, stepsFwd, currentPlan
 				else:
-					#print 'doesn\'t work'
+					print 'doesn\'t work'
 					return False, 0, None
 			except:
 				traceback.print_exc()
@@ -129,10 +129,12 @@ class Executive(object):
 			sys.exit(1)
 		self.mutex.release()
 	def broadcastModel(self):
+		print 'bcm 0'
 		self.mutex.acquire()
+		print 'bcm 1'
 		try:
-			#print '<<<broadcastinnn'
-			#print self.currentModel
+			print '<<<broadcastinnn'
+			print self.currentModel
 			ev = RoboCompAGMWorldModel.Event()
 			if self.backModelICE == None:
 				ev.backModel = AGMModelConversion.fromInternalToIce(self.currentModel)
@@ -141,7 +143,7 @@ class Executive(object):
 			ev.newModel = AGMModelConversion.fromInternalToIce(self.currentModel)
 			self.executiveTopic.modelModified(ev)
 			self.backModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
-			#print 'broadcastinnn>>>'
+			print 'broadcastinnn>>>'
 		except:
 			print 'There was some problem broadcasting the model'
 			sys.exit(1)

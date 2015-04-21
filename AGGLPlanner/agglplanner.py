@@ -739,6 +739,7 @@ class PyPlan(object):
 				pass
 			#MOVIDO MENSAJE AL FINAL DEL METODO
 			rList = []
+			planConDescomposicion = False
 			if len(self.results[i].history) > 0:
 				action = self.results[i].history[0]
 				ac = AGGLPlannerAction(action)

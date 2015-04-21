@@ -4,16 +4,18 @@
 
 #include <algorithm>
 
-float str2float(const std::string &s)
+float str2float(const std::string &s, bool debug)
 {
 	if (s.size()<=0)
 	{
 		AGMMODELEXCEPTION("libagm: Error parsing float <empty>\n");
 	}
 
+	if (debug) printf("s1 %s\n", s.c_str());
 	float ret;
 	std::string str = s;
 	replace(str.begin(), str.end(), ',', '.');
+	if (debug) printf("s2 %s\n", str.c_str());
 	std::istringstream istr(str);
 	istr.imbue(std::locale("C"));
 	istr >> ret;
@@ -82,9 +84,13 @@ void AGMMisc::publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMAgentTopicPrx &
 #endif
 
 
-float AGMMisc::str2float(const std::string &s)
+float AGMMisc::str2float(const std::string &s, bool debug)
 {
-	return ::str2float(s);
+	const std::string st = s;
+	if (debug) printf("s %s\n", st.c_str());
+	const float f = ::str2float(s, debug);
+	if (debug) printf("f %f\n", f);
+	return f;
 }
 
 

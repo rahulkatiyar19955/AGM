@@ -532,10 +532,10 @@ std::vector<AGMModelSymbol::SPtr> AGMModel::getSymbols() const
 	return symbols;
 }
 
-std::vector<AGMModelEdge> AGMModel::getEdges() const
-{
-	return edges;
-}
+// std::vector<AGMModelEdge> AGMModel::getEdges() const
+// {
+// 	return edges;
+// }
 
 AGMModelSymbol::SPtr & AGMModel::symbol(uint32_t i)
 {

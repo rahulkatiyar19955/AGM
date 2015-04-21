@@ -86,7 +86,7 @@ public:
 	void setType(std::string t);
 	void setIdentifier(int32_t t);
 	void setAttribute(std::string a, std::string v);
-	std::string getAttribute(std::string a);
+	std::string getAttribute(std::string a, bool debug = false);
 
 	AGMModelSymbol::iterator edgesBegin(AGMModel *m)
 	{

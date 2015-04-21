@@ -10,7 +10,7 @@
 #endif
 
 /*! Converts an STD string to float. */
-float str2float(const std::string &s);
+float str2float(const std::string &s, bool debug = false);
 /*! Converts an STD string to integer. */
 int32_t str2int(const std::string &s);
 
@@ -39,7 +39,7 @@ public:
 	static void publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel, std::string sender="unspecified");
 	static void publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMAgentTopicPrx &agmagenttopic);
 #endif
-	static inline float str2float(const std::string &s);
+	static inline float str2float(const std::string &s, bool debug = false);
 	static inline int32_t str2int(const std::string &s);
 	static inline std::string float2str(const float &f);
 	static inline std::string int2str(const int32_t &i);
