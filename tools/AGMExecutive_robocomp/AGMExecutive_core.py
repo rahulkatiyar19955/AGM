@@ -12,6 +12,7 @@ from agglplanningcache import *
 
 import xmlModelParser
 
+import pickle
 
 # Check that RoboComp has been correctly detected
 ROBOCOMP = ''
@@ -190,6 +191,12 @@ class Executive(object):
 			#print '   Call Monitoring>>>'
 			#print '   Call Monitoring>>>'
 			#print 'aa', type(self.plan), self.plan
+			os.mkdir(peid)
+			pickle.dump(self.agmData,      peid+'agmData.pckl')
+			pickle.dump(domainPath,        peid+'domainPath.pckl')
+			pickle.dump(init,              peid+'init.pckl')
+			pickle.dump(self.currentModel, peid+'currentModel.pckl')
+			pickle.dump(self.plan, peid+'plan.pckl')
 			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel, target, AGGLPlannerPlan(self.plan))
 			#print 'bb'
 			print ret, stepsFwd, planMonitoring
