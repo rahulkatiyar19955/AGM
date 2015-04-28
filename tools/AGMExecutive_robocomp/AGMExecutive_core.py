@@ -191,15 +191,34 @@ class Executive(object):
 			#print '   Call Monitoring>>>'
 			#print '   Call Monitoring>>>'
 			#print 'aa', type(self.plan), self.plan
-			os.mkdir(peid)
-			pickle.dump(self.agmData,      peid+'agmData.pckl')
-			pickle.dump(domainPath,        peid+'domainPath.pckl')
-			pickle.dump(init,              peid+'init.pckl')
-			pickle.dump(self.currentModel, peid+'currentModel.pckl')
-			pickle.dump(self.plan, peid+'plan.pckl')
+			#try:
+				#os.system("rm -rf " + peid)
+				#os.system("mkdir " + peid)
+				#h = open(peid+'/agmData.pckl', 'w')
+				#print type(h)
+				#pickle.dump(self.agmData,      h)
+
+				#h = open(peid+'/domainPath.pckl', 'w')
+				#print type(h)
+				#pickle.dump(domainPath,        h)
+
+				#h = open(peid+'/domainPath.pckl', 'w')
+				#print type(h)
+				#pickle.dump(init,              h)
+
+				#h = open(peid+'/currentModel.pckl', 'w')
+				#print type(h)
+				#pickle.dump(self.currentModel, h)
+
+				#h = open(peid+'/plan.pckl', 'w')
+				#print type(h)
+				#pickle.dump(self.plan,         h)
+			#except:
+				#pass
+			
 			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel, target, AGGLPlannerPlan(self.plan))
 			#print 'bb'
-			print ret, stepsFwd, planMonitoring
+			#print ret, stepsFwd, planMonitoring
 			if ret:
 				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
 				stored = True
