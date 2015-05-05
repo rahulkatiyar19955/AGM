@@ -124,6 +124,7 @@ class Executive(object):
 	def broadcastPlan(self):
 		self.mutex.acquire()
 		try:
+			self.publishExecutiveVisualizationTopic()
 			self.sendParams()
 		except:
 			print 'There was some problem broadcasting the plan'
@@ -330,6 +331,12 @@ class Executive(object):
 		self.lastParamsSent = copy.deepcopy(params)
 		self.sendParams()
 		# Publish new information using the executiveVisualizationTopic
+		self.publishExecutiveVisualizationTopic()
+		print 'done'
+
+	#
+	#
+	def publishExecutiveVisualizationTopic(self):
 		try:
 			print self.plan
 			planPDDL = RoboCompPlanning.Plan() # Generate a PDDL-like version of the current plan for visualization
@@ -349,7 +356,9 @@ class Executive(object):
 		except:
 			traceback.print_exc()
 			print "can't publish executiveVisualizationTopic.update"
-		print 'done'
+
+	#
+	#
 	def sendParams(self):
 		print 'Send plan to'
 		for agent in self.agents:
