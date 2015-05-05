@@ -216,7 +216,7 @@ class Executive(object):
 				#pickle.dump(self.plan,         h)
 			#except:
 				#pass
-			
+
 			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel, target, AGGLPlannerPlan(self.plan))
 			#print 'bb'
 			#print ret, stepsFwd, planMonitoring
@@ -240,7 +240,7 @@ class Executive(object):
 
 		# First, try with the current plan
 		stored = False
-		if self.plan != None:
+		if self.plan != None and False:
 			self.pypyKillMutex.acquire()
 			peid = '_'+str(self.plannerExecutionID)
 			self.pypyKillMutex.release()
