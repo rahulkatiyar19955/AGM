@@ -327,8 +327,8 @@ void GraphModelViewer::animateStep()
 		/// Spring
 		if (dist>10.*RADIUS)
 		{
-			nodeMapId[edges[edgeIdx]->src]->vel += incNorm*dist*(0.001) * T;
-			nodeMapId[edges[edgeIdx]->dst]->vel -= incNorm*dist*(0.001) * T;
+			nodeMapId[edges[edgeIdx]->src]->vel += incNorm*dist*(0.002) * T;
+			nodeMapId[edges[edgeIdx]->dst]->vel -= incNorm*dist*(0.002) * T;
 		}
 	}
 
