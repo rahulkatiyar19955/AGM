@@ -237,4 +237,13 @@ class Server (Ice.Application):
 				traceback.print_exc()
 				status = 1
 
-Server( ).main(sys.argv)
+
+
+if __name__ == '__main__':
+	params = copy.deepcopy(sys.argv)
+	if len(params) > 1:
+		if not params[1].startswith('--Ice.Config='):
+			params[1] = '--Ice.Config=' + params[1]
+	elif len(params) == 0:
+		params.append('--Ice.Config=config')
+	Server( ).main(params)
