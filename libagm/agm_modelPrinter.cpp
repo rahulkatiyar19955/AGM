@@ -25,7 +25,7 @@ void AGMModelPrinter::printWorld(const AGMModel *w)
 	for (uint32_t i=0; i<w->edges.size(); ++i)
 	{
 		printf("%d -> %d  (%s)\n", w->edges[i].symbolPair.first, w->edges[i].symbolPair.second, w->edges[i].linking.c_str());
-		printf("attributes size %d\n",w->edges[i].attributes.size());
+		printf("attributes size %d\n",(int)w->edges[i].attributes.size());
 		std::map<std::string, std::string>::const_iterator itr = w->edges[i].attributes.begin();
 		for(; itr!=w->edges[i].attributes.end(); ++itr)
 		{
