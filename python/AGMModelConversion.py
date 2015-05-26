@@ -51,6 +51,7 @@ def fromInternalToIce(src):
 		#if dstLink.b == -1:
 			#print "Can't transform models containing edges linking invalid identifiers (type: "+dstLink.edgeType+").\n"
 			#sys.exit(-1)
+		dstLink.attributes = srcLink.attributes
 		dst.edges.append(dstLink)
 	return dst
 
@@ -71,7 +72,7 @@ def fromIceToInternal_model(src, ignoreInvalidEdges=False):
 		if srcLink.a == -1 or srcLink.b == -1:
 			raise Exception("Can't transform models containing nodes with invalid identifiers (type: "+src.edges[i].edgeType+").\n")
 			sys.exit(-1)
-		edge = AGMLink(str(srcLink.a), str(srcLink.b), srcLink.edgeType)
+		edge = AGMLink(str(srcLink.a), str(srcLink.b), srcLink.edgeType,srcLink.attributes)
 		if str(srcLink.a) in knownNodes and str(srcLink.b) in knownNodes:
 			dst.links.append(edge)
 		else:

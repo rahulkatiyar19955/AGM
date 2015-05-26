@@ -54,7 +54,7 @@ void AGMModel::setFrom(const AGMModel &src)
 	edges.clear();
 	for (uint32_t i=0; i<src.edges.size(); ++i)
 	{
-		AGMModelEdge edge(src.edges[i].symbolPair.first, src.edges[i].symbolPair.second, src.edges[i].linking);
+		AGMModelEdge edge(src.edges[i].symbolPair.first, src.edges[i].symbolPair.second, src.edges[i].linking,src.edges[i].attributes);
 		edges.push_back(edge);
 	}
 

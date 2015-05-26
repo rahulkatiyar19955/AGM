@@ -235,7 +235,7 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 				std::map<std::string, std::string> attrMap;
 				for (xmlNodePtr cur2=cur->xmlChildrenNode; cur2!=NULL; cur2=cur2->next)
 				{
-					if ((!xmlStrcmp(cur2->name, (const xmlChar *)"attribute")))
+					if ((!xmlStrcmp(cur2->name, (const xmlChar *)"attributeLink")))
 					{
 						xmlChar *skey = xmlGetProp(cur2, (const xmlChar *)"key");
 						if (skey == NULL) { printf("An atribute of %s lacks of attribute 'key'.\n", (char *)cur->name); exit(-1); }
