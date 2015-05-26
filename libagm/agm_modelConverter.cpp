@@ -120,6 +120,23 @@ bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMW
 	return false;
 }
 
+bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMWorldModel::Edge &edge, AGMModel::SPtr &world)
+{
+	for (uint32_t i=0; i<world->edges.size(); ++i)
+	{
+		if (edge.edgeType == world->edges[i].linking  and edge.a == world->edges[i].symbolPair.first and edge.b == world->edges[i].symbolPair.second)
+		{
+			std::map<std::string, std::string>::const_iterator iter;
+			for (iter = edge.attributes.begin(); iter!=edge.attributes.end(); iter++)
+			{
+				world->edges[i].attributes[iter->first] = iter->second;
+			}
+			return true;
+		}
+	}
+	return false;
+}
+
 #endif
 
 int32_t getIdFromString(char *sid, int32_t &lastVariableId, std::map <std::string, int32_t> &identifierMap)
