@@ -4,6 +4,7 @@ int main(int argc, char **argv)
 {
 	AGMModel::SPtr xml(new AGMModel());
 
-	AGMModelConverter::fromXMLToInternal("example.xagm", xml);
+	AGMModelConverter::fromXMLToInternal("/home/robocomp/AGM/examples/basic/initialModel.xml", xml);
+	AGMModelPrinter::printWorld(xml);
 }
 

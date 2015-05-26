@@ -109,7 +109,19 @@ class GraphViewer(QMainWindow):
 			self.ui.horizontalLayout.addWidget(self.widgets[fil])
 		for fil in range(len(fileList)):
 			self.drawers.append(GraphDraw(self.widgets[fil], self, "xxxx"))
+			print 'xmlModelParser()', fileList[fil]
 			self.drawers[fil].graph = xmlModelParser.graphFromXML(fileList[fil])
+			
+			print 'nodes',self.drawers[fil].graph.nodes
+			for key in self.drawers[fil].graph.nodes.keys():
+				v = self.drawers[fil].graph.nodes[key]
+				print key,v, self.drawers[fil].graph.nodes[key].attributes
+				
+			print 'links',self.drawers[fil].graph.links
+			L=self.drawers[fil].graph.links
+			for index, item in enumerate(L):
+					print index, item
+					print item.attributes
 			self.drawers[fil].show()
 
 		self.timer = QTimer()

@@ -63,15 +63,22 @@ class AGMWorldModelParser(xmllib.XMLParser):
 				enabled = False
 		except:
 			pass
+		
 		self.links.append(AGMLink(src, dst, attrs['label'], enabled=enabled))
+		
 
 	def end_link(self):
 		pass
 
 	def start_attribute(self, attrs):
 		self.nodes[self.currentSymbol].attributes[attrs['key']] = attrs['value']
+	def start_attributeLink(self, attrs):
+		#-1 means currentLink (last link)
+		self.links[-1].attributes[attrs['key']] = attrs['value']
 
 	def end_attribute(self):
+		pass
+	def end_attributeLink(self):
 		pass
 
 ## Makes a graph with the information contained in a XML file

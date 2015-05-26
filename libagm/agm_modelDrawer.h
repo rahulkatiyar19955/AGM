@@ -3,12 +3,15 @@
 
 #include <QObject>
 #include <QTableWidget>
-
+#include <QHash>
 #include <stdlib.h>
 
 #include <agm_model.h>
 #include <agm_modelEdge.h>
 #include <agm_modelSymbols.h>
+#include <agm_modelPrinter.h>
+#include <agm_misc_functions.h>
+
 
 #include <rcdraw/rcdraw.h>
 
@@ -80,6 +83,7 @@ private:
 					node.pos[d] = (100.*rand())/RAND_MAX - 50.;
 					node.vel[d] = 0;
 				}
+				node.labelsPositions.clear();
 				nodes.push_back(node);
 			}
 		}
@@ -106,6 +110,7 @@ private:
 			nodes[e].edges.clear();
 			nodes[e].edgesOriented.clear();
 			nodes[e].edgesNames.clear();
+			nodes[e].labelsPositions.clear();
 		}
 		// Push back edges again
 		for (uint32_t e=0; e<model->edges.size(); e++)
@@ -282,19 +287,35 @@ private:
 					QPointF pr = QPointF(p2.x()-(radius*0.5)*cos(angle+a), p2.y()+(radius*0.5)*sin(angle+a));
 					drawer->drawLine(QLineF(p2,  pr), QColor(0, 0, 0));
 				}
-
-
 				// Text
 				int32_t linkHeight = 16;
 				int32_t linkGroupBase = (-linkGroupCount+1)*linkHeight/2;
-
 				QPointF reLl(0, linkHeight*pos + linkGroupBase);
-				drawer->drawText(p1*0.6+p2*0.4-reLl, QString::fromStdString(nodes[n].edgesNames[e]), 10, QColor(255), true, QColor(127,127,127,127));
+				QPointF labelTextPosition=p1*0.6+p2*0.4-reLl;
+				
+				//Label
+				//destiny e in edgesOriented
+				int32_t dst=nodes[n].edgesOriented[e];
+				std::string nameSymbolDst=nodes[dst].name;
+				std::string stringStream;
+				stringStream =nodes[n].edgesNames[e] +" "+nodes[n].name+" "+nameSymbolDst;
+				QString labelKey = QString::fromStdString( stringStream );
+				
+				if (nodes[n].labelsPositions.contains(labelKey) == true )
+				{   
+					qDebug()<<"edge repeated"<<labelKey;
+					qDebug()<<"nodes["<<n<<"].labelsPositions"<<nodes[n].labelsPositions;
+					qFatal("Error:: Two equal edges!!!");
+				}
+				else 
+				{
+					nodes[n].labelsPositions[labelKey]=labelTextPosition;
+					drawer->drawText(labelTextPosition, QString::fromStdString(nodes[n].edgesNames[e]), 10, QColor(255), true, QColor(127,127,127,127));
+				}
+				
 // 				if (modified) printf("  link[%s] id(%s-->%s) idx(%d-->%d)\n", nodes[n].edgesNames[e].c_str(), nodes[n].name.c_str() , nodes[nodes[n].edgesOriented[e]].name.c_str(), n, nodes[n].edgesOriented[e]);
 			}
 		}
-
-
 		// Draw nodes
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
@@ -320,6 +341,8 @@ private:
 		std::vector<uint32_t> edges;
 		std::vector<uint32_t> edgesOriented;
 		std::vector<std::string> edgesNames;
+		QHash<QString, QPointF> labelsPositions;
+		
 	};
 
 private:
@@ -330,22 +353,41 @@ private:
 	AGMModel::SPtr model;
 	QTableWidget *tableWidget;
 	std::string interest;
+	
+	
 
-	// Draws attribute table.
+	// Draws attribute table, nodes and edge.
 	void drawTable()
 	{
-		int32_t index2 = -1;
-		for (uint32_t i=0; i<model->symbols.size(); ++i)
+		int32_t index2=-1;
+		std::map<std::string,std::string> attributes;
+		for (uint32_t i=0; i<model->edges.size(); ++i)
 		{
-			if (model->symbols[i]->toString() == interest)
+// 			std::cout<<model->edges[i].toString(model)<<"\n";
+			if (model->edges[i].toString(model)==interest)
 			{
 				index2 = i;
+				attributes= model->edges[index2]->attributes;
 				break;
 			}
 		}
-		if (index2 != -1)
+		
+		
+		if (index2==-1)
 		{
-			std::map<std::string,std::string> &attributes = model->symbols[index2]->attributes;
+			for (uint32_t i=0; i<model->symbols.size(); ++i)
+			{
+				if (model->symbols[i]->toString() == interest)
+				{
+					index2 = i;
+					attributes= model->symbols[index2]->attributes;
+					break;
+				}
+			}
+		}
+		if (index2 != -1 )
+		{
+			 
 			tableWidget->setColumnCount(2);
 			tableWidget->setRowCount(attributes.size()+1);
 			QTableWidgetItem *ti;
@@ -356,7 +398,8 @@ private:
 
 			ti = tableWidget->item(0, 1);
 			if (ti == NULL) { ti = new QTableWidgetItem(); tableWidget->setItem(0, 1, ti);}
-			ti->setText(QString::fromStdString(model->symbols[index2]->toString()));
+// 			ti->setText(QString::fromStdString(model->symbols[index2]->toString()));
+			ti->setText(QString::fromStdString(interest));
 
 			int row = 1;
 			for (std::map<std::string,std::string>::iterator iter = attributes.begin(); iter != attributes.end(); iter++, row++)
@@ -370,12 +413,55 @@ private:
 				ti->setText(QString::fromStdString( iter->second ));
 			}
 		}
+				
 		else
 		{
 			if (tableWidget != NULL) tableWidget->clear();
 		}
+		
 	}
-
+	void print ()
+	{
+		qDebug()<<"\nAGMModelPrinter::printWorld(model)\n";
+		AGMModelPrinter::printWorld(model);
+// 		
+		qDebug()<<"\nAGMModelDrawer::Print Graphical Structure\n";
+		qDebug()<<"nodes.size()"<<nodes.size();		
+		
+		for (uint32_t n=0; n<nodes.size(); n++)
+		{
+			
+			qDebug()<<"\nNode"<<n;
+			std::cout<<"nodes["<<n<<"].name "<<nodes[n].name<<std::endl;
+			std::cout<<"nodes["<<n<<"].type "<<nodes[n].type<<std::endl;
+			std::cout<<"nodes["<<n<<"].type "<<nodes[n].identifier<<std::endl;
+			qDebug()<<"nodes["<<n<<"].pos"<<nodes[n].pos[0]<<nodes[n].pos[1];
+			qDebug()<<"nodes["<<n<<"].edgesNames.size()"<<nodes[n].edgesNames.size();
+			for (uint32_t e=0; e<nodes[n].edgesNames.size(); e++)
+			{
+				std::cout<<"\tnodes["<<n<<"].edgesNames ["<<e<<"]"<<nodes[n].edgesNames[e]<<"\n";
+			}
+			///edges
+			qDebug()<<"nodes["<<n<<"].edges.size()"<<nodes[n].edges.size();
+			for (uint32_t e=0; e<nodes[n].edges.size(); e++)
+			{
+				std::cout<<"\tnodes["<< n <<"].edges ["<<e<<"]"<<nodes[n].edges[e]<<"\n";
+			}
+			///edgesOriented
+			qDebug()<<"nodes["<<n<<"].edgesOriented.size()"<<nodes[n].edgesOriented.size();
+			for (uint32_t e=0; e<nodes[n].edgesOriented.size(); e++)
+			{
+				std::cout<<"\tnodes["<< n <<"].edgesOriented ["<<e<<"]"<<nodes[n].edgesOriented[e]<<"\n";
+			}
+			///labelsPositions
+			qDebug()<<"nodes[n].labelsPositions"<<nodes[n].labelsPositions.size();
+			foreach (const QString &name, nodes[n].labelsPositions.keys())
+			{
+				qDebug() <<"\t"<< name << ":" << nodes[n].labelsPositions.value(name);
+			}
+			
+		}
+	}
 
 public slots:
 	// Updates selected node in the attribute table according to the provided coordinates.
@@ -383,16 +469,23 @@ public slots:
 	{
 		if (tableWidget == NULL) return;
 		QPointF c = drawer->getWindow().center();
+		
 		int wW2 = c.x();
 		int wH2 = c.y();
 		float x = pC.x();
 		float y = pC.y();
-		int32_t index = -1;
-		float minDist = -1;
+		int32_t index=-1;
+		int32_t indexLink = -1;
+		float minDist=-1;
+		float minDistLink = -1;
+		QString clickedLabel;
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
+			
 			const QPointF p = QPointF(nodes[n].pos[0]+wW2, wH2+nodes[n].pos[1]);
 			const float dist = sqrt( pow(p.x()-x, 2)+pow(p.y()-y, 2));
+// 			qDebug()<<QString::fromStdString(nodes[n].name)<<"node pos ("<<nodes[n].pos[0]<<","<<nodes[n].pos[1]<<")"<<"p"<<p<<"dist"<<dist;
+			//distance to node
 			if ( dist < 20.)
 			{
 				if (dist < minDist or minDist < 0)
@@ -401,13 +494,37 @@ public slots:
 					minDist = dist;
 				}
 			}
+			//distance to label
+			foreach (const QString &str, nodes[n].labelsPositions.keys())
+ 			{
+				QPointF labelTextPosition = nodes[n].labelsPositions.value(str);
+				const QPointF pLabel = QPointF(labelTextPosition.x(), -1*(labelTextPosition.y()-drawer->getWindow().height()));
+				const float distLabel = sqrt( pow(pLabel.x()-x, 2)+pow(pLabel.y()-y, 2));
+// 				qDebug()<<"\tlabel"<<str<<":"<<nodes[n].labelsPositions.value(str)<<"pLabel"<<pLabel<<"distLabel"<<distLabel;
+				
+				if ( distLabel < 20.)
+				{
+					if (distLabel < minDistLink or minDistLink < 0)
+					{
+						indexLink = n;
+						minDistLink = distLabel;
+						clickedLabel =str;
+					}
+				}
+			}
+
 		}
 		if (index > -1)
 		{
 			interest = nodes[index].name;
 		}
+		else if (indexLink > -1)
+		{
+			
+			interest = clickedLabel.toStdString();
+		}
+		print();
 	}
-
 };
 
 

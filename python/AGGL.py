@@ -61,6 +61,9 @@ class AGMLink(object):
 		self.a = a
 		self.b = b
 		self.linkType = linkType
+		#if attrs==None: attrs=dict()
+		#self.attributes = attrs
+
 		if attrs==None:
 			self.attributes = {}
 		elif type(attrs)==type({}):
@@ -335,8 +338,9 @@ class AGMGraph(object):
 		else:
 			print 'No such node', str(name)+'. Internal editor error.'
 			pass
-	def addEdge(self, a, b, linkname='link'):
-		self.links.append(AGMLink(a, b, linkname, enabled=True))
+	def addEdge(self, a, b, linkname='link',attrs=None):
+		if attrs==None: attrs=dict()
+		self.links.append(AGMLink(a, b, linkname, attrs, enabled=True))
 	def removeEdge(self, a, b):
 		i = 0
 		while i < len(self.links):
@@ -383,7 +387,10 @@ class AGMGraph(object):
 				f.write('\t\t<attribute key="'+attr+'" value="'+self.nodes[n].attributes[attr]+'" />\n')
 			f.write('\t</symbol>\n')
 		for l in self.links:
-			f.write('\t<link src="'+str(l.a)+'" dst="'+str(l.b)+'" label="'+str(l.linkType)+'" />\n')
+			f.write('\t<link src="'+str(l.a)+'" dst="'+str(l.b)+'" label="'+str(l.linkType)+'" >\n')
+			for attr in l.attributes.keys():
+				f.write('\t\t<attributeLink key="'+attr+'" value="'+l.attributes[attr]+'" />\n')
+			f.write('\t</link>\n')
 		f.write('</AGMModel>\n\n')
 		f.close()
 
