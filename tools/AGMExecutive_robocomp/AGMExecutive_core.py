@@ -122,7 +122,9 @@ class Executive(object):
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
 	def broadcastPlan(self):
-		self.mutex.acquire()
+		print 'ma0'
+		self.mutex.acquire( )
+		print 'mb0'
 		try:
 			self.publishExecutiveVisualizationTopic()
 			self.sendParams()
@@ -131,9 +133,9 @@ class Executive(object):
 			sys.exit(1)
 		self.mutex.release()
 	def broadcastModel(self):
-		print 'bcm 0'
-		self.mutex.acquire()
-		print 'bcm 1'
+		print 'ma1'
+		self.mutex.acquire( )
+		print 'mb1'
 		try:
 			print '<<<broadcastinnn'
 			print self.currentModel
@@ -151,7 +153,9 @@ class Executive(object):
 			sys.exit(1)
 		self.mutex.release()
 	def reset(self):
-		self.mutex.acquire()
+		print 'ma2'
+		self.mutex.acquire( )
+		print 'mb2'
 		self.currentModel = xmlModelParser.graphFromXML(self.initialModelPath)
 		self.updatePlan()
 		self.mutex.release()
@@ -160,15 +164,21 @@ class Executive(object):
 		self.currentModel = model
 		self.broadcastModel()
 	def setMission(self, target, avoidUpdate=False):
-		self.mutex.acquire()
-		self.target = target
-		self.target.toXML("/tmp/target.xml")
-		targetText = generateTarget(self.target)
-		ofile = open("/tmp/target.py", 'w')
-		ofile.write(targetText)
-		ofile.close()
-		if not avoidUpdate:
-			self.updatePlan()
+		print 'ma3'
+		self.mutex.acquire( )
+		print 'mb3'
+		try:
+			self.target = target
+			self.target.toXML("/tmp/target.xml")
+			targetText = generateTarget(self.target)
+			ofile = open("/tmp/target.py", 'w')
+			ofile.write(targetText)
+			ofile.close()
+			if not avoidUpdate:
+				self.updatePlan()
+		except:
+			print 'There was some problem setting the mission'
+			sys.exit(1)
 		self.mutex.release()
 	def ignoreCommentsInPlan(self, plan):
 		ret = []
@@ -241,8 +251,13 @@ class Executive(object):
 		# First, try with the current plan
 		stored = False
 		if self.plan != None and False:
+			print 'pkm0'
 			self.pypyKillMutex.acquire()
-			peid = '_'+str(self.plannerExecutionID)
+			try:
+				peid = '_'+str(self.plannerExecutionID)
+			except:
+				print 'There was some problem broadcasting the model'
+				sys.exit(1)
 			self.pypyKillMutex.release()
 			stored, stepsFwd = self.callMonitoring(peid)
 			print stored, stepsFwd
@@ -254,11 +269,16 @@ class Executive(object):
 			# Run planner
 			start = time.time()
 			#PRE
+			print 'pkm1'
 			self.pypyKillMutex.acquire()
-			self.pypyInProgress += 1
-			self.plannerExecutionID+=1
-			peid = '_'+str(self.plannerExecutionID)
-			self.currentModel.toXML("/tmp/lastWorld"+peid+".xml")
+			try:
+				self.pypyInProgress += 1
+				self.plannerExecutionID+=1
+				peid = '_'+str(self.plannerExecutionID)
+				self.currentModel.toXML("/tmp/lastWorld"+peid+".xml")
+			except:
+				print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
+				sys.exit(1)
 			self.pypyKillMutex.release()
 			#CALL
 			argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
@@ -276,10 +296,17 @@ class Executive(object):
 				print 'Running the planner...'
 				subprocess.call(argsss)
 				#POST Check if the planner was killed
+				print 'pkm2'
 				self.pypyKillMutex.acquire()
-				self.pypyInProgress -= 1
-				if self.pypyInProgress == 0: plannerWasKilled = False
-				else: plannerWasKilled = True
+				try:
+					self.pypyInProgress -= 1
+					if self.pypyInProgress == 0:
+						plannerWasKilled = False
+					else:
+						plannerWasKilled = True
+				except:
+					print 'There was some problem doing this'
+					sys.exit(1)
 				self.pypyKillMutex.release()
 				#CONTINUE?                       Probably i'ts better just to try to open the file and consider it was killed if there's no result file...
 				#if plannerWasKilled:
@@ -393,7 +420,9 @@ class Executive(object):
 		self.modifications += 1
 		print "<<<<<<<<<<<modificationProposal(self, modification) (", sup, ') by', modification.sender
 		print 'Tryin...'
+		print 'ma44'
 		while self.mutex.acquire(0)==False:
+			print 'mb44'
 			now = time.time()
 			elap = (now - self.lastPypyKill)
 			print 'couldn\'t acquire', elap
@@ -401,17 +430,27 @@ class Executive(object):
 				subprocess.call(["killall", "-9", "pypy"])
 				self.lastPypyKill = now
 			time.sleep(1)
-		self.worldModelICE = worldModelICE
-		internalModel.toXML('modification'+(str(self.modifications).zfill(4))+'.xml')
-		self.setModel(internalModel)
-		self.updatePlan()
+		try:
+			self.worldModelICE = worldModelICE
+			internalModel.toXML('modification'+(str(self.modifications).zfill(4))+'.xml')
+			self.setModel(internalModel)
+			self.updatePlan()
+		except:
+			print 'There was some problem updating internal model to xml'
+			sys.exit(1)
 		self.mutex.release()
 		print "modificationProposal(self, modification)>>>>>>>>>>>", sup
 
 	def updateNode(self, nodeModification):
-		self.mutex.acquire()
-		internal = AGMModelConversion.fromIceToInternal_node(nodeModification)
-		self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
-		self.executiveTopic.modelUpdated(nodeModification)
+		print 'ma4'
+		self.mutex.acquire( )
+		print 'mb4'
+		try:
+			internal = AGMModelConversion.fromIceToInternal_node(nodeModification)
+			self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
+			self.executiveTopic.modelUpdated(nodeModification)
+		except:
+			print 'There was some problem with update node'
+			sys.exit(1)
 		self.mutex.release()
 
