@@ -34,6 +34,9 @@ public:
 
 	/// Updates an AGM world model (an AGMModel object) using an updated node (given a RoboCompAGMWorldModel::Node instance).
 	static bool includeIceModificationInInternalModel(const RoboCompAGMWorldModel::Node &node, AGMModel::SPtr &world);
+	
+	/// Updates an AGM world model (an AGMModel object) using an updated edge (given a RoboCompAGMWorldModel::Edge instance).
+	static bool includeIceModificationInInternalModel(const RoboCompAGMWorldModel::Edge &edge, AGMModel::SPtr &world);
 #endif
 
 	/// Creates an AGM world model (AGMModel object) given the path to an existing XML description.
