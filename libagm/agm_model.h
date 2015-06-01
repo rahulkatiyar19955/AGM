@@ -14,6 +14,7 @@
 
 #include <agm_modelSymbols.h>
 
+
 int32_t str2int(const std::string &s);
 
 class AGMModelEdge;

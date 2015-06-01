@@ -87,12 +87,35 @@ void AGMModelConverter::fromInternalToIce(const AGMModelSymbol::SPtr &node, Robo
 	dst.nodeIdentifier = node->identifier;
 	dst.attributes = node->attributes;
 }
+// ["cpp:comparable"]
+// 	struct Edge{
+// 		StringDictionary attributes;
+// 		int a;
+// 		int b;
+// 		string edgeType;
+// 	};
+
+// void AGMModelConverter::fromInternalToIce(const AGMModelEdge::SPtr &edge, RoboCompAGMWorldModel::Edge &dst)
+// {
+// 	dst.edgeType = edge->linking;
+// 	dst.a = edge->symbolPair.first;
+// 	dst.b = edge->symbolPair.second;
+// 	dst.attributes = edge->attributes;
+// }
 
 void AGMModelConverter::fromInternalToIce(const AGMModelSymbol *node, RoboCompAGMWorldModel::Node &dst)
 {
 	dst.nodeType = node->symbolType;
 	dst.nodeIdentifier = node->identifier;
 	dst.attributes = node->attributes;
+}
+
+void AGMModelConverter::fromInternalToIce(const AGMModelEdge *edge, RoboCompAGMWorldModel::Edge &dst)
+{
+	dst.edgeType = edge->linking;
+	dst.a = edge->symbolPair.first;
+	dst.b =edge->symbolPair.second;
+	dst.attributes = edge->attributes;
 }
 
 void AGMModelConverter::fromIceToInternal(const RoboCompAGMWorldModel::Node &node, AGMModelSymbol::SPtr &dst)
@@ -252,7 +275,7 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 				std::map<std::string, std::string> attrMap;
 				for (xmlNodePtr cur2=cur->xmlChildrenNode; cur2!=NULL; cur2=cur2->next)
 				{
-					if ((!xmlStrcmp(cur2->name, (const xmlChar *)"attributeLink")))
+					if ((!xmlStrcmp(cur2->name, (const xmlChar *)"linkAttribute")))
 					{
 						xmlChar *skey = xmlGetProp(cur2, (const xmlChar *)"key");
 						if (skey == NULL) { printf("An atribute of %s lacks of attribute 'key'.\n", (char *)cur->name); exit(-1); }
