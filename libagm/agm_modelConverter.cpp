@@ -87,13 +87,6 @@ void AGMModelConverter::fromInternalToIce(const AGMModelSymbol::SPtr &node, Robo
 	dst.nodeIdentifier = node->identifier;
 	dst.attributes = node->attributes;
 }
-// ["cpp:comparable"]
-// 	struct Edge{
-// 		StringDictionary attributes;
-// 		int a;
-// 		int b;
-// 		string edgeType;
-// 	};
 
 // void AGMModelConverter::fromInternalToIce(const AGMModelEdge::SPtr &edge, RoboCompAGMWorldModel::Edge &dst)
 // {

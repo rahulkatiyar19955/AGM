@@ -369,7 +369,7 @@ class Executive(object):
 				print '     (can\'t connect to', agent, '!!!)',
 			print ''
 
-	def modificationProposal(self, modification):
+	def structuralChange(self, modification):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
@@ -408,10 +408,17 @@ class Executive(object):
 		self.mutex.release()
 		print "modificationProposal(self, modification)>>>>>>>>>>>", sup
 
-	def updateNode(self, nodeModification):
+	def symbolUpdated(self, nodeModification):
 		self.mutex.acquire()
 		internal = AGMModelConversion.fromIceToInternal_node(nodeModification)
 		self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
-		self.executiveTopic.modelUpdated(nodeModification)
+		self.executiveTopic.symbolUpdated(nodeModification)
 		self.mutex.release()
 
+	def edgeUpdated(self, edgeModification):
+		sys.exit(-1)
+		self.mutex.acquire()
+		#internal = AGMModelConversion.fromIceToInternal_edge(edgeModification)
+		#self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
+		#self.executiveTopic.symbolUpdated(nodeModification)
+		self.mutex.release()
