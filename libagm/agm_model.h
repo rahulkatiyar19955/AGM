@@ -323,7 +323,7 @@ public:
 	 */
 	bool renameEdgeByIdentifiers(int32_t a, int32_t b, const std::string &was, const std::string &will);
 
-
+	
 	/*! \brief Renames an edge in the model given the identifiers of two symbols, the previous and new label. Returns True on success.
 	 *
 	 * \throws AGMException Nodes a and b must exist
@@ -333,6 +333,15 @@ public:
 	{
 		return renameEdgeByIdentifiers(a->identifier, b->identifier, was, will);
 	}
+	
+	/*! \brief get edge by indentifiers of two symbols and label. 
+	 *
+	 * \throws AGMException Nodes a and b must exist
+	 *
+	 */
+
+	AGMModelEdge &getEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
+
 
 
 	/*! \brief Automatically updates the next available identifier as the smaller identifier that is bigger than any of the existing ones.

@@ -39,6 +39,9 @@ public:
 // 	static void fromInternalToIce(const AGMModelEdge::SPtr &edge, RoboCompAGMWorldModel::Edge &dst);
 	/// Converts an AGM edge model from an AGMModelEdge container (given by a regular pointer) to a RoboCompAGMWorldModel::Edge container.
 	static void fromInternalToIce(const AGMModelEdge *edge, RoboCompAGMWorldModel::Edge &dst);
+	/// Converts an AGM symbol model from a RoboCompAGMWorldModel::Edge container to an AGMModelEdge container.
+	static void fromIceToInternal(const RoboCompAGMWorldModel::Edge &edge, AGMModelEdge &dst);
+
 
 	/// Updates an AGM world model (an AGMModel object) using an updated node (given a RoboCompAGMWorldModel::Node instance).
 	static bool includeIceModificationInInternalModel(const RoboCompAGMWorldModel::Node &node, AGMModel::SPtr &world);

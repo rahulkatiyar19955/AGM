@@ -831,6 +831,33 @@ bool AGMModel::renameEdgeByIdentifiers(int32_t a, int32_t b, const std::string &
 	return renamed;
 }
 
+AGMModelEdge & AGMModel::getEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName)
+{
+	// Nodes must exist.
+	if (a < 0 or b < 0)
+	{
+		AGMMODELEXCEPTION("Trying to get an edge using invalid identifiers");;
+	}
+
+	for (uint32_t i=0; i<edges.size(); i++)
+	{
+		if (edges[i].symbolPair.first == a)
+		{
+			if (edges[i].symbolPair.second == b)
+			{
+				if (edges[i].getLabel() == edgeName)
+				{
+					return edges[i];
+				}
+			}
+		}
+	}
+	std::ostringstream s;
+	s << "Exception: " <<  a << " "<< b <<" "<<edgeName;
+	AGMMODELEXCEPTION(std::string("Exception: AGMModel::getEdgeByIdentifiers EDGE  (")+s.str()+std::string(")."));
+	
+}
+
 AGMModelSymbol::SPtr AGMModel::newSymbol(std::string typ, int32_t id)
 {
 	return newSymbol(id, typ);

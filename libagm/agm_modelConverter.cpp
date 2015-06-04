@@ -118,6 +118,15 @@ void AGMModelConverter::fromIceToInternal(const RoboCompAGMWorldModel::Node &nod
 	dst->identifier = node.nodeIdentifier;
 }
 
+void AGMModelConverter::fromIceToInternal(const RoboCompAGMWorldModel::Edge &edge, AGMModelEdge &dst)
+{
+	dst->linking = edge.edgeType;
+	dst->symbolPair.first = edge.a;
+	dst->symbolPair.second =edge.b;
+	dst->attributes = edge.attributes;
+	
+}
+
 
 bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMWorldModel::Node &node, AGMModel::SPtr &world)
 {

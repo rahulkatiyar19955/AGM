@@ -416,9 +416,19 @@ class Executive(object):
 		self.mutex.release()
 
 	def edgeUpdated(self, edgeModification):
-		sys.exit(-1)
+		
 		self.mutex.acquire()
-		#internal = AGMModelConversion.fromIceToInternal_edge(edgeModification)
+		internal = AGMModelConversion.fromIceToInternal_edge(edgeModification)
 		#self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
-		#self.executiveTopic.symbolUpdated(nodeModification)
+		found = False
+		for i in xrange(len(self.currentModel.links)):
+			if str(self.currentModel.links[i].a) == str(edgeModification.a):
+				if str(self.currentModel.links[i].b) == str(edgeModification.b):
+					if str(self.currentModel.links[i].linkType) == str(edgeModification.edgeType):
+						self.currentModel.links[i].attributes = copy.deepcopy(edgeModification.attributes)
+						self.executiveTopic.edgeUpdated(edgeModification)
+						found = True
 		self.mutex.release()
+		if not found:
+			print 'couldn\'t update edge because no match was found'
+			sys.exit(-1)
