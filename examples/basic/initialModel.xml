@@ -13,22 +13,22 @@
 
 	<link src="1" dst="2" label="link"/>
 	<link src="1" dst="2" label="RT">
-		<attributeLink key="rx" value="1.0" />
-		<attributeLink key="ry" value="1.57" />
-		<attributeLink key="rz" value="1.0" />
-		<attributeLink key="tx" value="400" />
-		<attributeLink key="ty" value="500" />
-		<attributeLink key="tz" value="600" />
+		<linkAttribute key="rx" value="1.0" />
+		<linkAttribute key="ry" value="1.57" />
+		<linkAttribute key="rz" value="1.0" />
+		<linkAttribute key="tx" value="400" />
+		<linkAttribute key="ty" value="500" />
+		<linkAttribute key="tz" value="600" />
 	</link>
 	<!--<link src="1" dst="6" label="link" />-->
 	<link src="1" dst="3" label="link" />
 	<link src="1" dst="4" label="linkLink" >
-		<attributeLink key="rx" value="1.0" />
-		<attributeLink key="ry" value="1.57" />
-		<attributeLink key="rz" value="1.0" />
-		<attributeLink key="tx" value="100" />
-		<attributeLink key="ty" value="200" />
-		<attributeLink key="tz" value="300" />
+		<linkAttribute key="rx" value="1.0" />
+		<linkAttribute key="ry" value="1.57" />
+		<linkAttribute key="rz" value="1.0" />
+		<linkAttribute key="tx" value="100" />
+		<linkAttribute key="ty" value="200" />
+		<linkAttribute key="tz" value="300" />
 	</link>
 	<!--<link src="4" dst="5" label="link" />-->
 </AGMModel>
@@ -52,22 +52,22 @@
 	<!--¿como se meten más etiquetas para el mismo arco en el .xml?-->
 <!--	<link src="1" dst="2" label="link"/>
 	<link src="1" dst="2" label="RT">
-		<attributeLink key="rx" value="1.0" />
-		<attributeLink key="ry" value="1.57" />
-		<attributeLink key="rz" value="1.0" />
-		<attributeLink key="tx" value="400" />
-		<attributeLink key="ty" value="500" />
-		<attributeLink key="tz" value="600" />
+		<linkAttribute key="rx" value="1.0" />
+		<linkAttribute key="ry" value="1.57" />
+		<linkAttribute key="rz" value="1.0" />
+		<linkAttribute key="tx" value="400" />
+		<linkAttribute key="ty" value="500" />
+		<linkAttribute key="tz" value="600" />
 	</link>-->
 	<!--<link src="1" dst="6" label="link" />-->
 <!--	<link src="2" dst="3" label="link" />
 	<link src="3" dst="4" label="link2" >
-		<attributeLink key="rx" value="1.0" />
-		<attributeLink key="ry" value="1.57" />
-		<attributeLink key="rz" value="1.0" />
-		<attributeLink key="tx" value="100" />
-		<attributeLink key="ty" value="200" />
-		<attributeLink key="tz" value="300" />
+		<linkAttribute key="rx" value="1.0" />
+		<linkAttribute key="ry" value="1.57" />
+		<linkAttribute key="rz" value="1.0" />
+		<linkAttribute key="tx" value="100" />
+		<linkAttribute key="ty" value="200" />
+		<linkAttribute key="tz" value="300" />
 	</link>-->
 	<!--<link src="4" dst="5" label="link" />-->
 <!--</AGMModel>-->

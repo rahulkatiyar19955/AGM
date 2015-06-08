@@ -83,6 +83,9 @@ def fromIceToInternal_model(src, ignoreInvalidEdges=False):
 def fromIceToInternal_node(node):
 	return AGMSymbol(str(node.nodeIdentifier), node.nodeType, [0,0], node.attributes)
 
+def fromIceToInternal_edge(edge):
+	return AGMLink(str(edge.a),str(edge.b),str(edge.edgeType), edge.attributes)
+
 
 #bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMWorldModel::Node &node, AGMModel::SPtr &world)
 #{

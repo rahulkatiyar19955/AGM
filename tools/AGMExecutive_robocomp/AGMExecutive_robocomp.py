@@ -90,10 +90,12 @@ class AGMCommonBehaviorI (RoboCompAGMCommonBehavior.AGMCommonBehavior):
 class AGMAgentTopicI (RoboCompAGMAgent.AGMAgentTopic):
 	def __init__(self, _handler):
 		self.handler = _handler
-	def modificationProposal(self, modification, current=None):
-		self.handler.modificationProposal(modification)
-	def update(self, nodeModification, current=None):
-		self.handler.updateNode(nodeModification)
+	def structuralChange(self, modification, current=None):
+		self.handler.structuralChange(modification)
+	def symbolUpdated(self, nodeModification, current=None):
+		self.handler.symbolUpdated(nodeModification)
+	def edgeUpdated(self, edgeModification, current=None):
+		self.handler.edgeUpdated(edgeModification)
 
 from AGMExecutive_core import Executive
 

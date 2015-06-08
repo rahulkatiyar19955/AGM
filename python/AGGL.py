@@ -389,7 +389,7 @@ class AGMGraph(object):
 		for l in self.links:
 			f.write('\t<link src="'+str(l.a)+'" dst="'+str(l.b)+'" label="'+str(l.linkType)+'" >\n')
 			for attr in l.attributes.keys():
-				f.write('\t\t<attributeLink key="'+attr+'" value="'+l.attributes[attr]+'" />\n')
+				f.write('\t\t<linkAttribute key="'+attr+'" value="'+l.attributes[attr]+'" />\n')
 			f.write('\t</link>\n')
 		f.write('</AGMModel>\n\n')
 		f.close()

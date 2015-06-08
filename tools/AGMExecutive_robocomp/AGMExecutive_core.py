@@ -396,7 +396,7 @@ class Executive(object):
 				print '     (can\'t connect to', agent, '!!!)',
 			print ''
 
-	def modificationProposal(self, modification):
+	def structuralChange(self, modification):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
@@ -441,6 +441,7 @@ class Executive(object):
 		self.mutex.release()
 		print "modificationProposal(self, modification)>>>>>>>>>>>", sup
 
+<<<<<<< HEAD
 	def updateNode(self, nodeModification):
 		print 'ma4'
 		self.mutex.acquire( )
@@ -452,5 +453,29 @@ class Executive(object):
 		except:
 			print 'There was some problem with update node'
 			sys.exit(1)
+=======
+	def symbolUpdated(self, nodeModification):
+		self.mutex.acquire()
+		internal = AGMModelConversion.fromIceToInternal_node(nodeModification)
+		self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
+		self.executiveTopic.symbolUpdated(nodeModification)
+>>>>>>> a2883575794886638fa58349c7cc869908ca3b83
 		self.mutex.release()
 
+	def edgeUpdated(self, edgeModification):
+		
+		self.mutex.acquire()
+		internal = AGMModelConversion.fromIceToInternal_edge(edgeModification)
+		#self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
+		found = False
+		for i in xrange(len(self.currentModel.links)):
+			if str(self.currentModel.links[i].a) == str(edgeModification.a):
+				if str(self.currentModel.links[i].b) == str(edgeModification.b):
+					if str(self.currentModel.links[i].linkType) == str(edgeModification.edgeType):
+						self.currentModel.links[i].attributes = copy.deepcopy(edgeModification.attributes)
+						self.executiveTopic.edgeUpdated(edgeModification)
+						found = True
+		self.mutex.release()
+		if not found:
+			print 'couldn\'t update edge because no match was found'
+			sys.exit(-1)
