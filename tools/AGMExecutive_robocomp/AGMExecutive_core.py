@@ -448,7 +448,7 @@ class Executive(object):
 		try:
 			internal = AGMModelConversion.fromIceToInternal_node(nodeModification)
 			self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
-			self.executiveTopic.modelUpdated(nodeModification)
+			self.executiveTopic.symbolUpdated(nodeModification)
 		except:
 			print 'There was some problem with update node'
 			sys.exit(1)
