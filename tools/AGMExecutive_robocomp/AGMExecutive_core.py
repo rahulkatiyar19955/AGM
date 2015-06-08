@@ -441,25 +441,16 @@ class Executive(object):
 		self.mutex.release()
 		print "modificationProposal(self, modification)>>>>>>>>>>>", sup
 
-<<<<<<< HEAD
-	def updateNode(self, nodeModification):
-		print 'ma4'
+	def symbolUpdated(self, nodeModification):
 		self.mutex.acquire( )
-		print 'mb4'
 		try:
 			internal = AGMModelConversion.fromIceToInternal_node(nodeModification)
 			self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
 			self.executiveTopic.symbolUpdated(nodeModification)
 		except:
 			print 'There was some problem with update node'
+			self.mutex.release()
 			sys.exit(1)
-=======
-	def symbolUpdated(self, nodeModification):
-		self.mutex.acquire()
-		internal = AGMModelConversion.fromIceToInternal_node(nodeModification)
-		self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
-		self.executiveTopic.symbolUpdated(nodeModification)
->>>>>>> a2883575794886638fa58349c7cc869908ca3b83
 		self.mutex.release()
 
 	def edgeUpdated(self, edgeModification):
