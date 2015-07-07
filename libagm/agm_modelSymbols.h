@@ -79,7 +79,7 @@ private:
 	void init(AGMModel *model, int32_t identifier, std::string typ, std::map<std::string, std::string> atr);
 public:
 	typedef boost::shared_ptr<AGMModelSymbol> SPtr;
-	std::string toString() const;
+	std::string toString(bool verbose = false) const;
 	std::string typeString() const;
 	std::string symboltype() const { return symbolType; }
 

@@ -111,10 +111,20 @@ bool AGMModelSymbol::operator==(const AGMModelSymbol &p) const
 	return false;
 }
 
-std::string AGMModelSymbol::toString() const
+std::string AGMModelSymbol::toString(bool verbose) const
 {
 	std::ostringstream stringStream;
 	stringStream << symbolType << "_" << identifier;
+	if (verbose)
+	{		
+		std::map<std::string, std::string>::const_iterator itr = this->attributes.begin();
+		for(; itr!=this->attributes.end(); ++itr)
+		{
+			//printf("\t<%s> --> <%s>\n", itr->first.c_str(), itr->second.c_str());
+			stringStream <<"\n\t"<<itr->first<<" "<< itr->second;
+		}
+	}
+			
 	return stringStream.str();
 }
 
