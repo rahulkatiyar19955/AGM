@@ -66,11 +66,20 @@ class AGMLink(object):
 
 		if attrs==None:
 			self.attributes = {}
+			if linkType == 'RT':
+				self.attributes['tx'] = '0'
+				self.attributes['ty'] = '0'
+				self.attributes['tz'] = '0'
+				self.attributes['rx'] = '0'
+				self.attributes['ry'] = '0'
+				self.attributes['rz'] = '0'
 		elif type(attrs)==type({}):
 			self.attributes = attrs
 		else:
 			print 'Wrong value for AGMLink() [attrs is not a dictionary]', type(attrs)
 			sys.exit(-1358)
+		
+			
 		self.color = 'white'
 		self.enabled = enabled
 	## Converts an AGMLink to a string
