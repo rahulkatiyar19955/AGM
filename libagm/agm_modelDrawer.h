@@ -40,6 +40,7 @@ public:
 		drawer->setZoomMultiplier(0.91);
 		tableWidget = tableWidget_;
 		modified = false;
+		showInner = false;
 		connect(drawer, SIGNAL(newCoor(QPointF)), this, SLOT(clickedNode(QPointF)));
 	}
 
@@ -55,14 +56,25 @@ public:
 		drawer->update();
 		mutex.unlock();
 	}
+	
+	void setShowInnerModel(bool s=false)
+	{
+		showInner=s;
+		modified=true;
+		//std::cout<<"\n\nsetShowInnerModel "<<showInner<<"\n\n";
+		//updateStructure();
+	}
 
 private:
 	/// Inspects the current model to detect significant changes.
 	void updateStructure()
 	{
 		// Push back new nodes
+		
 		for (uint32_t e1=0; e1<model->symbols.size(); e1++)
-		{
+		{	
+			
+				
 			bool found = false;
 			for (uint32_t e2=0; e2<nodes.size(); e2++)
 			{
@@ -77,7 +89,7 @@ private:
 				GraphicalNodeInfo node;
 				node.name = model->symbols[e1]->toString();
 				node.type = model->symbols[e1]->symbolType;
-				node.identifier = model->symbols[e1]->identifier;
+				node.identifier = model->symbols[e1]->identifier;				
 				for (int d=0; d<2; d++)
 				{
 					node.pos[d] = (100.*rand())/RAND_MAX - 50.;
@@ -86,6 +98,9 @@ private:
 				node.labelsPositions.clear();
 				nodes.push_back(node);
 			}
+			
+			
+				
 		}
 		// Remove deleted nodes
 		for (uint32_t e1=0; e1<nodes.size();)
@@ -114,7 +129,10 @@ private:
 		}
 		// Push back edges again
 		for (uint32_t e=0; e<model->edges.size(); e++)
-		{
+		{	
+			if (model->edges[e].linking=="RT" && showInner==false)
+				continue;
+
 			int f = model->getIndexByIdentifier(model->edges[e].symbolPair.first);
 			int s = model->getIndexByIdentifier(model->edges[e].symbolPair.second);
 			if (s<0 or f<0)
@@ -145,6 +163,24 @@ private:
 			{
 				printf("We had a link whose nodes where not found?!? (%s --> %s)\n", first.c_str(), second.c_str());
 				exit(-1);
+			}
+		}
+		
+		// Remove nodes with only a nodes
+		//borra los nodos que solo tienen enlaces RT (deben estar solos)
+		if (showInner==false)
+		{
+			//std::cout << "\n\n ******************************** \n";			
+			for (uint32_t e1=0; e1<nodes.size();)
+			{
+				//nodo solo
+				if (nodes.at(e1).edges.empty())
+				{
+					//std::cout << "\t must be erase, e1: "<< e1<<" "<< nodes[e1].name<<"labels: "<<nodes[e1].edgesNames.size()<<" \n";
+					nodes.erase(nodes.begin() + e1);
+				}
+				else
+					e1++;
 			}
 		}
 		modified = true;
@@ -244,6 +280,7 @@ private:
 		// Draw links
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
+			
 			if (modified)
 			{
 				/*printf("IDENTIFIER %s  index:%d (LINKS:%d,%d)\n", nodes[n].name.c_str(), n, (int)nodes[n].edgesOriented.size(), (int)nodes[n].edgesNames.size());*/
@@ -270,7 +307,7 @@ private:
 						}
 					}
 				}
-
+				
 				QPointF p1 = QPointF(nodes[            n            ].pos[0]+wW2, wH2-nodes[            n            ].pos[1]);
 				QPointF p2 = QPointF(nodes[nodes[n].edgesOriented[e]].pos[0]+wW2, wH2-nodes[nodes[n].edgesOriented[e]].pos[1]);
 				QPointF inc = (p2 - p1);
@@ -319,6 +356,7 @@ private:
 		// Draw nodes
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
+			
 			const QPointF p = QPointF(nodes[n].pos[0]+wW2, wH2-nodes[n].pos[1]);
 			drawer->drawEllipse(p, radius, radius, QColor(255, 0, 0), true);
 			drawer->drawText(p+QPointF(0,-7), QString::fromStdString(nodes[n].type), 10, QColor(255), true);
@@ -353,6 +391,7 @@ private:
 	AGMModel::SPtr model;
 	QTableWidget *tableWidget;
 	std::string interest;
+	bool showInner;
 	
 	
 
