@@ -1,6 +1,9 @@
 #pragma once
 
 #include <stdio.h>
+#include <iostream>
+#include <fstream>
+
 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
@@ -137,6 +140,8 @@ public:
 
 	/// Removes all edges related to an unexisting symbol. Dangling edges only exist if users remove symbols using the variable <em>symbols</em> directly, which is disencouraged. Generally it's a better idea to remove symbols using the method <em>removeSymbol</em>.
 	bool removeDanglingEdges();
+	
+	void save(std::string xmlFilePath);
 
 
 private:

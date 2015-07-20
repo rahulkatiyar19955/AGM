@@ -694,6 +694,78 @@ bool AGMModel::removeDanglingEdges()
 	}
 	return any;
 }
+// <AGMModel>
+// 
+// 	<!-- R O O M -->	
+// 	<symbol id="2" type="room" />
+// 	
+// 	<!-- R O B O T -->
+// 	<symbol id="1" type="robot">
+// 	</symbol>
+// 	
+// 	<link src="1" dst="2" label="in" />	
+// 
+// 	
+// 	<!-- non-Explored table -->
+// 	<symbol id="5" type="object">
+// 		<attribute key="tag" value="0" />
+// 		<attribute key="polygon" value="(-842,1854);(775,1854);(775,751);(-842,751)" />
+// 	</symbol>
+// 	<link src="1" dst="5" label="know" />
+// 	<link src="5" dst="2" label="in" />
+// 
+// </AGMModel>
+
+
+void AGMModel::save(std::string xmlFilePath)
+{
+	std::ofstream myfile;
+	myfile.open (xmlFilePath);
+	myfile <<  "<AGMModel>\n\n";
+  
+	for (uint32_t i=0; i<symbols.size(); ++i)
+	{
+		
+		myfile <<"<symbol id=\""<<symbols[i]->identifier<<"\" type=\""<<symbols[i]->symbolType<<"\"";//>\n";
+		if (symbols[i]->attributes.size()>0)
+		{
+			myfile <<">\n";
+			std::map<std::string, std::string>::const_iterator itr = symbols[i]->attributes.begin();
+			for(; itr!=symbols[i]->attributes.end(); ++itr)
+			{
+				myfile <<"\t<attribute key=\"" << itr->first <<"\" value=\""<<itr->second<<"\" />\n";			
+			}
+		
+			myfile <<"</symbol>\n";
+		}			
+		else
+			myfile <<"/>\n";
+			
+	}
+	
+	myfile <<"\n\n"; 
+	for (uint32_t i=0; i<edges.size(); ++i)
+	{
+		 
+		myfile <<"<link src=\""<<edges[i].symbolPair.first<<"\" dst=\""<<edges[i].symbolPair.second<<"\" label=\""<<edges[i].linking<<"\"";//> \n";
+		if (edges[i]->attributes.size()>0)
+		{
+			myfile <<">\n";
+			std::map<std::string, std::string>::const_iterator itr = edges[i].attributes.begin();
+			for(; itr!=edges[i].attributes.end(); ++itr)
+			{
+				myfile <<"\t<linkAttribute key=\"" << itr->first <<"\" value=\""<<itr->second<<"\" />\n";			
+			}
+			myfile <<"</link>\n";
+		}
+		else
+			myfile <<"/>\n";
+		
+			
+	}
+	myfile <<  "\n</AGMModel>\n";
+	myfile.close();
+}
 
 
 int32_t AGMModel::replaceIdentifierInEdges(int32_t a, int32_t b)
