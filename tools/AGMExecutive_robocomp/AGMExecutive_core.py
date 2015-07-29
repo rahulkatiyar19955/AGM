@@ -145,7 +145,9 @@ class Executive(object):
 			else:
 				ev.backModel = self.backModelICE
 			ev.newModel = AGMModelConversion.fromInternalToIce(self.currentModel)
+			print 'a'
 			self.executiveTopic.structuralChange(ev)
+			print 'b'
 			self.backModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 			print 'broadcastinnn>>>'
 		except:
