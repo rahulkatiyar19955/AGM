@@ -1058,3 +1058,19 @@ AGMModelSymbol::SPtr AGMModel::iterator::operator->()
 }
 
 
+std::map<std::string, AGMModelSymbol::SPtr> AGMModel::getSymbolsMap(::RoboCompAGMCommonBehavior::ParameterMap params)
+{
+	std::map<std::string, AGMModelSymbol::SPtr> ret;
+	for (auto v : params)
+	{
+		int r = str2int(params[v.first].value);
+		if (r>0)
+		{
+			ret[v.first] = getSymbolByIdentifier(r);
+		}
+	}
+	return ret;
+}
+
+
+

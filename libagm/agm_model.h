@@ -213,16 +213,8 @@ public:
 		ret.insert(recurs.begin(), recurs.end());
 		return ret;
 	}
-	template<typename T, typename... Args>
-	std::map<std::string, AGMModelSymbol::SPtr>getSymbolsMap(::RoboCompAGMCommonBehavior::ParameterMap params)
-	{
-		std::map<std::string, AGMModelSymbol::SPtr> ret;
-		for (auto v : params)
-		{
-			ret[v.first] = getSymbolByIdentifier(str2int(params[v.first].value));
-		}
-		return ret;
-	}
+
+	std::map<std::string, AGMModelSymbol::SPtr>getSymbolsMap(::RoboCompAGMCommonBehavior::ParameterMap params);
 
 // 	worldModel->getSymbolsMap(params, "person", "objectr", "conth");
 #endif
