@@ -1058,6 +1058,9 @@ AGMModelSymbol::SPtr AGMModel::iterator::operator->()
 }
 
 
+
+#if ROBOCOMP_SUPPORT == 1
+
 std::map<std::string, AGMModelSymbol::SPtr> AGMModel::getSymbolsMap(::RoboCompAGMCommonBehavior::ParameterMap params)
 {
 	std::map<std::string, AGMModelSymbol::SPtr> ret;
@@ -1071,6 +1074,8 @@ std::map<std::string, AGMModelSymbol::SPtr> AGMModel::getSymbolsMap(::RoboCompAG
 	}
 	return ret;
 }
+
+#endif
 
 
 
