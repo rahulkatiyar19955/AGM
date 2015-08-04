@@ -40,14 +40,16 @@ public:
 		drawer->setZoomMultiplier(0.91);
 		tableWidget = tableWidget_;
 		modified = false;
-		showInner = false;
+		showInner = true;
 		connect(drawer, SIGNAL(newCoor(QPointF)), this, SLOT(clickedNode(QPointF)));
 	}
 
 	/// This method updates the widget with the current model ('w' vairable).
 	void update(const AGMModel::SPtr &w)
 	{
+		
 		drawer->autoResize(true);
+		
 		mutex.lock();
 		model = AGMModel::SPtr(new AGMModel(w));
 		updateStructure();
@@ -60,7 +62,7 @@ public:
 	void setShowInnerModel(bool s=false)
 	{
 		showInner=s;
-		modified=true;
+		//modified=true;
 		//std::cout<<"\n\nsetShowInnerModel "<<showInner<<"\n\n";
 		//updateStructure();
 	}
@@ -276,7 +278,7 @@ private:
 		QPointF c = drawer->getWindow().center();
 		int wW2 = c.x();
 		int wH2 = c.y();
-
+		
 		// Draw links
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
@@ -314,7 +316,7 @@ private:
 				inc /= sqrt(inc.x()*inc.x() + inc.y()*inc.y());
 				p1 = p1 + radius*inc;
 				p2 = p2 - radius*inc;
-
+				
 				// Link itself
 				drawer->drawLine(QLineF(p1, p2), QColor(0, 0, 0));
 				// Arrow
@@ -324,6 +326,7 @@ private:
 					QPointF pr = QPointF(p2.x()-(radius*0.5)*cos(angle+a), p2.y()+(radius*0.5)*sin(angle+a));
 					drawer->drawLine(QLineF(p2,  pr), QColor(0, 0, 0));
 				}
+				
 				// Text
 				int32_t linkHeight = 16;
 				int32_t linkGroupBase = (-linkGroupCount+1)*linkHeight/2;
@@ -333,11 +336,11 @@ private:
 				//Label
 				//destiny e in edgesOriented
 				int32_t dst=nodes[n].edgesOriented[e];
-				std::string nameSymbolDst=nodes[dst].name;
+				std::string nameSymbolDst=nodes[dst].name;				
 				std::string stringStream;
 				stringStream =nodes[n].edgesNames[e] +" "+nodes[n].name+" "+nameSymbolDst;
-				QString labelKey = QString::fromStdString( stringStream );
 				
+				QString labelKey = QString::fromStdString( stringStream );
 				if (nodes[n].labelsPositions.contains(labelKey) == true )
 				{   
 					qDebug()<<"edge repeated"<<labelKey;
@@ -349,14 +352,12 @@ private:
 					nodes[n].labelsPositions[labelKey]=labelTextPosition;
 					drawer->drawText(labelTextPosition, QString::fromStdString(nodes[n].edgesNames[e]), 10, QColor(255), true, QColor(127,127,127,127));
 				}
-				
 // 				if (modified) printf("  link[%s] id(%s-->%s) idx(%d-->%d)\n", nodes[n].edgesNames[e].c_str(), nodes[n].name.c_str() , nodes[nodes[n].edgesOriented[e]].name.c_str(), n, nodes[n].edgesOriented[e]);
 			}
 		}
 		// Draw nodes
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
-			
 			const QPointF p = QPointF(nodes[n].pos[0]+wW2, wH2-nodes[n].pos[1]);
 			drawer->drawEllipse(p, radius, radius, QColor(255, 0, 0), true);
 			drawer->drawText(p+QPointF(0,-7), QString::fromStdString(nodes[n].type), 10, QColor(255), true);
