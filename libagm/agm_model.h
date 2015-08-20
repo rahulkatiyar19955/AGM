@@ -252,7 +252,10 @@ public:
 	 * \deprecated This method is kept only to avoid breaking old code but shouldn't be used in new code. It will soon be removed from the API. Please, don't use this method anymore.
 	 *
 	 */
-	int32_t getLinkedID(int32_t id, std::string linkname, int32_t i=0) const;
+	int32_t getLinkedID(    int32_t id, std::string linkname, int32_t i=0) const;
+	
+	
+	AGMModelSymbol::SPtr getParentByLink(int32_t id, std::string linkname, int32_t i=0) const;
 
 
 	/// Returns the index of the symbol with identifier '<em>targetId</em>, <em>-1</em> if the symbol is not found.

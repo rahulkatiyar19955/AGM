@@ -241,7 +241,6 @@ private:
 			nodes[n].vel[0] = (nodes[n].vel[0] + (forceX*time))*FRICTION;
 			nodes[n].vel[1] = (nodes[n].vel[1] + (forceY*time))*FRICTION;
 			float v = sqrt((nodes[n].vel[0]*nodes[n].vel[0]) + (nodes[n].vel[1]*nodes[n].vel[1]));
-			printf("v:%f\n", v);
 			float MAX = 10;
 			if (v > MAX)
 			{
