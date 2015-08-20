@@ -591,7 +591,7 @@ int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 				break;
 			}
 		}
-		if (idx>=symbols.size())
+		if (idx>=edges.size())
 		{
 			printf("Exception: %d, %s, %d\n", id, linkname.c_str(), i);
 			return -1;
@@ -602,6 +602,28 @@ int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 		return edges[ret].symbolPair.second;
 // 	printf("%d\n", __LINE__);
 	return -1;
+}
+
+AGMModelSymbol::SPtr AGMModel::getParentByLink(int32_t id, std::string linkname, int32_t i) const
+{
+	int64_t ret = -1;
+	uint32_t idx = 0;
+	for (int32_t time=0; time<=i; ++time)
+	{
+		for ( ; idx<edges.size(); ++idx)
+		{
+			if (edges[idx].symbolPair.second == id and linkname == edges[idx].linking)
+			{
+				if (time == i)
+					return getSymbolByIdentifier(edges[idx].symbolPair.first);
+			}
+		}
+		if (idx>=edges.size())
+		{
+			AGMMODELEXCEPTION("Trying to get the identifier of a node linked to a given one");
+		}
+	}
+	AGMMODELEXCEPTION("Trying to get the identifier of a node linked to a given one");
 }
 
 

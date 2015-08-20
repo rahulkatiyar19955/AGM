@@ -17,8 +17,8 @@
 
 
 #define SPRING_LENGTH 50.
-#define HOOKES_CONSTANT 0.14
-#define FRICTION 0.97
+#define HOOKES_CONSTANT 0.15
+#define FRICTION 0.9999
 #define FIELD_FORCE_MULTIPLIER 690000.
 
 
@@ -237,8 +237,16 @@ private:
 					forceY -= force * sin(angle);
 				}
 			}
+
 			nodes[n].vel[0] = (nodes[n].vel[0] + (forceX*time))*FRICTION;
 			nodes[n].vel[1] = (nodes[n].vel[1] + (forceY*time))*FRICTION;
+			float v = sqrt((nodes[n].vel[0]*nodes[n].vel[0]) + (nodes[n].vel[1]*nodes[n].vel[1]));
+			float MAX = 10;
+			if (v > MAX)
+			{
+				nodes[n].vel[0] = nodes[n].vel[0] / v * MAX;
+				nodes[n].vel[1] = nodes[n].vel[1] / v * MAX;
+			}
 		}
 		// Integrate velocities, storing the result in nodes[n].pos
 		// Also, implement friction by multipling velocities by FRICTION
@@ -247,7 +255,6 @@ private:
 			for (int d=0; d<2; d++)
 			{
 				nodes[n].pos[d] += nodes[n].vel[d];
-				nodes[n].vel[d] *= FRICTION;
 			}
 		}
 

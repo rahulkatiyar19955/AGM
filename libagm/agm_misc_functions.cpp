@@ -66,10 +66,8 @@ void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &ag
 	AGMModelConverter::fromInternalToIce(oldModel, e.backModel);
 	newModel->removeDanglingEdges();
 	AGMModelConverter::fromInternalToIce(newModel, e.newModel);
-	//printf("<<%d\n", newModel->numberOfSymbols());
 	//AGMModelPrinter::printWorld(newModel);
 	agmagenttopic->structuralChange(e);
-	//printf(">>\n");
 }
 
 void AGMMisc::publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMAgentTopicPrx &agmagenttopic)
@@ -78,6 +76,7 @@ void AGMMisc::publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMAgentTopicPrx &
 	AGMModelConverter::fromInternalToIce(symbol, iceSymbol);
 	agmagenttopic->symbolUpdated(iceSymbol);
 }
+
 void AGMMisc::publishEdgeUpdate(AGMModelEdge &edge, AGMAgentTopicPrx &agmagenttopic)
 {
 	RoboCompAGMWorldModel::Edge iceEdge;
