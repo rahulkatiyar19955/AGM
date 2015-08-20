@@ -563,7 +563,7 @@ public slots:
 			
 			interest = clickedLabel.toStdString();
 		}
-		print();
+		
 	}
 };
 
