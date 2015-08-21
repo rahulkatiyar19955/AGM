@@ -241,7 +241,7 @@ private:
 			nodes[n].vel[0] = (nodes[n].vel[0] + (forceX*time))*FRICTION;
 			nodes[n].vel[1] = (nodes[n].vel[1] + (forceY*time))*FRICTION;
 			float v = sqrt((nodes[n].vel[0]*nodes[n].vel[0]) + (nodes[n].vel[1]*nodes[n].vel[1]));
-			float MAX = 10;
+			float MAX = 25;
 			if (v > MAX)
 			{
 				nodes[n].vel[0] = nodes[n].vel[0] / v * MAX;
