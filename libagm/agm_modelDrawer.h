@@ -5,6 +5,7 @@
 #include <QTableWidget>
 #include <QHash>
 #include <stdlib.h>
+#include <string>
 
 #include <agm_model.h>
 #include <agm_modelEdge.h>
@@ -41,6 +42,8 @@ public:
 		tableWidget = tableWidget_;
 		modified = false;
 		showInner = true;
+		showRobot = true;
+		visited.clear();
 		connect(drawer, SIGNAL(newCoor(QPointF)), this, SLOT(clickedNode(QPointF)));
 	}
 
@@ -53,18 +56,71 @@ public:
 		mutex.lock();
 		model = AGMModel::SPtr(new AGMModel(w));
 		updateStructure();
+// 		std::cout<<"rerecalculatePositions()\n";
 		recalculatePositions();
+// 		std::cout<<"draw\n";
 		draw();
+// 		std::cout<<"draw->updater\n";
 		drawer->update();
+// 		std::cout<<"en update\n";
 		mutex.unlock();
 	}
 	
 	void setShowInnerModel(bool s=false)
 	{
-		showInner=s;
-		//modified=true;
-		//std::cout<<"\n\nsetShowInnerModel "<<showInner<<"\n\n";
-		//updateStructure();
+		showInner=s;		
+	}
+	
+	void setShowRobot( bool s=false)
+	{
+				
+		visited.clear();
+		bool loop=false;
+		int symbolID=1;
+		listOfSymbolThroughLinkType (symbolID,visited,"RT",loop);
+		if (loop)
+		{
+			std::cout<<"mission setShowRobot loop starting from robot symbol 1\n";		   
+			exit(-1);
+		}
+		std::cout<<"visited.size() "<<visited.size()<<"\n";
+		for (int i=0; i<visited.size();i++)
+		{
+			std::cout<<" "<<model->getSymbolByIdentifier(visited.at(i))->toString();
+		}
+		
+		showRobot=s;
+		std::cout<<"\n setShowRobot "<<showRobot<<"\n\n";
+		std::cout<<" fin setShowRobot \n\n";
+		
+		
+	}
+	void listOfSymbolThroughLinkType( int& symbolID, QList<int> &visited, std::string linkType, bool &loop)
+	{
+		if (visited.contains(symbolID) )
+		{
+			loop=true;
+			visited.append(symbolID);
+			return;
+		}
+		else
+			visited.append(symbolID);
+		try
+		{
+			const AGMModelSymbol::SPtr &symbol = model->getSymbol(symbolID);
+			for (AGMModelSymbol::iterator edge_itr=symbol->edgesBegin(model); edge_itr!=symbol->edgesEnd(model); edge_itr++)
+			{
+				std::cout<<(*edge_itr).toString(model)<<"\n";
+				//comprobamos el id del simbolo para evitar los arcos que le llegan y seguir solo los que salen del nodo
+				if ((*edge_itr)->getLabel() == linkType && (*edge_itr)->getSymbolPair().first==symbolID )
+				{
+					int second = (*edge_itr)->getSymbolPair().second;
+					std::cout<<symbolID<<" -- "<<linkType<<" --> "<<second;				
+					listOfSymbolThroughLinkType(second,visited, linkType,loop);
+				}
+			}
+		}
+		catch(...){}
 	}
 
 private:
@@ -134,6 +190,16 @@ private:
 		{	
 			if (model->edges[e].linking=="RT" && showInner==false)
 				continue;
+			if (model->edges[e].linking=="RT" && showRobot==false && showInner==true)
+			{
+				int first =model->edges[e].symbolPair.first;
+				int second =model->edges[e].symbolPair.second;
+				if ( visited.contains(first) and visited.contains(second) )
+				{
+					
+					continue;			
+				}
+			}
 
 			int f = model->getIndexByIdentifier(model->edges[e].symbolPair.first);
 			int s = model->getIndexByIdentifier(model->edges[e].symbolPair.second);
@@ -184,6 +250,29 @@ private:
 				else
 					e1++;
 			}
+		}
+		//se muestrra innermodel y no se quiere mostrar el robot
+		//borro los nodos del robot
+		else if (showRobot==false)
+		{
+			std::cout << "\n\n *************  statr bucle showRobot ******************* \n";			
+			for (uint32_t e1=0; e1<nodes.size();)
+			{
+				
+					std::cout<<"indice e1 "<<e1<<" nodes[e1].identifier "<<std::cout<<nodes[e1].identifier;
+					std::cout<<" visited.contains(nodes.at(e1).identifier) "<<visited.contains(nodes[e1].identifier)<<"\n";
+				
+					//nodo solo del robot
+					if (nodes.at(e1).edges.empty() and visited.contains(nodes[e1].identifier))
+					{					
+						std::cout << "\t must be erase, e1: "<< e1<<" "<< nodes[e1].name<<" labels: "<<nodes[e1].edgesNames.size()<<" \n";
+						nodes.erase(nodes.begin() + e1);
+					}
+					else
+						e1++;
+				
+			}
+			std::cout << "\n\n ************* FIN bucle showRobot ******************* \n";			
 		}
 		modified = true;
 	}
@@ -400,6 +489,8 @@ private:
 	QTableWidget *tableWidget;
 	std::string interest;
 	bool showInner;
+	bool showRobot;
+	QList<int> visited;
 	
 	
 
