@@ -46,6 +46,10 @@ public:
 		visited.clear();
 		connect(drawer, SIGNAL(newCoor(QPointF)), this, SLOT(clickedNode(QPointF)));
 	}
+	void setInterest(std::string item)
+	{
+		interest = item;
+	}
 
 	/// This method updates the widget with the current model ('w' vairable).
 	void update(const AGMModel::SPtr &w)
@@ -498,7 +502,7 @@ private:
 		modified = false;
 		
 		if (tableWidget != NULL) drawTable();
-		qDebug()<<"\t\tEND DRAW";
+// 		qDebug()<<"\t\tEND DRAW";
 	}
 
 private:
