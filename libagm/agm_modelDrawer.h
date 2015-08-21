@@ -49,6 +49,7 @@ public:
 	void setInterest(std::string item)
 	{
 		interest = item;
+		drawTable();
 	}
 
 	/// This method updates the widget with the current model ('w' vairable).
