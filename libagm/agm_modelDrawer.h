@@ -73,25 +73,41 @@ public:
 	
 	void setShowRobot( bool s=false)
 	{
-				
+		if (s==true)
+		{
+			showRobot = s;
+			return;
+		}
+		
 		visited.clear();
 		bool loop=false;
 		int symbolID=1;
+		try
+		{
+			model->getSymbolByIdentifier(symbolID);
+		}
+		catch(AGMModelException e)
+		{
+			std::cout<<"robot, symbol id 1 not found "<<e.what()<<"\n";
+		}
 		listOfSymbolThroughLinkType (symbolID,visited,"RT",loop);
 		if (loop)
 		{
 			std::cout<<"mission setShowRobot loop starting from robot symbol 1\n";		   
 			exit(-1);
 		}
-		std::cout<<"visited.size() "<<visited.size()<<"\n";
-		for (int i=0; i<visited.size();i++)
-		{
-			std::cout<<" "<<model->getSymbolByIdentifier(visited.at(i))->toString();
-		}
-		
 		showRobot=s;
-		std::cout<<"\n setShowRobot "<<showRobot<<"\n\n";
-		std::cout<<" fin setShowRobot \n\n";
+		
+// 		std::cout<<"visited.size() "<<visited.size()<<"\n";
+// 		for (int i=0; i<visited.size();i++)
+// 		{
+// 			std::cout<<"id "<<visited.at(i)<<" symbol "<<model->getSymbolByIdentifier(visited.at(i))->toString();
+// 		}
+// 		
+// 		
+// 		std::cout<<"\n setShowRobot "<<showRobot<<"\n\n";
+// 		std::cout<<" fin setShowRobot \n\n";
+		
 		
 		
 	}
@@ -110,12 +126,12 @@ public:
 			const AGMModelSymbol::SPtr &symbol = model->getSymbol(symbolID);
 			for (AGMModelSymbol::iterator edge_itr=symbol->edgesBegin(model); edge_itr!=symbol->edgesEnd(model); edge_itr++)
 			{
-				std::cout<<(*edge_itr).toString(model)<<"\n";
+				//std::cout<<(*edge_itr).toString(model)<<"\n";
 				//comprobamos el id del simbolo para evitar los arcos que le llegan y seguir solo los que salen del nodo
 				if ((*edge_itr)->getLabel() == linkType && (*edge_itr)->getSymbolPair().first==symbolID )
 				{
 					int second = (*edge_itr)->getSymbolPair().second;
-					std::cout<<symbolID<<" -- "<<linkType<<" --> "<<second;				
+					//std::cout<<symbolID<<" -- "<<linkType<<" --> "<<second;				
 					listOfSymbolThroughLinkType(second,visited, linkType,loop);
 				}
 			}
@@ -139,6 +155,7 @@ private:
 				if (nodes[e2].name == model->symbols[e1]->toString())
 				{
 					found = true;
+					nodes[e2].show=true;
 					break;
 				}
 			}
@@ -148,6 +165,7 @@ private:
 				node.name = model->symbols[e1]->toString();
 				node.type = model->symbols[e1]->symbolType;
 				node.identifier = model->symbols[e1]->identifier;				
+				node.show=true;
 				for (int d=0; d<2; d++)
 				{
 					node.pos[d] = (100.*rand())/RAND_MAX - 50.;
@@ -195,11 +213,9 @@ private:
 				int first =model->edges[e].symbolPair.first;
 				int second =model->edges[e].symbolPair.second;
 				if ( visited.contains(first) and visited.contains(second) )
-				{
-					
-					continue;			
-				}
+					continue;
 			}
+			
 
 			int f = model->getIndexByIdentifier(model->edges[e].symbolPair.first);
 			int s = model->getIndexByIdentifier(model->edges[e].symbolPair.second);
@@ -239,40 +255,33 @@ private:
 		if (showInner==false)
 		{
 			//std::cout << "\n\n ******************************** \n";			
-			for (uint32_t e1=0; e1<nodes.size();)
+			for (uint32_t e1=0; e1<nodes.size(); e1++)
 			{
 				//nodo solo
 				if (nodes.at(e1).edges.empty())
 				{
-					//std::cout << "\t must be erase, e1: "<< e1<<" "<< nodes[e1].name<<"labels: "<<nodes[e1].edgesNames.size()<<" \n";
-					nodes.erase(nodes.begin() + e1);
+// 					std::cout << "\t SHOWWINNNER must be erase, e1: "<< e1<<" "<< nodes[e1].name<<" labels: "<<nodes[e1].edgesNames.size()<<" \n";
+					nodes[e1].show=false;
 				}
-				else
-					e1++;
 			}
 		}
 		//se muestrra innermodel y no se quiere mostrar el robot
 		//borro los nodos del robot
 		else if (showRobot==false)
 		{
-			std::cout << "\n\n *************  statr bucle showRobot ******************* \n";			
-			for (uint32_t e1=0; e1<nodes.size();)
+// 			std::cout << "\n\n *************  statr bucle showRobot "<<nodes.size()<<" *******************  \n";			
+			for (uint32_t e1=0; e1<nodes.size();e1++)
 			{
-				
-					std::cout<<"indice e1 "<<e1<<" nodes[e1].identifier "<<std::cout<<nodes[e1].identifier;
-					std::cout<<" visited.contains(nodes.at(e1).identifier) "<<visited.contains(nodes[e1].identifier)<<"\n";
 				
 					//nodo solo del robot
 					if (nodes.at(e1).edges.empty() and visited.contains(nodes[e1].identifier))
 					{					
-						std::cout << "\t must be erase, e1: "<< e1<<" "<< nodes[e1].name<<" labels: "<<nodes[e1].edgesNames.size()<<" \n";
-						nodes.erase(nodes.begin() + e1);
+// 						std::cout << "\t must be erase, e1: "<< e1<<" "<< nodes[e1].name<<" labels: "<<nodes[e1].edgesNames.size()<<" \n";
+						nodes[e1].show=false;
 					}
-					else
-						e1++;
-				
 			}
-			std::cout << "\n\n ************* FIN bucle showRobot ******************* \n";			
+// 			std::cout << "\n\n ************* FIN bucle showRobot "<<nodes.size()<<" ******************* \n";			
+			
 		}
 		modified = true;
 	}
@@ -288,6 +297,8 @@ private:
 		// Compute forces and integrate velocities, storing updated velocities in nodes[n].vel[0-1]
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
+			if (nodes[n].show==false)
+				continue;
 			int32_t i[2];
 			double forceX=0., forceY=0.;
 			for (uint32_t n2=0; n2<nodes.size(); n2++)
@@ -341,6 +352,8 @@ private:
 		// Also, implement friction by multipling velocities by FRICTION
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
+			if (nodes[n].show==false)
+				continue;
 			for (int d=0; d<2; d++)
 			{
 				nodes[n].pos[d] += nodes[n].vel[d];
@@ -353,13 +366,25 @@ private:
 			double totalY = 0;
 			for (uint32_t n=0; n<nodes.size(); n++)
 			{
+				if (nodes[n].show==false)
+					continue;
 				totalX += nodes[n].pos[0];
 				totalY += nodes[n].pos[1];
 			}
-			totalX /= nodes.size();
-			totalY /= nodes.size();
+			
+			double nodesSizeShow=0;
 			for (uint32_t n=0; n<nodes.size(); n++)
 			{
+				if (nodes[n].show==false)
+					nodesSizeShow++;
+			}
+			
+			totalX /= nodes.size()-nodesSizeShow;
+			totalY /= nodes.size()-nodesSizeShow;
+			for (uint32_t n=0; n<nodes.size(); n++)
+			{
+				if (nodes[n].show==false)
+					continue;
 				nodes[n].pos[0] -= totalX;
 				nodes[n].pos[1] -= totalY;
 			}
@@ -374,10 +399,13 @@ private:
 		QPointF c = drawer->getWindow().center();
 		int wW2 = c.x();
 		int wH2 = c.y();
-		
+// 		qDebug()<<"\t\tINIT DRAW";
 		// Draw links
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
+			
+			if (nodes[n].show==false)
+				continue;
 			
 			if (modified)
 			{
@@ -431,11 +459,16 @@ private:
 				
 				//Label
 				//destiny e in edgesOriented
+// 				std::cout<<"nodes[n].name "<<nodes[n].name<<"\n";
+// 				qDebug()<<"nodes[n].edgesOriented.size()"<<nodes[n].edgesOriented.size();
+// 				qDebug()<<"destiny e in edgesOriented "<<e;				
 				int32_t dst=nodes[n].edgesOriented[e];
+// 				qDebug()<<"dst"<<dst;
 				std::string nameSymbolDst=nodes[dst].name;				
+// 				std::cout<<"nameSymbolDst "<<nameSymbolDst<<"\n";
 				std::string stringStream;
 				stringStream =nodes[n].edgesNames[e] +" "+nodes[n].name+" "+nameSymbolDst;
-				
+// 				std::cout<<"stringStream "<<stringStream<<"\n";
 				QString labelKey = QString::fromStdString( stringStream );
 				if (nodes[n].labelsPositions.contains(labelKey) == true )
 				{   
@@ -448,20 +481,24 @@ private:
 					nodes[n].labelsPositions[labelKey]=labelTextPosition;
 					drawer->drawText(labelTextPosition, QString::fromStdString(nodes[n].edgesNames[e]), 10, QColor(255), true, QColor(127,127,127,127));
 				}
+// 				qDebug()<<"\t----";
 // 				if (modified) printf("  link[%s] id(%s-->%s) idx(%d-->%d)\n", nodes[n].edgesNames[e].c_str(), nodes[n].name.c_str() , nodes[nodes[n].edgesOriented[e]].name.c_str(), n, nodes[n].edgesOriented[e]);
 			}
 		}
 		// Draw nodes
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
+			if (nodes[n].show==false)
+				continue;
 			const QPointF p = QPointF(nodes[n].pos[0]+wW2, wH2-nodes[n].pos[1]);
 			drawer->drawEllipse(p, radius, radius, QColor(255, 0, 0), true);
 			drawer->drawText(p+QPointF(0,-7), QString::fromStdString(nodes[n].type), 10, QColor(255), true);
 			drawer->drawText(p+QPointF(0,+10), QString::number(nodes[n].identifier), 10, QColor(255), true);
 		}
 		modified = false;
-
+		
 		if (tableWidget != NULL) drawTable();
+		qDebug()<<"\t\tEND DRAW";
 	}
 
 private:
@@ -471,6 +508,7 @@ private:
 		std::string name;
 		std::string type;
 		int32_t identifier;
+		bool show;
 		int32_t pos[2];
 		float vel[2];
 		std::vector<uint32_t> edges;
