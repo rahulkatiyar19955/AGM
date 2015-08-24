@@ -143,6 +143,70 @@ public:
 		}
 		catch(...){}
 	}
+		// Draws attribute table, nodes and edge.
+	void drawTable()
+	{
+		int32_t index2=-1;
+		std::map<std::string,std::string> attributes;
+		for (uint32_t i=0; i<model->edges.size(); ++i)
+		{
+// 			std::cout<<model->edges[i].toString(model)<<"\n";
+			if (model->edges[i].toString(model)==interest)
+			{
+				index2 = i;
+				attributes= model->edges[index2]->attributes;
+				break;
+			}
+		}
+		
+		
+		if (index2==-1)
+		{
+			for (uint32_t i=0; i<model->symbols.size(); ++i)
+			{
+				if (model->symbols[i]->toString() == interest)
+				{
+					index2 = i;
+					attributes= model->symbols[index2]->attributes;
+					break;
+				}
+			}
+		}
+		if (index2 != -1 )
+		{
+			 
+			tableWidget->setColumnCount(2);
+			tableWidget->setRowCount(attributes.size()+1);
+			QTableWidgetItem *ti;
+
+			ti = tableWidget->item(0, 0);
+			if (ti == NULL) { ti = new QTableWidgetItem(); tableWidget->setItem(0, 0, ti);}
+			ti->setText(QString("ID"));
+
+			ti = tableWidget->item(0, 1);
+			if (ti == NULL) { ti = new QTableWidgetItem(); tableWidget->setItem(0, 1, ti);}
+// 			ti->setText(QString::fromStdString(model->symbols[index2]->toString()));
+			ti->setText(QString::fromStdString(interest));
+
+			int row = 1;
+			for (std::map<std::string,std::string>::iterator iter = attributes.begin(); iter != attributes.end(); iter++, row++)
+			{
+				ti = tableWidget->item(row, 0);
+				if (ti == NULL) { ti = new QTableWidgetItem(); tableWidget->setItem(row, 0, ti);}
+				ti->setText(QString::fromStdString( iter->first ));
+
+				ti = tableWidget->item(row, 1);
+				if (ti == NULL) { ti = new QTableWidgetItem(); tableWidget->setItem(row, 1, ti);}
+				ti->setText(QString::fromStdString( iter->second ));
+			}
+		}
+				
+		else
+		{
+			if (tableWidget != NULL) tableWidget->clear();
+		}
+		
+	}
 
 private:
 	/// Inspects the current model to detect significant changes.
@@ -537,70 +601,7 @@ private:
 	
 	
 
-	// Draws attribute table, nodes and edge.
-	void drawTable()
-	{
-		int32_t index2=-1;
-		std::map<std::string,std::string> attributes;
-		for (uint32_t i=0; i<model->edges.size(); ++i)
-		{
-// 			std::cout<<model->edges[i].toString(model)<<"\n";
-			if (model->edges[i].toString(model)==interest)
-			{
-				index2 = i;
-				attributes= model->edges[index2]->attributes;
-				break;
-			}
-		}
-		
-		
-		if (index2==-1)
-		{
-			for (uint32_t i=0; i<model->symbols.size(); ++i)
-			{
-				if (model->symbols[i]->toString() == interest)
-				{
-					index2 = i;
-					attributes= model->symbols[index2]->attributes;
-					break;
-				}
-			}
-		}
-		if (index2 != -1 )
-		{
-			 
-			tableWidget->setColumnCount(2);
-			tableWidget->setRowCount(attributes.size()+1);
-			QTableWidgetItem *ti;
 
-			ti = tableWidget->item(0, 0);
-			if (ti == NULL) { ti = new QTableWidgetItem(); tableWidget->setItem(0, 0, ti);}
-			ti->setText(QString("ID"));
-
-			ti = tableWidget->item(0, 1);
-			if (ti == NULL) { ti = new QTableWidgetItem(); tableWidget->setItem(0, 1, ti);}
-// 			ti->setText(QString::fromStdString(model->symbols[index2]->toString()));
-			ti->setText(QString::fromStdString(interest));
-
-			int row = 1;
-			for (std::map<std::string,std::string>::iterator iter = attributes.begin(); iter != attributes.end(); iter++, row++)
-			{
-				ti = tableWidget->item(row, 0);
-				if (ti == NULL) { ti = new QTableWidgetItem(); tableWidget->setItem(row, 0, ti);}
-				ti->setText(QString::fromStdString( iter->first ));
-
-				ti = tableWidget->item(row, 1);
-				if (ti == NULL) { ti = new QTableWidgetItem(); tableWidget->setItem(row, 1, ti);}
-				ti->setText(QString::fromStdString( iter->second ));
-			}
-		}
-				
-		else
-		{
-			if (tableWidget != NULL) tableWidget->clear();
-		}
-		
-	}
 	void print ()
 	{
 		qDebug()<<"\nAGMModelPrinter::printWorld(model)\n";
