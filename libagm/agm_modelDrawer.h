@@ -17,9 +17,9 @@
 #include <rcdraw/rcdraw.h>
 
 
-#define SPRING_LENGTH 50.
-#define HOOKES_CONSTANT 0.4
-#define FRICTION 0.9999
+#define SPRING_LENGTH 20.
+#define HOOKES_CONSTANT 1.
+#define FRICTION 0.9
 #define FIELD_FORCE_MULTIPLIER 690000.
 
 
@@ -346,7 +346,7 @@ private:
 			nodes[n].vel[0] = (nodes[n].vel[0] + (forceX*time))*FRICTION;
 			nodes[n].vel[1] = (nodes[n].vel[1] + (forceY*time))*FRICTION;
 			float v = sqrt((nodes[n].vel[0]*nodes[n].vel[0]) + (nodes[n].vel[1]*nodes[n].vel[1]));
-			float MAX = 25;
+			float MAX = 50;
 			if (v > MAX)
 			{
 				nodes[n].vel[0] = nodes[n].vel[0] / v * MAX;
