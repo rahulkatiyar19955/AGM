@@ -43,7 +43,11 @@ public:
 		modified = false;
 		showInner = true;
 		showRobot = true;
+		showMesh = false;
+		showPlane = false;
 		visited.clear();
+		meshList.clear();
+		planeList.clear();
 		connect(drawer, SIGNAL(newCoor(QPointF)), this, SLOT(clickedNode(QPointF)));
 	}
 	void setInterest(std::string item)
@@ -70,7 +74,32 @@ public:
 // 		std::cout<<"en update\n";
 		mutex.unlock();
 	}
-	
+	void setShowMesh(bool s=false)
+	{
+		showMesh=s;
+		meshList.clear();
+		for (uint32_t i=0; i<model->symbols.size(); ++i)
+		{
+			QString type =QString::fromStdString( model->symbols[i]->symbolType );
+			if (type  == "mesh")
+			{
+				meshList.append(model->symbols[i]->identifier);
+			}
+		}
+	}
+	void setShowPlane (bool s=false)
+	{
+		showPlane=s;
+		planeList.clear();
+		for (uint32_t i=0; i<model->symbols.size(); ++i)
+		{
+			QString type =QString::fromStdString( model->symbols[i]->symbolType );
+			if (type  == "plane")
+			{
+				planeList.append(model->symbols[i]->identifier);
+			}
+		}
+	}
 	void setShowInnerModel(bool s=false)
 	{
 		showInner=s;		
@@ -284,6 +313,20 @@ private:
 				if ( visited.contains(first) and visited.contains(second) )
 					continue;
 			}
+			if (model->edges[e].linking=="RT" &&  showInner==true && showMesh ==false)
+			{
+// 				int first =model->edges[e].symbolPair.first;
+				int second =model->edges[e].symbolPair.second;
+				if ( meshList.contains(second) )
+					continue;
+			}
+			if (model->edges[e].linking=="RT"  && showInner==true && showPlane ==false)
+			{
+// 				int first =model->edges[e].symbolPair.first;
+				int second =model->edges[e].symbolPair.second;
+				if ( planeList.contains(second) )
+					continue;
+			}
 			
 
 			int f = model->getIndexByIdentifier(model->edges[e].symbolPair.first);
@@ -351,6 +394,26 @@ private:
 			}
 // 			std::cout << "\n\n ************* FIN bucle showRobot "<<nodes.size()<<" ******************* \n";			
 			
+		}
+		if (showInner and showMesh == false)
+		{
+			for (uint32_t e1=0; e1<nodes.size();e1++)
+			{
+				if ( meshList.contains(nodes[e1].identifier))
+				{	
+					nodes[e1].show=false;
+				}
+			}
+		}
+		if (showInner and showPlane == false)
+		{
+			for (uint32_t e1=0; e1<nodes.size();e1++)
+			{
+				if ( planeList.contains(nodes[e1].identifier))
+				{	
+					nodes[e1].show=false;
+				}
+			}
 		}
 		modified = true;
 	}
@@ -597,7 +660,11 @@ private:
 	std::string interest;
 	bool showInner;
 	bool showRobot;
+	bool showMesh;
+	bool showPlane;
 	QList<int> visited;
+	QList<int> meshList;
+	QList<int> planeList;
 	
 	
 
