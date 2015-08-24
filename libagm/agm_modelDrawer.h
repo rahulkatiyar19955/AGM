@@ -19,7 +19,7 @@
 
 #define SPRING_LENGTH 20.
 #define HOOKES_CONSTANT 1.
-#define FRICTION 0.9
+#define FRICTION 0.85
 #define FIELD_FORCE_MULTIPLIER 690000.
 
 
