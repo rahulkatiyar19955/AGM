@@ -41,8 +41,8 @@ public:
 		drawer->setZoomMultiplier(0.91);
 		tableWidget = tableWidget_;
 		modified = false;
-		showInner = true;
-		showRobot = true;
+		showInner = false;
+		showRobot = false;
 		showMesh = false;
 		showPlane = false;
 		visited.clear();
