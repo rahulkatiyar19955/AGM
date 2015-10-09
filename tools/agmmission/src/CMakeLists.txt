@@ -8,6 +8,9 @@ ENDIF(NOT EXISTS $ENV{ROBOCOMP}/cmake)
 INCLUDE( $ENV{ROBOCOMP}/cmake/robocomp.cmake )
 INCLUDE ( CMakeListsSpecific.txt)
 
+
+# INCLUDE_DIRECTORIES(  ../../..  )
+
 # Sources set
 SET ( SOURCES
   ${SOURCES}

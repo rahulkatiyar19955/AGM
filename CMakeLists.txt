@@ -5,6 +5,7 @@ cmake_minimum_required( VERSION 2.8)
 set(CMAKE_CXX_FLAGS "-Wall -Wfatal-errors " )
 INCLUDE_DIRECTORIES ( . libagm )
 
+SUBDIRS (tools/agmmission)
 
 #  Optional features and options  #
 ###################################

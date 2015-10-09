@@ -12,12 +12,14 @@ SET ( HEADERS
   specificworker.h
   specificmonitor.h
   $ENV{ROBOCOMP}/classes/rcdraw/rcdraw.h
-  /usr/local/include/agm_modelDrawer.h
+  ../../../libagm/agm_modelDrawer.h
   $ENV{ROBOCOMP}/classes/agmInner/agmInner.h
 )
 
 
 SET (LIBS ${LIBS}
+  -L../../../..
+  -L../../..
   -lagm
   -lboost_system
 )
