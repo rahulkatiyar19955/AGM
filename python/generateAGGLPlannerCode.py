@@ -902,9 +902,15 @@ def CheckTarget(graph):\n
 	# Eliminamos las constantes de la lista de nodos 'available', de forma ordenada.
 	for symbol in constantes:
 		if len(forHierarchicalRule)>0:
-			ret += indent+"del available[n2id['"+symbol+"']]"
+			ret += indent+"try:"
+			ret += indent+"\t"+"del available[n2id['"+symbol+"']]"
+			ret += indent+"except:"
+			ret += indent+"\t"+"pass"
 		else:
-			ret += indent+"del available['"+symbol+"']"
+			ret += indent+"try:"
+			ret += indent+"\t"+"del available['"+symbol+"']"
+			ret += indent+"except:"
+			ret += indent+"\t"+"pass"
 
 	conditionsListList = []
 	# Generate the loop that checks the model

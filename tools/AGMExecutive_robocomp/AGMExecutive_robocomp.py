@@ -22,12 +22,15 @@
 import sys, traceback, Ice, subprocess, threading, time, Queue, os
 import IceStorm
 
+
+
 # Ctrl+c handling
 import signal
 signal.signal(signal.SIGINT, signal.SIG_DFL)
 # AGM
 sys.path.append('/usr/local/share/agm')
 
+import xmlModelParser
 import AGMModelConversion
 
 # Check that RoboComp has been correctly detected
@@ -70,8 +73,7 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 	def reset(self, current=None):
 		self.handler.reset()
 	def setMission(self, target, current=None):
-		targetAGM = self.world2agmgraph(target)
-		self.handler.setMission(targetAGM)
+		self.handler.setMission(xmlModelParser.graphFromXML(target), avoidUpdate=True)
 	def getData(self, current=None):
 		return world, target, plan
 	def world2agmgraph(self, target):

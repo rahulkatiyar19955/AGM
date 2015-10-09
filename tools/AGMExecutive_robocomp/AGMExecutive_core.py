@@ -133,9 +133,7 @@ class Executive(object):
 			sys.exit(1)
 		self.mutex.release()
 	def broadcastModel(self):
-		print 'ma1'
 		self.mutex.acquire( )
-		print 'mb1'
 		try:
 			print '<<<broadcastinnn'
 			print self.currentModel
@@ -145,9 +143,7 @@ class Executive(object):
 			else:
 				ev.backModel = self.backModelICE
 			ev.newModel = AGMModelConversion.fromInternalToIce(self.currentModel)
-			print 'a'
 			self.executiveTopic.structuralChange(ev)
-			print 'b'
 			self.backModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 			print 'broadcastinnn>>>'
 		except:
@@ -261,11 +257,15 @@ class Executive(object):
 				print 'There was some problem broadcasting the model'
 				sys.exit(1)
 			self.pypyKillMutex.release()
+			print 'YY0'
 			stored, stepsFwd = self.callMonitoring(peid)
+			print 'YY1'
 			print stored, stepsFwd
+			print 'hola1'
 		else:
 			print 'There was no previous plan'
 
+		print 'hola2'
 		print 'Running the planner?', stored==False
 		if stored == False:
 			# Run planner
@@ -324,7 +324,9 @@ class Executive(object):
 			# Get the output
 			try:
 				self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
+				print 'XX0'
 				stored, stepsFwd = self.callMonitoring(peid)
+				print 'XX1'
 			except: # The planner was probably killed
 				traceback.print_exc()
 				return
