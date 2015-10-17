@@ -17,10 +17,10 @@
 #include <rcdraw/rcdraw.h>
 
 
-#define SPRING_LENGTH 20.
-#define HOOKES_CONSTANT 1.
+#define SPRING_LENGTH 17.
+#define HOOKES_CONSTANT 1.5
 #define FRICTION 0.85
-#define FIELD_FORCE_MULTIPLIER 690000.
+#define FIELD_FORCE_MULTIPLIER 7000000.
 
 
 /*!
@@ -102,7 +102,7 @@ public:
 	}
 	void setShowInnerModel(bool s=false)
 	{
-		showInner=s;		
+		showInner = s;
 	}
 	
 	void setShowRobot( bool s=false)
@@ -145,6 +145,7 @@ public:
 		
 		
 	}
+
 	void listOfSymbolThroughLinkType( int& symbolID, QList<int> &visited, std::string linkType, bool &loop)
 	{
 		if (visited.contains(symbolID) )
@@ -624,8 +625,8 @@ private:
 				continue;
 			const QPointF p = QPointF(nodes[n].pos[0]+wW2, wH2-nodes[n].pos[1]);
 			drawer->drawEllipse(p, radius, radius, QColor(255, 0, 0), true);
-			drawer->drawText(p+QPointF(0,-7), QString::fromStdString(nodes[n].type), 10, QColor(255), true);
-			drawer->drawText(p+QPointF(0,+10), QString::number(nodes[n].identifier), 10, QColor(255), true);
+			drawer->drawText(p+QPointF(0,+10), QString::fromStdString(nodes[n].type), 10, QColor(255), true);
+			drawer->drawText(p+QPointF(0,-7), QString::number(nodes[n].identifier), 10, QColor(255), true);
 		}
 		modified = false;
 		

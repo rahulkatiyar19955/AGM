@@ -988,7 +988,7 @@ def CheckTarget(graph):\n
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
 	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
 	#LUEGO HAY QUE QUITAR DE AQUI
-	ret += indent+"\tprint 'Correcto: score ='+str(maxScore)"  
+	ret += indent+"\tprint 'Correct: score ='+str(maxScore)"  
 	ret += indent+"\treturn maxScore, True"
 
 	# Rule ending

@@ -1,6 +1,0 @@
-setObjectReach@{'status': '8', 'object': '7'}
-findObjectVisuallyInTable@{'status': '109', 'object': '110', 'container': '7', 'room': '3', 'contst': '8', 'robot': '1'}
-recognizeObjFails@{'status': '109', 'object': '110', 'robot': '1'}
-tellHumanAboutCoffeePot@{'statusr': '10', 'objecth': '111', 'robot': '1', 'conth': '105', 'person': '20', 'objectr': '9', 'contr': '5', 'statush': '112'}
-tellHumanAboutUnknownObject@{'statusr': '109', 'objecth': '113', 'robot': '1', 'conth': '103', 'person': '20', 'objectr': '110', 'contr': '3', 'statush': '114'}
-personClassifiesMilkPot@{'objecth': '113', 'robot': '1', 'person': '20', 'objectr': '110', 'cont2': '111', 'statush': '114'}
