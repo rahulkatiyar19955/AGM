@@ -175,6 +175,7 @@ if __name__ == '__main__': # program domain problem result
 	else:
 		result = ''
 
+	agmData = None
 	# If the grammar is stored in a .aggl file, we must generate the domain python file.
 	if domain.endswith('.aggl'):
 		## The domain python file is stored in agmData

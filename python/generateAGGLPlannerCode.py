@@ -1,5 +1,5 @@
 from operator import *
-import collections, sys, time #aniadida libreria TIME
+import collections, sys, time
 
 sys.path.append('/usr/local/share/agm/')
 
@@ -481,6 +481,21 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 			for l in linksInfo:
 				ret += indent+l
 			ret += indent+"raise WrongRuleExecution('"+rule.name+"_trigger"+str(lelele)+"')"
+			# Quantifier-related code (PRECONDITION)
+			# <<<
+			if rule.preconditionAST != None:
+				indentP = indent
+				preconditionCode, indent, conditionId, stuff = normalRuleImplementation_PRECONDITION(rule.preconditionAST, indent)
+				ret += indentP+'backVars = n2id.keys()'
+				ret += preconditionCode
+				ret += indentP+'for k in n2id.keys():'
+				ret += indentP+'\tif not k in backVars:'
+				ret += indentP+'\t\tdel n2id[k]'
+				ret += indentP+'if precondition'+str(conditionId)+':'
+				indent += '\t'
+			else:
+				ret += indent+'# no precondition'
+			# >>>
 			indent = indent[:-1]
 		indent = indent[:-1]
 	#ret += indent+"smap = "+COPY_OPTION+"(n2id)"
