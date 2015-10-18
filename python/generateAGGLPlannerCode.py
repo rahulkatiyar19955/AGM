@@ -390,12 +390,14 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	# <<<
 	if rule.preconditionAST != None:
 		indentP = indent
+		ret += indentP+'# <preconds'
 		preconditionCode, indent, conditionId, stuff = normalRuleImplementation_PRECONDITION(rule.preconditionAST, indent)
 		ret += indentP+'backVars = n2id.keys()'
 		ret += preconditionCode
 		ret += indentP+'for k in n2id.keys():'
 		ret += indentP+'\tif not k in backVars:'
 		ret += indentP+'\t\tdel n2id[k]'
+		ret += indentP+'# preconds end after this line'
 		ret += indentP+'if precondition'+str(conditionId)+':'
 		indent += '\t'
 	# >>>
@@ -481,23 +483,25 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 			for l in linksInfo:
 				ret += indent+l
 			ret += indent+"raise WrongRuleExecution('"+rule.name+"_trigger"+str(lelele)+"')"
-			# Quantifier-related code (PRECONDITION)
-			# <<<
-			if rule.preconditionAST != None:
-				indentP = indent
-				preconditionCode, indent, conditionId, stuff = normalRuleImplementation_PRECONDITION(rule.preconditionAST, indent)
-				ret += indentP+'backVars = n2id.keys()'
-				ret += preconditionCode
-				ret += indentP+'for k in n2id.keys():'
-				ret += indentP+'\tif not k in backVars:'
-				ret += indentP+'\t\tdel n2id[k]'
-				ret += indentP+'if precondition'+str(conditionId)+':'
-				indent += '\t'
-			else:
-				ret += indent+'# no precondition'
-			# >>>
 			indent = indent[:-1]
-		indent = indent[:-1]
+	# Quantifier-related code (PRECONDITION)
+	# <<<
+	if rule.preconditionAST != None:
+		ret += indent+"nodes = "+COPY_OPTION+"(snode.graph.nodes)"
+		indentP = copy.deepcopy(indent)
+		ret += indent+'# precondition in trigger begins'
+		preconditionCode, indentP, conditionId, stuff = normalRuleImplementation_PRECONDITION(rule.preconditionAST, indentP)
+		ret += indent+'backVars = n2id.keys()'
+		ret += preconditionCode
+		ret += indentP+'for k in n2id.keys():'
+		ret += indentP+'\tif not k in backVars:'
+		ret += indentP+'\t\tdel n2id[k]'
+		ret += indentP+'if not precondition'+str(conditionId)+': raise WrongRuleExecution(\'preconditions\')'
+		ret += indentP+'# precondition in trigger ends here'
+	else:
+		ret += indent+'# no precondition'
+	indent = indent[:-1]
+	# >>>
 	#ret += indent+"smap = "+COPY_OPTION+"(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
 	ret += indent+"global lastNodeId"
