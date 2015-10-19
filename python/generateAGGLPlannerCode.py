@@ -618,7 +618,7 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 			ret += text
 			ret += indent+'if precondition'+str(formulaIdRet)+' == True: # inside OR'
 			ret += indent+'\tprecondition'+str(formulaId)+' = True # make OR true'
-		ret += indent+'if precondition'+str(formulaId)+' == True: # IF OR'
+		#ret += indent+'if precondition'+str(formulaId)+' == True: # IF OR'
 	elif preconditionType == "and":
 		ret += indent+'precondition'+str(formulaId)+' = True # AND initialization as true'
 		first = True

@@ -265,7 +265,7 @@ class AGMFileDataParsing:
 			if debug: print pre+'or'
 			r = []
 			for i in tree.more:
-				r.append(AGMFileDataParsing.interpretPrecondition(tree.child, pre+"\t"))
+				r.append(AGMFileDataParsing.interpretPrecondition(i, pre+"\t"))
 			return ["or", r]
 		elif tree.type == "and":
 			if debug: print pre+'and'
