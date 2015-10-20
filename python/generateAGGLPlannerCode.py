@@ -487,6 +487,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	# Quantifier-related code (PRECONDITION)
 	# <<<
 	if rule.preconditionAST != None:
+		ret += indent+'# precondition in trigger starts here'
 		ret += indent+"nodes = "+COPY_OPTION+"(snode.graph.nodes)"
 		indentP = copy.deepcopy(indent)
 		ret += indent+'# precondition in trigger begins'
@@ -496,12 +497,12 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 		ret += indentP+'for k in n2id.keys():'
 		ret += indentP+'\tif not k in backVars:'
 		ret += indentP+'\t\tdel n2id[k]'
-		ret += indentP+'if not precondition'+str(conditionId)+': raise WrongRuleExecution(\'preconditions\')'
-		ret += indentP+'# precondition in trigger ends here'
+		ret += indent+'if not precondition'+str(conditionId)+': raise WrongRuleExecution(\'preconditions\')'
+		ret += indent+'# precondition in trigger ends here'
 	else:
 		ret += indent+'# no precondition'
-	indent = indent[:-1]
 	# >>>
+	indent = indent[:-1]
 	#ret += indent+"smap = "+COPY_OPTION+"(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
 	ret += indent+"global lastNodeId"
