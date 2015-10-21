@@ -1346,3 +1346,149 @@ def componerSubgrafos(grafo, ramasGrafo, constantes):
 		i = i+1
 
 	return vectorSubgrafos
+
+
+
+
+def generateTarget_AGGT(target, forHierarchicalRule='', lgraph=None, verbose=False):
+	graph = target['graph']
+	linkList = []   # vector de enlaces del grafo.
+	constantes, listaNodos = encontrarOrden(graph, lgraph, verbose)
+	ret = ''
+	indent = "\n\t"
+
+	if len(forHierarchicalRule)==0:
+		ret += """import copy, sys\nsys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import *\n
+def computeMaxScore(a, b, maxScore):
+	s = 0
+	for i in a: s+=i
+	for i in b: s+=i
+	if s > maxScore: return s
+	return maxScore\n
+def CheckTarget(graph):\n
+	n2id = dict()                             # diccionario
+	available = copy.deepcopy(graph.nodes)    # lista de nodos del grafo inicial.
+"""
+	else:
+		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping=dict()):'
+		indent += "\t"
+		ret += indent+"n2id = copy.deepcopy(smapping)\n"
+		ret += indent+"available = copy.deepcopy(graph.nodes)"
+
+	ret += indent+"maxScore = 0"
+	ret += indent+"totalScore = " + str(calcularTotalScore(graph)) + '\n'
+
+	# Sacamos los enlaces y los transformamos de AGMLink a tuplas de string [origen, enlace, destino]
+	# y los ordenamos de menor a mayor con el metodo sorted
+	for link_i in range(len(graph.links)):
+		link = graph.links[link_i]
+		linkList.append([link.a, link.b, link.linkType])
+	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
+
+	# Eliminamos las constantes de la lista de nodos 'available', de forma ordenada.
+	for symbol in constantes:
+		if len(forHierarchicalRule)>0:
+			ret += indent+"try:"
+			ret += indent+"\t"+"del available[n2id['"+symbol+"']]"
+			ret += indent+"except:"
+			ret += indent+"\t"+"pass"
+		else:
+			ret += indent+"try:"
+			ret += indent+"\t"+"del available['"+symbol+"']"
+			ret += indent+"except:"
+			ret += indent+"\t"+"pass"
+
+	conditionsListList = []
+	# Generate the loop that checks the model
+	symbols_in_stack = []
+	score = 0
+
+	pops = []
+
+	ret += indent+"# Hard score"
+	ret += indent+"scoreNodes = []"
+	ret += indent+"scoreLinks = []"
+
+	#if verbose: print 'hierarchical\nhierarchical'
+	#if verbose: print 'constantes', constantes
+	#if verbose: print 'nodos', listaNodos
+	for n_n in listaNodos:
+		n = str(n_n)
+		ret += indent+"# "+n
+
+		constant = False
+		if (n[0] in "0123456789") and n in graph.nodes: # This checks the node is already in the model
+			constant = True
+		elif lgraph:
+			if n in lgraph.nodes:
+				constant = True
+		if constant:
+			#if verbose: print forHierarchicalRule, 'CONSTANTE', n
+			if (n[0] in "0123456789") and n in graph.nodes:
+				ret += indent+"symbol_"+n+" = graph.nodes['"+n+"']"
+			else:
+				ret += indent+"symbol_"+n+" = graph.nodes[n2id['"+n+"']]"
+				#ret += indent+"print '"+n+"', n2id['"+n+"'], graph.nodes[n2id['"+n+"']]"
+		else: # otherwise, we're talking about a variable!
+			#if verbose: print forHierarchicalRule, 'VARIABLE', n
+			#if len(forHierarchicalRule) > 0:
+				#ret += indent+"print '" + n + "', available, n2id"
+			ret += indent+"symbol_"+n+"_name = '" + n + "'"
+			ret += indent+"for symbol_"+n+"_name in available:"
+			indent += "\t"
+			ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
+			#ret += indent+"print symbol_"+n
+
+		if len(forHierarchicalRule)>0:
+			if not constant:
+				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+		else:
+			if constant:
+				ret += indent+"n2id['"+n+"'] = '"+n+"'"
+			else:
+				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+		ret += indent+"linksVal = 0"
+		#ret += indent+"print n2id"
+		for cond in newLinkScore(graph.links, n_n, symbols_in_stack):
+			ret += indent+cond
+		ret += indent+"scoreLinks.append(linksVal)"
+		pops.append(indent+'scoreLinks.pop()')
+		ret += indent+"maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)"
+		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n_n].sType+"'"
+		for other in symbols_in_stack:
+			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
+		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack)
+		conditions = conditions.replace("snode.graph", "graph")
+		conditionsListList.append( [conditions, number] )
+		ret += conditions
+		ret += ":"
+		symbols_in_stack.append(n_n)
+		indent += "\t"
+		score += scorePerContition
+		ret += indent + "scoreNodes.append(100)"
+		pops.append(indent+'scoreNodes.pop()')
+		ret += indent + "maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)"
+
+	allConditionsStr = ''
+	for c in conditionsListList:
+		allConditionsStr += c[0]
+	conditionsSeparated = allConditionsStr.split("and ")
+	realCond = 0
+	for cond in conditionsSeparated:
+		if len(cond) > 1:
+			realCond += 1
+			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
+	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
+	#LUEGO HAY QUE QUITAR DE AQUI
+	ret += indent+"\tprint 'Correct: score ='+str(maxScore)"  
+	ret += indent+"\treturn maxScore, True"
+
+	# Rule ending
+	while len(pops)>0:
+		ret += pops.pop()
+	indent = "\n\t"
+	if len(forHierarchicalRule)>0: indent+='\t'
+	ret += indent+"return maxScore, False"
+	ret += "\n"
+
+	return ret

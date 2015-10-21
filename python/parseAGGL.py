@@ -357,14 +357,24 @@ class AGMFileDataParsing:
 	## This method makes the analysis of the .aggt file representing a robot's target
 	@staticmethod
 	def targetFromFile(filename, verbose=False, includeIncludes=True):
-		if verbose: print 'Verbose:', verbose
-
 		# Define AGM's DSL meta-model
 		agglMetaModels = getAGGLMetaModels()
 
 		# Parse input file
 		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('#')])
 		result = agglMetaModels['aggt'].parseWithTabs().parseString(inputText)
-		
-		if verbose: print "Result:\n", result
 
+		preconditionAST = []
+		if len(str(result.precondition[0]).strip())>0:
+			preconditionStr = str(result.precondition[0])
+			preconditionTree = AGGLCodeParsing.parseFormula(preconditionStr)
+			if len(preconditionTree)>0: preconditionTree = preconditionTree[0]
+			preconditionAST = AGMFileDataParsing.interpretPrecondition(preconditionTree)
+			
+		graph = AGMGraphParsing.parseGraphFromAST(result.graph)
+		precondition = preconditionAST
+		
+		print 'graph:\n', graph
+		print 'precondition:\n', precondition
+		
+		return { 'graph':graph, 'precondition':precondition}
