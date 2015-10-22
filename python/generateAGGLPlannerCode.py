@@ -1481,14 +1481,12 @@ def CheckTarget(graph):\n
 	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
 	#LUEGO HAY QUE QUITAR DE AQUI
 	ret += indent+"\tprint 'CorrectGRAPH (precondition?): score ='+str(maxScore)"  
-	
-	
-	print target['precondition']
-	
-	
-	ret += generateTargetPreconditionCode(target['precondition'], indent+'\t')
-	
-	
+
+
+	preconditionCode, totalCond = generateTargetPreconditionCode(target['precondition'], realCond, indent+'\t')
+	ret += preconditionCode
+	ret += indent+"if maxScore == " + str(score + totalCond*scorePerContition) + ":"
+
 	ret += indent+"\treturn maxScore, True"
 
 	# Rule ending
@@ -1503,24 +1501,32 @@ def CheckTarget(graph):\n
 
 
 
-def generateTargetPreconditionCode(precondition, indent):
+def generateTargetPreconditionCode(precondition, condNumber, indent):
 	ret = ''
 	
 	
 	if precondition[0] == 'forall':
-		ret += indent + precondition[0]
-		ret += generateTargetPreconditionCode(precondition[2], indent+'\t')
+		ret += indent + 'for forall_' + precondition[1][0][0] + ' in graph.nodes:'
+		indent += '\t'
+		ret += indent + 'if forall_' + precondition[1][0][0] + '.type == \'' + precondition[1][0][1] + '\':'
+		indent += '\t'
+		code, condNumber2 = generateTargetPreconditionCode(precondition[2:][0], condNumber, indent+'\t')
+		ret += code
 	elif precondition[0] == 'and':
 		ret += indent + precondition[0]
-		ret += generateTargetPreconditionCode(precondition[1:], indent+'\t')
+		for subprecondition in precondition[1]:
+			print subprecondition
+			code, condNumber2 = generateTargetPreconditionCode(precondition[1:][0][0], condNumber, indent+'\t')
+			ret += code
 	elif precondition[0] == 'not':
 		ret += indent + precondition[0]
-		ret += generateTargetPreconditionCode(precondition[1:], indent+'\t')
+		code, condNumber2 = generateTargetPreconditionCode(precondition[1:], condNumber, indent+'\t')
+		ret += code
 	else:
-		ret += indent + str(precondition[0])
+		ret += indent + 'link ' + str(precondition[0])
 
 
-	return ret
+	return ret, condNumber
 
 
 
