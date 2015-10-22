@@ -1480,7 +1480,15 @@ def CheckTarget(graph):\n
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
 	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
 	#LUEGO HAY QUE QUITAR DE AQUI
-	ret += indent+"\tprint 'Correct: score ='+str(maxScore)"  
+	ret += indent+"\tprint 'CorrectGRAPH (precondition?): score ='+str(maxScore)"  
+	
+	
+	print target['precondition']
+	
+	
+	ret += generateTargetPreconditionCode(target['precondition'], indent+'\t')
+	
+	
 	ret += indent+"\treturn maxScore, True"
 
 	# Rule ending
@@ -1492,3 +1500,32 @@ def CheckTarget(graph):\n
 	ret += "\n"
 
 	return ret
+
+
+
+def generateTargetPreconditionCode(precondition, indent):
+	ret = ''
+	
+	
+	if precondition[0] == 'forall':
+		ret += indent + precondition[0]
+		ret += generateTargetPreconditionCode(precondition[2], indent+'\t')
+	elif precondition[0] == 'and':
+		ret += indent + precondition[0]
+		ret += generateTargetPreconditionCode(precondition[1:], indent+'\t')
+	elif precondition[0] == 'not':
+		ret += indent + precondition[0]
+		ret += generateTargetPreconditionCode(precondition[1:], indent+'\t')
+	else:
+		ret += indent + str(precondition[0])
+
+
+	return ret
+
+
+
+
+
+
+
+
