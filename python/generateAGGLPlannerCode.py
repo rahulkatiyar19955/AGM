@@ -1480,10 +1480,10 @@ def CheckTarget(graph):\n
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
 	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
 	#LUEGO HAY QUE QUITAR DE AQUI
-	ret += indent+"\tprint 'CorrectGRAPH (precondition?): score ='+str(maxScore)"  
 
-
+	print realCond
 	preconditionCode, totalCond = generateTargetPreconditionCode(target['precondition'], realCond, indent+'\t')
+	print totalCond
 	ret += preconditionCode
 	ret += indent+"if maxScore == " + str(score + totalCond*scorePerContition) + ":"
 
@@ -1501,32 +1501,43 @@ def CheckTarget(graph):\n
 
 
 
-def generateTargetPreconditionCode(precondition, condNumber, indent):
+def generateTargetPreconditionCode(precondition, condNumber, indent, neg=False):
 	ret = ''
-	
+	condNumber2 = condNumber
 	
 	if precondition[0] == 'forall':
-		ret += indent + 'for forall_' + precondition[1][0][0] + ' in graph.nodes:'
+		ret += indent + 'for ' + precondition[1][0][0] + ' in graph.nodes:'
 		indent += '\t'
-		ret += indent + 'if forall_' + precondition[1][0][0] + '.type == \'' + precondition[1][0][1] + '\':'
+		ret += indent + 'n2id["'+precondition[1][0][0]+'"] = ' + precondition[1][0][1]
+		ret += indent + 'if graph.nodes[' + precondition[1][0][0] + '].sType == \'' + precondition[1][0][1] + '\':'
 		indent += '\t'
-		code, condNumber2 = generateTargetPreconditionCode(precondition[2:][0], condNumber, indent+'\t')
+		code, condNumber2 = generateTargetPreconditionCode(precondition[2:][0], condNumber2, indent, neg)
 		ret += code
 	elif precondition[0] == 'and':
-		ret += indent + precondition[0]
+		ret += indent + '# and (multiple conditions below)'
 		for subprecondition in precondition[1]:
-			print subprecondition
-			code, condNumber2 = generateTargetPreconditionCode(precondition[1:][0][0], condNumber, indent+'\t')
+			print subprecondition, 'caca'
+			code, condNumber2 = generateTargetPreconditionCode(subprecondition, condNumber2, indent, neg)
 			ret += code
 	elif precondition[0] == 'not':
-		ret += indent + precondition[0]
-		code, condNumber2 = generateTargetPreconditionCode(precondition[1:], condNumber, indent+'\t')
+		code, condNumber2 = generateTargetPreconditionCode(precondition[1], condNumber2, indent, not neg)
 		ret += code
+	elif precondition[0] == 'exists':
+		raise 'not implemented "exist" in target preconditions yet'
+	elif precondition[0] == 'when':
+		raise 'not implemented "when" in target preconditions yet'
 	else:
-		ret += indent + 'link ' + str(precondition[0])
+		#print precondition
+		#ret += indent + 'print "LINKS:", [x for x in graph.links if x.linkType == "in"]'
+		#ret += indent + 'print n2id'
+		ret += indent + 'if [n2id["'+precondition[1]+'"],n2id["'+precondition[2]+'"],"'+precondition[0]+'"] in graph.links:'
+		ret += indent + '\tscoreLinks.append(100)'
+		condNumber2 += 1
+		ret += indent + '\tmaxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)'
+		#ret += indent + '\tprint maxScore'
+		ret += indent + '\tscoreLinks.pop()'
 
-
-	return ret, condNumber
+	return ret, condNumber2
 
 
 
