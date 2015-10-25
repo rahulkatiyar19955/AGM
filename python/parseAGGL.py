@@ -364,17 +364,19 @@ class AGMFileDataParsing:
 		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('#')])
 		result = agglMetaModels['aggt'].parseWithTabs().parseString(inputText)
 
-		preconditionAST = []
-		if len(str(result.precondition[0]).strip())>0:
-			preconditionStr = str(result.precondition[0])
-			preconditionTree = AGGLCodeParsing.parseFormula(preconditionStr)
-			if len(preconditionTree)>0: preconditionTree = preconditionTree[0]
-			preconditionAST = AGMFileDataParsing.interpretPrecondition(preconditionTree)
+		preconditionAST = None
+		if result.precondition != None:
+			if len(result.precondition) > 0:
+				if len(str(result.precondition[0]).strip())>0:
+					preconditionStr = str(result.precondition[0])
+					preconditionTree = AGGLCodeParsing.parseFormula(preconditionStr)
+					if len(preconditionTree)>0: preconditionTree = preconditionTree[0]
+					preconditionAST = AGMFileDataParsing.interpretPrecondition(preconditionTree)
 			
 		graph = AGMGraphParsing.parseGraphFromAST(result.graph)
 		precondition = preconditionAST
 		
-		print 'graph:\n', graph
-		print 'precondition:\n', precondition
+		#print 'graph:\n', graph
+		#print 'precondition:\n', precondition
 		
 		return { 'graph':graph, 'precondition':precondition}

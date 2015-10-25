@@ -1478,16 +1478,18 @@ def CheckTarget(graph):\n
 		if len(cond) > 1:
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
-	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
-	#LUEGO HAY QUE QUITAR DE AQUI
 
 	print realCond
-	preconditionCode, totalCond = generateTargetPreconditionCode(target['precondition'], realCond, indent+'\t')
-	print totalCond
-	ret += preconditionCode
-	ret += indent+"if maxScore == " + str(score + totalCond*scorePerContition) + ":"
-
-	ret += indent+"\treturn maxScore, True"
+	totalCond = realCond
+	if target['precondition'] != None:
+		ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
+		preconditionCode, totalCond = generateTargetPreconditionCode(target['precondition'], realCond, indent+'\t')
+		print totalCond
+		ret += preconditionCode
+		ret += indent+"\t\t\treturn maxScore, True # there were preconditions and were met"
+	else:
+		ret += indent+"if maxScore == " + str(score + totalCond*scorePerContition) + ": # there are no preconditions"
+		ret += indent+"\treturn maxScore, True"
 
 	# Rule ending
 	while len(pops)>0:
@@ -1502,46 +1504,112 @@ def CheckTarget(graph):\n
 
 
 def generateTargetPreconditionCode(precondition, condNumber, indent, neg=False):
+	# Quantifier-related code (PRECONDITION)
+	# <<<
 	ret = ''
-	condNumber2 = condNumber
-	
-	if precondition[0] == 'forall':
-		ret += indent + 'for ' + precondition[1][0][0] + ' in graph.nodes:'
+	if precondition != None:
+		indentP = indent
+		ret += indentP+'# <preconds'
+		preconditionCode, indent, conditionId, stuff = targetPreconditionImplementation(precondition, indent)
+		ret += indentP+'backVars = n2id.keys()'
+		ret += preconditionCode
+		ret += indentP+'for k in n2id.keys():'
+		ret += indentP+'\tif not k in backVars:'
+		ret += indentP+'\t\tdel n2id[k]'
+		ret += indentP+'# preconds end after this line'
+		ret += indentP+'if precondition'+str(conditionId)+':'
 		indent += '\t'
-		ret += indent + 'n2id["'+precondition[1][0][0]+'"] = ' + precondition[1][0][1]
-		ret += indent + 'if graph.nodes[' + precondition[1][0][0] + '].sType == \'' + precondition[1][0][1] + '\':'
-		indent += '\t'
-		code, condNumber2 = generateTargetPreconditionCode(precondition[2:][0], condNumber2, indent, neg)
-		ret += code
-	elif precondition[0] == 'and':
-		ret += indent + '# and (multiple conditions below)'
-		for subprecondition in precondition[1]:
-			print subprecondition, 'caca'
-			code, condNumber2 = generateTargetPreconditionCode(subprecondition, condNumber2, indent, neg)
-			ret += code
-	elif precondition[0] == 'not':
-		code, condNumber2 = generateTargetPreconditionCode(precondition[1], condNumber2, indent, not neg)
-		ret += code
-	elif precondition[0] == 'exists':
-		raise 'not implemented "exist" in target preconditions yet'
-	elif precondition[0] == 'when':
-		raise 'not implemented "when" in target preconditions yet'
+	# >>>
+	return ret, 9
+
+
+
+def targetPreconditionImplementation(precondition, indent, modifier='', stuff=None):
+	if stuff == None: stuff = {'availableid':0}
+	if len(precondition) == 0:
+		return '', indent, modifier, stuff
+	# Split the list in its head and body
+	preconditionType, preconditionBody = precondition[0], precondition[1:]
+	formulaId = stuff['availableid']
+	stuff['availableid'] += 1
+	ret = ''
+
+	if preconditionType == "not":
+		preconditionBody = preconditionBody[0]
+		text, indent, formulaIdRet, stuff = targetPreconditionImplementation(preconditionBody, indent, 'not', stuff)
+		ret += text
+		ret += indent+'precondition'+str(formulaId)+' = not precondition'+str(formulaIdRet)+' # this is a not'
+	elif preconditionType == "or":
+		ret += indent+'precondition'+str(formulaId)+' = False # or initialization'
+		for part in preconditionBody[0]:
+			text, indent, formulaIdRet, stuff = targetPreconditionImplementation(part, indent, 'or', stuff)
+			ret += text
+			ret += indent+'if precondition'+str(formulaIdRet)+' == True: # inside OR'
+			ret += indent+'\tprecondition'+str(formulaId)+' = True # make OR true'
+		#ret += indent+'if precondition'+str(formulaId)+' == True: # IF OR'
+	elif preconditionType == "and":
+		ret += indent+'precondition'+str(formulaId)+' = True # AND initialization as true'
+		first = True
+		for part in preconditionBody[0]:
+			if first: first = False
+			else:
+				ret += indent+'if precondition'+str(formulaId)+': # if still true'
+				indent += '\t'
+			text, indent, formulaIdRet, stuff = targetPreconditionImplementation(part, indent, 'and', stuff)
+			ret += text
+			ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the AND is false'
+			ret += indent+'\tprecondition'+str(formulaId)+' = False # make the AND false'
+	elif preconditionType == "forall":
+		ret += indent+'precondition'+str(formulaId)+' = True # FORALL initialization as true'
+		indentA = indent
+		for V in preconditionBody[0]:
+			n = V[0]
+			t = V[1]
+			ret += indent+"for symbol_"+n+"_name in graph.nodes:"
+			indent += "\t"
+			ret += indent+"if precondition"+str(formulaId)+"==False: break"
+			ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
+			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
+			ret += indent+"if symbol_"+n+".sType == '"+t+"':  # now the body of the FORALL"
+			indent += "\t"
+		text, indento, formulaIdRet, stuff = targetPreconditionImplementation(preconditionBody[1], indent, 'forall', stuff)
+		ret += text
+		ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the FORALL is false'
+		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the FORALL false'
+		for V in preconditionBody[0]:
+			ret += indentA+"del n2id['"+V[0]+"']"
+		indent = indentA
+	elif preconditionType == "when":
+		ret += indent+'precondition'+str(formulaId)+' = True # WHEN initialization as true'
+		text, indent, formulaIdRet1, stuff = targetPreconditionImplementation(preconditionBody[0], indent, 'whenA', stuff)
+		ret += text
+		ret += indent+'if precondition'+str(formulaIdRet1)+' == True: # if what\'s inside the WHEN(if) is True'
+		text, indent, formulaIdRet2, stuff = targetPreconditionImplementation(preconditionBody[1], indent+'\t', 'whenB', stuff)
+		ret += text
+		ret += indent+'if precondition'+str(formulaIdRet2)+' == False: # if what\'s inside the WHEN(then) is False'
+		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the WHEN false'
+	elif preconditionType == "=":
+		ret += indent+'precondition'+str(formulaId) + ' = (n2id["'+preconditionBody[0]+'"] == n2id["'+preconditionBody[1]+'"])'
+	elif preconditionType == "create":
+		print '\'create\' statements are not allowed in preconditions'
+		sys.exit(1)
+	elif preconditionType == "delete":
+		print '\'delete\' statements are not allowed in preconditions'
+		sys.exit(1)
+	elif preconditionType == "retype":
+		print '\'retype\' statements are not allowed in preconditions'
+		sys.exit(1)
 	else:
-		#print precondition
-		#ret += indent + 'print "LINKS:", [x for x in graph.links if x.linkType == "in"]'
-		#ret += indent + 'print n2id'
-		ret += indent + 'if [n2id["'+precondition[1]+'"],n2id["'+precondition[2]+'"],"'+precondition[0]+'"] in graph.links:'
-		ret += indent + '\tscoreLinks.append(100)'
-		condNumber2 += 1
-		ret += indent + '\tmaxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)'
-		#ret += indent + '\tprint maxScore'
-		ret += indent + '\tscoreLinks.pop()'
-
-	return ret, condNumber2
-
-
-
-
+		try:
+			ret += indent+'precondition'+str(formulaId) + ' = ['
+			ret += 'n2id["'+preconditionBody[0]+'"], '
+			ret += 'n2id["'+preconditionBody[1]+'"], "'
+			ret += preconditionType + '"] in graph.links # LINK'
+		except:
+			print 'ERROR IN', preconditionType
+			print 'ERROR IN', preconditionBody
+			traceback.print_exc()
+	return ret, indent, formulaId, stuff
 
 
 
