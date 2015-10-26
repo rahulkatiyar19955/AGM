@@ -1,10 +1,11 @@
 // http://www.boost.org/doc/libs/1_53_0/libs/python/doc/tutorial/doc/html/python/exposing.html
 
-#include <boost/python.hpp>
+#ifndef Q_MOC_RUN
+	#include <boost/python.hpp>
+	#include "agm_modelEdge.h"
+	#include "agm_modelSymbols.h"
+	#include "agm.h"
 
-#include "agm_modelEdge.h"
-#include "agm_modelSymbols.h"
-#include "agm.h"
 
 using namespace boost::python;
 
@@ -67,4 +68,6 @@ BOOST_PYTHON_MODULE(libagm)
 	
 }
 
+
+#endif
 

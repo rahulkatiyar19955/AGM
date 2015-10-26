@@ -7,12 +7,14 @@
 #include <stdlib.h>
 #include <string>
 
-#include <agm_model.h>
-#include <agm_modelEdge.h>
-#include <agm_modelSymbols.h>
-#include <agm_modelPrinter.h>
-#include <agm_misc_functions.h>
 
+#ifndef Q_MOC_RUN
+	#include <agm_model.h>
+	#include <agm_modelEdge.h>
+	#include <agm_modelSymbols.h>
+	#include <agm_modelPrinter.h>
+	#include <agm_misc_functions.h>
+#endif
 
 #include <rcdraw/rcdraw.h>
 

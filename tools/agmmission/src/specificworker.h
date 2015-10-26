@@ -21,18 +21,21 @@
 
 #include <genericworker.h>
 
-#include <agm.h>
-#include <agm_model.h>
-#include <agm_modelPrinter.h>
-#include <agm_modelDrawer.h>
-#include <graphModelViewer.h>
+
+#ifndef Q_MOC_RUN
+	#include <agm.h>
+	#include <agm_model.h>
+	#include <agm_modelPrinter.h>
+	#include <agm_modelDrawer.h>
+	#include <graphModelViewer.h>
+	#include <agmInner/agmInner.h>
+#endif
 
 #include <innermodel/innermodel.h>
 #include <innermodel/innermodeldraw.h>
 #include <innermodel/innermodelreader.h>
 #include <osgviewer/osgview.h>
 #include <innermodel/innermodelviewer.h>
-#include <agmInner/agmInner.h>
 
 /**
 	   \brief
