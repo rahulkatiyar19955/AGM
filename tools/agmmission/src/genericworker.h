@@ -76,6 +76,7 @@ public:
 	virtual void  structuralChange(const RoboCompAGMWorldModel::Event& modification) = 0;
 	virtual void  symbolUpdated(const RoboCompAGMWorldModel::Node& modification) = 0;
 	virtual void  edgeUpdated(const RoboCompAGMWorldModel::Edge& modification) = 0;
+	virtual void  edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence& modifications) = 0;
 
 	virtual void  update(const RoboCompAGMWorldModel::World& world, const RoboCompAGMWorldModel::World& target, const RoboCompPlanning::Plan& plan) = 0;
 

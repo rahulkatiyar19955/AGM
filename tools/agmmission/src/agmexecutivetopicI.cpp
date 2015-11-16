@@ -53,4 +53,11 @@ void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge& modifica
 // 	printf("%s: %d\n", __FILE__, __LINE__);
 }
 
+void AGMExecutiveTopicI::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence& modifications, const Ice::Current&)
+{
+// 	printf("%s: %d\n", __FILE__, __LINE__);
+	worker->edgesUpdated(modifications);
+// 	printf("%s: %d\n", __FILE__, __LINE__);
+}
+
 
