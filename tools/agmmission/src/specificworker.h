@@ -51,6 +51,7 @@ public:
 	void structuralChange(const RoboCompAGMWorldModel::Event& modification);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence& modification);
 	void update(const RoboCompAGMWorldModel::World &a, const RoboCompAGMWorldModel::World &b, const RoboCompPlanning::Plan &p);
 
 	bool setParams(RoboCompCommonBehavior::ParameterList params) { return true; }

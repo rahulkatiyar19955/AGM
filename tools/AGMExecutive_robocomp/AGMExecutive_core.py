@@ -244,8 +244,10 @@ class Executive(object):
 
 	def updatePlan(self):
 		# Kill any previous planning process
-		subprocess.call(["killall", "-9", "pypy"])
-
+		try:
+			subprocess.call(["killall", "-9", "pypy"])
+		except:
+			pass
 		# First, try with the current plan
 		stored = False
 		if self.plan != None and False:
@@ -296,7 +298,10 @@ class Executive(object):
 				lines = cacheResult[1].split('\n')
 			else:
 				print 'Running the planner...'
-				subprocess.call(argsss)
+				try:
+					subprocess.call(argsss)
+				except:
+					pass
 				#POST Check if the planner was killed
 				print 'pkm2'
 				self.pypyKillMutex.acquire()
@@ -431,7 +436,10 @@ class Executive(object):
 			elap = (now - self.lastPypyKill)
 			print 'couldn\'t acquire', elap
 			if elap > 3.:
-				subprocess.call(["killall", "-9", "pypy"])
+				try:
+					subprocess.call(["killall", "-9", "pypy"])
+				except:
+					pass
 				self.lastPypyKill = now
 			time.sleep(1)
 		try:
@@ -441,7 +449,6 @@ class Executive(object):
 			self.updatePlan()
 		except:
 			print 'There was some problem updating internal model to xml'
-			sys.exit(1)
 		self.mutex.release()
 		print "modificationProposal(self, modification)>>>>>>>>>>>", sup
 
@@ -453,12 +460,9 @@ class Executive(object):
 			self.executiveTopic.symbolUpdated(nodeModification)
 		except:
 			print 'There was some problem with update node'
-			self.mutex.release()
-			sys.exit(1)
 		self.mutex.release()
 
 	def edgeUpdated(self, edgeModification):
-		
 		self.mutex.acquire()
 		internal = AGMModelConversion.fromIceToInternal_edge(edgeModification)
 		#self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
@@ -473,4 +477,28 @@ class Executive(object):
 		self.mutex.release()
 		if not found:
 			print 'couldn\'t update edge because no match was found'
-			sys.exit(-1)
+
+	def edgesUpdated(self, edgeModifications):
+		self.mutex.acquire()
+		allFound = True
+		for edgeModification in edgeModifications:
+			internal = AGMModelConversion.fromIceToInternal_edge(edgeModification)
+			found = False
+			for i in xrange(len(self.currentModel.links)):
+				if str(self.currentModel.links[i].a) == str(edgeModification.a):
+					if str(self.currentModel.links[i].b) == str(edgeModification.b):
+						if str(self.currentModel.links[i].linkType) == str(edgeModification.edgeType):
+							self.currentModel.links[i].attributes = copy.deepcopy(edgeModification.attributes)
+							found = True
+			if not found:
+				allFound = False
+				break
+
+		self.mutex.release()
+		if allFound:
+			self.executiveTopic.edgesUpdated(edgeModifications)
+		else:
+			print 'couldn\'t update edges sequence because some edges were not found'
+
+
+
