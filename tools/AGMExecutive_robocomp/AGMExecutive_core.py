@@ -122,9 +122,7 @@ class Executive(object):
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
 	def broadcastPlan(self):
-		print 'ma0'
 		self.mutex.acquire( )
-		print 'mb0'
 		try:
 			self.publishExecutiveVisualizationTopic()
 			self.sendParams()
@@ -151,9 +149,7 @@ class Executive(object):
 			sys.exit(1)
 		self.mutex.release()
 	def reset(self):
-		print 'ma2'
 		self.mutex.acquire( )
-		print 'mb2'
 		self.currentModel = xmlModelParser.graphFromXML(self.initialModelPath)
 		self.updatePlan()
 		self.mutex.release()
@@ -162,21 +158,29 @@ class Executive(object):
 		self.currentModel = model
 		self.broadcastModel()
 	def setMission(self, target, avoidUpdate=False):
-		print 'ma3'
+		print 'setMission1'
 		self.mutex.acquire( )
-		print 'mb3'
+		print 'setMission1'
 		try:
+			print 'setMission2'
 			self.target = target
 			self.target.toXML("/tmp/target.xml")
+			print 'setMission3'
 			targetText = generateTarget(self.target)
 			ofile = open("/tmp/target.py", 'w')
 			ofile.write(targetText)
 			ofile.close()
-			if not avoidUpdate:
+			print 'setMission4'
+			if avoidUpdate:
+				print 'setMission4.5'
 				self.updatePlan()
+				print 'setMission4.8'
+			else:
+				print 'setMission4.9'
 		except:
 			print 'There was some problem setting the mission'
 			sys.exit(1)
+		print 'setMission5'
 		self.mutex.release()
 	def ignoreCommentsInPlan(self, plan):
 		ret = []
@@ -249,7 +253,6 @@ class Executive(object):
 		# First, try with the current plan
 		stored = False
 		if self.plan != None and False:
-			print 'pkm0'
 			self.pypyKillMutex.acquire()
 			try:
 				peid = '_'+str(self.plannerExecutionID)
@@ -257,21 +260,16 @@ class Executive(object):
 				print 'There was some problem broadcasting the model'
 				sys.exit(1)
 			self.pypyKillMutex.release()
-			print 'YY0'
 			stored, stepsFwd = self.callMonitoring(peid)
-			print 'YY1'
 			print stored, stepsFwd
-			print 'hola1'
 		else:
 			print 'There was no previous plan'
 
-		print 'hola2'
 		print 'Running the planner?', stored==False
 		if stored == False:
 			# Run planner
 			start = time.time()
 			#PRE
-			print 'pkm1'
 			self.pypyKillMutex.acquire()
 			try:
 				self.pypyInProgress += 1
@@ -391,6 +389,8 @@ class Executive(object):
 	#
 	#
 	def sendParams(self):
+		print 'SEND PLAN'
+		print self.lastParamsSent
 		print 'Send plan to'
 		for agent in self.agents:
 			print '\t', agent,
@@ -458,7 +458,6 @@ class Executive(object):
 		self.mutex.release()
 
 	def edgeUpdated(self, edgeModification):
-		
 		self.mutex.acquire()
 		internal = AGMModelConversion.fromIceToInternal_edge(edgeModification)
 		#self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
@@ -473,4 +472,5 @@ class Executive(object):
 		self.mutex.release()
 		if not found:
 			print 'couldn\'t update edge because no match was found'
-			sys.exit(-1)
+			print 'edge', edgeModification.a, edgeModification.b, edgeModification.edgeType
+			#sys.exit(-1)
