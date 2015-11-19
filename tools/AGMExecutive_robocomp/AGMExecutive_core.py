@@ -158,29 +158,19 @@ class Executive(object):
 		self.currentModel = model
 		self.broadcastModel()
 	def setMission(self, target, avoidUpdate=False):
-		print 'setMission1'
 		self.mutex.acquire( )
-		print 'setMission1'
 		try:
-			print 'setMission2'
 			self.target = target
 			self.target.toXML("/tmp/target.xml")
-			print 'setMission3'
 			targetText = generateTarget(self.target)
 			ofile = open("/tmp/target.py", 'w')
 			ofile.write(targetText)
 			ofile.close()
-			print 'setMission4'
 			if avoidUpdate:
-				print 'setMission4.5'
 				self.updatePlan()
-				print 'setMission4.8'
-			else:
-				print 'setMission4.9'
 		except:
 			print 'There was some problem setting the mission'
 			sys.exit(1)
-		print 'setMission5'
 		self.mutex.release()
 	def ignoreCommentsInPlan(self, plan):
 		ret = []
@@ -248,8 +238,10 @@ class Executive(object):
 
 	def updatePlan(self):
 		# Kill any previous planning process
-		subprocess.call(["killall", "-9", "pypy"])
-
+		try:
+			subprocess.call(["killall", "-9", "pypy"])
+		except:
+			pass
 		# First, try with the current plan
 		stored = False
 		if self.plan != None and False:
@@ -294,7 +286,10 @@ class Executive(object):
 				lines = cacheResult[1].split('\n')
 			else:
 				print 'Running the planner...'
-				subprocess.call(argsss)
+				try:
+					subprocess.call(argsss)
+				except:
+					pass
 				#POST Check if the planner was killed
 				print 'pkm2'
 				self.pypyKillMutex.acquire()
@@ -389,8 +384,6 @@ class Executive(object):
 	#
 	#
 	def sendParams(self):
-		print 'SEND PLAN'
-		print self.lastParamsSent
 		print 'Send plan to'
 		for agent in self.agents:
 			print '\t', agent,
@@ -431,7 +424,10 @@ class Executive(object):
 			elap = (now - self.lastPypyKill)
 			print 'couldn\'t acquire', elap
 			if elap > 3.:
-				subprocess.call(["killall", "-9", "pypy"])
+				try:
+					subprocess.call(["killall", "-9", "pypy"])
+				except:
+					pass
 				self.lastPypyKill = now
 			time.sleep(1)
 		try:
@@ -441,7 +437,6 @@ class Executive(object):
 			self.updatePlan()
 		except:
 			print 'There was some problem updating internal model to xml'
-			sys.exit(1)
 		self.mutex.release()
 		print "modificationProposal(self, modification)>>>>>>>>>>>", sup
 

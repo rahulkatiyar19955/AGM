@@ -215,12 +215,28 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 		refresh = true;
 	}
 }
+
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
 {
 	{
 		QMutexLocker dd(&modelMutex);
 		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);				
 		agmInner.updateImNodeFromEdge(modification,innerViewer->innerModel);
+		agmInner.setWorld(worldModel);		
+		refresh = true;
+	}
+}
+
+
+void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence& modifications)
+{
+	{
+		QMutexLocker dd(&modelMutex);
+                for (auto modification : modifications)
+                {
+                    AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);				
+                    agmInner.updateImNodeFromEdge(modification,innerViewer->innerModel);
+                }
 		agmInner.setWorld(worldModel);		
 		refresh = true;
 	}
