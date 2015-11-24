@@ -122,9 +122,7 @@ class Executive(object):
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
 	def broadcastPlan(self):
-		print 'ma0'
 		self.mutex.acquire( )
-		print 'mb0'
 		try:
 			self.publishExecutiveVisualizationTopic()
 			self.sendParams()
@@ -151,9 +149,7 @@ class Executive(object):
 			sys.exit(1)
 		self.mutex.release()
 	def reset(self):
-		print 'ma2'
 		self.mutex.acquire( )
-		print 'mb2'
 		self.currentModel = xmlModelParser.graphFromXML(self.initialModelPath)
 		self.updatePlan()
 		self.mutex.release()
@@ -162,9 +158,7 @@ class Executive(object):
 		self.currentModel = model
 		self.broadcastModel()
 	def setMission(self, target, avoidUpdate=False):
-		print 'ma3'
 		self.mutex.acquire( )
-		print 'mb3'
 		try:
 			self.target = target
 			self.target.toXML("/tmp/target.xml")
@@ -172,7 +166,7 @@ class Executive(object):
 			ofile = open("/tmp/target.py", 'w')
 			ofile.write(targetText)
 			ofile.close()
-			if not avoidUpdate:
+			if avoidUpdate:
 				self.updatePlan()
 		except:
 			print 'There was some problem setting the mission'
@@ -251,7 +245,6 @@ class Executive(object):
 		# First, try with the current plan
 		stored = False
 		if self.plan != None and False:
-			print 'pkm0'
 			self.pypyKillMutex.acquire()
 			try:
 				peid = '_'+str(self.plannerExecutionID)
@@ -259,21 +252,16 @@ class Executive(object):
 				print 'There was some problem broadcasting the model'
 				sys.exit(1)
 			self.pypyKillMutex.release()
-			print 'YY0'
 			stored, stepsFwd = self.callMonitoring(peid)
-			print 'YY1'
 			print stored, stepsFwd
-			print 'hola1'
 		else:
 			print 'There was no previous plan'
 
-		print 'hola2'
 		print 'Running the planner?', stored==False
 		if stored == False:
 			# Run planner
 			start = time.time()
 			#PRE
-			print 'pkm1'
 			self.pypyKillMutex.acquire()
 			try:
 				self.pypyInProgress += 1
@@ -460,6 +448,8 @@ class Executive(object):
 			self.executiveTopic.symbolUpdated(nodeModification)
 		except:
 			print 'There was some problem with update node'
+			self.mutex.release()
+			sys.exit(1)
 		self.mutex.release()
 
 	def edgeUpdated(self, edgeModification):
@@ -477,28 +467,5 @@ class Executive(object):
 		self.mutex.release()
 		if not found:
 			print 'couldn\'t update edge because no match was found'
-
-	def edgesUpdated(self, edgeModifications):
-		self.mutex.acquire()
-		allFound = True
-		for edgeModification in edgeModifications:
-			internal = AGMModelConversion.fromIceToInternal_edge(edgeModification)
-			found = False
-			for i in xrange(len(self.currentModel.links)):
-				if str(self.currentModel.links[i].a) == str(edgeModification.a):
-					if str(self.currentModel.links[i].b) == str(edgeModification.b):
-						if str(self.currentModel.links[i].linkType) == str(edgeModification.edgeType):
-							self.currentModel.links[i].attributes = copy.deepcopy(edgeModification.attributes)
-							found = True
-			if not found:
-				allFound = False
-				break
-
-		self.mutex.release()
-		if allFound:
-			self.executiveTopic.edgesUpdated(edgeModifications)
-		else:
-			print 'couldn\'t update edges sequence because some edges were not found'
-
-
-
+			print 'edge', edgeModification.a, edgeModification.b, edgeModification.edgeType
+			#sys.exit(-1)
