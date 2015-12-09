@@ -199,7 +199,8 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 		//agmInner.setWorld(worldModel);	
 		//CAUTION no realentizará el hilo
 		worldModel->save("lastStructuralChange.xml");
-		changeInner(agmInner.extractInnerModel(worldModel, "room"));		
+		//changeInner(agmInner.extractInnerModel(worldModel, "room"));		
+		changeInner(AgmInner::extractInnerModel(worldModel, "room"));		
 		fillItemList();
 		refresh = true;
 		
@@ -221,8 +222,9 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	{
 		QMutexLocker dd(&modelMutex);
 		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);				
-		agmInner.updateImNodeFromEdge(worldModel, modification,innerViewer->innerModel);
+		//agmInner.updateImNodeFromEdge(worldModel, modification,innerViewer->innerModel);
 		//agmInner.setWorld(worldModel);		
+		AgmInner::updateImNodeFromEdge(worldModel,modification,innerViewer->innerModel);
 		refresh = true;
 	}
 }
@@ -235,7 +237,8 @@ void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence& mod
                 for (auto modification : modifications)
                 {
                     AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);				
-                    agmInner.updateImNodeFromEdge(worldModel, modification,innerViewer->innerModel);
+                    //agmInner.updateImNodeFromEdge(worldModel, modification,innerViewer->innerModel);
+		    AgmInner::updateImNodeFromEdge(worldModel,modification,innerViewer->innerModel);
                 }
 		//agmInner.setWorld(worldModel);		
 		refresh = true;

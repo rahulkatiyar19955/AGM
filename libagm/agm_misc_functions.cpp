@@ -57,6 +57,7 @@ std::string int2str(const int32_t &i)
 
 
 #if ROBOCOMP_SUPPORT == 1
+
 void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel, std::string sender)
 {
 	RoboCompAGMWorldModel::Event e;
