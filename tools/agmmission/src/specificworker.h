@@ -109,7 +109,7 @@ private:
 	OsgView *osgView;
 	InnerModel *innerModelVacio;
 	InnerModelViewer *innerViewer; 
-	AgmInner agmInner;
+// 	AgmInner agmInner;
 
 
 	
