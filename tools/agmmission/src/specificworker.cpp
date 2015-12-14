@@ -200,7 +200,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 		//CAUTION no realentizará el hilo
 		worldModel->save("lastStructuralChange.xml");
 		//changeInner(agmInner.extractInnerModel(worldModel, "room"));		
-		changeInner(AgmInner::extractInnerModel(worldModel, "room"));		
+		changeInner(AgmInner::extractInnerModel(worldModel));		
 		fillItemList();
 		refresh = true;
 		
