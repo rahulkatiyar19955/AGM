@@ -606,7 +606,6 @@ int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 
 AGMModelSymbol::SPtr AGMModel::getParentByLink(int32_t id, std::string linkname, int32_t i) const
 {
-	int64_t ret = -1;
 	uint32_t idx = 0;
 	for (int32_t time=0; time<=i; ++time)
 	{
@@ -966,6 +965,12 @@ AGMModelSymbol::SPtr AGMModel::newSymbol(int32_t identifier, std::string typ)
 AGMModelSymbol::SPtr AGMModel::newSymbol(int32_t identifier, std::string typ, std::map<std::string, std::string> atr)
 {
 	AGMModelSymbol *s = new AGMModelSymbol(this, identifier, typ, atr);
+	return symbols[getIndexByIdentifier(s->identifier)];
+}
+
+AGMModelSymbol::SPtr AGMModel::newSymbol(std::string typ, std::map<std::string, std::string> atr)
+{
+	AGMModelSymbol *s = new AGMModelSymbol(this, -1, typ, atr);
 	return symbols[getIndexByIdentifier(s->identifier)];
 }
 
