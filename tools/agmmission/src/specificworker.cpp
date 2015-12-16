@@ -350,12 +350,13 @@ void SpecificWorker::setMission()
 		QMessageBox::critical(this, "Can't connect to the executive", "Can't connect to the executive. Please, make sure the executive is running properly");
 	}
 	planText->clear();
-	AGMModelConverter::fromXMLToInternal(missionPaths[missions->currentIndex()], targetModel);
-	AGMModelConverter::fromInternalToIce(targetModel, targetModelICE);
+// 	AGMModelConverter::fromXMLToInternal(missionPaths[missions->currentIndex()], targetModel);
+// 	AGMModelConverter::fromInternalToIce(targetModel, targetModelICE);
 
 	try
 	{
 		agmexecutive_proxy->deactivate();
+		printf("mission path: %s\n", missionPaths[missions->currentIndex()].c_str());
 		agmexecutive_proxy->setMission(missionPaths[missions->currentIndex()]);
 		agmexecutive_proxy->activate(); 
 	}

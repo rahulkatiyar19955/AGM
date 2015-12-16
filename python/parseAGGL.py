@@ -64,7 +64,7 @@ def getAGGLMetaModels():
 	aggl  = OneOrMore(prop).setResultsName("props") + sep + OneOrMore(rule).setResultsName("rules") + StringEnd()
 	
 	# WHOLE AGGT FILE
-	aggt  = graph.setResultsName("graph") + Cnd
+	aggt  = Optional(graph.setResultsName("graph")) + Optional(Cnd)
 
 	ret = {}
 	ret['aggl'] = aggl

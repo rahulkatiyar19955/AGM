@@ -117,7 +117,7 @@ class Executive(object):
 		self.setModel(xmlModelParser.graphFromXML(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 		print 'setmission'
-		self.setMission(xmlModelParser.graphFromXML(initialMissionPath), avoidUpdate=True)
+		self.setMission(initialMissionPath, avoidUpdate=True)
 
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
@@ -160,14 +160,22 @@ class Executive(object):
 	def setMission(self, target, avoidUpdate=False):
 		self.mutex.acquire( )
 		try:
-			self.target = target
-			self.target.toXML("/tmp/target.xml")
-			targetText = generateTarget(self.target)
+			print 'generate target', target
+			print 'temp'
+			temp = AGMFileDataParsing.targetFromFile(target)
+			print 'temp1'
+			self.target = generateTarget_AGGT(temp)
+			print 'open target.py for writing'
 			ofile = open("/tmp/target.py", 'w')
-			ofile.write(targetText)
+			print 'write'
+			ofile.write(self.target)
+			print 'close'
 			ofile.close()
+			print 'done'
 			if avoidUpdate:
+				print 'do update plan'
 				self.updatePlan()
+			print 'd'
 		except:
 			print 'There was some problem setting the mission'
 			sys.exit(1)
@@ -376,7 +384,7 @@ class Executive(object):
 			except:
 				traceback.print_exc()
 				print 'Error generating PDDL-like version of the current plan'
-			self.executiveVisualizationTopic.update(self.worldModelICE, AGMModelConversion.fromInternalToIce(self.target), planPDDL)
+			#self.executiveVisualizationTopic.update(self.worldModelICE, AGMModelConversion.fromInternalToIce(self.target), planPDDL)
 		except:
 			traceback.print_exc()
 			print "can't publish executiveVisualizationTopic.update"

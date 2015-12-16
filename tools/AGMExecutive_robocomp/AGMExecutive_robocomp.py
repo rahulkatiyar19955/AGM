@@ -74,7 +74,7 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 		self.handler.reset()
 	def setMission(self, target, current=None):
 		print target
-		self.handler.setMission(xmlModelParser.graphFromXML(target), avoidUpdate=True)
+		self.handler.setMission(target, avoidUpdate=False)
 	def getData(self, current=None):
 		return world, target, plan
 	def world2agmgraph(self, target):
