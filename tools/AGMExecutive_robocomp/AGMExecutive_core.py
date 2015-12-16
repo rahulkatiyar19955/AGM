@@ -409,14 +409,14 @@ class Executive(object):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
-
 		# Handle model conversion and verification that the model is not the current model
+		print 'nos llega cambio estructural'
 		worldModelICE = modification.newModel
 		internalModel = AGMModelConversion.fromIceToInternal_model(worldModelICE, ignoreInvalidEdges=True)
 		try:
-			if internalModel.equivalent(self.lastModification):
-				return
-			else:
+#			if internalModel.equivalent(self.lastModification):
+#				return
+#			else:
 				self.lastModification = internalModel
 		except AttributeError:
 			self.lastModification = internalModel
@@ -425,9 +425,7 @@ class Executive(object):
 		self.modifications += 1
 		print "<<<<<<<<<<<modificationProposal(self, modification) (", sup, ') by', modification.sender
 		print 'Tryin...'
-		print 'ma44'
 		while self.mutex.acquire(0)==False:
-			print 'mb44'
 			now = time.time()
 			elap = (now - self.lastPypyKill)
 			print 'couldn\'t acquire', elap

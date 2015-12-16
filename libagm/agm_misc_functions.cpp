@@ -60,6 +60,8 @@ std::string int2str(const int32_t &i)
 
 void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel, std::string sender)
 {
+	newModel->save("new.xml");
+	oldModel->save("old.xml");
 	RoboCompAGMWorldModel::Event e;
 	e.sender = sender;
 	e.why = RoboCompAGMWorldModel::BehaviorBasedModification;
@@ -67,7 +69,6 @@ void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &ag
 	AGMModelConverter::fromInternalToIce(oldModel, e.backModel);
 	newModel->removeDanglingEdges();
 	AGMModelConverter::fromInternalToIce(newModel, e.newModel);
-	//AGMModelPrinter::printWorld(newModel);
 	agmagenttopic->structuralChange(e);
 }
 
