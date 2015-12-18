@@ -112,12 +112,13 @@ class Executive(object):
 		print 'read initialmodelpath'
 		self.initialModelPath = initialModelPath
 		self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
-		print 'set mission'
+		print 'set model'
 		self.backModelICE  = None
 		self.setModel(xmlModelParser.graphFromXML(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
-		print 'setmission'
-		self.setMission(xmlModelParser.graphFromXML(initialMissionPath), avoidUpdate=True)
+		print 'setmission11'
+		self.setMission(initialMissionPath, avoidUpdate=True)
+		print 'setmission22'
 
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
@@ -161,10 +162,14 @@ class Executive(object):
 		self.mutex.acquire( )
 		try:
 			self.target = target
-			self.target.toXML("/tmp/target.xml")
-			targetText = generateTarget(self.target)
+			#self.target.toXML("/tmp/target.xml")
+			print 'generatetarget', self.target
+			targetText = generateTarget_AGGT(AGMFileDataParsing.targetFromFile(self.target))
+			print 'generatetarget 2'
 			ofile = open("/tmp/target.py", 'w')
+			print 'dede'
 			ofile.write(targetText)
+			print 'edwetwe'
 			ofile.close()
 			if avoidUpdate:
 				self.updatePlan()
@@ -275,7 +280,7 @@ class Executive(object):
 			#CALL
 			argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
 			print 'Ask cache'
-			cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
+			cacheResult = False#self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
 			if cacheResult:
 				print 'Got plan from cache'
 				print '<<<'
@@ -376,7 +381,7 @@ class Executive(object):
 			except:
 				traceback.print_exc()
 				print 'Error generating PDDL-like version of the current plan'
-			self.executiveVisualizationTopic.update(self.worldModelICE, AGMModelConversion.fromInternalToIce(self.target), planPDDL)
+			#self.executiveVisualizationTopic.update(self.worldModelICE, AGMModelConversion.fromInternalToIce(self.target), planPDDL)
 		except:
 			traceback.print_exc()
 			print "can't publish executiveVisualizationTopic.update"
