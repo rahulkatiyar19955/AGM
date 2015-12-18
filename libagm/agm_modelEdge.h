@@ -34,8 +34,8 @@ public:
 	void setAttribute(std::string a, std::string v);
 	std::string getAttribute(std::string a);
 
-	std::string toString(const AGMModel::SPtr &world) const;
-	std::string toString(const AGMModel *world) const;
+	std::string toString(const AGMModel::SPtr &world, bool verbose = false) const;
+	std::string toString(const AGMModel *world, bool verbose = false) const;
 
 	void getStrings(const AGMModel::SPtr &world, std::string &label, std::string &a, std::string &b) const;
 	void getStrings(const AGMModel *world, std::string &label, std::string &a, std::string &b) const;

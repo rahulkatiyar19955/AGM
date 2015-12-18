@@ -196,10 +196,11 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modifi
 		QMutexLocker dd(&modelMutex);
 		AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
 		//AGMModelPrinter::printWorld(worldModel);		
-		agmInner.setWorld(worldModel);	
+		//agmInner.setWorld(worldModel);	
 		//CAUTION no realentizará el hilo
 		worldModel->save("lastStructuralChange.xml");
-		changeInner(agmInner.extractInnerModel("room"));		
+		//changeInner(agmInner.extractInnerModel(worldModel, "room"));		
+		changeInner(AgmInner::extractInnerModel(worldModel));		
 		fillItemList();
 		refresh = true;
 		
@@ -211,7 +212,7 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modificati
 	{
 		QMutexLocker dd(&modelMutex);
 		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
-		agmInner.setWorld(worldModel);				
+		//agmInner.setWorld(worldModel);				
 		refresh = true;
 	}
 }
@@ -221,8 +222,9 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification
 	{
 		QMutexLocker dd(&modelMutex);
 		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);				
-		agmInner.updateImNodeFromEdge(modification,innerViewer->innerModel);
-		agmInner.setWorld(worldModel);		
+		//agmInner.updateImNodeFromEdge(worldModel, modification,innerViewer->innerModel);
+		//agmInner.setWorld(worldModel);		
+		AgmInner::updateImNodeFromEdge(worldModel,modification,innerViewer->innerModel);
 		refresh = true;
 	}
 }
@@ -235,9 +237,10 @@ void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence& mod
                 for (auto modification : modifications)
                 {
                     AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);				
-                    agmInner.updateImNodeFromEdge(modification,innerViewer->innerModel);
+                    //agmInner.updateImNodeFromEdge(worldModel, modification,innerViewer->innerModel);
+		    AgmInner::updateImNodeFromEdge(worldModel,modification,innerViewer->innerModel);
                 }
-		agmInner.setWorld(worldModel);		
+		//agmInner.setWorld(worldModel);		
 		refresh = true;
 	}
 }
@@ -347,12 +350,13 @@ void SpecificWorker::setMission()
 		QMessageBox::critical(this, "Can't connect to the executive", "Can't connect to the executive. Please, make sure the executive is running properly");
 	}
 	planText->clear();
-	AGMModelConverter::fromXMLToInternal(missionPaths[missions->currentIndex()], targetModel);
-	AGMModelConverter::fromInternalToIce(targetModel, targetModelICE);
+// 	AGMModelConverter::fromXMLToInternal(missionPaths[missions->currentIndex()], targetModel);
+// 	AGMModelConverter::fromInternalToIce(targetModel, targetModelICE);
 
 	try
 	{
 		agmexecutive_proxy->deactivate();
+		printf("mission path: %s\n", missionPaths[missions->currentIndex()].c_str());
 		agmexecutive_proxy->setMission(missionPaths[missions->currentIndex()]);
 		agmexecutive_proxy->activate(); 
 	}

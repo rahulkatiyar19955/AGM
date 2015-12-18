@@ -133,6 +133,8 @@ public:
 	/// Returns a shared pointer to a new symbol of type <em>symbolType</em>. Its behavior is the one of the previous method, but it also sets for the new symbol the map of attributes provided as <em>attrs</em>.
 	AGMModelSymbol::SPtr newSymbol(int32_t identifier, std::string symbolType, std::map<std::string, std::string> attrs);
 
+	AGMModelSymbol::SPtr newSymbol(std::string symbolType, std::map<std::string, std::string> attrs);
+
 
 	/// Removes all edges related to the symbol with identifier <em>id</em>.
 	bool removeEdgesRelatedToSymbol(int32_t id);

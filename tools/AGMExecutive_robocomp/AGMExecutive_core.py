@@ -116,7 +116,7 @@ class Executive(object):
 		self.backModelICE  = None
 		self.setModel(xmlModelParser.graphFromXML(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
-		print 'setmission11'
+		print 'setmission'
 		self.setMission(initialMissionPath, avoidUpdate=True)
 		print 'setmission22'
 
@@ -161,18 +161,22 @@ class Executive(object):
 	def setMission(self, target, avoidUpdate=False):
 		self.mutex.acquire( )
 		try:
-			self.target = target
-			#self.target.toXML("/tmp/target.xml")
-			print 'generatetarget', self.target
-			targetText = generateTarget_AGGT(AGMFileDataParsing.targetFromFile(self.target))
-			print 'generatetarget 2'
+			print 'generate target', target
+			print 'temp'
+			temp = AGMFileDataParsing.targetFromFile(target)
+			print 'temp1'
+			self.target = generateTarget_AGGT(temp)
+			print 'open target.py for writing'
 			ofile = open("/tmp/target.py", 'w')
-			print 'dede'
-			ofile.write(targetText)
-			print 'edwetwe'
+			print 'write'
+			ofile.write(self.target)
+			print 'close'
 			ofile.close()
+			print 'done'
 			if avoidUpdate:
+				print 'do update plan'
 				self.updatePlan()
+			print 'd'
 		except:
 			print 'There was some problem setting the mission'
 			sys.exit(1)
@@ -280,7 +284,7 @@ class Executive(object):
 			#CALL
 			argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
 			print 'Ask cache'
-			cacheResult = False#self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
+			cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
 			if cacheResult:
 				print 'Got plan from cache'
 				print '<<<'
@@ -406,14 +410,14 @@ class Executive(object):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
-
 		# Handle model conversion and verification that the model is not the current model
+		print 'nos llega cambio estructural'
 		worldModelICE = modification.newModel
 		internalModel = AGMModelConversion.fromIceToInternal_model(worldModelICE, ignoreInvalidEdges=True)
 		try:
-			if internalModel.equivalent(self.lastModification):
-				return
-			else:
+#			if internalModel.equivalent(self.lastModification):
+#				return
+#			else:
 				self.lastModification = internalModel
 		except AttributeError:
 			self.lastModification = internalModel
@@ -422,9 +426,7 @@ class Executive(object):
 		self.modifications += 1
 		print "<<<<<<<<<<<modificationProposal(self, modification) (", sup, ') by', modification.sender
 		print 'Tryin...'
-		print 'ma44'
 		while self.mutex.acquire(0)==False:
-			print 'mb44'
 			now = time.time()
 			elap = (now - self.lastPypyKill)
 			print 'couldn\'t acquire', elap

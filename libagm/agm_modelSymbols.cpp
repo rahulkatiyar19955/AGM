@@ -65,11 +65,11 @@ void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ)
 	if (id==-1)
 	{
 		identifier = model->getNewId();
-// 		printf("Got new ID from pool: %d\n", identifier);
 	}
 	else
+	{
 		identifier = id;
-
+	}
 	symbolType = typ;
 
 	model->insertSymbol(this);
@@ -86,15 +86,20 @@ void AGMModelSymbol::init(AGMModel *model, int32_t id, std::string typ, std::map
 		exit(-1);
 	}
 
-	identifier = id;
+	if (id==-1)
+	{
+		identifier = model->getNewId();
+	}
+	else
+	{
+		identifier = id;
+	}
 	symbolType = typ;
 	attributes = atr;
 
-	if (model != NULL)
-		model->insertSymbol(this);
+	model->insertSymbol(this);
 
 	modelRef = model;
-// 	printf("new symbol: %s [%d] (%p)\n", symbolType.c_str(), identifier, this);
 }
 
 

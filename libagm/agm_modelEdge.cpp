@@ -43,14 +43,14 @@ void AGMModelEdge::setFrom(const AGMModelEdge &src)
 
 
 
-std::string AGMModelEdge::toString(const AGMModel::SPtr &world) const
+std::string AGMModelEdge::toString(const AGMModel::SPtr &world, bool verbose) const
 {
-	return toString(world.get());
+	return toString(world.get(),verbose);
 }
 
 
 
-std::string AGMModelEdge::toString(const AGMModel *world) const
+std::string AGMModelEdge::toString(const AGMModel *world, bool verbose) const
 {
 	std::ostringstream stringStream;
 	std::string stringA, stringB;
@@ -75,8 +75,20 @@ std::string AGMModelEdge::toString(const AGMModel *world) const
 		AGMModelPrinter::printWorld(world);
 		exit(-1);
 	}
-
+	
 	stringStream << linking << " " << stringA << " " << stringB;
+	
+	if (verbose)
+	{		
+		std::map<std::string, std::string>::const_iterator itr = this->attributes.begin();
+		for(; itr!=this->attributes.end(); ++itr)
+		{
+			//printf("\t<%s> --> <%s>\n", itr->first.c_str(), itr->second.c_str());
+			stringStream <<"\n\t"<<itr->first<<" "<< itr->second;
+		}
+	}
+
+	
 	return stringStream.str();
 }
 
