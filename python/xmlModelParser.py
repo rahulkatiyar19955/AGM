@@ -50,10 +50,10 @@ class AGMWorldModelParser(xmllib.XMLParser):
 		src = attrs['src']
 		dst = attrs['dst']
 		if not src in self.nodes:
-			print 'No node', src
+			print 'No src node', src
 			sys.exit(-1)
 		if not dst in self.nodes:
-			print 'No node', dst
+			print 'No dst node', dst
 			sys.exit(-1)
 		enabled = False
 

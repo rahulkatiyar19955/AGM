@@ -61,23 +61,23 @@ class AGMLink(object):
 		self.a = a
 		self.b = b
 		self.linkType = linkType
-		#if attrs==None: attrs=dict()
-		#self.attributes = attrs
+		self.attributes = attrs
 
-		if attrs==None:
+		if self.attributes == None:
 			self.attributes = {}
-			if linkType == 'RT':
-				self.attributes['tx'] = '0'
-				self.attributes['ty'] = '0'
-				self.attributes['tz'] = '0'
-				self.attributes['rx'] = '0'
-				self.attributes['ry'] = '0'
-				self.attributes['rz'] = '0'
-		elif type(attrs)==type({}):
+		elif type(self.attributes) == type({}):
 			self.attributes = attrs
 		else:
 			print 'Wrong value for AGMLink() [attrs is not a dictionary]', type(attrs)
 			sys.exit(-1358)
+
+		if linkType == 'RT':
+			if not 'tx' in self.attributes: self.attributes['tx'] = '0'
+			if not 'ty' in self.attributes: self.attributes['ty'] = '0'
+			if not 'tz' in self.attributes: self.attributes['tz'] = '0'
+			if not 'rx' in self.attributes: self.attributes['rx'] = '0'
+			if not 'ry' in self.attributes: self.attributes['ry'] = '0'
+			if not 'rz' in self.attributes: self.attributes['rz'] = '0'
 		
 			
 		self.color = 'white'
@@ -155,6 +155,26 @@ class AGMGraph(object):
 		self.nodes = nodes
 		self.links = links
 		self.side = side
+
+	def getIsolatedSymbolsNames(self):
+		connected = set()
+		for link in self.links:
+			connected.add(link.a)
+			connected.add(link.b)
+		return [ n for n in self.nodes.keys() if not n in connected ]
+
+	def filterGeometricSymbols(self):
+		# Create a deep copy of the current graph
+		ret = copy.deepcopy(self)
+		# Remove RT links
+		ret.links = [ l for l in ret.links if not l.linkType == "RT"]
+		# Get isolated nodes
+		isolated = ret.getIsolatedSymbolsNames()
+		# Remove isolated nodes
+		for n in isolated:
+			del ret.nodes[n]
+		# Return resulting graph
+		return ret
 	def removeDanglingEdges(self):
 		linkindex = 0
 		while linkindex < len(self.links):

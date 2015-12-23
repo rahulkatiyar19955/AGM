@@ -51,7 +51,7 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 		ret2 = False
 		if len(currentPlan)>0:
 			try:
-				print 'Trying one step ahead...', stepsFwd
+				#print 'Trying one step ahead...', stepsFwd
 				newPlan = currentPlan.removeFirstAction(currentModel)
 				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, newPlan, stepsFwd+1)
 			except:
@@ -63,15 +63,15 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 			return ret2, stepsFwd2, planMonitoring2
 		else:
 			try:
-				print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
-				print plan
+				#print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
+				#print plan
 				p = PyPlanChecker(domainClass, domainPath, init, currentPlan, target, '', verbose=False)
 				if p.valid:
-					print 'GOT PLAN FROM MONITORING!!!'
-					print currentPlan
+					#print 'GOT PLAN FROM MONITORING!!!'
+					#print currentPlan
 					return True, stepsFwd, currentPlan
 				else:
-					print 'doesn\'t work'
+					#print 'doesn\'t work'
 					return False, 0, None
 			except:
 				traceback.print_exc()
@@ -228,7 +228,7 @@ class Executive(object):
 			#except:
 				#pass
 
-			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel, target, AGGLPlannerPlan(self.plan))
+			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan))
 			#print 'bb'
 			#print ret, stepsFwd, planMonitoring
 			if ret:
@@ -276,7 +276,11 @@ class Executive(object):
 				self.pypyInProgress += 1
 				self.plannerExecutionID+=1
 				peid = '_'+str(self.plannerExecutionID)
-				self.currentModel.toXML("/tmp/lastWorld"+peid+".xml")
+				print 'a'
+				f = self.currentModel.filterGeometricSymbols()
+				print 'b'
+				f.toXML("/tmp/lastWorld"+peid+".xml")
+				print 'c'
 			except:
 				print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
 				sys.exit(1)
@@ -326,9 +330,7 @@ class Executive(object):
 			# Get the output
 			try:
 				self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
-				print 'XX0'
 				stored, stepsFwd = self.callMonitoring(peid)
-				print 'XX1'
 			except: # The planner was probably killed
 				traceback.print_exc()
 				return
