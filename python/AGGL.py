@@ -199,6 +199,7 @@ class AGMGraph(object):
 	def __repr__(self):
 		return self.__str__()
 	def __cmp__(self):
+		print 'AGMGraph cmp(self)'
 		return object.__cmp__(self)
 	def __hash__(self):
 		return (len(self.nodes), len(self.links))
@@ -241,14 +242,15 @@ class AGMGraph(object):
 			return False
 
 	def __cmp__(self, other):
+		#print 'AGMGraph cmp(self, other)'
 		# Basic: number of nodes
 		if len(self.nodes) != len(other.nodes):
-			return False
+			return -1
 		# Basic: number of links
 		if len(self.links) != len(other.links):
-			return False
+			return -1
 
-		return True
+		return 0
 	def getName(self, xa, ya, diameter):
 		minDist = -1
 		minName = None
@@ -428,12 +430,16 @@ class AGMGraph(object):
 # @ingroup PyAPI
 #
 class AGMRule(object):
-	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, parameters='', precondition='', effect=''):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, success=1., parameters='', precondition='', effect=''):
 		object.__init__(self)
 		self.name = name
 		self.lhs = lhs
 		self.rhs = rhs
 		self.cost = cost
+		if len(str(success)) == 0:
+			self.success = 1.
+		else:
+			self.success = float(str(success))
 		self.passive = passive
 		self.parameters = parameters
 		self.precondition = precondition

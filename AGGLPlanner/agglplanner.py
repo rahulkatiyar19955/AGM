@@ -55,15 +55,30 @@ from generateAGGLPlannerCode import *
 # C O N F I G U R A T I O N
 number_of_threads = 0 #4
 maxWorldIncrement = 16
-maxCost = 200
-stopWithFirstPlan = True
+maxCost = 2000000000000
+stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 5.
 maxTimeWaitLimit = 5000.#1000.
 
 
 
+def sumActionCosts(node, last):
+	ret = 0
+	for t in node.costData[0:last]:
+		ret += t[0]
+	return ret
 
+def computePlanCost(node):
+	ret = 0
+	iters = 0
+	
+	for xcost, xsuccess, xname in node.costData:
+		print 'x', xcost, xsuccess, xname
+		iters += 1
+		ret += xcost + (1-xsuccess)*sumActionCosts(node, iters)
+	return ret
+	
 
 def quitar_Constantes_Creadas(ficheroMundo):
 	constantes = []
@@ -88,7 +103,7 @@ def quitar_Constantes_Creadas(ficheroMundo):
 			y limpiamos las variables usadas."""
 			T2 = int(''.join(constante)) 
 			constantes.append(T2)
-			constante = []				
+			constante = []
 		linea = init.readline()
 	init.close()
 	
@@ -118,7 +133,7 @@ def quitar_Constantes_Creadas(ficheroMundo):
 					i=i+1
 				T2 = int(''.join(constante)) 
 				eliminar.append(T2)
-				constante = []		
+				constante = []
 		contenido = contenido+linea
 		linea = target.readline()
 	target.close()
@@ -365,6 +380,8 @@ class WorldStateHistory(object):
 			self.cost = 0
 			# The string with all the changes made from the original graph.
 			self.history = []
+			# CostData
+			self.costData = []
 			# The identifier of the current graph
 			self.nodeId = -1
 			# The depth of the current graph.
@@ -377,6 +394,7 @@ class WorldStateHistory(object):
 		elif isinstance(type(init), type(WorldStateHistory)):
 			self.graph = copy.deepcopy(init.graph)
 			self.cost = copy.deepcopy(init.cost)
+			self.costData = copy.deepcopy(init.costData)
 			self.history = copy.deepcopy(init.history)
 			self.depth = copy.deepcopy(init.depth)
 			self.stop = False
@@ -391,8 +409,14 @@ class WorldStateHistory(object):
 	# @param other is the graph with which we compare.
 	# @retval an integer that can be 1 if the current graph is greater, -1 if it is smaller, and 0 if both are equals.
 	def __cmp__(self, other):
-		return self.graph.__cmp__(other.graph)
-
+		ret = self.graph.__cmp__(other.graph)
+		if ret == 0:
+			#print 'd'
+			if self.cost != other.cost:
+				ret = 1
+				#print 'dd'
+				#sys.exit(-2)
+		return ret
 	##@brief This method calculates the hashcode of the current graph.
 	# @retval an integer with the hashcode.
 	def __hash__(self):
@@ -402,7 +426,7 @@ class WorldStateHistory(object):
 	# @param other the other graph.
 	# @retval a boolean wit the result of the comparison
 	def __eq__(self, other):
-		return self.graph.__eq__(other.graph)
+		return self.graph.__eq__(other.graph) and self.cost.__eq__(other.cost)
 
 	##@brief This method returns a string with the information of the current graph.
 	def __repr__(self):
@@ -609,7 +633,7 @@ class PyPlan(object):
 		self.knownNodes = LockableList()
 		## This is the lockable list of all the calculated results.
 		self.results = LockableList()
-		## This is the lockable list of all the explored nodes
+		## This is the lockable integer of all the explored nodes
 		self.explored = LockableInteger(0)
 		## This is the LockableInteger that stores the better cost of the solution
 		self.cheapestSolutionCost = LockableInteger(-1)
@@ -667,7 +691,7 @@ class PyPlan(object):
 		if self.end_condition.get() == "IndexError":
 			if verbose > 0: print 'End: state space exhausted'
 		elif self.end_condition.get() == "MaxCostReached":
-			if verbose > 0: print 'End: max cost reached:', e.cost
+			if verbose > 0: print 'End: max cost reached'
 		elif self.end_condition.get() == "BestSolutionFound":
 			if verbose > 0: print 'End: best solution found'
 		elif self.end_condition.get() == "GoalAchieved":
@@ -731,7 +755,7 @@ class PyPlan(object):
 						print  '  (not removed)', self.results[i].history[0]
 						break
 				if descomponiendo==False:
-					print 'ORIGINAL PLAN: '
+					print 'ORIGINAL PLAN: ', self.results[i].cost
 					for action in self.results[i].history:
 						print '    ', action
 			except:
@@ -892,11 +916,8 @@ class PyPlan(object):
 						deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
 					else:
 						deriv.score, achieved = self.targetCode(deriv.graph)
-						
 					if achieved:
-						#print 'Found solution', deriv.cost
 						self.results.append(deriv)
-						# Should we stop with the first plan?
 						if stopWithFirstPlan:
 							self.end_condition.set("GoalAchieved")
 							lock.release()

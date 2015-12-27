@@ -32,9 +32,26 @@ def computeMaxScore(a, b, maxScore):
 def getNewIdForSymbol(node):
 	m = 1
 	for k in node.graph.nodes:
-			if int(node.graph.nodes[k].name) >= m:
-				m = int(node.graph.nodes[k].name)+1
+		if int(node.graph.nodes[k].name) >= m:
+			m = int(node.graph.nodes[k].name)+1
 	return m
+
+
+def sumActionCosts(node, last):
+	ret = 0
+	for t in node.costData[0:last]:
+		ret += t[0]
+	return ret
+
+def computePlanCost(node):
+	ret = 0
+	iters = 0
+
+	for cost, success, name in node.costData:
+		iters += 1
+		ret += cost + (1-success)*sumActionCosts(node, iters)
+	return ret
+	
 
 lastNodeId = 0
 
@@ -259,7 +276,7 @@ def comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"if not inCombo:"
-	ret += indent+"\tnewNode.cost += " + str(rule.cost)
+	ret += indent+"\tnewNode.cost = computePlanCost(newNode)"
 	ret += indent+"newNode.depth += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
 	#ret += indent+"newNode.parentId = snode.nodeId"
@@ -569,13 +586,15 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	# Misc stuff
 	indent = '\n\t\t'
 	ret += indent+"# Misc stuff"
-	ret += indent+"if not inCombo:"
-	ret += indent+"\tnewNode.cost += "+str(rule.cost)
-	ret += indent+"\tnewNode.depth += 1"
 	if thisIsActuallyAHierarchicalRule: markHierarchical = '*'
 	else: markHierarchical = ''
 	ret += indent+"newNode.history.append('" + markHierarchical + rule.name + "@' + str(n2id) )"
 	ret += indent+"if finish!='': newNode.history.append(finish)"
+	ret += indent+"if not inCombo:"
+	#ret += indent+"\tnewNode.cost += " + str(rule.cost)
+	ret += indent+"\tnewNode.costData.append((" + str(float(rule.cost)) + ', '+ str(float(rule.success)) + ', "' + str(rule.name) + '"))'
+	ret += indent+"\tnewNode.cost = computePlanCost(newNode)"
+	ret += indent+"\tnewNode.depth += 1"
 	ret += indent+"return newNode"
 	ret += indent+""
 	ret += indent+""

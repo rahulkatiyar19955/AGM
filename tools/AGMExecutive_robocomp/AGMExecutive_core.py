@@ -103,22 +103,15 @@ class Executive(object):
 		self.speech = speech
 
 		self.agglPath = agglPath
-		print 'read agmfiledataparsing'
 		self.agmData = AGMFileDataParsing.fromFile(self.agglPath)
-		print 'generate domain active'
 		self.agmData.generateAGGLPlannerCode("/tmp/domainActive.py", skipPassiveRules=False)
-		print 'generate domain passive'
 		self.agmData.generateAGGLPlannerCode("/tmp/domainPasive.py", skipPassiveRules=True)
-		print 'read initialmodelpath'
 		self.initialModelPath = initialModelPath
 		self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
-		print 'set model'
 		self.backModelICE  = None
 		self.setModel(xmlModelParser.graphFromXML(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
-		print 'setmission'
 		self.setMission(initialMissionPath, avoidUpdate=True)
-		print 'setmission22'
 
 	def setAgent(self, name, proxy):
 		self.agents[name] = proxy
@@ -135,7 +128,7 @@ class Executive(object):
 		self.mutex.acquire( )
 		try:
 			print '<<<broadcastinnn'
-			print self.currentModel
+			print self.currentModel.filterGeometricSymbols()
 			ev = RoboCompAGMWorldModel.Event()
 			if self.backModelICE == None:
 				ev.backModel = AGMModelConversion.fromInternalToIce(self.currentModel)
@@ -161,22 +154,14 @@ class Executive(object):
 	def setMission(self, target, avoidUpdate=False):
 		self.mutex.acquire( )
 		try:
-			print 'generate target', target
-			print 'temp'
 			temp = AGMFileDataParsing.targetFromFile(target)
-			print 'temp1'
 			self.target = generateTarget_AGGT(temp)
-			print 'open target.py for writing'
 			ofile = open("/tmp/target.py", 'w')
-			print 'write'
 			ofile.write(self.target)
-			print 'close'
 			ofile.close()
-			print 'done'
 			if avoidUpdate:
 				print 'do update plan'
 				self.updatePlan()
-			print 'd'
 		except:
 			print 'There was some problem setting the mission'
 			sys.exit(1)
@@ -276,11 +261,7 @@ class Executive(object):
 				self.pypyInProgress += 1
 				self.plannerExecutionID+=1
 				peid = '_'+str(self.plannerExecutionID)
-				print 'a'
-				f = self.currentModel.filterGeometricSymbols()
-				print 'b'
-				f.toXML("/tmp/lastWorld"+peid+".xml")
-				print 'c'
+				self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
 			except:
 				print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
 				sys.exit(1)

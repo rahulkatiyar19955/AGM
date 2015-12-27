@@ -1,4 +1,6 @@
-from pyparsinglocal import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn, Literal, Combine, Optional, Suppress, ZeroOrMore, Group, StringEnd, srange
+from pyparsinglocal import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn
+from pyparsinglocal import Literal, CaselessLiteral, Combine, Optional, Suppress
+from pyparsinglocal import ZeroOrMore, Group, StringEnd, srange
 from AGGL import *
 #from PySide.QtCore import *
 #from PySide.QtGui import *
@@ -40,6 +42,8 @@ def getAGGLMetaModels():
 	node  = Group(an.setResultsName("symbol") + cn + an.setResultsName("symbolType") + Optional(po + nu.setResultsName("x") + co + nu.setResultsName("y") + pc))
 	# GRAPH
 	graph = Group(op + ZeroOrMore(node).setResultsName("nodes") + ZeroOrMore(link).setResultsName("links") + cl)
+	# RULE SUCCESS
+	ruleSuccess = CaselessLiteral("success") + po + an.setResultsName("success") + pc
 	# COMBO RULE
 	atom = Group(ids.setResultsName("name") + Suppress("as") + ids.setResultsName("alias") + Optional("optional"))
 	equivElement = Group(ids.setResultsName("rule") + pt + ids.setResultsName("variable"))
@@ -50,7 +54,7 @@ def getAGGLMetaModels():
 	Prm = Optional(parameters   + op + almostanything + cl).setResultsName("parameters")
 	Cnd = Optional(precondition + op + almostanything + cl).setResultsName("precondition")
 	Eft = Optional(effect       + op + almostanything + cl).setResultsName("effect")
-	rule_nrm = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
+	rule_nrm = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(ruleSuccess) + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 	# HIERARCHICAL RULE
 	rule_hierarchical = Group(Literal("hierarchical").setResultsName("hierarchical") + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 	# indlude
@@ -132,7 +136,7 @@ class AGMRuleParsing:
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 			if verbose: print '\t===>'
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-			regular = AGMRule(i.name, LHS, RHS, passive, i.cost, parameters, precondition, effect)
+			regular = AGMRule(i.name, LHS, RHS, passive, i.cost, i.success, parameters, precondition, effect)
 			if len(i.conditions) > 0:
 				regular.conditions = str(i.conditions[0])
 			else:
