@@ -1085,28 +1085,6 @@ AGMModelSymbol::SPtr AGMModel::iterator::operator->()
 }
 
 
-	// Get symbols' map
-	std::map<std::string, AGMModelSymbol::SPtr> symbols;
-	try
-	{
-		symbols = newModel->getSymbolsMap(params);
-	}
-	catch(AGMModelException &e)
-	{
-		printf("navigationAgent: Couldn't retrieve action's parameters\n");
-		printf("ERROR: %s\n", e.what());
-		return;
-	}
-
-
-	printf("MOVE GENERIC!\n");
-
-	if (not (symbols["r"] and symbols["A"] and symbols["B"]))
-	{
-		printf("mundo u orden desfasados\n");
-		return;
-	}
-
 #if ROBOCOMP_SUPPORT == 1
 
 std::map<std::string, AGMModelSymbol::SPtr> AGMModel::getSymbolsMap(::RoboCompAGMCommonBehavior::ParameterMap params)

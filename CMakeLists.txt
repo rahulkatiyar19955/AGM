@@ -22,6 +22,7 @@ SET (AGM_CODE
   libagm/agm_modelPrinter.cpp
   libagm/agm_modelSymbols.cpp
   libagm/agm_modelConverter.cpp
+  libagm/agm_plan.cpp
   libagm/graphModelViewer.cpp
 )
 
