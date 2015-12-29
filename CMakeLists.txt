@@ -37,6 +37,7 @@ SET (HEADERS
   libagm/agm_misc_functions.h
   libagm/agm_modelConverter.h
   libagm/agm_config.h
+  libagm/agm_plan.h
   libagm/graphModelViewer.h
 )
 
