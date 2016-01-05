@@ -159,7 +159,7 @@ class Executive(object):
 			ofile = open("/tmp/target.py", 'w')
 			ofile.write(self.target)
 			ofile.close()
-			if avoidUpdate:
+			if not avoidUpdate:
 				print 'do update plan'
 				self.updatePlan()
 		except:
