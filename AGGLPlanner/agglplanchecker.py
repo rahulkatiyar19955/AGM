@@ -117,7 +117,7 @@ class PyPlanChecker(object):
 			## We store the result to check the plan
 			self.valid = achieved
 			if achieved:               # On the one hand, if we achieve the target world status, we will print all the  correct actions of the plan.
-				if debug: print 'GOAL ACHIEVED'
+				if verbose: print 'GOAL ACHIEVED'
 				self.achieved = True
 				if verbose:
 					for action in self.plan:

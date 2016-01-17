@@ -266,7 +266,7 @@ class Executive(object):
 				print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
 				sys.exit(1)
 			self.pypyKillMutex.release()
-			#CALL
+			# CALL
 			argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
 			print 'Ask cache'
 			cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
@@ -281,6 +281,7 @@ class Executive(object):
 			else:
 				print 'Running the planner...'
 				try:
+					print argsss
 					subprocess.call(argsss)
 				except:
 					pass

@@ -4,7 +4,7 @@ from pyparsinglocal import ZeroOrMore, Group, StringEnd, srange
 from AGGL import *
 #from PySide.QtCore import *
 #from PySide.QtGui import *
-import sys
+import sys, os
 from parseQuantifiers import *
 
 debug = False
@@ -204,10 +204,24 @@ class AGMFileDataParsing:
 		for i in result.rules:
 			if i.includefile:
 				if includeIncludes:
-					inc = AGMFileDataParsing.fromFile(i.includefile)
-					for incr in inc.agm.rules:
-						agmFD.addRule(incr)
-						number = number + 1
+					paths = [ '/', '.']
+					try:
+						paths += os.environ['AGGLPATH'].split(';')
+					except:
+						pass
+					doneInclude = False
+					for includePath in paths:
+						if os.path.exists(includePath + '/' + i.includefile):
+							print 'Including', i.includefile, 'from', includePath
+							inc = AGMFileDataParsing.fromFile(includePath + '/' +  i.includefile)
+							for incr in inc.agm.rules:
+								agmFD.addRule(incr)
+								number = number + 1
+							doneInclude = True
+							break
+					if not doneInclude:
+						print 'Couldn\' find', i.includefile, 'in any of the configured paths:', paths
+						raise Exception('Couldn\' find '+str(i.includefile)+' in any of the configured paths: '+str(paths))
 			else:
 				preconditionRec = None
 				parametersList = None
