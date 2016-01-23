@@ -30,12 +30,10 @@
 \ref installation
 <br />
 \ref tutorials
+<br />
+\ref papers
 
-**/
 
-
-
-/**
 \page agmworks How does AGM work?
 
 In the context of AGM, behavior is the resulting phenomena of the coordinated interaction between the main modules of the architecture. In every AGM-based architecture, we can find three types of modules:
@@ -331,3 +329,25 @@ The code generation of the heuristic is implemented in generateTarget(graph)
 
 */
 
+
+/**
+\page papers Scientific papers where AGM or AGGL were used or described
+<ul>
+  <li>
+    <a href="http://www.intechopen.com/download/pdf/49713"><b>A Perception-aware Architecture for Autonomous Robots</b></a>,<br/>
+    L.J. Manso, P. Bustos, P. Bachiller, P. Núñez.<br />
+    In International Journal of Advanced Robotic Systems (ISSN 1729-8806), InTech, Vol. 12, No. 174, 2015. DOI: 10.5772/61742 
+  </li>
+  <li>
+    <a href="http://ljmanso.com/files/planning_hri_reacts2015.pdf"><b>Planning Human-Robot Interaction Tasks using Graph Models</b></a>,<br />
+    L.J. Manso, P. Bustos, R. Alami, G. Milliez, P. Núñez.<br />
+    In Proceedings of International Workshop on Recognition and Action for Scene Understanding (REACTS 2015), pp. 15-27, 2015. 
+  </li>
+   <li>
+    <a href="http://ljmanso.com/thesis.pdf"><b>Perception as Stochastic Sampling on Dynamic Graph Spaces,</b></a>,<br />
+    L.J. Manso.<br />
+    PhD thesis. Cáceres Polytechnic School, University of Extremadura. 2013. 
+  </li>
+</ul>
+
+*/
