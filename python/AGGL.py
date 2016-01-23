@@ -553,7 +553,7 @@ class AGMComboRule(object):
 # @ingroup PyAPI
 #
 class AGMHierarchicalRule(object):
-	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1., success=1.):
 		object.__init__(self)
 		self.cost = cost
 		self.lhs = lhs
@@ -561,6 +561,10 @@ class AGMHierarchicalRule(object):
 		self.rhs = rhs
 		if rhs == None: self.rhs = AGMGraph()
 		self.name = name
+		try:
+			self.success = float(success)
+		except:
+			self.success = 1.
 		self.passive = passive
 		self.text = self.generateTextFromHierarchical()
 	def generateTextFromHierarchical(self):

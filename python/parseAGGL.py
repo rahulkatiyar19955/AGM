@@ -56,7 +56,8 @@ def getAGGLMetaModels():
 	Eft = Optional(effect       + op + almostanything + cl).setResultsName("effect")
 	rule_nrm = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(ruleSuccess) + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 	# HIERARCHICAL RULE
-	rule_hierarchical = Group(Literal("hierarchical").setResultsName("hierarchical") + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
+	allowedRules = almostanything + OneOrMore(Literal(",") + almostanything)
+	rule_hierarchical = Group(Literal("hierarchical").setResultsName("hierarchical") + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(ruleSuccess) + Optional(allowedRules)+ op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 	# indlude
 	include = Group(Suppress("include") + po + incPath.setResultsName("includefile") + pc)
 	# GENERAL RULE
@@ -127,7 +128,8 @@ class AGMRuleParsing:
 			#print "Hierarchical rule:", i.name
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-			hierarchical = AGMHierarchicalRule(i.name, LHS, RHS, passive, i.cost)
+			print i.success
+			hierarchical = AGMHierarchicalRule(i.name, LHS, RHS, passive, i.cost, i.success)
 			return hierarchical
 		elif len(i.atomss)==0: # We are dealing with a normal rule!
 			#print 'Normal rule:', i.name
