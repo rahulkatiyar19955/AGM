@@ -37,7 +37,7 @@ def getAGGLMetaModels():
 	no = Suppress("!")
 	
 	dormant =        (Optional(CaselessLiteral("dormant"))).setResultsName("dormant")
-	activatesRules = (Optional(CaselessLiteral("activates") + po + an + ZeroOrMore(co + an) + pc)).setResultsName("activates") 
+	activatesRules = (Optional(CaselessLiteral("activates") + po + ids + ZeroOrMore(co + ids) + pc)).setResultsName("activates") 
 
 
 	# LINK
