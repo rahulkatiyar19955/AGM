@@ -430,7 +430,7 @@ class AGMGraph(object):
 # @ingroup PyAPI
 #
 class AGMRule(object):
-	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, success=1., parameters='', precondition='', effect='', dormant=False):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, success=1., parameters='', precondition='', effect='', dormant=False, activates=None):
 		object.__init__(self)
 		self.name = name
 		self.lhs = lhs
@@ -441,6 +441,9 @@ class AGMRule(object):
 		else:
 			self.success = float(str(success))
 		self.dormant = dormant
+		if activates == None:
+			activates = []
+		self.activates = activates
 		self.passive = passive
 		self.parameters = parameters
 		self.precondition = precondition
@@ -554,7 +557,7 @@ class AGMComboRule(object):
 # @ingroup PyAPI
 #
 class AGMHierarchicalRule(object):
-	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, success=1., dormant=False):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, success=1., dormant=False, activates=None):
 		object.__init__(self)
 		self.cost = cost
 		if len(str(success)) == 0:
@@ -567,6 +570,9 @@ class AGMHierarchicalRule(object):
 		if rhs == None: self.rhs = AGMGraph()
 		self.name = name
 		self.dormant = dormant
+		if activates == None:
+			activates = []
+		self.activates = activates
 		self.passive = passive
 		self.text = self.generateTextFromHierarchical()
 	def generateTextFromHierarchical(self):

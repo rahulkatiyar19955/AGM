@@ -35,7 +35,10 @@ def getAGGLMetaModels():
 	pt = Suppress(".")
 	pc = Suppress(")")
 	no = Suppress("!")
-	dormant = CaselessLiteral("dormant")
+	
+	dormant =        (Optional(CaselessLiteral("dormant"))).setResultsName("dormant")
+	activatesRules = (Optional(CaselessLiteral("activates") + po + an + ZeroOrMore(co + an) + pc)).setResultsName("activates") 
+
 
 	# LINK
 	link  = Group(an.setResultsName("lhs") + lk + an.setResultsName("rhs") + po + Optional(no).setResultsName("no") + an.setResultsName("linkType") + pc + neg.setResultsName("enabled"))
@@ -55,10 +58,9 @@ def getAGGLMetaModels():
 	Prm = Optional(parameters   + op + almostanything + cl).setResultsName("parameters")
 	Cnd = Optional(precondition + op + almostanything + cl).setResultsName("precondition")
 	Eft = Optional(effect       + op + almostanything + cl).setResultsName("effect")
-	rule_nrm = Group(Optional(dormant.setResultsName("dormant")) + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(ruleSuccess) + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
+	rule_nrm = Group(dormant.setResultsName("dormant") + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(ruleSuccess) + activatesRules.setResultsName("activates") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 	# HIERARCHICAL RULE
-	activatesRules = almostanything + OneOrMore(Literal(",") + almostanything)
-	rule_hierarchical = Group(Each([Optional(dormant.setResultsName("dormant")), Literal("hierarchical").setResultsName("hierarchical")]) + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(ruleSuccess) + Optional(activatesRules)+ op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
+	rule_hierarchical = Group(dormant.setResultsName("dormant") + Literal("hierarchical").setResultsName("hierarchical") + dormant.setResultsName("dormant") + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(ruleSuccess)  + activatesRules.setResultsName("activates") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 	# indlude
 	include = Group(Suppress("include") + po + incPath.setResultsName("includefile") + pc)
 	# GENERAL RULE
@@ -116,6 +118,8 @@ class AGMGraphParsing:
 class AGMRuleParsing:
 	@staticmethod
 	def parseRuleFromAST(i, parameters, precondition, effect, verbose=False):
+		print i.name, 'activates('+str(i.activates)+') dormant('+str(i.dormant)+")"
+		activates = i.activates
 		dormant = False
 		if i.dormant == 'dormant':
 			dormant = True
@@ -132,8 +136,7 @@ class AGMRuleParsing:
 			#print "Hierarchical rule:", i.name
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-			print i.success
-			hierarchical = AGMHierarchicalRule(i.name, LHS, RHS, passive, i.cost, i.success, dormant=dormant)
+			hierarchical = AGMHierarchicalRule(i.name, LHS, RHS, passive, i.cost, i.success, dormant=dormant, activates=activates)
 			return hierarchical
 		elif len(i.atomss)==0: # We are dealing with a normal rule!
 			#print 'Normal rule:', i.name
@@ -142,7 +145,7 @@ class AGMRuleParsing:
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 			if verbose: print '\t===>'
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-			regular = AGMRule(i.name, LHS, RHS, passive, i.cost, i.success, parameters, precondition, effect, dormant=dormant)
+			regular = AGMRule(i.name, LHS, RHS, passive, i.cost, i.success, parameters, precondition, effect, dormant=dormant, activates=activates)
 			if len(i.conditions) > 0:
 				regular.conditions = str(i.conditions[0])
 			else:
@@ -266,6 +269,7 @@ class AGMFileDataParsing:
 						effectRec = AGMFileDataParsing.interpretEffect(effectTree)
 				# Build rule
 				rule = AGMRuleParsing.parseRuleFromAST(i, parametersList, preconditionRec, effectRec, verbose)
+				#print type(rule)
 				rule.parameters      = parametersStr
 				rule.parametersAST   = parametersList
 				rule.precondition    = preconditionStr

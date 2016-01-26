@@ -201,7 +201,7 @@ def ruleImplementation(rule):
 	elif type(rule) == AGMHierarchicalRule:
 		#print rule.name, 'hierarchical'
 		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
-		ret += generateTarget(rule.rhs, rule.name, rule.lhs, verbose=(rule.name=="hierarchicalFindMugInTable"))
+		ret += generateTarget(rule.rhs, rule.name, rule.lhs)
 
 #ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 	else:
@@ -449,6 +449,9 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	#ret += indent+"print stack2[-1]"
 	#ret += indent+"print stack2[-1][0]"
 	ret += indent+"newNode = WorldStateHistory(r1)"
+	if rule.activates != None:
+		for i in rule.activates:
+			ret += indent+"newNode.awakenRules.add("+i+")"
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
