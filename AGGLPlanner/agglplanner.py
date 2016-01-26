@@ -371,9 +371,9 @@ class WorldStateHistory(object):
 		object.__init__(self)
 
 		# If INIT IS A GRAPH
-		if isinstance(init, AGMGraph):
+		if isinstance(init, list):
 			# Graph with the current world status.
-			self.graph = copy.deepcopy(init)
+			self.graph = copy.deepcopy(init[0])
 			# The identifier of the graph that the current graph comes from
 			self.parentId = 0
 			# The cost of the new graph (as result of execute the heuristic?)
@@ -384,6 +384,8 @@ class WorldStateHistory(object):
 			self.costData = []
 			# The identifier of the current graph
 			self.nodeId = -1
+			# Awaken rules set
+			self.awakenRules = init[1]
 			# The depth of the current graph.
 			self.depth = 0
 			# A flag to stop.
@@ -394,15 +396,14 @@ class WorldStateHistory(object):
 		elif isinstance(type(init), type(WorldStateHistory)):
 			self.graph = copy.deepcopy(init.graph)
 			self.cost = copy.deepcopy(init.cost)
+			self.awakenRules = copy.deepcopy(init.awakenRules)
 			self.costData = copy.deepcopy(init.costData)
 			self.history = copy.deepcopy(init.history)
 			self.depth = copy.deepcopy(init.depth)
 			self.stop = False
 			self.score = 0
 		else:
-			print 'Internal errorr 45343'
-			print type(init)
-			print type(self)
+			print 'Internal errorr: Cannot create WorldStateHistory from unexpected object of type', str(type(init))
 			sys.exit(1)
 
 	##@brief This method compares two graphs.
@@ -599,7 +600,7 @@ class PyPlan(object):
 	def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile, descomponiendo=False, estadoIntermedio=''):
 		object.__init__(self)
 		# Get initial world mdoel
-		initWorld = WorldStateHistory(xmlModelParser.graphFromXML(init))
+		initWorld = WorldStateHistory([xmlModelParser.graphFromXML(init), domainAGM.getInitiallyAwakeRules()])
 		initWorld.nodeId = 0 
 
 		self.symbol_mapping = copy.deepcopy(symbol_mapping) 
@@ -717,12 +718,6 @@ class PyPlan(object):
 				
 		
 			try:
-				#unalista = []
-				#for xx in self.results[i].history:
-					#print xx
-					#unalista.append(xx.split('@'))
-				#unalista = [xx.split('@') for xx in self.results[i].history]
-				#plann = AGGLPlannerPlan(unalista)
 				plann = AGGLPlannerPlan([xx.split('@') for xx in self.results[i].history])
 				n = copy.deepcopy(plann)
 				while len(self.results[i].history)>0:
@@ -742,7 +737,7 @@ class PyPlan(object):
 						else:
 							#print 'No hay que crear estado intermedio'
 							from agglplanchecker import PyPlanChecker
-							check = PyPlanChecker(domainAGM, domainPath, init, n,targetPath,symbol_mapping, verbose=False)
+							check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath,symbol_mapping, verbose=False)
 					except:
 						print 'Excepction!!'
 						traceback.print_exc()
@@ -761,7 +756,6 @@ class PyPlan(object):
 			except:
 				traceback.print_exc()
 				pass
-			#MOVIDO MENSAJE AL FINAL DEL METODO
 			rList = []
 			planConDescomposicion = False
 			if len(self.results[i].history) > 0:
@@ -799,15 +793,6 @@ class PyPlan(object):
 					ofile.close()
 					"""Ponemos una bandera para pintar despues el plan completa una vez descompuesta la primera regla jerarquica"""
 					planConDescomposicion = True
-					#print 'PyPlan'
-					#print '\tdomain:     ', domainAGM
-					#print '\tdomain path:', domainPath
-					#print '\tinit:       ', init
-					#print '\ttargetPath: ', domain.getHierarchicalTargets()[ac.name].__str__
-					#print '\tsymbol map: ', paramsWithoutNew
-					#print '\texclude:    ', self.excludeList
-
-					#deff PyPlan(self, domainAGM, domainPath, init,                               targetPath,      indent,   symbol_mapping,      excludeList, resultFile):
 					aaa = PyPlan(      domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, rList, True, "/tmp/estadoIntermedio.py")
 					#if type(resultFile) == type([]):
 						#resultFile = rList + resultFile[1:]
@@ -854,7 +839,7 @@ class PyPlan(object):
 		# We take the initial time.
 		timeA = datetime.datetime.now()
 		
-		while True:	
+		while True:
 			# Again, we take the time and we calculated the elapsed time
 			timeB = datetime.datetime.now()
 			timeElapsed = float((timeB-timeA).seconds) + float((timeB-timeA).microseconds)/1e6
@@ -876,9 +861,7 @@ class PyPlan(object):
 				if threadPoolStatus:
 					threadPoolStatus.lock()
 					threadPoolStatus[i] = True # We say that the thread i is active.
-
 					threadPoolStatus.unlock()
-
 				self.knownNodes.append(head)
 			except:
 				#traceback.print_exc()
@@ -910,27 +893,28 @@ class PyPlan(object):
 			if verbose>5: print 'Expanding'.ljust(5), head
 			for k in ruleMap:
 				# Iterate over rules and generate derivates
-				for deriv in ruleMap[k](head):
-					self.explored.increase()
-					if self.symbol_mapping:
-						deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
-					else:
-						deriv.score, achieved = self.targetCode(deriv.graph)
-					if achieved:
-						self.results.append(deriv)
-						if stopWithFirstPlan:
-							self.end_condition.set("GoalAchieved")
-							lock.release()
-							return
-						# Compute cheapest solution
-						self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
-					self.knownNodes.lock()
-					notDerivInKnownNodes = not deriv in self.knownNodes
-					self.knownNodes.unlock()
-					if notDerivInKnownNodes:
-						if deriv.stop == False:
-							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
-								self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+				if k in head.awakenRules:
+					for deriv in ruleMap[k](head):
+						self.explored.increase()
+						if self.symbol_mapping:
+							deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
+						else:
+							deriv.score, achieved = self.targetCode(deriv.graph)
+						if achieved:
+							self.results.append(deriv)
+							if stopWithFirstPlan:
+								self.end_condition.set("GoalAchieved")
+								lock.release()
+								return
+							# Compute cheapest solution
+							self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
+						self.knownNodes.lock()
+						notDerivInKnownNodes = not deriv in self.knownNodes
+						self.knownNodes.unlock()
+						if notDerivInKnownNodes:
+							if deriv.stop == False:
+								if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
+									self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
 			if verbose > 0:
 				doIt=False
 				nowNow = datetime.datetime.now()

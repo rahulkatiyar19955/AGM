@@ -63,7 +63,8 @@ class PyPlanChecker(object):
 	def __init__(self, agmData, domainPath, init, planPath, targetPath, symbolMapping=dict(), resultPath='', verbose=False):
 		object.__init__(self)
 		## We get the initial world model graph
-		self.initWorld  = WorldStateHistory(xmlModelParser.graphFromXML(init))
+		self.initWorld  = WorldStateHistory([xmlModelParser.graphFromXML(init), agmData.getInitiallyAwakeRules()])
+
 		# Get graph rewriting rules
 		if verbose: print 'domainPath:', domainPath
 		domain = imp.load_source('domain', domainPath)

@@ -430,7 +430,7 @@ class AGMGraph(object):
 # @ingroup PyAPI
 #
 class AGMRule(object):
-	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, success=1., parameters='', precondition='', effect=''):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, success=1., parameters='', precondition='', effect='', dormant=False):
 		object.__init__(self)
 		self.name = name
 		self.lhs = lhs
@@ -440,6 +440,7 @@ class AGMRule(object):
 			self.success = 1.
 		else:
 			self.success = float(str(success))
+		self.dormant = dormant
 		self.passive = passive
 		self.parameters = parameters
 		self.precondition = precondition
@@ -553,7 +554,7 @@ class AGMComboRule(object):
 # @ingroup PyAPI
 #
 class AGMHierarchicalRule(object):
-	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, success=1.):
+	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, success=1., dormant=False):
 		object.__init__(self)
 		self.cost = cost
 		if len(str(success)) == 0:
@@ -565,6 +566,7 @@ class AGMHierarchicalRule(object):
 		self.rhs = rhs
 		if rhs == None: self.rhs = AGMGraph()
 		self.name = name
+		self.dormant = dormant
 		self.passive = passive
 		self.text = self.generateTextFromHierarchical()
 	def generateTextFromHierarchical(self):
@@ -597,7 +599,12 @@ class AGM(object):
 		self.rules = []
 	def addRule(self, rule):
 		self.rules.append(rule)
-
+	def getInitiallyAwakeRules(self):
+		ret = set()
+		for rule in self.rules:
+			if not rule.dormant:
+				ret.add(rule.name)
+		return ret
 
 ## AGM file data
 # @ingroup PyAPI
@@ -610,6 +617,9 @@ class AGMFileData(object):
 
 	def addRule(self, rule):
 		self.agm.addRule(rule)
+
+	def getInitiallyAwakeRules(self):
+		return self.agm.getInitiallyAwakeRules()
 
 	def toFile(self, filename):
 		writeString = ''
