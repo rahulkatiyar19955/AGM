@@ -54,7 +54,7 @@ from generateAGGLPlannerCode import *
 
 # C O N F I G U R A T I O N
 number_of_threads = 0 #4
-maxWorldIncrement = 16
+maxWorldIncrement = 32
 maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
@@ -597,10 +597,10 @@ class PyPlan(object):
 	# @param resultFile is the optional name of the file where the plan result will be stored.
 	# @param descomponiendo: added whe we are descomposing a jerarchical rule
 	# @param estadoIntermedio: python file with the intermediate status of the world, after whe apply the jerarchical rule
-	def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile, descomponiendo=False, estadoIntermedio=''):
+	def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile, descomponiendo=False, estadoIntermedio='', awakenRules=set()):
 		object.__init__(self)
 		# Get initial world mdoel
-		initWorld = WorldStateHistory([xmlModelParser.graphFromXML(init), domainAGM.getInitiallyAwakeRules()])
+		initWorld = WorldStateHistory([xmlModelParser.graphFromXML(init), domainAGM.getInitiallyAwakeRules()|awakenRules])
 		initWorld.nodeId = 0 
 
 		self.symbol_mapping = copy.deepcopy(symbol_mapping) 
@@ -793,7 +793,7 @@ class PyPlan(object):
 					ofile.close()
 					"""Ponemos una bandera para pintar despues el plan completa una vez descompuesta la primera regla jerarquica"""
 					planConDescomposicion = True
-					aaa = PyPlan(      domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, rList, True, "/tmp/estadoIntermedio.py")
+					aaa = PyPlan(      domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, rList, True, "/tmp/estadoIntermedio.py", copy.deepcopy(self.results[i].awakenRules|awakenRules))
 					#if type(resultFile) == type([]):
 						#resultFile = rList + resultFile[1:]
 					#print self.indent
@@ -893,7 +893,7 @@ class PyPlan(object):
 			if verbose>5: print 'Expanding'.ljust(5), head
 			for k in ruleMap:
 				# Iterate over rules and generate derivates
-				if k in head.awakenRules:
+				if True:# k in head.awakenRules:
 					for deriv in ruleMap[k](head):
 						self.explored.increase()
 						if self.symbol_mapping:

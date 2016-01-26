@@ -609,7 +609,7 @@ class AGM(object):
 		ret = set()
 		for rule in self.rules:
 			if not rule.dormant:
-				ret.add(rule.name)
+				ret.add(str(rule.name))
 		return ret
 
 ## AGM file data

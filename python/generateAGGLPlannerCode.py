@@ -423,6 +423,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	#ret += indent+"print 'Running rule "+rule.name+"'"
 	ret += indent+"stack2        = "+COPY_OPTION+"(stack)"
 	ret += indent+"equivalences2 = "+COPY_OPTION+"(equivalences)"
+	
 	ret += indent+"r1 = self."+rule.name+"_trigger(snode, n2id, stack2, inCombo, equivalences2, "+COPY_OPTION+"(finishesCombo))"
 	ret += indent+"c = "+COPY_OPTION+"(r1)"
 	ret += indent+"if 'fina' in locals():"
@@ -449,9 +450,6 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	#ret += indent+"print stack2[-1]"
 	#ret += indent+"print stack2[-1][0]"
 	ret += indent+"newNode = WorldStateHistory(r1)"
-	if rule.activates != None:
-		for i in rule.activates:
-			ret += indent+"newNode.awakenRules.add("+i+")"
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"
@@ -525,6 +523,9 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	indent = indent[:-1]
 	#ret += indent+"smap = "+COPY_OPTION+"(n2id)"
 	ret += indent+"newNode = WorldStateHistory(snode)"
+	if rule.activates != None:
+		for i in rule.activates:
+			ret += indent+"newNode.awakenRules.add('"+i+"')"
 	ret += indent+"global lastNodeId"
 	ret += indent+"lastNodeId += 1"
 	ret += indent+"newNode.nodeId = lastNodeId"

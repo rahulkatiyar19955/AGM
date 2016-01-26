@@ -37,7 +37,7 @@ def getAGGLMetaModels():
 	no = Suppress("!")
 	
 	dormant =        (Optional(CaselessLiteral("dormant"))).setResultsName("dormant")
-	activatesRules = (Optional(CaselessLiteral("activates") + po + ids + ZeroOrMore(co + ids) + pc)).setResultsName("activates") 
+	activatesRules = (Optional(Suppress(CaselessLiteral("activates")) + po + ids + ZeroOrMore(co + ids) + pc)).setResultsName("activates") 
 
 
 	# LINK
@@ -118,11 +118,11 @@ class AGMGraphParsing:
 class AGMRuleParsing:
 	@staticmethod
 	def parseRuleFromAST(i, parameters, precondition, effect, verbose=False):
-		print i.name, 'activates('+str(i.activates)+') dormant('+str(i.dormant)+")"
-		activates = i.activates
+		# dormant
 		dormant = False
 		if i.dormant == 'dormant':
 			dormant = True
+		# passive
 		passive = False
 		if i.passive == 'passive':
 			passive = True
@@ -131,6 +131,19 @@ class AGMRuleParsing:
 		else:
 			print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
 			sys.exit(-345)
+		# activates
+		activates = []
+		for activatedRule in i.activates:
+			activates.append(str(activatedRule))
+
+		if len(i.activates)>0 or dormant:
+			print i.name,
+			if len(i.activates)>0:
+				print 'ACTIVATES('+str(i.activates)+')',
+			if dormant:
+				print 'ISDORMANT',
+			print ''
+
 		#print i.name+'('+i.hierarchical+')'
 		if len(i.hierarchical)>0:
 			#print "Hierarchical rule:", i.name
