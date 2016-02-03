@@ -155,6 +155,7 @@ class AGMGraph(object):
 		self.nodes = nodes
 		self.links = links
 		self.side = side
+		self.version = 0
 
 	def getIsolatedSymbolsNames(self):
 		connected = set()

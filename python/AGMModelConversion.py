@@ -20,6 +20,7 @@ from AGGL import *
 def fromInternalToIce(src):
 	# Create new model
 	dst = RoboCompAGMWorldModel.World([], [])
+	dst.version = int(src.version)
 	# Copy indices
 	for nodeSrc in src.nodes.values():
 		nodeDst = RoboCompAGMWorldModel.Node()
@@ -90,6 +91,7 @@ def fromIceToInternal_model(src, ignoreInvalidEdges=False):
 		else:
 			if not ignoreInvalidEdges:
 				raise Exception('I was sent a model with an edge linkning a non-existing node.')
+	dst.version = int(src.version)
 	return dst
 
 def fromIceToInternal_node(node):
