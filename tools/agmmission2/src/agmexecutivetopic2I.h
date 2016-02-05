@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2016 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -16,32 +16,33 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef AGMEXECUTIVETOPICI_H
-#define AGMEXECUTIVETOPICI_H
+#ifndef AGMEXECUTIVETOPIC2_H
+#define AGMEXECUTIVETOPIC2_H
 
 // QT includes
 #include <QtCore/QObject>
 
 // Ice includes
 #include <Ice/Ice.h>
-#include <AGMExecutive.h>
+#include <AGMExecutive2.h>
 
 #include <config.h>
 #include "genericworker.h"
 
-using namespace RoboCompAGMExecutive;
+using namespace RoboCompAGMExecutive2;
 
-class AGMExecutiveTopicI : public QObject , public virtual RoboCompAGMExecutive::AGMExecutiveTopic
+class AGMExecutiveTopic2I : public QObject , public virtual RoboCompAGMExecutive2::AGMExecutiveTopic2
 {
 Q_OBJECT
 public:
-	AGMExecutiveTopicI( GenericWorker *_worker, QObject *parent = 0 );
-	~AGMExecutiveTopicI();
-	void  structuralChange(const RoboCompAGMWorldModel::Event& modification, const Ice::Current& = Ice::Current());
-	void  symbolUpdated(const RoboCompAGMWorldModel::Node& modification, const Ice::Current& = Ice::Current());
-	void  edgeUpdated(const RoboCompAGMWorldModel::Edge& modification, const Ice::Current& = Ice::Current());
-	void  edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence& modifications, const Ice::Current& = Ice::Current());
-
+	AGMExecutiveTopic2I( GenericWorker *_worker, QObject *parent = 0 );
+	~AGMExecutiveTopic2I();
+	
+	void structuralChange(const RoboCompAGMWorldModel2::World  &w, const Ice::Current&);
+	void edgesUpdated(const RoboCompAGMWorldModel2::EdgeSequence  &es, const Ice::Current&);
+	void edgeUpdated(const RoboCompAGMWorldModel2::Edge  &e, const Ice::Current&);
+	void symbolUpdated(const RoboCompAGMWorldModel2::Node  &n, const Ice::Current&);
+	void symbolsUpdated(const RoboCompAGMWorldModel2::NodeSequence  &ns, const Ice::Current&);
 
 	QMutex *mutex;
 private:

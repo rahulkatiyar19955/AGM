@@ -189,62 +189,55 @@ bool SpecificWorker::setAgentParameters(const ParameterMap& params)
 	return true;
 }
 
-void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::Event& modification)
+void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &w)
 {
 // 	printf("MODEL MODIFIED (%s)\n", modification.sender.c_str());
-	{
-		QMutexLocker dd(&modelMutex);
-		AGMModelConverter::fromIceToInternal(modification.newModel, worldModel);
-		//AGMModelPrinter::printWorld(worldModel);		
-		//agmInner.setWorld(worldModel);	
-		//CAUTION no realentizará el hilo
-		worldModel->save(missions->currentText().toStdString()+"_LastStructuralChange.xml");
+	QMutexLocker dd(&modelMutex);
+	AGMModelConverter::fromIceToInternal(w, worldModel);
+// 	worldModel->save(missions->currentText().toStdString()+"_LastStructuralChange.xml");
 // 		qDebug()<<missions->currentText() <<QTime::currentTime().toString() ;
-		//changeInner(agmInner.extractInnerModel(worldModel, "room"));		
-		changeInner(AgmInner::extractInnerModel(worldModel));		
-		fillItemList();
-		refresh = true;
-		
-	}
+	changeInner(AgmInner::extractInnerModel(worldModel));		
+	fillItemList();
+	refresh = true;
 }
 
-void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node& modification)
+
+void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &n)
 {
-	{
 		QMutexLocker dd(&modelMutex);
-		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+		AGMModelConverter::includeIceModificationInInternalModel(n, worldModel);
 		//agmInner.setWorld(worldModel);				
 		refresh = true;
-	}
 }
 
-void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification)
+void SpecificWorker::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &ns)
 {
-	{
-		QMutexLocker dd(&modelMutex);
-		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);				
-		//agmInner.updateImNodeFromEdge(worldModel, modification,innerViewer->innerModel);
-		//agmInner.setWorld(worldModel);		
-		AgmInner::updateImNodeFromEdge(worldModel,modification,innerViewer->innerModel);
-		refresh = true;
-	}
+	QMutexLocker dd(&modelMutex);
+	for (auto n : ns)
+		AGMModelConverter::includeIceModificationInInternalModel(n, worldModel);
+	refresh = true;
 }
 
 
-void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence& modifications)
+void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &es)
 {
+	QMutexLocker dd(&modelMutex);
+	for (auto e : es)
 	{
-		QMutexLocker dd(&modelMutex);
-                for (auto modification : modifications)
-                {
-                    AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);				
-                    //agmInner.updateImNodeFromEdge(worldModel, modification,innerViewer->innerModel);
-		    AgmInner::updateImNodeFromEdge(worldModel,modification,innerViewer->innerModel);
-                }
-		//agmInner.setWorld(worldModel);		
-		refresh = true;
+		AGMModelConverter::includeIceModificationInInternalModel(e, worldModel);
+		AgmInner::updateImNodeFromEdge(worldModel, e, innerViewer->innerModel);
 	}
+	refresh = true;
 }
+
+void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &e)
+{
+	QMutexLocker dd(&modelMutex);
+	AGMModelConverter::includeIceModificationInInternalModel(e, worldModel);				
+	AgmInner::updateImNodeFromEdge(worldModel, e, innerViewer->innerModel);
+	refresh = true;
+}
+
 
 
 void SpecificWorker::update(const RoboCompAGMWorldModel::World &a, const RoboCompAGMWorldModel::World &b, const RoboCompPlanning::Plan &pl)
@@ -392,17 +385,6 @@ void SpecificWorker::deactivateClicked()
 }
 
 
-void SpecificWorker::resetClicked()
-{
-	try
-	{
-		agmexecutive_proxy->reset();
-	}
-	catch(const Ice::Exception & e)
-	{
-		QMessageBox::critical(this, "Can't connect to the executive", "Can't connect to the executive. Please, make sure the executive is running properly");
-	}
-}
 
 /*
 void SpecificWorker::set3DViewer()

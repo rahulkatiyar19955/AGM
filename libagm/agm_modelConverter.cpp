@@ -128,6 +128,17 @@ void AGMModelConverter::fromIceToInternal(const RoboCompAGMWorldModel::Edge &edg
 }
 
 
+bool AGMModelConverter::includeIceModificationInInternalModel(const std::vector<RoboCompAGMWorldModel::Node> &nodes, AGMModel::SPtr &world)
+{
+	bool ret = true;
+	for (auto n : nodes)
+	{
+		if (not includeIceModificationInInternalModel(n, world))
+			ret = false;
+	}
+	return ret;
+}
+
 bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMWorldModel::Node &node, AGMModel::SPtr &world)
 {
 	for (uint32_t i=0; i<world->symbols.size(); ++i)
@@ -143,6 +154,17 @@ bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMW
 		}
 	}
 	return false;
+}
+
+bool AGMModelConverter::includeIceModificationInInternalModel(const std::vector<RoboCompAGMWorldModel::Edge> &edges, AGMModel::SPtr &world)
+{
+	bool ret = true;
+	for (auto e : edges)
+	{
+		if (not includeIceModificationInInternalModel(e, world))
+			ret = false;
+	}
+	return ret;
 }
 
 bool AGMModelConverter::includeIceModificationInInternalModel(const RoboCompAGMWorldModel::Edge &edge, AGMModel::SPtr &world)

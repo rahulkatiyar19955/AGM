@@ -9,21 +9,19 @@
 AGMModel::AGMModel()
 {
 	lastId = 0;
-// 	printf("new model: (%p)\n", this);
+	version = 0;
 }
 
 AGMModel::~AGMModel()
 {
-// 	printf("delete model: (%p)\n", this);
 	lastId = 0;
+	version = 0;
 	symbols.clear();
 	edges.clear();
 }
 
 AGMModel::AGMModel(const AGMModel::SPtr &src)
 {
-// 	printf("new model (sptr): (%p)\n", this);
-	//printf("AGMModel::AGMModel(const AGMModel::SPtr &src)\n");
 	setFrom(*src);
 }
 

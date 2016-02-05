@@ -5,7 +5,7 @@ cmake_minimum_required( VERSION 2.8)
 set(CMAKE_CXX_FLAGS "-Wall -Wfatal-errors " )
 INCLUDE_DIRECTORIES ( . libagm )
 
-SUBDIRS (tools/agmmission)
+SUBDIRS (tools/agmmission2)
 
 #  Optional features and options  #
 ###################################
@@ -100,7 +100,7 @@ if (ROBOCOMP_SUPPORT)
 	INCLUDE( $ENV{ROBOCOMP}/cmake/robocomp.cmake )
 	ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
 	SET(ICE_LIBS -lIce)
-	ROBOCOMP_WRAP_ICE( AGMWorldModel AGMAgent AGMCommonBehavior )
+	ROBOCOMP_WRAP_ICE( AGMWorldModel AGMExecutive Planning AGMCommonBehavior )
 	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
 endif (ROBOCOMP_SUPPORT)
 
@@ -160,8 +160,8 @@ WRAP_PYTHON_QRC( resource )
 #  Library building  #
 ######################
 if (ROBOCOMP_SUPPORT)
-   add_library(agmdummy SHARED AGMWorldModel.cpp AGMAgent.cpp AGMCommonBehavior )
-   set(ROBOCOMP_ADDITIONAL_SRC AGMAgent.cpp)
+   add_library(agmdummy SHARED AGMWorldModel.cpp AGMExecutive.cpp AGMCommonBehavior.cpp Planning.cpp )
+   set(ROBOCOMP_ADDITIONAL_SRC AGMExecutive.cpp Planning.cpp )
 endif (ROBOCOMP_SUPPORT)
 
 add_library(agm SHARED ${AGM_CODE} ${XMLVIEWER3D_MOCS} )
@@ -229,9 +229,10 @@ INSTALL(PROGRAMS "AGGLPlanner/agglcheckhierarchical.py" DESTINATION ${INST_BIN_P
 INSTALL(PROGRAMS "python/pyparsinglocal.py" DESTINATION ${INST_SHARE_PATH}/ RENAME pyparsinglocal.py )
 
 if (ROBOCOMP_SUPPORT)
-	INSTALL(FILES     AGMWorldModel.h DESTINATION ${INST_INCL_PATH}/ )
-	INSTALL(FILES          AGMAgent.h DESTINATION ${INST_INCL_PATH}/ )
 	INSTALL(FILES AGMCommonBehavior.h DESTINATION ${INST_INCL_PATH}/ )
+	INSTALL(FILES     AGMWorldModel.h DESTINATION ${INST_INCL_PATH}/ )
+	INSTALL(FILES          Planning.h DESTINATION ${INST_INCL_PATH}/ )
+	INSTALL(FILES      AGMExecutive.h DESTINATION ${INST_INCL_PATH}/ )
 endif (ROBOCOMP_SUPPORT)
 
 INSTALL(PROGRAMS python/parseAGGL.py DESTINATION ${INST_SHARE_PATH})

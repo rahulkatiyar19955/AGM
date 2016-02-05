@@ -10,7 +10,9 @@
 #include <boost/thread.hpp>
 
 #include <agm_modelException.h>
+
 #if ROBOCOMP_SUPPORT == 1
+#include <AGMExecutive.h>
 #include <AGMWorldModel.h>
 #include <AGMCommonBehavior.h>
 #endif
@@ -380,6 +382,8 @@ public:
 	int32_t size() { return symbols.size(); }
 	/// Vector of the edges that the model holds.
 	std::vector<AGMModelEdge> edges;
+	/// Version ID of the model
+	int32_t version;
 private:
 
 	/// Overwrites the symbols attribute with the vector provided.

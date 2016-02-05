@@ -48,10 +48,11 @@ Q_OBJECT
 public:
 	SpecificWorker(MapPrx& mprx);
 	~SpecificWorker();
-	void structuralChange(const RoboCompAGMWorldModel::Event& modification);
-	void symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
-	void edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
-	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence& modification);
+	void structuralChange(const RoboCompAGMWorldModel::World &w);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &es);
+	void edgeUpdated(const RoboCompAGMWorldModel::Edge &e);
+	void symbolUpdated(const RoboCompAGMWorldModel::Node &n);
+	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &ns);
 	void update(const RoboCompAGMWorldModel::World &a, const RoboCompAGMWorldModel::World &b, const RoboCompPlanning::Plan &p);
 
 	bool setParams(RoboCompCommonBehavior::ParameterList params) { return true; }
@@ -75,7 +76,6 @@ public slots:
 
 	void activateClicked();
 	void deactivateClicked();
-	void resetClicked();
 
 // 	void broadcastButtonClicked();
 	void broadcastPlanButtonClicked();

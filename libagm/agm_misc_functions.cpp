@@ -58,32 +58,26 @@ std::string int2str(const int32_t &i)
 
 #if ROBOCOMP_SUPPORT == 1
 
-void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel, std::string sender)
+void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agmexecutive, std::string sender)
 {
-	newModel->save("new.xml");
-	oldModel->save("old.xml");
-	RoboCompAGMWorldModel::Event e;
-	e.sender = sender;
-	e.why = RoboCompAGMWorldModel::BehaviorBasedModification;
-	oldModel->removeDanglingEdges();
-	AGMModelConverter::fromInternalToIce(oldModel, e.backModel);
 	newModel->removeDanglingEdges();
-	AGMModelConverter::fromInternalToIce(newModel, e.newModel);
-	agmagenttopic->structuralChange(e);
+	RoboCompAGMWorldModel::World newModelICE;
+	AGMModelConverter::fromInternalToIce(newModel, newModelICE);
+	agmexecutive->structuralChangeProposal(newModelICE, sender, "");
 }
 
-void AGMMisc::publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMAgentTopicPrx &agmagenttopic)
+void AGMMisc::publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMExecutivePrx &agmexecutive)
 {
 	RoboCompAGMWorldModel::Node iceSymbol;
 	AGMModelConverter::fromInternalToIce(symbol, iceSymbol);
-	agmagenttopic->symbolUpdated(iceSymbol);
+	agmexecutive->symbolUpdate(iceSymbol);
 }
 
-void AGMMisc::publishEdgeUpdate(AGMModelEdge &edge, AGMAgentTopicPrx &agmagenttopic)
+void AGMMisc::publishEdgeUpdate(AGMModelEdge &edge, AGMExecutivePrx &agmexecutive)
 {
 	RoboCompAGMWorldModel::Edge iceEdge;
 	AGMModelConverter::fromInternalToIce(&edge, iceEdge);
-	agmagenttopic->edgeUpdated(iceEdge);
+	agmexecutive->edgeUpdate(iceEdge);
 }
 
 #endif

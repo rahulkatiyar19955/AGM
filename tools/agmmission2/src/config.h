@@ -3,7 +3,9 @@
 
 // Comment out this line if your application has a QtGui
 #define USE_QTGUI
-#define PROGRAM_NAME    "missionAgent"
-#define SERVER_FULL_NAME   "RoboCompmissionAgent::missionAgent"
+
+
+#define PROGRAM_NAME    "agmmission"
+#define SERVER_FULL_NAME   "RoboComp agmmission:: agmmission"
 
 #endif

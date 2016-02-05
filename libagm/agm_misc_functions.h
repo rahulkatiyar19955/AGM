@@ -5,8 +5,10 @@
 #include <agm_modelException.h>
 
 #if ROBOCOMP_SUPPORT == 1
-	#include <AGMAgent.h>
-	using namespace RoboCompAGMAgent;
+#include <AGMExecutive.h>
+#include <AGMWorldModel.h>
+#include <AGMCommonBehavior.h>
+using namespace RoboCompAGMExecutive;
 #endif
 
 /*! Converts an STD string to float. */
@@ -35,10 +37,10 @@ class AGMMisc
 {
 public:
 #if ROBOCOMP_SUPPORT == 1
-	/*! Publish a new world model (<em>worldModel</em>) using the proxy <em>agmagenttopic</em> using <em>oldModel</em> as the old model. */
-	static void publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel, std::string sender="unspecified");
-	static void publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMAgentTopicPrx &agmagenttopic);
-	static void publishEdgeUpdate(AGMModelEdge &edge, AGMAgentTopicPrx &agmagenttopic);
+	/*! Publish a new world model (<em>worldModel</em>) using the proxy <em>AGMExecutive</em> using <em>oldModel</em> as the old model. */
+	static void publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agmexecutive, std::string sender="unspecified");
+	static void publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMExecutivePrx &agmexecutive);
+	static void publishEdgeUpdate(AGMModelEdge &edge, AGMExecutivePrx &agmexecutive);
 #endif
 	static inline float str2float(const std::string &s, bool debug = false);
 	static inline int32_t str2int(const std::string &s);

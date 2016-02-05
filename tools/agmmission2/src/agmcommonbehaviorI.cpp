@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2016 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -22,46 +22,55 @@ AGMCommonBehaviorI::AGMCommonBehaviorI(GenericWorker *_worker, QObject *parent) 
 {
 	worker = _worker;
 	mutex = worker->mutex;       // Shared worker mutex
-	// Component initialization...
 }
 
 
 AGMCommonBehaviorI::~AGMCommonBehaviorI()
 {
-	// Free component resources here
 }
 
-// Component functions, implementation
-bool AGMCommonBehaviorI::activateAgent(const ParameterMap& params, const Ice::Current&){
-	return worker->activateAgent(params);
+bool AGMCommonBehaviorI::reloadConfigAgent(const Ice::Current&)
+{
+	return worker->reloadConfigAgent();
 }
 
-bool AGMCommonBehaviorI::deactivateAgent(const Ice::Current&){
-	return worker->deactivateAgent();
+bool AGMCommonBehaviorI::activateAgent(const ParameterMap  &prs, const Ice::Current&)
+{
+	return worker->activateAgent(prs);
 }
 
-StateStruct AGMCommonBehaviorI::getAgentState(const Ice::Current&){
-	return worker->getAgentState();
+bool AGMCommonBehaviorI::setAgentParameters(const ParameterMap  &prs, const Ice::Current&)
+{
+	return worker->setAgentParameters(prs);
 }
 
-ParameterMap AGMCommonBehaviorI::getAgentParameters(const Ice::Current&){
+ParameterMap AGMCommonBehaviorI::getAgentParameters(const Ice::Current&)
+{
 	return worker->getAgentParameters();
 }
 
-bool AGMCommonBehaviorI::setAgentParameters(const ParameterMap& params, const Ice::Current&){
-	return worker->setAgentParameters(params);
-}
-
-void AGMCommonBehaviorI::killAgent(const Ice::Current&){
+void AGMCommonBehaviorI::killAgent(const Ice::Current&)
+{
 	worker->killAgent();
 }
 
-int AGMCommonBehaviorI::uptimeAgent(const Ice::Current&){
+int AGMCommonBehaviorI::uptimeAgent(const Ice::Current&)
+{
 	return worker->uptimeAgent();
 }
 
-bool AGMCommonBehaviorI::reloadConfigAgent(const Ice::Current&){
-	return worker->reloadConfigAgent();
+bool AGMCommonBehaviorI::deactivateAgent(const Ice::Current&)
+{
+	return worker->deactivateAgent();
 }
+
+StateStruct AGMCommonBehaviorI::getAgentState(const Ice::Current&)
+{
+	return worker->getAgentState();
+}
+
+
+
+
 
 
