@@ -45,9 +45,9 @@ if len(ROBOCOMP)<1:
 
 
 preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
-Ice.loadSlice(preStr+"AGMCommonBehavior2.ice")
-Ice.loadSlice(preStr+"AGMExecutive2.ice")
-Ice.loadSlice(preStr+"AGMWorldModel2.ice")
+Ice.loadSlice(preStr+"AGMCommonBehavior.ice")
+Ice.loadSlice(preStr+"AGMExecutive.ice")
+Ice.loadSlice(preStr+"AGMWorldModel.ice")
 Ice.loadSlice(preStr+"Speech.ice")
 import RoboCompAGMCommonBehavior
 import RoboCompAGMExecutive

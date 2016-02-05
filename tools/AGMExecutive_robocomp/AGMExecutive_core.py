@@ -24,9 +24,9 @@ if len(ROBOCOMP)<1:
 	print 'ROBOCOMP environment variable not set! Exiting.'
 	sys.exit()
 preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
-Ice.loadSlice(preStr+"AGMCommonBehavior2.ice")
-Ice.loadSlice(preStr+"AGMExecutive2.ice")
-Ice.loadSlice(preStr+"AGMWorldModel2.ice")
+Ice.loadSlice(preStr+"AGMCommonBehavior.ice")
+Ice.loadSlice(preStr+"AGMExecutive.ice")
+Ice.loadSlice(preStr+"AGMWorldModel.ice")
 Ice.loadSlice(preStr+"Speech.ice")
 Ice.loadSlice(preStr+"Planning.ice")
 import RoboCompAGMCommonBehavior
@@ -148,7 +148,7 @@ class Executive(object):
 			except AttributeError:
 				pass
 			self.lastModification = internalModel                                                              # store last modification
-			self.modifications++
+			self.modifications += 1
 			self.worldModelICE = worldModelICE
 			# Store the model in XML
 			try:
@@ -193,7 +193,7 @@ class Executive(object):
 	def edgeUpdate(self, edge):
 		self.edgesUpdate([edge])
 
-	def edgesUpdate(self, edges)
+	def edgesUpdate(self, edges):
 		try:
 			self.modelMutex.acquire()
 			for edge in edges:
@@ -249,7 +249,7 @@ class Executive(object):
 
 
 	def getData(self):
-		return self.worldModelICE, self.targetStr, self.plan)
+		return self.worldModelICE, self.targetStr, self.plan
 
 
 	def broadcastPlan(self):
