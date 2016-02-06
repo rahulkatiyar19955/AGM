@@ -191,23 +191,24 @@ bool SpecificWorker::setAgentParameters(const ParameterMap& params)
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &w)
 {
-// 	printf("MODEL MODIFIED (%s)\n", modification.sender.c_str());
+	printf("MODEL MODIFIED %d\n", __LINE__);
 	QMutexLocker dd(&modelMutex);
+	printf("MODEL MODIFIED %d\n", __LINE__);
 	AGMModelConverter::fromIceToInternal(w, worldModel);
-// 	worldModel->save(missions->currentText().toStdString()+"_LastStructuralChange.xml");
-// 		qDebug()<<missions->currentText() <<QTime::currentTime().toString() ;
-	changeInner(AgmInner::extractInnerModel(worldModel));		
+	printf("MODEL MODIFIED %d\n", __LINE__);
+	changeInner(AgmInner::extractInnerModel(worldModel));
+	printf("MODEL MODIFIED %d\n", __LINE__);
 	fillItemList();
+	printf("MODEL MODIFIED %d\n", __LINE__);
 	refresh = true;
 }
 
 
 void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &n)
 {
-		QMutexLocker dd(&modelMutex);
-		AGMModelConverter::includeIceModificationInInternalModel(n, worldModel);
-		//agmInner.setWorld(worldModel);				
-		refresh = true;
+	QMutexLocker dd(&modelMutex);
+	AGMModelConverter::includeIceModificationInInternalModel(n, worldModel);
+	refresh = true;
 }
 
 void SpecificWorker::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &ns)
@@ -233,7 +234,7 @@ void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &es)
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &e)
 {
 	QMutexLocker dd(&modelMutex);
-	AGMModelConverter::includeIceModificationInInternalModel(e, worldModel);				
+	AGMModelConverter::includeIceModificationInInternalModel(e, worldModel);
 	AgmInner::updateImNodeFromEdge(worldModel, e, innerViewer->innerModel);
 	refresh = true;
 }

@@ -77,7 +77,6 @@ public slots:
 	void activateClicked();
 	void deactivateClicked();
 
-// 	void broadcastButtonClicked();
 	void broadcastPlanButtonClicked();
 	void broadcastModelButtonClicked();
 
@@ -109,7 +108,6 @@ private:
 	OsgView *osgView;
 	InnerModel *innerModelVacio;
 	InnerModelViewer *innerViewer; 
-// 	AgmInner agmInner;
 
 
 	

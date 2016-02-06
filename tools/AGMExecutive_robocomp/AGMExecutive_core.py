@@ -133,13 +133,14 @@ class Executive(object):
 
 		# Get structuralChange mutex
 		if self.modelMutex.acquire(blocking=False) == False:
-			return ProposalError.Locked
+			return RoboCompAGMExecutive.ProposalError.Locked
 		try:
 			# Ignore outdated modifications
-			if worldModelICE.version != self.lastModification.version+1:
-				return ProposalError.OldModel
+			if worldModelICE.version != self.lastModification.version:
+				return RoboCompAGMExecutive.ProposalError.OldModel
 
 			# Here we're OK with the modification, accept it, but first check if replanning is necessary
+			worldModelICE+=1
 			internalModel = AGMModelConversion.fromIceToInternal_model(worldModelICE, ignoreInvalidEdges=True) # set internal model
 			try:                                                                                               # is replanning necessary?
 				avoidReplanning = False
@@ -169,7 +170,7 @@ class Executive(object):
 				print 'There was some problem updating internal model to xml'
 		finally:
 			self.modelMutex.release()
-
+		return RoboCompAGMExecutive.NoError
 
 	def symbolUpdate(self, nodeModification):
 		self.symbolsUpdate([nodeModification])
@@ -241,16 +242,13 @@ class Executive(object):
 			if n.nodeIdentifier == identifier:
 				return n
 
-
 	def getEdge(self, srcIdentifier, dstIdentifier, label):
 		for e in self.worldModelICE.edges:
 			if e.a == srcIdentifier and e.b == dstIdentifier and e.edgeType == label:
 				return e
 
-
 	def getData(self):
 		return self.worldModelICE, self.targetStr, self.plan
-
 
 	def broadcastPlan(self):
 		self.mutex.acquire( )
