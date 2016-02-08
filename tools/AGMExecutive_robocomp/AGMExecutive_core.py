@@ -283,17 +283,19 @@ class Executive(object):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
-
+		print 'structuralChangeProposal', sender, log
 		# Get structuralChange mutex
 		if self.modelMutex.acquire(blocking=False) == False:
+			print 'locked!??!'
 			return RoboCompAGMExecutive.ProposalError.Locked
 		try:
 			# Ignore outdated modifications
 			if worldModelICE.version != self.lastModification.version:
+				print 'outdated!??!  self='+str(self.lastModification.version)+'   ice='+str(worldModelICE.version)
 				return RoboCompAGMExecutive.ProposalError.OldModel
-
+			print 'inside'
 			# Here we're OK with the modification, accept it, but first check if replanning is necessary
-			worldModelICE+=1
+			worldModelICE.version += 1
 			internalModel = AGMModelConversion.fromIceToInternal_model(worldModelICE, ignoreInvalidEdges=True) # set internal model
 			try:                                                                                               # is replanning necessary?
 				avoidReplanning = False
@@ -323,7 +325,7 @@ class Executive(object):
 				print 'There was some problem updating internal model to xml'
 		finally:
 			self.modelMutex.release()
-		return RoboCompAGMExecutive.NoError
+		return RoboCompAGMExecutive.ProposalError.NoError
 
 	def symbolUpdate(self, nodeModification):
 		self.symbolsUpdate([nodeModification])

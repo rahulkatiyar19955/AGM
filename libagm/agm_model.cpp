@@ -42,6 +42,7 @@ AGMModel &AGMModel::operator=(const AGMModel &src)
 void AGMModel::setFrom(const AGMModel &src)
 {
 	lastId = src.lastId;
+	version = src.version;
 
 	symbols.clear();
 	for (uint32_t i=0; i<src.symbols.size(); ++i)
@@ -75,6 +76,7 @@ void AGMModel::resetLastId()
 void AGMModel::clear()
 {
 	lastId = 0;
+	version = 0;
 	symbols.clear();
 	edges.clear();
 }

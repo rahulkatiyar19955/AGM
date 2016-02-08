@@ -11,7 +11,11 @@
 #if ROBOCOMP_SUPPORT == 1
 void AGMModelConverter::fromInternalToIce(const AGMModel::SPtr &src, RoboCompAGMWorldModel::World &dst)
 {
+	// remove dangling edges
 	src->removeDanglingEdges();
+	// copy version
+	dst.version = src->version;
+	// copy nodes
 	dst.nodes.clear();
 	for (uint32_t i=0; i<src->symbols.size(); ++i)
 	{
@@ -27,7 +31,7 @@ void AGMModelConverter::fromInternalToIce(const AGMModel::SPtr &src, RoboCompAGM
 		node.attributes = src->symbols[i]->attributes;
 		dst.nodes.push_back(node);
 	}
-
+	// copy edges
 	dst.edges.clear();
 	for (uint32_t i=0; i<src->edges.size(); ++i)
 	{
@@ -55,6 +59,7 @@ void AGMModelConverter::fromInternalToIce(const AGMModel::SPtr &src, RoboCompAGM
 
 void AGMModelConverter::fromIceToInternal(const RoboCompAGMWorldModel::World &src, AGMModel::SPtr &dst)
 {
+	// nodes
 	dst->symbols.clear();
 	for (uint32_t i=0; i<src.nodes.size(); ++i)
 	{
@@ -65,7 +70,7 @@ void AGMModelConverter::fromIceToInternal(const RoboCompAGMWorldModel::World &sr
 			exit(-1);
 		}
 	}
-
+	// edges
 	dst->edges.clear();
 	for (uint32_t i=0; i<src.edges.size(); ++i)
 	{
@@ -77,7 +82,9 @@ void AGMModelConverter::fromIceToInternal(const RoboCompAGMWorldModel::World &sr
 			exit(-1);
 		}
 	}
-
+	// version
+	dst->version = src.version;
+	// last id
 	dst->resetLastId();
 }
 
@@ -242,7 +249,7 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 		return;
 	}
 
-
+	
 	int32_t lastVariableId=1000;
 	std::map <std::string, int32_t> identifierMap;
 
@@ -337,6 +344,7 @@ void AGMModelConverter::fromXMLToInternal(const std::string path, AGMModel::SPtr
 		}
 	}
 
+	dst->version;
 	dst->resetLastId();
 }
 
