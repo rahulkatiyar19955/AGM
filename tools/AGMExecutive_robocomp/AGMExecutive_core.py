@@ -81,20 +81,176 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 	sys.exit(692)
 
 
+class PlannerCaller(threading.Thread):
+	def __init__(self, executive, agglPath):
+		threading.Thread.__init__(self)
+		self.cache = PlanningCache()
+		self.plannerExecutionID = 0
+		self.executive = executive
+		self.working = False
+		self.plannerCallerMutex = threading.RLock()
+		self.agglPath = agglPath
+		self.agmData = AGMFileDataParsing.fromFile(self.agglPath)
+		self.agmData.generateAGGLPlannerCode("/tmp/domainActive.py", skipPassiveRules=False)
+		self.agmData.generateAGGLPlannerCode("/tmp/domainPasive.py", skipPassiveRules=True)
+	def setWork(self, currentModel):
+		print 'PlannerCaller::setWork 0'
+		# Kill any previous planning process
+		while self.plannerCallerMutex.acquire(0)==False:
+			now = time.time()
+			elap = (now - self.lastPypyKill)
+			if elap > 2.:
+				try: subprocess.call(["killall", "-9", "pypy"])
+				except: pass
+				self.lastPypyKill = now
+			time.sleep(0.1)
+		# Set work
+		print 'PlannerCaller::setWork 1'
+		self.working = True
+		self.currentModel = currentModel
+		# End
+		self.plannerCallerMutex.release()
+	def run(self):
+		while True:
+			# Continue if we can't acquire the mutex
+			if self.plannerCallerMutex.acquire(0)==False:
+				time.sleep(0.05)
+				continue
+			# Continue if there's no work to do
+			if not self.working:
+				self.plannerCallerMutex.release()
+				time.sleep(0.05)
+				continue
+			print 'PlannerCaller::run 2'
+			try:
+				# Run planner
+				start = time.time()
+				#PRE
+				try:
+					self.plannerExecutionID+=1
+					peid = '_'+str(self.plannerExecutionID)
+					self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
+				except:
+					print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
+					sys.exit(1)
+				# CALL
+				argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
+				print 'Ask cache'
+				cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
+				if cacheResult:
+					print 'Got plan from cache'
+					print '<<<'
+					print cacheResult[1]
+					print '>>>'
+					cacheSuccess = cacheResult[0]
+					cachePlan = cacheResult[1]
+					lines = cacheResult[1].split('\n')
+				else:
+					print 'Running the planner...'
+					try:
+						print argsss
+						subprocess.call(argsss)
+					except:
+						pass
+					#POST Check if the planner was killed
+					print 'pkm2'
+					#print plan
+					#CONTINUE?                       Probably it's better just to try to open the file and consider it was killed if there's no result file...
+					end = time.time()
+					print 'It took', end - start, 'seconds'
+					print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
+					self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
+					ofile = open("/tmp/result"+peid+".txt", 'r')
+					lines = self.ignoreCommentsInPlan(ofile.readlines())
+					ofile.close()
+				# Get the output
+				try:
+					self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
+					print self.plan
+					stored, stepsFwd = self.callMonitoring(peid)
+				except: # The planner was probably killed
+					traceback.print_exc()
+					return
+				self.working = False
+				self.executive.gotPlan(self.plan)
+			finally:
+				self.plannerCallerMutex.release()
+		
+	def callMonitoring(self, peid):
+		stored = False
+		stepsFwd = 0
+		print 'Trying with the last steps of the current plan...'
+		domainPath = '/tmp/domainActive.py'
+		init   = '/tmp/lastWorld'+peid+'.xml'
+		target = '/tmp/target.py'
+		try:
+			#print '<<<Call Monitoring'
+			#print '<<<Call Monitoring'
+			#print self.plan
+			#print '   Call Monitoring>>>'
+			#print '   Call Monitoring>>>'
+			#print 'aa', type(self.plan), self.plan
+			#try:
+				#os.system("rm -rf " + peid)
+				#os.system("mkdir " + peid)
+				#h = open(peid+'/agmData.pckl', 'w')
+				#print type(h)
+				#pickle.dump(self.agmData,      h)
+
+				#h = open(peid+'/domainPath.pckl', 'w')
+				#print type(h)
+				#pickle.dump(domainPath,        h)
+
+				#h = open(peid+'/domainPath.pckl', 'w')
+				#print type(h)
+				#pickle.dump(init,              h)
+
+				#h = open(peid+'/currentModel.pckl', 'w')
+				#print type(h)
+				#pickle.dump(self.currentModel, h)
+
+				#h = open(peid+'/plan.pckl', 'w')
+				#print type(h)
+				#pickle.dump(self.plan,         h)
+			#except:
+				#pass
+
+			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan))
+			#print 'bb'
+			#print ret, stepsFwd, planMonitoring
+			if ret:
+				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
+				stored = True
+				self.plan = planMonitoring
+			else:
+				print 'No modified version of the current plan satisfies the goal. Replanning is necessary.'
+				stored = False
+		except:
+			print traceback.print_exc()
+			print 'It didn\'t seem to work.'
+			stored = False
+		print 'done callMonitoring', stored, stepsFwd
+		return stored, stepsFwd
+
+	def ignoreCommentsInPlan(self, plan):
+		ret = []
+		for i in plan:
+			if len(i) > 0:
+				if i[0] != '#':
+					ret.append(i)
+		return ret
+
 
 class Executive(object):
 	def __init__(self, agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech):
 		self.executiveActive = True
 		self.modelMutex = threading.RLock()
 		self.mutex = threading.RLock()
-		self.pypyKillMutex = threading.RLock()
-		self.pypyInProgress = 0
-		self.plannerExecutionID=0
 		self.agents = dict()
 		self.plan = None
 		self.modifications = 0
-		self.lastPypyKill = time.time()
-		self.cache = PlanningCache()
+		self.plannerCaller = PlannerCaller(self, agglPath)
+		self.plannerCaller.start()
 
 		# Set proxies
 		self.executiveTopic = executiveTopic
@@ -102,9 +258,6 @@ class Executive(object):
 		self.speech = speech
 
 		self.agglPath = agglPath
-		self.agmData = AGMFileDataParsing.fromFile(self.agglPath)
-		self.agmData.generateAGGLPlannerCode("/tmp/domainActive.py", skipPassiveRules=False)
-		self.agmData.generateAGGLPlannerCode("/tmp/domainPasive.py", skipPassiveRules=True)
 		self.initialModelPath = initialModelPath
 		self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
 		self.lastModification = self.initialModel
@@ -215,7 +368,7 @@ class Executive(object):
 
 
 	def setMission(self, target, avoidUpdate=False):
-		self.mutex.acquire( )
+		self.mutex.acquire()
 		self.targetStr = target
 		try:
 			temp = AGMFileDataParsing.targetFromFile(target)
@@ -291,171 +444,29 @@ class Executive(object):
 		self.currentModel = model
 		self.broadcastModel()
 
-	def ignoreCommentsInPlan(self, plan):
-		ret = []
-		for i in plan:
-			if len(i) > 0:
-				if i[0] != '#':
-					ret.append(i)
-		return ret
-
-	def callMonitoring(self, peid):
-		stored = False
-		stepsFwd = 0
-		print 'Trying with the last steps of the current plan...'
-		domainPath = '/tmp/domainActive.py'
-		init   = '/tmp/lastWorld'+peid+'.xml'
-		target = '/tmp/target.py'
-		try:
-			#print '<<<Call Monitoring'
-			#print '<<<Call Monitoring'
-			#print self.plan
-			#print '   Call Monitoring>>>'
-			#print '   Call Monitoring>>>'
-			#print 'aa', type(self.plan), self.plan
-			#try:
-				#os.system("rm -rf " + peid)
-				#os.system("mkdir " + peid)
-				#h = open(peid+'/agmData.pckl', 'w')
-				#print type(h)
-				#pickle.dump(self.agmData,      h)
-
-				#h = open(peid+'/domainPath.pckl', 'w')
-				#print type(h)
-				#pickle.dump(domainPath,        h)
-
-				#h = open(peid+'/domainPath.pckl', 'w')
-				#print type(h)
-				#pickle.dump(init,              h)
-
-				#h = open(peid+'/currentModel.pckl', 'w')
-				#print type(h)
-				#pickle.dump(self.currentModel, h)
-
-				#h = open(peid+'/plan.pckl', 'w')
-				#print type(h)
-				#pickle.dump(self.plan,         h)
-			#except:
-				#pass
-
-			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan))
-			#print 'bb'
-			#print ret, stepsFwd, planMonitoring
-			if ret:
-				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
-				stored = True
-				self.plan = planMonitoring
-			else:
-				print 'No modified version of the current plan satisfies the goal. Replanning is necessary.'
-				stored = False
-		except:
-			print traceback.print_exc()
-			print 'It didn\'t seem to work.'
-			stored = False
-		print 'done callMonitoring', stored, stepsFwd
-		return stored, stepsFwd
 
 	def updatePlan(self):
-		# Kill any previous planning process
-		while self.mutex.acquire(0)==False:
-			now = time.time()
-			elap = (now - self.lastPypyKill)
-			print 'couldn\'t acquire', elap
-			if elap > 3.:
-				try:
-					subprocess.call(["killall", "-9", "pypy"])
-				except:
-					pass
-				self.lastPypyKill = now
-			time.sleep(1)
-		self.mutex.release()
+		self.plannerCaller.setWork(self.currentModel)
+		# MONITORING DEACTIVATED WARNING TODO FIXME
+				#stored = False
+				#if self.plan != None and False:
+					#self.pypyKillMutex.acquire()
+					#try:
+						#peid = '_'+str(self.plannerExecutionID)
+					#except:
+						#print 'There was some problem broadcasting the model'
+						#sys.exit(1)
+					#self.pypyKillMutex.release()
+					#stored, stepsFwd = self.callMonitoring(peid)
+					#print stored, stepsFwd
+				#else:
+					#print 'There was no previous plan'
 
+				#print 'Running the planner?', stored==False
+				#if stored == False:
 
-		# First, try with the current plan
-		stored = False
-		if self.plan != None and False:
-			self.pypyKillMutex.acquire()
-			try:
-				peid = '_'+str(self.plannerExecutionID)
-			except:
-				print 'There was some problem broadcasting the model'
-				sys.exit(1)
-			self.pypyKillMutex.release()
-			stored, stepsFwd = self.callMonitoring(peid)
-			print stored, stepsFwd
-		else:
-			print 'There was no previous plan'
-
-		print 'Running the planner?', stored==False
-		if stored == False:
-			# Run planner
-			start = time.time()
-			#PRE
-			self.pypyKillMutex.acquire()
-			try:
-				self.pypyInProgress += 1
-				self.plannerExecutionID+=1
-				peid = '_'+str(self.plannerExecutionID)
-				self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
-			except:
-				print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
-				sys.exit(1)
-			self.pypyKillMutex.release()
-			# CALL
-			argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
-			print 'Ask cache'
-			cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
-			if cacheResult:
-				print 'Got plan from cache'
-				print '<<<'
-				print cacheResult[1]
-				print '>>>'
-				cacheSuccess = cacheResult[0]
-				cachePlan = cacheResult[1]
-				lines = cacheResult[1].split('\n')
-			else:
-				print 'Running the planner...'
-				try:
-					print argsss
-					subprocess.call(argsss)
-				except:
-					pass
-				#POST Check if the planner was killed
-				print 'pkm2'
-				self.pypyKillMutex.acquire()
-				try:
-					self.pypyInProgress -= 1
-					if self.pypyInProgress == 0:
-						plannerWasKilled = False
-					else:
-						plannerWasKilled = True
-				except:
-					print 'There was some problem doing this'
-					sys.exit(1)
-				self.pypyKillMutex.release()
-				#CONTINUE?                       Probably i'ts better just to try to open the file and consider it was killed if there's no result file...
-				#if plannerWasKilled:
-					#print 'There\'s another planning process running... abort'
-					#return
-				end = time.time()
-				print 'It took', end - start, 'seconds'
-				print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
-				self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
-				ofile = open("/tmp/result"+peid+".txt", 'r')
-				lines = self.ignoreCommentsInPlan(ofile.readlines())
-				ofile.close()
-			# Get the output
-			try:
-				self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
-				stored, stepsFwd = self.callMonitoring(peid)
-			except: # The planner was probably killed
-				traceback.print_exc()
-				return
-		else:
-			print 'Got plan from monitorization'
-			print self.plan
-			print 'Got plan from monitorization'
-
+	def gotPlan(self, plan):
+		self.plan = plan
 		# Extract first action
 		action = "none"
 		parameterMap = dict()

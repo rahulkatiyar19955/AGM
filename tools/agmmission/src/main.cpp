@@ -118,6 +118,36 @@ void ::agmmission::initialize()
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
 
+int32_t strToNumber(const std::string &s)
+{
+	if (s.size()<=0)
+	{
+		throw 1;
+	}
+
+	int32_t ret;
+	std::string str = s;
+	//replace(str.begin(), str.end(), ',', '.');
+	std::istringstream istr(str);
+	istr.imbue(std::locale("C"));
+	istr >> ret;
+	return ret;
+}
+
+vector<std::string> commaSplit(const std::string &s)
+{
+	stringstream ss(s);
+	vector<string> result;
+
+	while (ss.good())
+	{
+		string substr;
+		getline( ss, substr, ',' );
+		result.push_back( substr );
+	}
+	return result;
+}
+
 int ::agmmission::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
@@ -131,6 +161,33 @@ int ::agmmission::run(int argc, char* argv[])
 
 	string proxy, tmp;
 	initialize();
+
+
+
+	printf("agmmission::run()\n");
+	int32_t goals;
+	vector<std::pair<std::string, std::string> > missions;
+	try
+	{
+		goals = strToNumber(getProxyString("Goals"));
+		printf("Goals: %d\n", goals);
+		for (int32_t i=0; i<goals; i++)
+		{
+			std::ostringstream ostr;
+			ostr.imbue(std::locale("C"));
+			ostr << "Goal";
+			ostr << i + 1;
+			std::string goalDescriptor = getProxyString(ostr.str());
+			vector<std::string> result = commaSplit(goalDescriptor);
+			missions.push_back(std::pair<std::string, std::string>(result[0], result[1]));
+			printf("%s: <%s> <%s>\n", ostr.str().c_str(), result[0].c_str(), result[1].c_str());
+		}
+	}
+	catch(...)
+	{
+		fprintf(stderr, "Can't read 'Goals' configuration variable (needed to set the goals of the mission controller.\n");
+		exit(42);
+	}
 
 
 	try
@@ -153,6 +210,13 @@ int ::agmmission::run(int argc, char* argv[])
 
 
 	SpecificWorker *worker = new SpecificWorker(mprx);
+	
+	
+	for (uint32_t i=0; i<missions.size(); i++)
+	{
+		((SpecificWorker*)worker)->addMission(missions[i].first, missions[i].second);
+	}
+	
 	//Monitor thread
 	SpecificMonitor *monitor = new SpecificMonitor(worker,communicator());
 	QObject::connect(monitor, SIGNAL(kill()), &a, SLOT(quit()));
