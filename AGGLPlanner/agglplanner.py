@@ -410,14 +410,8 @@ class WorldStateHistory(object):
 	# @param other is the graph with which we compare.
 	# @retval an integer that can be 1 if the current graph is greater, -1 if it is smaller, and 0 if both are equals.
 	def __cmp__(self, other):
-		ret = self.graph.__cmp__(other.graph)
-		if ret == 0:
-			#print 'd'
-			if self.cost != other.cost:
-				ret = 1
-				#print 'dd'
-				#sys.exit(-2)
-		return ret
+		return self.graph.__cmp__(other.graph)
+
 	##@brief This method calculates the hashcode of the current graph.
 	# @retval an integer with the hashcode.
 	def __hash__(self):
@@ -427,7 +421,7 @@ class WorldStateHistory(object):
 	# @param other the other graph.
 	# @retval a boolean wit the result of the comparison
 	def __eq__(self, other):
-		return self.graph.__eq__(other.graph) and self.cost.__eq__(other.cost)
+		return self.graph.__eq__(other.graph)
 
 	##@brief This method returns a string with the information of the current graph.
 	def __repr__(self):
@@ -909,7 +903,7 @@ class PyPlan(object):
 							# Compute cheapest solution
 							self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
 						self.knownNodes.lock()
-						notDerivInKnownNodes = not deriv in self.knownNodes
+						notDerivInKnownNodes = not self.computeDerivInKnownNodes(deriv)
 						self.knownNodes.unlock()
 						if notDerivInKnownNodes:
 							if deriv.stop == False:
@@ -969,6 +963,13 @@ class PyPlan(object):
 						self.minCostOnOpenNodes.value = n[1].cost
 		self.openNodes.unlock()
 		self.minCostOnOpenNodes.unlock()
+
+	def  computeDerivInKnownNodes(self, deriv):
+		for other in self.knownNodes:
+			if deriv == other:
+				if other.cost <= deriv.cost:
+					return True
+		return False
 
 if __name__ == '__main__': # program domain problem result
 	#from pycallgraph import *
