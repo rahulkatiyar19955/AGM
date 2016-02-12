@@ -244,7 +244,6 @@ class PlannerCaller(threading.Thread):
 class Executive(object):
 	def __init__(self, agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech):
 		self.executiveActive = True
-		self.modelMutex = threading.RLock()
 		self.mutex = threading.RLock()
 		self.agents = dict()
 		self.plan = None
@@ -285,10 +284,13 @@ class Executive(object):
 		#
 		print 'structuralChangeProposal', sender, log
 		# Get structuralChange mutex
-		if self.modelMutex.acquire(blocking=False) == False:
-			print 'locked!??!'
+		print 'structuralChangeProposal acquire() a'
+		if self.mutex.acquire(blocking=False) == False:
+			print 'structuralChangeProposal acquire() IT WAS LOCKED'
 			return RoboCompAGMExecutive.ProposalError.Locked
 		try:
+			print 'structuralChangeProposal acquire() z'
+
 			# Ignore outdated modifications
 			if worldModelICE.version != self.lastModification.version:
 				print 'outdated!??!  self='+str(self.lastModification.version)+'   ice='+str(worldModelICE.version)
@@ -324,7 +326,9 @@ class Executive(object):
 			except:
 				print 'There was some problem updating internal model to xml'
 		finally:
-			self.modelMutex.release()
+			print 'structuralChange release() a'
+			self.mutex.release()
+			print 'structuralChange release() z'
 		return RoboCompAGMExecutive.ProposalError.NoError
 
 	def symbolUpdate(self, nodeModification):
@@ -333,7 +337,9 @@ class Executive(object):
 
 	def symbolsUpdate(self, symbols):
 		try:
-			self.modelMutex.acquire()
+			print 'symbolsUpdate acquire() a'
+			self.mutex.acquire()
+			print 'symbolsUpdate acquire() z'
 			try:
 				for symbol in symbols:
 					internal = AGMModelConversion.fromIceToInternal_node(symbol)
@@ -343,7 +349,9 @@ class Executive(object):
 				sys.exit(1)
 			self.executiveTopic.symbolsUpdated(symbols)
 		finally:
-			self.modelMutex.release()
+			print 'symbolsUpdate release() a'
+			self.mutex.release()
+			print 'symbolsUpdate release() z'
 
 
 	def edgeUpdate(self, edge):
@@ -351,7 +359,9 @@ class Executive(object):
 
 	def edgesUpdate(self, edges):
 		try:
-			self.modelMutex.acquire()
+			print 'edgesUpdate acquire() a'
+			self.mutex.acquire()
+			print 'edgesUpdate acquire() z'
 			for edge in edges:
 				internal = AGMModelConversion.fromIceToInternal_edge(edge)
 				found = False
@@ -366,7 +376,9 @@ class Executive(object):
 					print 'couldn\'t update edge because no match was found'
 					print 'edge', edge.a, edge.b, edge.edgeType
 		finally:
+			print 'edgesUpdate release() a'
 			self.mutex.release()
+			print 'edgesUpdate release() z'
 
 
 	def setMission(self, target, avoidUpdate=False):
