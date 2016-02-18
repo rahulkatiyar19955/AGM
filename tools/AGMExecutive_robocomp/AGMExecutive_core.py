@@ -326,9 +326,9 @@ class Executive(object):
 			except:
 				print 'There was some problem updating internal model to xml'
 		finally:
-			print 'structuralChange release() a'
+			#print 'structuralChange release() a'
 			self.mutex.release()
-			print 'structuralChange release() z'
+			#print 'structuralChange release() z'
 		return RoboCompAGMExecutive.ProposalError.NoError
 
 	def symbolUpdate(self, nodeModification):
@@ -337,9 +337,9 @@ class Executive(object):
 
 	def symbolsUpdate(self, symbols):
 		try:
-			print 'symbolsUpdate acquire() a'
+			#print 'symbolsUpdate acquire() a'
 			self.mutex.acquire()
-			print 'symbolsUpdate acquire() z'
+			#print 'symbolsUpdate acquire() z'
 			try:
 				for symbol in symbols:
 					internal = AGMModelConversion.fromIceToInternal_node(symbol)
@@ -349,9 +349,9 @@ class Executive(object):
 				sys.exit(1)
 			self.executiveTopic.symbolsUpdated(symbols)
 		finally:
-			print 'symbolsUpdate release() a'
+			#print 'symbolsUpdate release() a'
 			self.mutex.release()
-			print 'symbolsUpdate release() z'
+			#print 'symbolsUpdate release() z'
 
 
 	def edgeUpdate(self, edge):
@@ -359,9 +359,9 @@ class Executive(object):
 
 	def edgesUpdate(self, edges):
 		try:
-			print 'edgesUpdate acquire() a'
+			#print 'edgesUpdate acquire() a'
 			self.mutex.acquire()
-			print 'edgesUpdate acquire() z'
+			#print 'edgesUpdate acquire() z'
 			for edge in edges:
 				internal = AGMModelConversion.fromIceToInternal_edge(edge)
 				found = False
@@ -376,9 +376,9 @@ class Executive(object):
 					print 'couldn\'t update edge because no match was found'
 					print 'edge', edge.a, edge.b, edge.edgeType
 		finally:
-			print 'edgesUpdate release() a'
+			#print 'edgesUpdate release() a'
 			self.mutex.release()
-			print 'edgesUpdate release() z'
+			#print 'edgesUpdate release() z'
 
 
 	def setMission(self, target, avoidUpdate=False):
