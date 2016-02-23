@@ -32,9 +32,10 @@
 #include <AGMCommonBehavior.h>
 #include <AGMWorldModel.h>
 
-#include <agm.h>
-#include <agmInner/agmInner.h>
-
+#ifndef Q_MOC_RUN
+  #include <agm.h>
+  #include <agmInner/agmInner.h>
+#endif
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100

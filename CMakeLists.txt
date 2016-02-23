@@ -100,7 +100,7 @@ if (ROBOCOMP_SUPPORT)
 	SET(ICE_LIBS -lIce)
 	ROBOCOMP_WRAP_ICE( AGMWorldModel AGMExecutive Planning AGMCommonBehavior )
 	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
-	SUBDIRS (tools/agmmission)
+	SUBDIRS (tools/agmmission tools/agminneragent)
 endif (ROBOCOMP_SUPPORT)
 
 # LibXML

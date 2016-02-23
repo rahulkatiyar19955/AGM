@@ -36,10 +36,13 @@
 #include <innermodel/innermodel.h>
 #include <innermodel/innermodelviewer.h>
 
-#include <agm.h>
-#include <qt4/QtCore/QHash>
-#include <qt4/QtCore/QList>
-#include <agmInner/agmInner.h>
+#ifndef Q_MOC_RUN
+ #include <agm.h>
+ #include <agmInner/agmInner.h>
+#endif
+
+#include <QHash>
+#include <QList>
 
 class SpecificWorker : public GenericWorker
 {
