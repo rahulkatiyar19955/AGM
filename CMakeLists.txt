@@ -5,13 +5,11 @@ cmake_minimum_required( VERSION 2.8)
 set(CMAKE_CXX_FLAGS "-Wall -Wfatal-errors " )
 INCLUDE_DIRECTORIES ( . libagm )
 
-SUBDIRS (tools/agmmission)
 
 #  Optional features and options  #
 ###################################
 option (PYTHON_BINDINGS "Build python bindings" OFF)
 option (ROBOCOMP_SUPPORT "Build with support for RoboComp" OFF)
-
 
 #  Set sources  #
 #################
@@ -102,6 +100,7 @@ if (ROBOCOMP_SUPPORT)
 	SET(ICE_LIBS -lIce)
 	ROBOCOMP_WRAP_ICE( AGMWorldModel AGMExecutive Planning AGMCommonBehavior )
 	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
+	SUBDIRS (tools/agmmission tools/agminneragent)
 endif (ROBOCOMP_SUPPORT)
 
 # LibXML

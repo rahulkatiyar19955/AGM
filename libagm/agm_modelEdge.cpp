@@ -113,7 +113,6 @@ std::string AGMModelEdge::getAttribute(std::string a)
 }
 
 
-
 void AGMModelEdge::setLabel(std::string l)
 {
 	linking = l;
