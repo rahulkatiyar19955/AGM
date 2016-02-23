@@ -359,9 +359,9 @@ class Executive(object):
 
 	def edgesUpdate(self, edges):
 		try:
-			print 'edgesUpdate acquire() a'
+			#print 'edgesUpdate acquire() a'
 			self.mutex.acquire()
-			print 'edgesUpdate acquire() z'
+			#print 'edgesUpdate acquire() z'
 			for edge in edges:
 				internal = AGMModelConversion.fromIceToInternal_edge(edge)
 				found = False
@@ -376,9 +376,9 @@ class Executive(object):
 					print 'couldn\'t update edge because no match was found'
 					print 'edge', edge.a, edge.b, edge.edgeType
 		finally:
-			print 'edgesUpdate release() a'
+			#print 'edgesUpdate release() a'
 			self.mutex.release()
-			print 'edgesUpdate release() z'
+			#print 'edgesUpdate release() z'
 
 
 	def setMission(self, target, avoidUpdate=False):

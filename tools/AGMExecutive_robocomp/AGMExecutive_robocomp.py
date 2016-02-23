@@ -77,9 +77,9 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 		self.handler.symbolsUpdate(ss)
 
 	def edgeUpdate(self, e, current=None):
-		print 'robocomp edgesUpdate a'
+		#print 'robocomp edgesUpdate a'
 		self.handler.edgeUpdate(e)
-		print 'robocomp edgesUpdate z'
+		#print 'robocomp edgesUpdate z'
 
 	def edgesUpdate(self, es, current=None):
 		self.handler.edgesUpdate(es)

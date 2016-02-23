@@ -114,16 +114,6 @@ std::string AGMModelEdge::getAttribute(std::string a)
 
 
 
-std::string AGMModelEdge::getLabel() const
-{
-	return linking;
-}
-
-std::pair<int32_t, int32_t> AGMModelEdge::getSymbolPair() const
-{
-	return symbolPair;
-}
-
 void AGMModelEdge::setLabel(std::string l)
 {
 	linking = l;
