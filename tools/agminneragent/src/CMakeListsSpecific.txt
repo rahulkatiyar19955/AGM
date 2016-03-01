@@ -3,12 +3,22 @@
 SET ( SOURCES
   specificworker.cpp
   specificmonitor.cpp
+  $ENV{ROBOCOMP}/classes/agmInner/agmInner.cpp
 )
 
 # Headers set
 SET ( HEADERS
   specificworker.h
   specificmonitor.h
+   $ENV{ROBOCOMP}/classes/agmInner/agmInner.h
+  
+)
+
+SET (LIBS ${LIBS}
+  -L../../../..
+  -L../../..
+  -lagm
+  -lboost_system
 )
 
 INCLUDE($ENV{ROBOCOMP}/cmake/modules/ipp.cmake)
