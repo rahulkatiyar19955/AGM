@@ -74,6 +74,7 @@ public slots:
 public:
 	std::vector<std::pair<InnerModel *, QString> > innerModelInfoVector;
 private:
+	bool gotModel;
 	std::string action;
 	ParameterMap params;
 	AGMModel::SPtr worldModel;
