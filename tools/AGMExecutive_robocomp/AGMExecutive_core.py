@@ -175,7 +175,7 @@ class PlannerCaller(threading.Thread):
 				self.executive.gotPlan(self.plan)
 			finally:
 				self.plannerCallerMutex.release()
-		
+
 	def callMonitoring(self, peid):
 		stored = False
 		stepsFwd = 0
@@ -258,7 +258,14 @@ class Executive(object):
 
 		self.agglPath = agglPath
 		self.initialModelPath = initialModelPath
-		self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
+		try:
+			self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
+		except Exception, e:
+			print 'Can\'t open ' + initialModelPath + '.'
+			sys.exit(-1)
+
+
+		print 'INITIAL MODEL: ', self.initialModel
 		self.lastModification = self.initialModel
 		self.backModelICE  = None
 		self.setAndBroadcastModel(xmlModelParser.graphFromXML(initialModelPath))

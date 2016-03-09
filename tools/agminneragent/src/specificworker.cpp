@@ -20,9 +20,15 @@
 
 void SpecificWorker::compute()
 {
-//	qDebug()<<"numberOfSymbols "<<worldModel->numberOfSymbols();
+	if (not gotModel)
+	{
+		printf("waiting for the model\n");
+		return;
+	}
 
-	if (worldModel->numberOfSymbols()>0)
+	qDebug()<<"received a model with " << worldModel->numberOfSymbols() << " symbols\n";
+
+	if (worldModel->numberOfSymbols() > 0)
 	{
 		AGMModel::SPtr newModel(new AGMModel(worldModel));
 		for (auto p : innerModelInfoVector)
@@ -32,9 +38,9 @@ void SpecificWorker::compute()
 		}
 		printf("send\n");
 		sendModificationProposal(worldModel, newModel);
-		printf("save\n");
+		printf("save agm model\n");
 		newModel->save("agmModel.xml");
-		printf("extract\n");
+		printf("save extracted innermodel\n");
 		AgmInner::extractInnerModel(newModel, "world")->save("extractInnerModel.xml");
 		qFatal("The job was done. Exiting...");
 	}
@@ -340,6 +346,7 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
+	gotModel = false;
 	active = false;
 	worldModel = AGMModel::SPtr(new AGMModel());
 	worldModel->name = "worldModel";
@@ -458,6 +465,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &modifi
 {
 	mutex->lock();
 	printf("structural change\n");
+	gotModel=true;
  	AGMModelConverter::fromIceToInternal(modification, worldModel);
  	mutex->unlock();
 }
