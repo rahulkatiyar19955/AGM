@@ -63,9 +63,9 @@ class AGMWorldModelParser(xmllib.XMLParser):
 				enabled = False
 		except:
 			pass
-		
+
 		self.links.append(AGMLink(src, dst, attrs['label'], enabled=enabled))
-		
+
 
 	def end_link(self):
 		pass
@@ -83,13 +83,8 @@ class AGMWorldModelParser(xmllib.XMLParser):
 
 ## Makes a graph with the information contained in a XML file
 def graphFromXML(path):
-	try:
-		parser = AGMWorldModelParser(path)
-		parser.close()
-		return AGMGraph(parser.nodes, parser.links)
-	except Exception, e:
-		print e
-		print 'Can\'t open ' + path + '.'
-		return AGMGraph(dict(), list())
+	parser = AGMWorldModelParser(path)
+	parser.close()
+	return AGMGraph(parser.nodes, parser.links)
 
 
