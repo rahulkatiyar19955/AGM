@@ -48,7 +48,7 @@ class SpecificWorker : public GenericWorker
 {
 Q_OBJECT
 public:
-	SpecificWorker(MapPrx& mprx);	
+	SpecificWorker(MapPrx& mprx);
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 
@@ -65,11 +65,11 @@ public:
 	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
 	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modification);
-	
+
 
 public slots:
 	void compute();
-	
+
 
 public:
 	std::vector<std::pair<InnerModel *, QString> > innerModelInfoVector;
@@ -80,25 +80,25 @@ private:
 	osgGA::TrackballManipulator *manipulator;
 	OsgView *osgView;
 	InnerModel *innerModelVacio;
-	InnerModelViewer *innerViewer; 
-	
+	InnerModelViewer *innerViewer;
+
 	//AgmInner agmInner;
 	bool active;
 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
-	
 
-	void innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode);		
+
+	void innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode);
 	//void include_im(QHash< QString, ::int32_t > match);
 // 	void include_im(QHash<QString, int32_t>  match, InnerModel *im);
 
-	
-	int findName(QString n);	
+
+	int findName(QString n);
 	AGMModelSymbol::SPtr ImNodeToSymbol(InnerModelNode* node);
 // 	InnerModel* extractInnerModel(QString imNodeName);
 // 	void recorrer(InnerModel* imNew, int& symbolID);
 // 	void edgeToInnerModel(AGMModelEdge edge, InnerModel* imNew);
-	
+
 // 	void checkLoop(int& symbolID, QList< int >& visited, string linkType, bool& loop);
 
 };
