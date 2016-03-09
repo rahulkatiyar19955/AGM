@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1201</width>
-    <height>876</height>
+    <width>1194</width>
+    <height>761</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -194,7 +194,7 @@ plan</string>
            <property name="minimumSize">
             <size>
              <width>300</width>
-             <height>300</height>
+             <height>100</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -255,7 +255,7 @@ plan</string>
            <property name="minimumSize">
             <size>
              <width>300</width>
-             <height>250</height>
+             <height>100</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -370,6 +370,12 @@ plan</string>
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="maximumSize">
+                <size>
+                 <width>900</width>
+                 <height>900</height>
+                </size>
+               </property>
                <property name="verticalScrollBarPolicy">
                 <enum>Qt::ScrollBarAsNeeded</enum>
                </property>
@@ -399,8 +405,8 @@ plan</string>
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>3000</width>
-                  <height>3000</height>
+                  <width>500</width>
+                  <height>500</height>
                  </size>
                 </property>
                </widget>
