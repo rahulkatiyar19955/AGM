@@ -35,93 +35,99 @@ AGMModel::AGMModel(const AGMModel &src)
 
 AGMModel::AGMModel(const std::string path)
 {
+	// Open file and make initial checks
 	xmlDocPtr doc;
 	if ((doc = xmlParseFile(path.c_str())) == NULL)
 	{
-		fprintf(stderr,"Document not parsed successfully. \n");
+		fprintf(stderr,"Can't read XML file - probably a syntax error. \n");
 		exit(1);
 	}
-	xmlNodePtr cur;
-	if ((cur = xmlDocGetRootElement(doc)) == NULL)
+	xmlNodePtr root;
+	if ((root = xmlDocGetRootElement(doc)) == NULL)
 	{
-		fprintf(stderr,"empty document\n");
+		fprintf(stderr,"Can't read XML file - empty document\n");
+		xmlFreeDoc(doc);
+		exit(1);
+	}
+	if (xmlStrcmp(root->name, (const xmlChar *) "AGMModel"))
+	{
+		fprintf(stderr,"Can't read XML file - root node != AGMModel");
 		xmlFreeDoc(doc);
 		exit(1);
 	}
 
-	if (xmlStrcmp(cur->name, (const xmlChar *) "AGMModel"))
+	
+	// Read symbols (just symbols, then links in other loop)
+	for (xmlNodePtr cur=root->xmlChildrenNode; cur!=NULL; cur=cur->next)
 	{
-		fprintf(stderr,"document of the wrong type, root node != AGMModel");
-		xmlFreeDoc(doc);
-		exit(1);
-	}
-	for (cur=cur->xmlChildrenNode; cur!=NULL; cur=cur->next)
-	{
-		if ((xmlStrcmp(cur->name, (const xmlChar *)"text")))
+		if ((!xmlStrcmp(cur->name, (const xmlChar *)"symbol")))
 		{
-			if ((!xmlStrcmp(cur->name, (const xmlChar *)"symbol")))
+			xmlChar *stype = xmlGetProp(cur, (const xmlChar *)"type");
+			xmlChar *sid = xmlGetProp(cur, (const xmlChar *)"id");
+			AGMModelSymbol::SPtr s = newSymbol(atoi((char *)sid), (char *)stype);
+			xmlFree(sid);
+			xmlFree(stype);
+
+			for (xmlNodePtr cur2=cur->xmlChildrenNode; cur2!=NULL; cur2=cur2->next)
 			{
-				xmlChar *stype = xmlGetProp(cur, (const xmlChar *)"type");
-				xmlChar *sid = xmlGetProp(cur, (const xmlChar *)"id");
-// 				graphViewer->addNode((char *)sid, (char *)stype);
-/*
-				static uint32_t xpos = 0;
-				static uint32_t ypos = 0;
-				static uint32_t zpos = 0;
-				graphViewer->setNodePosition((char *)sid, osg::Vec3(xpos, ypos, zpos));
-				xpos += 800;
-				ypos += 0;
-				zpos += 0;
-*/
-// 				graphViewer->setNodePosition((char *)sid, osg::Vec3(qrand()%int(50*RADIUS), qrand()%int(50*RADIUS), qrand()%int(50*RADIUS)));
-				xmlFree(sid);
-				xmlFree(stype);
-			}
-			else if ((!xmlStrcmp(cur->name, (const xmlChar *)"link")))
-			{
-			}
-			else if ((!xmlStrcmp(cur->name, (const xmlChar *)"comment")))
-			{
-			}
-			else
-			{
-				printf("??? %s\n", cur->name);
+				if ((!xmlStrcmp(cur2->name, (const xmlChar *)"attribute")))
+				{
+					xmlChar *attr_key   = xmlGetProp(cur2, (const xmlChar *)"key");
+					xmlChar *attr_value = xmlGetProp(cur2, (const xmlChar *)"value");
+					s->setAttribute(std::string((char *)attr_key), std::string((char *)attr_value));
+					xmlFree(attr_key);
+					xmlFree(attr_value);
+				}
+				else if ((!xmlStrcmp(cur2->name, (const xmlChar *)"comment"))) { }           // coments are always ignored
+				else { printf("unexpected tag inside symbol: %s\n", cur2->name); exit(-1); } // unexpected tags make the program exit
 			}
 		}
+		else if ((!xmlStrcmp(cur->name, (const xmlChar *)"link"))) { }     // we'll ignore links in this first loop
+		else if ((!xmlStrcmp(cur->name, (const xmlChar *)"comment"))) { }  // coments are always ignored
+		else { printf("unexpected tag: %s\n", cur->name); exit(-1); }      // unexpected tags make the program exit
 	}
-	if ((cur = xmlDocGetRootElement(doc)) == NULL)
+	
+	// Read links
+	for (xmlNodePtr cur=root->xmlChildrenNode; cur!=NULL; cur=cur->next)
 	{
-		fprintf(stderr,"empty document\n");
-		xmlFreeDoc(doc);
-		exit(1);
-	}
-	for (cur=cur->xmlChildrenNode; cur!=NULL; cur=cur->next)
-	{
-		if ((xmlStrcmp(cur->name, (const xmlChar *)"text")))
+		if (xmlStrcmp(cur->name, (const xmlChar *)"link") != 0)
 		{
-			if ((!xmlStrcmp(cur->name, (const xmlChar *)"symbol")))
+			xmlChar *srcn = xmlGetProp(cur, (const xmlChar *)"src");
+			if (srcn == NULL) { printf("Link %s lacks of attribute 'src'.\n", (char *)cur->name); exit(-1); }
+			int a = atoi((char *)srcn);
+			xmlFree(srcn);
+
+			xmlChar *dstn = xmlGetProp(cur, (const xmlChar *)"dst");
+			if (dstn == NULL) { printf("Link %s lacks of attribute 'dst'.\n", (char *)cur->name); exit(-1); }
+			int b = atoi((char *)dstn);
+			xmlFree(dstn);
+
+			
+			xmlChar *label = xmlGetProp(cur, (const xmlChar *)"label");
+			if (label == NULL) { printf("Link %s lacks of attribute 'label'.\n", (char *)cur->name); exit(-1); }
+			std::string edgeName((char *)label);
+			xmlFree(label);
+
+			std::map<std::string, std::string> attrs;
+			for (xmlNodePtr cur2=cur->xmlChildrenNode; cur2!=NULL; cur2=cur2->next)
 			{
+				if (xmlStrcmp(cur2->name, (const xmlChar *)"linkAttribute") != 0)
+				{
+					xmlChar *attr_key   = xmlGetProp(cur2, (const xmlChar *)"key");
+					xmlChar *attr_value = xmlGetProp(cur2, (const xmlChar *)"value");
+					attrs[std::string((char *)attr_key)] = std::string((char *)attr_value);
+					xmlFree(attr_key);
+					xmlFree(attr_value);
+				}
+				else if (xmlStrcmp(cur2->name, (const xmlChar *)"comment")!=0) { }           // coments are always ignored
+				else { printf("unexpected tag inside symbol: %s\n", cur2->name); exit(-1); } // unexpected tags make the program exit
 			}
-			else if ((!xmlStrcmp(cur->name, (const xmlChar *)"link")))
-			{
-				xmlChar *srcn = xmlGetProp(cur, (const xmlChar *)"src");
-				if (srcn == NULL) { printf("Link %s lacks of attribute 'src'.\n", (char *)cur->name); exit(-1); }
-				xmlChar *dstn = xmlGetProp(cur, (const xmlChar *)"dst");
-				if (dstn == NULL) { printf("Link %s lacks of attribute 'dst'.\n", (char *)cur->name); exit(-1); }
-				xmlChar *label = xmlGetProp(cur, (const xmlChar *)"label");
-				if (label == NULL) { printf("Link %s lacks of attribute 'label'.\n", (char *)cur->name); exit(-1); }
-// 				graphViewer->addEdge((char *)srcn, (char *)dstn, (char *)label);
-				xmlFree(srcn);
-				xmlFree(dstn);
-			}
-			else if ((!xmlStrcmp(cur->name, (const xmlChar *)"comment")))
-			{
-			}
-			else
-			{
-				printf("??? %s\n", cur->name);
-			}
+			
+			addEdgeByIdentifiers(a, b, edgeName, attrs);
 		}
+		else if ((!xmlStrcmp(cur->name, (const xmlChar *)"symbol"))) { }   // symbols are now ignored
+		else if ((!xmlStrcmp(cur->name, (const xmlChar *)"comment"))) { }  // comments are always ignored
+		else { printf("unexpected tag: %s\n", cur->name); exit(-1); }      // unexpected tags make the program exit
 	}
 }
 
