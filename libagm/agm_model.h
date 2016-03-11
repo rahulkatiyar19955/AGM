@@ -4,6 +4,9 @@
 #include <iostream>
 #include <fstream>
 
+#include <libxml2/libxml/parser.h>
+#include <libxml2/libxml/tree.h>
+
 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
@@ -87,6 +90,8 @@ public:
 	AGMModel(const AGMModel::SPtr &src);
 	//! Copy constructor using a reference.
 	AGMModel(const AGMModel &src);
+	//! File constructor.
+	AGMModel(const std::string xmlFilePath);
 	//! Destructor.
 	~AGMModel();
 	//! Assignment operator.
@@ -144,7 +149,7 @@ public:
 
 	/// Removes all edges related to an unexisting symbol. Dangling edges only exist if users remove symbols using the variable <em>symbols</em> directly, which is disencouraged. Generally it's a better idea to remove symbols using the method <em>removeSymbol</em>.
 	bool removeDanglingEdges();
-	
+
 	void save(std::string xmlFilePath);
 
 
@@ -257,8 +262,8 @@ public:
 	 *
 	 */
 	int32_t getLinkedID(    int32_t id, std::string linkname, int32_t i=0) const;
-	
-	
+
+
 	AGMModelSymbol::SPtr getParentByLink(int32_t id, std::string linkname, int32_t i=0) const;
 
 
@@ -327,7 +332,7 @@ public:
 	 */
 	bool renameEdgeByIdentifiers(int32_t a, int32_t b, const std::string &was, const std::string &will);
 
-	
+
 	/*! \brief Renames an edge in the model given the identifiers of two symbols, the previous and new label. Returns True on success.
 	 *
 	 * \throws AGMException Nodes a and b must exist
@@ -337,8 +342,8 @@ public:
 	{
 		return renameEdgeByIdentifiers(a->identifier, b->identifier, was, will);
 	}
-	
-	/*! \brief get edge by indentifiers of two symbols and label. 
+
+	/*! \brief get edge by indentifiers of two symbols and label.
 	 *
 	 * \throws AGMException Nodes a and b must exist
 	 *

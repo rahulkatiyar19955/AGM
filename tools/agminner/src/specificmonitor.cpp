@@ -46,7 +46,7 @@ void SpecificMonitor::run()
  * \brief Reads components parameters and checks set integrity before signaling the Worker thread to start running
  * There can be four (4) types of parameteres:
  *		(1) Ice parameters
- *		(2) Nexus (configuration) parameters	
+ *		(2) Nexus (configuration) parameters
  *		(3) Local component parameters read at start
  *		(4) Local parameters read from other running component
  *
@@ -71,7 +71,7 @@ bool SpecificMonitor::sendParamsToWorker(RoboCompCommonBehavior::ParameterList p
 	if (checkParams(params))
 	{
 		//Set params to worker
-		if(worker->setParams(params)) 
+		if(worker->setParams(params))
 			return true;
 	}
 	else
@@ -92,12 +92,18 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
  	string name = PROGRAM_NAME;
 	std::cout<<"\t\t***************** "<< name <<"\n";
 
-	configGetString("AGMInnerAgent","InnerModels", aux.value, "");
-	params["AGMInnerAgent.InnerModels"] = aux;
-	
+
+
+	configGetString("AGMInner","InitialModel", aux.value, "");
+	params["AGMInner.InitialModel"] = aux;
+
+	configGetString("AGMInner","InnerModels", aux.value, "");
+	params["AGMInner.InnerModels"] = aux;
+
+	configGetString("AGMInner","OutputFile", aux.value, "");
+	params["AGMInner.OutputFile"] = aux;
+
 	ready = true;
-	//todo better if necessary
-	
 }
 
 //comprueba que los parametros sean correctos y los transforma a la estructura del worker

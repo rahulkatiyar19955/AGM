@@ -32,6 +32,99 @@ AGMModel::AGMModel(const AGMModel &src)
 	setFrom(src);
 }
 
+
+AGMModel::AGMModel(const std::string path)
+{
+	xmlDocPtr doc;
+	if ((doc = xmlParseFile(path.c_str())) == NULL)
+	{
+		fprintf(stderr,"Document not parsed successfully. \n");
+		exit(1);
+	}
+	xmlNodePtr cur;
+	if ((cur = xmlDocGetRootElement(doc)) == NULL)
+	{
+		fprintf(stderr,"empty document\n");
+		xmlFreeDoc(doc);
+		exit(1);
+	}
+
+	if (xmlStrcmp(cur->name, (const xmlChar *) "AGMModel"))
+	{
+		fprintf(stderr,"document of the wrong type, root node != AGMModel");
+		xmlFreeDoc(doc);
+		exit(1);
+	}
+	for (cur=cur->xmlChildrenNode; cur!=NULL; cur=cur->next)
+	{
+		if ((xmlStrcmp(cur->name, (const xmlChar *)"text")))
+		{
+			if ((!xmlStrcmp(cur->name, (const xmlChar *)"symbol")))
+			{
+				xmlChar *stype = xmlGetProp(cur, (const xmlChar *)"type");
+				xmlChar *sid = xmlGetProp(cur, (const xmlChar *)"id");
+// 				graphViewer->addNode((char *)sid, (char *)stype);
+/*
+				static uint32_t xpos = 0;
+				static uint32_t ypos = 0;
+				static uint32_t zpos = 0;
+				graphViewer->setNodePosition((char *)sid, osg::Vec3(xpos, ypos, zpos));
+				xpos += 800;
+				ypos += 0;
+				zpos += 0;
+*/
+// 				graphViewer->setNodePosition((char *)sid, osg::Vec3(qrand()%int(50*RADIUS), qrand()%int(50*RADIUS), qrand()%int(50*RADIUS)));
+				xmlFree(sid);
+				xmlFree(stype);
+			}
+			else if ((!xmlStrcmp(cur->name, (const xmlChar *)"link")))
+			{
+			}
+			else if ((!xmlStrcmp(cur->name, (const xmlChar *)"comment")))
+			{
+			}
+			else
+			{
+				printf("??? %s\n", cur->name);
+			}
+		}
+	}
+	if ((cur = xmlDocGetRootElement(doc)) == NULL)
+	{
+		fprintf(stderr,"empty document\n");
+		xmlFreeDoc(doc);
+		exit(1);
+	}
+	for (cur=cur->xmlChildrenNode; cur!=NULL; cur=cur->next)
+	{
+		if ((xmlStrcmp(cur->name, (const xmlChar *)"text")))
+		{
+			if ((!xmlStrcmp(cur->name, (const xmlChar *)"symbol")))
+			{
+			}
+			else if ((!xmlStrcmp(cur->name, (const xmlChar *)"link")))
+			{
+				xmlChar *srcn = xmlGetProp(cur, (const xmlChar *)"src");
+				if (srcn == NULL) { printf("Link %s lacks of attribute 'src'.\n", (char *)cur->name); exit(-1); }
+				xmlChar *dstn = xmlGetProp(cur, (const xmlChar *)"dst");
+				if (dstn == NULL) { printf("Link %s lacks of attribute 'dst'.\n", (char *)cur->name); exit(-1); }
+				xmlChar *label = xmlGetProp(cur, (const xmlChar *)"label");
+				if (label == NULL) { printf("Link %s lacks of attribute 'label'.\n", (char *)cur->name); exit(-1); }
+// 				graphViewer->addEdge((char *)srcn, (char *)dstn, (char *)label);
+				xmlFree(srcn);
+				xmlFree(dstn);
+			}
+			else if ((!xmlStrcmp(cur->name, (const xmlChar *)"comment")))
+			{
+			}
+			else
+			{
+				printf("??? %s\n", cur->name);
+			}
+		}
+	}
+}
+
 AGMModel &AGMModel::operator=(const AGMModel &src)
 {
 	//printf("AGMModel& AGMModel::operator=(const AGMModel &src)\n");
@@ -716,17 +809,17 @@ bool AGMModel::removeDanglingEdges()
 	return any;
 }
 // <AGMModel>
-// 
-// 	<!-- R O O M -->	
+//
+// 	<!-- R O O M -->
 // 	<symbol id="2" type="room" />
-// 	
+//
 // 	<!-- R O B O T -->
 // 	<symbol id="1" type="robot">
 // 	</symbol>
-// 	
-// 	<link src="1" dst="2" label="in" />	
-// 
-// 	
+//
+// 	<link src="1" dst="2" label="in" />
+//
+//
 // 	<!-- non-Explored table -->
 // 	<symbol id="5" type="object">
 // 		<attribute key="tag" value="0" />
@@ -734,7 +827,7 @@ bool AGMModel::removeDanglingEdges()
 // 	</symbol>
 // 	<link src="1" dst="5" label="know" />
 // 	<link src="5" dst="2" label="in" />
-// 
+//
 // </AGMModel>
 
 
@@ -743,10 +836,10 @@ void AGMModel::save(std::string xmlFilePath)
 	std::ofstream myfile;
 	myfile.open (xmlFilePath);
 	myfile <<  "<AGMModel>\n\n";
-  
+
 	for (uint32_t i=0; i<symbols.size(); ++i)
 	{
-		
+
 		myfile <<"<symbol id=\""<<symbols[i]->identifier<<"\" type=\""<<symbols[i]->symbolType<<"\"";//>\n";
 		if (symbols[i]->attributes.size()>0)
 		{
@@ -754,20 +847,20 @@ void AGMModel::save(std::string xmlFilePath)
 			std::map<std::string, std::string>::const_iterator itr = symbols[i]->attributes.begin();
 			for(; itr!=symbols[i]->attributes.end(); ++itr)
 			{
-				myfile <<"\t<attribute key=\"" << itr->first <<"\" value=\""<<itr->second<<"\" />\n";			
+				myfile <<"\t<attribute key=\"" << itr->first <<"\" value=\""<<itr->second<<"\" />\n";
 			}
-		
+
 			myfile <<"</symbol>\n";
-		}			
+		}
 		else
 			myfile <<"/>\n";
-			
+
 	}
-	
-	myfile <<"\n\n"; 
+
+	myfile <<"\n\n";
 	for (uint32_t i=0; i<edges.size(); ++i)
 	{
-		 
+
 		myfile <<"<link src=\""<<edges[i].symbolPair.first<<"\" dst=\""<<edges[i].symbolPair.second<<"\" label=\""<<edges[i].linking<<"\"";//> \n";
 		if (edges[i]->attributes.size()>0)
 		{
@@ -775,14 +868,14 @@ void AGMModel::save(std::string xmlFilePath)
 			std::map<std::string, std::string>::const_iterator itr = edges[i].attributes.begin();
 			for(; itr!=edges[i].attributes.end(); ++itr)
 			{
-				myfile <<"\t<linkAttribute key=\"" << itr->first <<"\" value=\""<<itr->second<<"\" />\n";			
+				myfile <<"\t<linkAttribute key=\"" << itr->first <<"\" value=\""<<itr->second<<"\" />\n";
 			}
 			myfile <<"</link>\n";
 		}
 		else
 			myfile <<"/>\n";
-		
-			
+
+
 	}
 	myfile <<  "\n</AGMModel>\n";
 	myfile.close();
@@ -948,7 +1041,7 @@ AGMModelEdge & AGMModel::getEdgeByIdentifiers(int32_t a, int32_t b, const std::s
 	std::ostringstream s;
 	s << "Exception: " <<  a << " "<< b <<" "<<edgeName;
 	AGMMODELEXCEPTION(std::string("Exception: AGMModel::getEdgeByIdentifiers EDGE  (")+s.str()+std::string(")."));
-	
+
 }
 
 AGMModelSymbol::SPtr AGMModel::newSymbol(std::string typ, int32_t id)

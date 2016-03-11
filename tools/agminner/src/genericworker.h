@@ -16,41 +16,66 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef AGMEXECUTIVETOPIC_H
-#define AGMEXECUTIVETOPIC_H
+#ifndef GENERICWORKER_H
+#define GENERICWORKER_H
 
-// QT includes
-#include <QtCore/QObject>
+#include "config.h"
+#include <QtGui>
+#include <stdint.h>
+#include <qlog/qlog.h>
 
-// Ice includes
-#include <Ice/Ice.h>
+#include <ui_mainUI.h>
+
+#include <CommonBehavior.h>
+#include <Planning.h>
 #include <AGMExecutive.h>
+#include <AGMWorldModel.h>
 
-#include <config.h>
-#include "genericworker.h"
 
+
+#define CHECK_PERIOD 5000
+#define BASIC_PERIOD 100
+
+typedef map <string,::IceProxy::Ice::Object*> MapPrx;
+
+using namespace std;
+
+using namespace RoboCompPlanning;
 using namespace RoboCompAGMExecutive;
+using namespace RoboCompAGMWorldModel;
 
-class AGMExecutiveTopicI : public QObject , public virtual RoboCompAGMExecutive::AGMExecutiveTopic
+
+
+
+class GenericWorker : 
+#ifdef USE_QTGUI
+public QWidget, public Ui_guiDlg
+#else
+public QObject
+#endif
 {
 Q_OBJECT
 public:
-	AGMExecutiveTopicI( GenericWorker *_worker, QObject *parent = 0 );
-	~AGMExecutiveTopicI();
+	GenericWorker(MapPrx& mprx);
+	virtual ~GenericWorker();
+	virtual void killYourSelf();
+	virtual void setPeriod(int p);
 	
-	void structuralChange(const RoboCompAGMWorldModel::World  &w, const Ice::Current&);
-	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &es, const Ice::Current&);
-	void edgeUpdated(const RoboCompAGMWorldModel::Edge  &e, const Ice::Current&);
-	void symbolUpdated(const RoboCompAGMWorldModel::Node  &n, const Ice::Current&);
-	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence  &ns, const Ice::Current&);
-
+	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;
-private:
+	
 
-	GenericWorker *worker;
+
+
+
+protected:
+	QTimer timer;
+	int Period;
+
 public slots:
-
-
+	virtual void compute() = 0;
+signals:
+	void kill();
 };
 
 #endif

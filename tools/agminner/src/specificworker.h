@@ -52,19 +52,19 @@ public:
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 
-	bool reloadConfigAgent();
-	bool activateAgent(const ParameterMap &prs);
-	bool setAgentParameters(const ParameterMap &prs);
-	ParameterMap getAgentParameters();
-	void killAgent();
-	int uptimeAgent();
-	bool deactivateAgent();
-	StateStruct getAgentState();
-	void structuralChange(const RoboCompAGMWorldModel::World &modification);
-	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
-	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
-	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
-	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modification);
+// 	bool reloadConfigAgent();
+// 	bool activateAgent(const ParameterMap &prs);
+// 	bool setAgentParameters(const ParameterMap &prs);
+// 	ParameterMap getAgentParameters();
+// 	void killAgent();
+// 	int uptimeAgent();
+// 	bool deactivateAgent();
+// 	StateStruct getAgentState();
+// 	void structuralChange(const RoboCompAGMWorldModel::World &modification);
+// 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
+// 	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
+// 	void symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
+// 	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modification);
 
 
 public slots:
@@ -76,7 +76,7 @@ public:
 private:
 	bool gotModel;
 	std::string action;
-	ParameterMap params;
+// 	ParameterMap params;
 	AGMModel::SPtr worldModel;
 	osgGA::TrackballManipulator *manipulator;
 	OsgView *osgView;
@@ -85,8 +85,8 @@ private:
 
 	//AgmInner agmInner;
 	bool active;
-	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
-	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
+// 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
+// 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
 
 
 	void innerToAGM(InnerModelNode* node, int &symbolID, QList<QString>  lNode);

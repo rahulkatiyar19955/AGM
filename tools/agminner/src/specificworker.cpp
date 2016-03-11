@@ -20,31 +20,6 @@
 
 void SpecificWorker::compute()
 {
-	if (not gotModel)
-	{
-		printf("waiting for the model\n");
-		return;
-	}
-
-	qDebug()<<"received a model with " << worldModel->numberOfSymbols() << " symbols\n";
-
-	if (worldModel->numberOfSymbols() > 0)
-	{
-		AGMModel::SPtr newModel(new AGMModel(worldModel));
-		for (auto p : innerModelInfoVector)
-		{
-			printf("Include in %d\n", p.second.toInt());
-			AgmInner::includeInnerModel(newModel, p.second.toInt(), p.first);
-		}
-		printf("send\n");
-		sendModificationProposal(worldModel, newModel);
-		printf("save agm model\n");
-		newModel->save("agmModel.xml");
-		printf("save extracted innermodel\n");
-		AgmInner::extractInnerModel(newModel, "world")->save("extractInnerModel.xml");
-		qFatal("The job was done. Exiting...");
-	}
-
 }
 
 
@@ -346,12 +321,6 @@ AGMModelSymbol::SPtr SpecificWorker::ImNodeToSymbol(InnerModelNode* node)
 */
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
-	gotModel = false;
-	active = false;
-	worldModel = AGMModel::SPtr(new AGMModel());
-	worldModel->name = "worldModel";
-
-	timer.start(33);
 }
 
 /**
@@ -364,6 +333,9 @@ SpecificWorker::~SpecificWorker()
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
+	//
+	// Read InnerModel insertions
+	//
 	RoboCompCommonBehavior::Parameter par;
 	try
 	{
@@ -389,8 +361,33 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		}
 	}
 
-	sleep(1);
 
+	//
+	// Read initial AGM model
+	worldModel = AGMModel::SPtr(new AGMModel(params.at("AGMInner.InitialModel").value));
+
+
+
+
+	qDebug()<<"received a model with " << worldModel->numberOfSymbols() << " symbols\n";
+
+	if (worldModel->numberOfSymbols() > 0)
+	{
+		AGMModel::SPtr newModel(new AGMModel(worldModel));
+		for (auto p : innerModelInfoVector)
+		{
+			printf("Include in %d\n", p.second.toInt());
+			AgmInner::includeInnerModel(newModel, p.second.toInt(), p.first);
+		}
+// 		printf("send\n");
+// 		sendModificationProposal(worldModel, newModel);
+		printf("save agm model\n");
+		newModel->save(params.at("AGMInner.InitialModel").value);
+		printf("save extracted innermodel\n");
+		AgmInner::extractInnerModel(newModel, "world")->save("extractInnerModel.xml");
+		printf("The job was done. Exiting...\n");
+		exit(0);
+	}
 
 	return true;
 }
@@ -398,167 +395,167 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 
 // ****** AGENTS *******
-bool SpecificWorker::reloadConfigAgent()
-{
-	return true;
-}
+// bool SpecificWorker::reloadConfigAgent()
+// {
+// 	return true;
+// }
 
-bool SpecificWorker::activateAgent(const ParameterMap &prs)
-{
-	bool activated = false;
-	if (setParametersAndPossibleActivation(prs, activated))
-	{
-		if (not activated)
-		{
-			return activate(p);
-		}
-	}
-	else
-	{
-		return false;
-	}
-	return true;
-}
+// bool SpecificWorker::activateAgent(const ParameterMap &prs)
+// {
+// 	bool activated = false;
+// // 	if (setParametersAndPossibleActivation(prs, activated))
+// 	{
+// 		if (not activated)
+// 		{
+// 			return activate(p);
+// 		}
+// 	}
+// 	else
+// 	{
+// 		return false;
+// 	}
+// 	return true;
+// }
+//
+// bool SpecificWorker::setAgentParameters(const ParameterMap &prs)
+// {
+// 	bool activated = false;
+// 	return setParametersAndPossibleActivation(prs, activated);
+// }
+//
+// ParameterMap SpecificWorker::getAgentParameters()
+// {
+// 	return params;
+// }
 
-bool SpecificWorker::setAgentParameters(const ParameterMap &prs)
-{
-	bool activated = false;
-	return setParametersAndPossibleActivation(prs, activated);
-}
-
-ParameterMap SpecificWorker::getAgentParameters()
-{
-	return params;
-}
-
-void SpecificWorker::killAgent()
-{
-
-}
-
-int SpecificWorker::uptimeAgent()
-{
-	return 0;
-}
-
-bool SpecificWorker::deactivateAgent()
-{
-	return deactivate();
-}
-
-StateStruct SpecificWorker::getAgentState()
-{
-	StateStruct s;
-	if (isActive())
-	{
-		s.state = Running;
-	}
-	else
-	{
-		s.state = Stopped;
-	}
-	s.info = p.action.name;
-	return s;
-}
-
-void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &modification)
-{
-	mutex->lock();
-	printf("structural change\n");
-	gotModel=true;
- 	AGMModelConverter::fromIceToInternal(modification, worldModel);
- 	mutex->unlock();
-}
-
-
-void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
-{
-	QMutexLocker lockIM(mutex);
-	for (auto modification : modifications)
-	{
-		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
-	}
-}
-
-void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification)
-{
-	mutex->lock();
- 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
- 	mutex->unlock();
-}
-
-void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modification)
-{
-	mutex->lock();
- 	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
- 	mutex->unlock();
-}
-void SpecificWorker::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modification)
-{
+// void SpecificWorker::killAgent()
+// {
+//
+// }
+//
+// int SpecificWorker::uptimeAgent()
+// {
+// 	return 0;
+// }
+//
+// bool SpecificWorker::deactivateAgent()
+// {
+// 	return deactivate();
+// }
+//
+// StateStruct SpecificWorker::getAgentState()
+// {
+// 	StateStruct s;
+// 	if (isActive())
+// 	{
+// 		s.state = Running;
+// 	}
+// 	else
+// 	{
+// 		s.state = Stopped;
+// 	}
+// 	s.info = p.action.name;
+// 	return s;
+// }
+//
+// void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &modification)
+// {
+// 	mutex->lock();
+// 	printf("structural change\n");
+// 	gotModel=true;
+//  	AGMModelConverter::fromIceToInternal(modification, worldModel);
+//  	mutex->unlock();
+// }
+//
+//
+// void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
+// {
+// 	QMutexLocker lockIM(mutex);
+// 	for (auto modification : modifications)
+// 	{
+// 		AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+// 	}
+// }
+//
+// void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &modification)
+// {
 // 	mutex->lock();
 //  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
 //  	mutex->unlock();
-}
-
-
-
-bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
-{
-	printf("<<< setParametersAndPossibleActivation\n");
-	// We didn't reactivate the component
-	reactivated = false;
-
-	// Update parameters
-	params.clear();
-	for (ParameterMap::const_iterator it=prs.begin(); it!=prs.end(); it++)
-	{
-		params[it->first] = it->second;
-	}
-
-	try
-	{
-		action = params["action"].value;
-		std::transform(action.begin(), action.end(), action.begin(), ::tolower);
-		//TYPE YOUR ACTION NAME
-		if (action == "actionname")
-		{
-			active = true;
-		}
-		else
-		{
-			active = true;
-		}
-	}
-	catch (...)
-	{
-		printf("exception in setParametersAndPossibleActivation %d\n", __LINE__);
-		return false;
-	}
-
-	// Check if we should reactivate the component
-	if (active)
-	{
-		active = true;
-		reactivated = true;
-	}
-
-	printf("setParametersAndPossibleActivation >>>\n");
-
-	return true;
-}
-
-
-void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
-{
-	try
-	{
-		AGMMisc::publishModification(newModel, agmexecutive_proxy, "agmInnerCompAgent");
-	}
-	catch(...)
-	{
-		exit(1);
-	}
-}
+// }
+//
+// void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &modification)
+// {
+// 	mutex->lock();
+//  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+//  	mutex->unlock();
+// }
+// void SpecificWorker::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modification)
+// {
+// // 	mutex->lock();
+// //  	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+// //  	mutex->unlock();
+// }
+//
+//
+//
+// bool SpecificWorker::setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated)
+// {
+// 	printf("<<< setParametersAndPossibleActivation\n");
+// 	// We didn't reactivate the component
+// 	reactivated = false;
+//
+// 	// Update parameters
+// 	params.clear();
+// 	for (ParameterMap::const_iterator it=prs.begin(); it!=prs.end(); it++)
+// 	{
+// 		params[it->first] = it->second;
+// 	}
+//
+// 	try
+// 	{
+// 		action = params["action"].value;
+// 		std::transform(action.begin(), action.end(), action.begin(), ::tolower);
+// 		//TYPE YOUR ACTION NAME
+// 		if (action == "actionname")
+// 		{
+// 			active = true;
+// 		}
+// 		else
+// 		{
+// 			active = true;
+// 		}
+// 	}
+// 	catch (...)
+// 	{
+// 		printf("exception in setParametersAndPossibleActivation %d\n", __LINE__);
+// 		return false;
+// 	}
+//
+// 	// Check if we should reactivate the component
+// 	if (active)
+// 	{
+// 		active = true;
+// 		reactivated = true;
+// 	}
+//
+// 	printf("setParametersAndPossibleActivation >>>\n");
+//
+// 	return true;
+// }
+//
+//
+// void SpecificWorker::sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel)
+// {
+// 	try
+// 	{
+// 		AGMMisc::publishModification(newModel, agmexecutive_proxy, "agmInnerCompAgent");
+// 	}
+// 	catch(...)
+// 	{
+// 		exit(1);
+// 	}
+// }
 
 
 

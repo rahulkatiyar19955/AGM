@@ -18,11 +18,11 @@
  */
 
 
-/** \mainpage RoboComp::agmInnerComp
+/** \mainpage RoboComp::agminner
  *
  * \section intro_sec Introduction
  *
- * The agmInnerComp component...
+ * The agminner component...
  *
  * \section interface_sec Interface
  *
@@ -34,7 +34,7 @@
  * ...
  *
  * \subsection install2_ssec Compile and install
- * cd agmInnerComp
+ * cd agminner
  * <br>
  * cmake . && make
  * <br>
@@ -52,7 +52,7 @@
  *
  * \subsection execution_ssec Execution
  *
- * Just: "${PATH_TO_BINARY}/agmInnerComp --Ice.Config=${PATH_TO_CONFIG_FILE}"
+ * Just: "${PATH_TO_BINARY}/agminner --Ice.Config=${PATH_TO_CONFIG_FILE}"
  *
  * \subsection running_ssec Once running
  *
@@ -78,12 +78,10 @@
 #include "specificmonitor.h"
 #include "commonbehaviorI.h"
 
-#include <agmcommonbehaviorI.h>
-#include <agmexecutivetopicI.h>
 
-#include <AGMExecutive.h>
-#include <AGMCommonBehavior.h>
 #include <AGMWorldModel.h>
+#include <Planning.h>
+#include <AGMExecutive.h>
 
 
 // User includes here
@@ -92,16 +90,16 @@
 using namespace std;
 using namespace RoboCompCommonBehavior;
 
-using namespace RoboCompAGMExecutive;
-using namespace RoboCompAGMCommonBehavior;
 using namespace RoboCompAGMWorldModel;
+using namespace RoboCompPlanning;
+using namespace RoboCompAGMExecutive;
 
 
 
-class agmInnerComp : public RoboComp::Application
+class agminner : public RoboComp::Application
 {
 public:
-	agmInnerComp (QString prfx) { prefix = prfx.toStdString(); }
+	agminner (QString prfx) { prefix = prfx.toStdString(); }
 private:
 	void initialize();
 	std::string prefix;
@@ -111,14 +109,14 @@ public:
 	virtual int run(int, char*[]);
 };
 
-void ::agmInnerComp::initialize()
+void ::agminner::initialize()
 {
 	// Config file properties read example
 	// configGetString( PROPERTY_NAME_1, property1_holder, PROPERTY_1_DEFAULT_VALUE );
 	// configGetInt( PROPERTY_NAME_2, property1_holder, PROPERTY_2_DEFAULT_VALUE );
 }
 
-int ::agmInnerComp::run(int argc, char* argv[])
+int ::agminner::run(int argc, char* argv[])
 {
 #ifdef USE_QTGUI
 	QApplication a(argc, argv);  // GUI application
@@ -127,34 +125,11 @@ int ::agmInnerComp::run(int argc, char* argv[])
 #endif
 	int status=EXIT_SUCCESS;
 
-	AGMExecutivePrx agmexecutive_proxy;
-
-printf("%s: %d\n", __FILE__, __LINE__);
 
 	string proxy, tmp;
 	initialize();
 
-printf("%s: %d\n", __FILE__, __LINE__);
 
-	try
-	{
-		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMExecutiveProxy", proxy, ""))
-		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AGMExecutiveProxy\n";
-		}
-		agmexecutive_proxy = AGMExecutivePrx::uncheckedCast( communicator()->stringToProxy( proxy ) );
-	}
-	catch(const Ice::Exception& ex)
-	{
-		cout << "[" << PROGRAM_NAME << "]: Exception: " << ex;
-		return EXIT_FAILURE;
-	}
-	rInfo("AGMExecutiveProxy initialized Ok!");
-	mprx["AGMExecutiveProxy"] = (::IceProxy::Ice::Object*)(&agmexecutive_proxy);//Remote server proxy creation example
-
-	IceStorm::TopicManagerPrx topicManager = IceStorm::TopicManagerPrx::checkedCast(communicator()->propertyToProxy("TopicManager.Proxy"));
-
-printf("%s: %d\n", __FILE__, __LINE__);
 
 	SpecificWorker *worker = new SpecificWorker(mprx);
 	//Monitor thread
@@ -168,11 +143,8 @@ printf("%s: %d\n", __FILE__, __LINE__);
 	
 	while (!monitor->ready)
 	{
-printf("%s: %d\n", __FILE__, __LINE__);
 		usleep(10000);
 	}
-	
-printf("%s: %d\n", __FILE__, __LINE__);
 	
 	try
 	{
@@ -187,69 +159,22 @@ printf("%s: %d\n", __FILE__, __LINE__);
 		adapterCommonBehavior->activate();
 
 
-printf("%s: %d\n", __FILE__, __LINE__);
-
-
-		// Server adapter creation and publication
-		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMCommonBehavior.Endpoints", tmp, ""))
-		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AGMCommonBehavior";
-		}
-		Ice::ObjectAdapterPtr adapterAGMCommonBehavior = communicator()->createObjectAdapterWithEndpoints("AGMCommonBehavior", tmp);
-		AGMCommonBehaviorI *agmcommonbehavior = new AGMCommonBehaviorI(worker);
-		adapterAGMCommonBehavior->add(agmcommonbehavior, communicator()->stringToIdentity("agmcommonbehavior"));
-		adapterAGMCommonBehavior->activate();
-		cout << "[" << PROGRAM_NAME << "]: AGMCommonBehavior adapter created in port " << tmp << endl;
 
 
 
-printf("%s: %d\n", __FILE__, __LINE__);
 
-
-		// Server adapter creation and publication
-		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMExecutiveTopicTopic.Endpoints", tmp, ""))
-		{
-			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AGMExecutiveTopicProxy";
-		}
-		Ice::ObjectAdapterPtr AGMExecutiveTopic_adapter = communicator()->createObjectAdapterWithEndpoints("agmexecutivetopic", tmp);
-		AGMExecutiveTopicPtr agmexecutivetopicI_ = new AGMExecutiveTopicI(worker);
-		Ice::ObjectPrx agmexecutivetopic = AGMExecutiveTopic_adapter->addWithUUID(agmexecutivetopicI_)->ice_oneway();
-		IceStorm::TopicPrx agmexecutivetopic_topic;
-printf("%s: %d\n", __FILE__, __LINE__);
-		if(!agmexecutivetopic_topic){
-		try {
-			agmexecutivetopic_topic = topicManager->create("AGMExecutiveTopic");
-		}
-		catch (const IceStorm::TopicExists&) {
-		//Another client created the topic
-		try{
-			agmexecutivetopic_topic = topicManager->retrieve("AGMExecutiveTopic");
-		}
-		catch(const IceStorm::NoSuchTopic&)
-		{
-			//Error. Topic does not exist
-			}
-		}
-		IceStorm::QoS qos;
-printf("%s: %d\n", __FILE__, __LINE__);
-		agmexecutivetopic_topic->subscribeAndGetPublisher(qos, agmexecutivetopic);
-		}
-		AGMExecutiveTopic_adapter->activate();
 
 		// Server adapter creation and publication
 		cout << SERVER_FULL_NAME " started" << endl;
 
 		// User defined QtGui elements ( main window, dialogs, etc )
 
-printf("%s: %d\n", __FILE__, __LINE__);
 #ifdef USE_QTGUI
 		//ignoreInterrupt(); // Uncomment if you want the component to ignore console SIGINT signal (ctrl+c).
 		a.setQuitOnLastWindowClosed( true );
 #endif
 		// Run QT Application Event Loop
-printf("%s: %d\n", __FILE__, __LINE__);
 		a.exec();
-printf("%s: %d\n", __FILE__, __LINE__);
 		status = EXIT_SUCCESS;
 	}
 	catch(const Ice::Exception& ex)
@@ -264,7 +189,6 @@ printf("%s: %d\n", __FILE__, __LINE__);
 #endif
 		monitor->exit(0);
 }
-printf("%s: %d\n", __FILE__, __LINE__);
 
 	return status;
 }
@@ -303,7 +227,7 @@ int main(int argc, char* argv[])
 			printf("Configuration prefix: <%s>\n", prefix.toStdString().c_str());
 		}
 	}
-	::agmInnerComp app(prefix);
+	::agminner app(prefix);
 
 	return app.main(argc, argv, configFile.c_str());
 }
