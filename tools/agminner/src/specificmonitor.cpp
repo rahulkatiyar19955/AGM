@@ -93,15 +93,19 @@ void SpecificMonitor::readConfig(RoboCompCommonBehavior::ParameterList &params )
 	std::cout<<"\t\t***************** "<< name <<"\n";
 
 
-
+printf("AGMInner.InitialModel\n");
 	configGetString("AGMInner","InitialModel", aux.value, "");
 	params["AGMInner.InitialModel"] = aux;
 
+printf("AGMInner.InnerModels\n");
 	configGetString("AGMInner","InnerModels", aux.value, "");
 	params["AGMInner.InnerModels"] = aux;
 
+printf("AGMInner.OutputFile\n");
 	configGetString("AGMInner","OutputFile", aux.value, "");
 	params["AGMInner.OutputFile"] = aux;
+
+printf("parameters read\n");
 
 	ready = true;
 }

@@ -336,10 +336,11 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	//
 	// Read InnerModel insertions
 	//
+	printf("read innermodel insertions\n");
 	RoboCompCommonBehavior::Parameter par;
 	try
 	{
-		par = params.at("AGMInnerAgent.InnerModels");
+		par = params.at("AGMInner.InnerModels");
 	}
 	catch(std::exception e)
 	{
@@ -351,7 +352,9 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		auto v = s.split(",");
 		if( QFile(v[0]).exists() == true)
 		{
-			InnerModel *innerModel = new InnerModel(v[0].toStdString());
+			std::string sstr = v[0].toStdString();
+			printf("reading innermodel file %s\n", sstr.c_str());
+			InnerModel *innerModel = new InnerModel(sstr);
 			printf("%s ---> %s\n", v[0].toStdString().c_str(), v[1].toStdString().c_str());
 			innerModelInfoVector.push_back(std::pair<InnerModel *, QString>(innerModel, v[1]));
 		}
@@ -364,6 +367,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 	//
 	// Read initial AGM model
+	printf("read initial model\n");
 	worldModel = AGMModel::SPtr(new AGMModel(params.at("AGMInner.InitialModel").value));
 
 
