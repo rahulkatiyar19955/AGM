@@ -170,7 +170,6 @@ std::string AGMModelSymbol::getAttribute(std::string a, bool debug)
 	}
 	else
 	{
-		printf ("couldn't find attribute %s\n", a.c_str());
 		throw ("couldn't find attribute");
 	}
 }

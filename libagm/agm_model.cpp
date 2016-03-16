@@ -60,7 +60,7 @@ AGMModel::AGMModel(const std::string path)
 	// Read symbols (just symbols, then links in other loop)
 	for (xmlNodePtr cur=root->xmlChildrenNode; cur!=NULL; cur=cur->next)
 	{
-		if ((!xmlStrcmp(cur->name, (const xmlChar *)"symbol")))
+		if (xmlStrcmp(cur->name, (const xmlChar *)"symbol") == 0)
 		{
 			xmlChar *stype = xmlGetProp(cur, (const xmlChar *)"type");
 			xmlChar *sid = xmlGetProp(cur, (const xmlChar *)"id");
@@ -70,7 +70,7 @@ AGMModel::AGMModel(const std::string path)
 
 			for (xmlNodePtr cur2=cur->xmlChildrenNode; cur2!=NULL; cur2=cur2->next)
 			{
-				if ((!xmlStrcmp(cur2->name, (const xmlChar *)"attribute")))
+				if (xmlStrcmp(cur2->name, (const xmlChar *)"attribute") == 0)
 				{
 					xmlChar *attr_key   = xmlGetProp(cur2, (const xmlChar *)"key");
 					xmlChar *attr_value = xmlGetProp(cur2, (const xmlChar *)"value");
@@ -78,19 +78,21 @@ AGMModel::AGMModel(const std::string path)
 					xmlFree(attr_key);
 					xmlFree(attr_value);
 				}
-				else if ((!xmlStrcmp(cur2->name, (const xmlChar *)"comment"))) { }           // coments are always ignored
+				else if (xmlStrcmp(cur2->name, (const xmlChar *)"comment") == 0) { }           // coments are always ignored
+				else if (xmlStrcmp(cur2->name, (const xmlChar *)"text") == 0) { }     // we'll ignore 'text'
 				else { printf("unexpected tag inside symbol: %s\n", cur2->name); exit(-1); } // unexpected tags make the program exit
 			}
 		}
-		else if ((!xmlStrcmp(cur->name, (const xmlChar *)"link"))) { }     // we'll ignore links in this first loop
-		else if ((!xmlStrcmp(cur->name, (const xmlChar *)"comment"))) { }  // coments are always ignored
-		else { printf("unexpected tag: %s\n", cur->name); exit(-1); }      // unexpected tags make the program exit
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"link") == 0) { }     // we'll ignore links in this first loop
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"text") == 0) { }     // we'll ignore 'text'
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"comment") == 0) { }  // coments are always ignored
+		else { printf("unexpected tag #1: %s\n", cur->name); exit(-1); }      // unexpected tags make the program exit
 	}
 	
 	// Read links
 	for (xmlNodePtr cur=root->xmlChildrenNode; cur!=NULL; cur=cur->next)
 	{
-		if (xmlStrcmp(cur->name, (const xmlChar *)"link") != 0)
+		if (xmlStrcmp(cur->name, (const xmlChar *)"link") == 0)
 		{
 			xmlChar *srcn = xmlGetProp(cur, (const xmlChar *)"src");
 			if (srcn == NULL) { printf("Link %s lacks of attribute 'src'.\n", (char *)cur->name); exit(-1); }
@@ -111,7 +113,7 @@ AGMModel::AGMModel(const std::string path)
 			std::map<std::string, std::string> attrs;
 			for (xmlNodePtr cur2=cur->xmlChildrenNode; cur2!=NULL; cur2=cur2->next)
 			{
-				if (xmlStrcmp(cur2->name, (const xmlChar *)"linkAttribute") != 0)
+				if (xmlStrcmp(cur2->name, (const xmlChar *)"linkAttribute") == 0)
 				{
 					xmlChar *attr_key   = xmlGetProp(cur2, (const xmlChar *)"key");
 					xmlChar *attr_value = xmlGetProp(cur2, (const xmlChar *)"value");
@@ -119,15 +121,17 @@ AGMModel::AGMModel(const std::string path)
 					xmlFree(attr_key);
 					xmlFree(attr_value);
 				}
-				else if (xmlStrcmp(cur2->name, (const xmlChar *)"comment")!=0) { }           // coments are always ignored
+				else if (xmlStrcmp(cur2->name, (const xmlChar *)"comment") == 0) { }           // coments are always ignored
+				else if (xmlStrcmp(cur2->name, (const xmlChar *)"text") == 0) { }     // we'll ignore 'text'
 				else { printf("unexpected tag inside symbol: %s\n", cur2->name); exit(-1); } // unexpected tags make the program exit
 			}
 			
 			addEdgeByIdentifiers(a, b, edgeName, attrs);
 		}
-		else if ((!xmlStrcmp(cur->name, (const xmlChar *)"symbol"))) { }   // symbols are now ignored
-		else if ((!xmlStrcmp(cur->name, (const xmlChar *)"comment"))) { }  // comments are always ignored
-		else { printf("unexpected tag: %s\n", cur->name); exit(-1); }      // unexpected tags make the program exit
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"symbol") == 0) { }   // symbols are now ignored
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"text") == 0) { }     // we'll ignore 'text'
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"comment") == 0) { }  // comments are always ignored
+		else { printf("unexpected tag #2: %s\n", cur->name); exit(-1); }      // unexpected tags make the program exit
 	}
 }
 
