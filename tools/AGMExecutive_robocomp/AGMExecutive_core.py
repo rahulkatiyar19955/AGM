@@ -242,7 +242,8 @@ class PlannerCaller(threading.Thread):
 
 
 class Executive(object):
-	def __init__(self, agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech):
+	def __init__(self, agglPath, initialModelPath, initialMissionPath, doNotPlan, executiveTopic, executiveVisualizationTopic, speech):
+		self.doNotPlan = doNotPlan
 		self.executiveActive = True
 		self.mutex = threading.RLock()
 		self.agents = dict()
@@ -328,7 +329,7 @@ class Executive(object):
 				sys.exit(-1)
 			# Force replanning
 			try:
-				if not avoidReplanning:
+				if not (avoidReplanning or self.doNotPlan):
 					self.updatePlan()
 			except:
 				print 'There was some problem updating internal model to xml'

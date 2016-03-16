@@ -118,9 +118,10 @@ class Server (Ice.Application):
 			self.shutdownOnInterrupt()
 
 			# Get component's parameters from config file
-			initialModelPath =   self.communicator().getProperties().getProperty( "InitialModelPath" )
-			agglPath =           self.communicator().getProperties().getProperty( "AGGLPath" )
+			initialModelPath   = self.communicator().getProperties().getProperty( "InitialModelPath" )
+			agglPath           = self.communicator().getProperties().getProperty( "AGGLPath" )
 			initialMissionPath = self.communicator().getProperties().getProperty( "InitialMissionPath" )
+			doNotPlan          = self.communicator().getProperties().getProperty( "DoNotPlan" )
 
 			# Get a proxy for the Speech
 			proxy = self.communicator().getProperties().getProperty( "SpeechProxy" )
@@ -172,7 +173,7 @@ class Server (Ice.Application):
 			executiveVisualizationTopic = RoboCompAGMExecutive.AGMExecutiveVisualizationTopicPrx.uncheckedCast(pub)
 
 			# Create the executive
-			executive = Executive(agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech)
+			executive = Executive(agglPath, initialModelPath, initialMissionPath, doNotPlan, executiveTopic, executiveVisualizationTopic, speech)
 			# AGMExecutive server
 			executiveI = ExecutiveI(executive)
 			adapterExecutive = self.communicator().createObjectAdapter('AGMExecutive')

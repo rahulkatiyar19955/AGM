@@ -373,7 +373,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 
 
 
-	qDebug()<<"received a model with " << worldModel->numberOfSymbols() << " symbols\n";
+	qDebug()<<"initial model read with " << worldModel->numberOfSymbols() << " symbols\n";
 
 	if (worldModel->numberOfSymbols() > 0)
 	{
@@ -386,7 +386,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 // 		printf("send\n");
 // 		sendModificationProposal(worldModel, newModel);
 		printf("save agm model\n");
-		newModel->save(params.at("AGMInner.InitialModel").value);
+		newModel->save(params.at("AGMInner.OutputFile").value);
 		printf("save extracted innermodel\n");
 		AgmInner::extractInnerModel(newModel, "world")->save("extractInnerModel.xml");
 		printf("The job was done. Exiting...\n");
