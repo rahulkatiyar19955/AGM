@@ -776,7 +776,7 @@ AGMModelSymbol::SPtr AGMModel::getSymbolByName(const std::string &ss) const
 }
 
 
-bool AGMModel::removeSymbol(int32_t id)
+void AGMModel::removeSymbol(int32_t id)
 {
 	removeEdgesRelatedToSymbol(id);
 	int32_t index = getIndexByIdentifier(id);
@@ -784,9 +784,8 @@ bool AGMModel::removeSymbol(int32_t id)
 	{
 		symbols.erase(symbols.begin() + index);
 		removeEdgesRelatedToSymbol(id);
-		return true;
 	}
-	return false;
+	AGMMODELEXCEPTION(std::string("Exception: Trying to remove unexisting symbol"));
 }
 
 bool AGMModel::removeDanglingEdges()
@@ -946,7 +945,7 @@ int32_t AGMModel::getNewId()
 }
 
 
-bool AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr)
+void AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr)
 {
 	// Nodes must exist.
 	if (a < 0 or b < 0)
@@ -963,18 +962,17 @@ bool AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edg
 			{
 				if (edges[i].getLabel() == edgeName)
 				{
-					return false;
+					AGMMODELEXCEPTION(std::string("Exception: addEdgeByIdentifiers"));
 				}
 			}
 		}
 	}
 	AGMModelEdge edge(a, b, edgeName, atr);
 	edges.push_back(edge);
-	return true;
 }
 
 
-bool AGMModel::removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName)
+void AGMModel::removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName)
 {
 	// Nodes must exist.
 	if (a < 0 or b < 0)
@@ -998,7 +996,9 @@ bool AGMModel::removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &
 			}
 		}
 	}
-	return removed;
+
+	if (not removed)
+		AGMMODELEXCEPTION(std::string("Exception: removeEdgeByIdentifiers"));
 }
 
 bool AGMModel::renameEdgeByIdentifiers(int32_t a, int32_t b, const std::string &was, const std::string &will)

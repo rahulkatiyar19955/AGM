@@ -113,15 +113,15 @@ public:
 	/*! Removes a particular symbol of the model given its identifier. It must be noted that by removing a symbol <strong>we will also delete all edges related to such symbol</strong>.
 	 * \attention It must be noted that by removing a symbol <strong>we will also delete all edges related to such symbol</strong>.
 	 */
-	bool removeSymbol(int32_t id);
+	void removeSymbol(int32_t id);
 
 
 	/*! Removes a particular symbol of the model given its identifier. It must be noted that by removing a symbol <strong>we will also delete all edges related to such symbol</strong>.
 	 * \attention It must be noted that by removing a symbol <strong>we will also delete all edges related to such symbol</strong>.
 	 */
-	bool removeSymbol(AGMModelSymbol::SPtr s)
+	void removeSymbol(AGMModelSymbol::SPtr s)
 	{
-		return removeSymbol(s->identifier);
+		removeSymbol(s->identifier);
 	}
 
 
@@ -292,7 +292,7 @@ public:
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
-	bool addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr=std::map<std::string, std::string>());
+	void addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr=std::map<std::string, std::string>());
 
 
 	/*! \brief Includes a new edge from the symbol 'a' to the symbol 'b', with an optional attribute map.  Returns True on success.
@@ -300,9 +300,9 @@ public:
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
-	bool addEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName, std::map<std::string, std::string> atr=std::map<std::string, std::string>())
+	void addEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName, std::map<std::string, std::string> atr=std::map<std::string, std::string>())
 	{
-		return addEdgeByIdentifiers(a->identifier, b->identifier, edgeName, atr);
+		addEdgeByIdentifiers(a->identifier, b->identifier, edgeName, atr);
 	}
 
 
@@ -311,7 +311,7 @@ public:
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
-	bool removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
+	void removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
 
 
 	/*! \brief Includes a new edge from the symbol 'a' to the symbol 'b' with label edgeName, with an optional attribute map.  Returns True on success.
@@ -319,9 +319,9 @@ public:
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
-	bool removeEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName)
+	void removeEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName)
 	{
-		return removeEdgeByIdentifiers(a->identifier, b->identifier, edgeName);
+		removeEdgeByIdentifiers(a->identifier, b->identifier, edgeName);
 	}
 
 
