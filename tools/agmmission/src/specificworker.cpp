@@ -85,6 +85,10 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	
 	
 	lastChange = QTime::currentTime();
+
+	
+	RoboCompAGMWorldModel::World w = agmexecutive_proxy->getModel();
+	structuralChange(w);
 }
 
 /**
