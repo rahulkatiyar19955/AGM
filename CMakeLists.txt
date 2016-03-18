@@ -21,6 +21,7 @@ SET (AGM_CODE
   libagm/agm_modelSymbols.cpp
   libagm/agm_modelConverter.cpp
   libagm/agm_plan.cpp
+  libagm/agm_inner.cpp
   libagm/graphModelViewer.cpp
 )
 
@@ -37,6 +38,7 @@ SET (HEADERS
   libagm/agm_modelConverter.h
   libagm/agm_config.h
   libagm/agm_plan.h
+  libagm/agm_inner.h
   libagm/graphModelViewer.h
 )
 
