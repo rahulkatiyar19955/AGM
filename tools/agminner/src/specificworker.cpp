@@ -381,14 +381,14 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 		for (auto p : innerModelInfoVector)
 		{
 			printf("Include in %d\n", p.second.toInt());
-			AgmInner::includeInnerModel(newModel, p.second.toInt(), p.first);
+			AGMInner::includeInnerModel(newModel, p.second.toInt(), p.first);
 		}
 // 		printf("send\n");
 // 		sendModificationProposal(worldModel, newModel);
 		printf("save agm model\n");
 		newModel->save(params.at("AGMInner.OutputFile").value);
 		printf("save extracted innermodel\n");
-		AgmInner::extractInnerModel(newModel, "world")->save("extractInnerModel.xml");
+		AGMInner::extractInnerModel(newModel, "world")->save("extractInnerModel.xml");
 		printf("The job was done. Exiting...\n");
 		exit(0);
 	}

@@ -200,7 +200,7 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &w)
 	printf("MODEL MODIFIED %d\n", __LINE__);
 	AGMModelConverter::fromIceToInternal(w, worldModel);
 	printf("MODEL MODIFIED %d\n", __LINE__);
-	changeInner(AgmInner::extractInnerModel(worldModel));
+	changeInner(AGMInner::extractInnerModel(worldModel));
 	printf("MODEL MODIFIED %d\n", __LINE__);
 	fillItemList();
 	printf("MODEL MODIFIED %d\n", __LINE__);
@@ -230,7 +230,7 @@ void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &es)
 	for (auto e : es)
 	{
 		AGMModelConverter::includeIceModificationInInternalModel(e, worldModel);
-		AgmInner::updateImNodeFromEdge(worldModel, e, innerViewer->innerModel);
+		AGMInner::updateImNodeFromEdge(worldModel, e, innerViewer->innerModel);
 	}
 	refresh = true;
 }
@@ -239,7 +239,7 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &e)
 {
 	QMutexLocker dd(&modelMutex);
 	AGMModelConverter::includeIceModificationInInternalModel(e, worldModel);
-	AgmInner::updateImNodeFromEdge(worldModel, e, innerViewer->innerModel);
+	AGMInner::updateImNodeFromEdge(worldModel, e, innerViewer->innerModel);
 	refresh = true;
 }
 

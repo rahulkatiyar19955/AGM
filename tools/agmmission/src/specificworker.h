@@ -28,7 +28,6 @@
 	#include <agm_modelPrinter.h>
 	#include <agm_modelDrawer.h>
 	#include <graphModelViewer.h>
-	#include <agmInner/agmInner.h>
 #endif
 
 #include <innermodel/innermodel.h>

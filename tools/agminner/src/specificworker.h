@@ -38,7 +38,6 @@
 
 #ifndef Q_MOC_RUN
  #include <agm.h>
- #include <agmInner/agmInner.h>
 #endif
 
 #include <QHash>
@@ -83,7 +82,6 @@ private:
 	InnerModel *innerModelVacio;
 	InnerModelViewer *innerViewer;
 
-	//AgmInner agmInner;
 	bool active;
 // 	bool setParametersAndPossibleActivation(const ParameterMap &prs, bool &reactivated);
 // 	void sendModificationProposal(AGMModel::SPtr &worldModel, AGMModel::SPtr &newModel);
