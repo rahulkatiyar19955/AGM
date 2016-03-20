@@ -15,10 +15,11 @@ matrix:
       
 before_install:
   - sudo apt-get update -qq
-  - sudo apt-get install -y python-pyparsing python-pyside pyside-tools libpython2.7-dev python-dev libboost-all-dev cmake python-imaging python-numpy
+  - sudo apt-get install -y python-pyparsing python-pyside pyside-tools libpython2.7-dev python-dev libboost-all-dev cmake python-imaging python-numpy libopenthreads-dev libopenscenegraph-dev
 
 script:
   - pwd
   - ls
-  - cmake -DCMAKE_CXX_COMPILER=$COMPILER . && make
+  - cmake -DCMAKE_CXX_COMPILER=$COMPILER
+  - make
 
