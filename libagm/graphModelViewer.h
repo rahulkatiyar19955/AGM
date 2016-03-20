@@ -22,8 +22,9 @@
 #define RADIUS 100.
 #define TIPSIZE 60.
 
-
+#ifndef Q_MOC_RUN
 #include "agm.h"
+#endif
 
 class GraphModelViewer;
 class GraphModelEdge;

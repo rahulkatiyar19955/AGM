@@ -25,24 +25,6 @@ SET (AGM_CODE
   libagm/graphModelViewer.cpp
 )
 
-
-SET (HEADERS
-  libagm/agm.h
-  libagm/agm_modelDrawer.h
-  libagm/agm_modelEdge.h
-  libagm/agm_modelException.h
-  libagm/agm_model.h
-  libagm/agm_modelPrinter.h
-  libagm/agm_modelSymbols.h
-  libagm/agm_misc_functions.h
-  libagm/agm_modelConverter.h
-  libagm/agm_config.h
-  libagm/agm_plan.h
-  libagm/agm_inner.h
-  libagm/graphModelViewer.h
-)
-
-
 #  Show enabled optional features  #
 ####################################
 MESSAGE(STATUS "\n\nOptional features:")
@@ -115,8 +97,9 @@ ADD_DEFINITIONS( -Wall  -DQT_XML_LIB -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB )
 FIND_PACKAGE( Qt4 )
 SET( QT_USE_QTGUI TRUE )
 SET( QT_USE_QTOPENGL TRUE )
+SET( CMAKE_AUTOMOC TRUE )
 INCLUDE( ${QT_USE_FILE} )
-QT4_WRAP_CPP(XMLVIEWER3D_MOCS libagm/graphModelViewer.h )
+# QT4_WRAP_CPP(XMLVIEWER3D_MOCS libagm/graphModelViewer.h )
 
 # OSG
 FIND_PACKAGE(OpenThreads)
