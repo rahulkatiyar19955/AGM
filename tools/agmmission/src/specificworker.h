@@ -19,22 +19,23 @@
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
 
-#include <genericworker.h>
 
+
+#include <agm_modelDrawer.h>
+#include <graphModelViewer.h>
 
 #ifndef Q_MOC_RUN
+	#include <agm_modelPrinter.h>
+	#include <genericworker.h>
 	#include <agm.h>
 	#include <agm_model.h>
-	#include <agm_modelPrinter.h>
-	#include <agm_modelDrawer.h>
-	#include <graphModelViewer.h>
-#endif
 
-#include <innermodel/innermodel.h>
-#include <innermodel/innermodeldraw.h>
-#include <innermodel/innermodelreader.h>
-#include <osgviewer/osgview.h>
-#include <innermodel/innermodelviewer.h>
+	#include <innermodel/innermodel.h>
+	#include <innermodel/innermodeldraw.h>
+	#include <innermodel/innermodelreader.h>
+	#include <osgviewer/osgview.h>
+	#include <innermodel/innermodelviewer.h>
+#endif
 
 /**
 	   \brief

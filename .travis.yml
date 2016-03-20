@@ -1,5 +1,5 @@
 sudo: required
-dist: willy
+dist: precise
 language: cpp
 
 matrix:

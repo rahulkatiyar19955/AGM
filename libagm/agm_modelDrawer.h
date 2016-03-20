@@ -8,15 +8,15 @@
 #include <string>
 
 
-#ifndef Q_MOC_RUN
-	#include <agm_model.h>
-	#include <agm_modelEdge.h>
-	#include <agm_modelSymbols.h>
-	#include <agm_modelPrinter.h>
-	#include <agm_misc_functions.h>
-#endif
+#include <agm_modelPrinter.h>
+#include <agm_misc_functions.h>
+#include <agm_model.h>
+#include <agm_modelEdge.h>
+#include <agm_modelSymbols.h>
 
 #include <rcdraw/rcdraw.h>
+
+
 
 
 #define SPRING_LENGTH 17.
