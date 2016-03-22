@@ -5,7 +5,6 @@ cmake_minimum_required( VERSION 2.8)
 set(CMAKE_CXX_FLAGS "-Wall -Wfatal-errors " )
 INCLUDE_DIRECTORIES ( . libagm )
 
-SUBDIRS (tools/agmmission)
 
 #  Optional features and options  #
 ###################################
@@ -102,6 +101,7 @@ if (ROBOCOMP_SUPPORT)
 	SET(ICE_LIBS -lIce)
 	ROBOCOMP_WRAP_ICE( AGMWorldModel AGMAgent AGMCommonBehavior )
 	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
+	SUBDIRS (tools/agmmission)
 endif (ROBOCOMP_SUPPORT)
 
 # LibXML
