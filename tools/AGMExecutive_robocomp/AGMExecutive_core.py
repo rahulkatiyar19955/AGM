@@ -318,7 +318,7 @@ class Executive(object):
 			self.worldModelICE = worldModelICE
 			# Store the model in XML
 			try:
-				internalModel.toXML('modification'+(str(self.modifications).zfill(4))+'.xml')
+				internalModel.toXML('modification'+str(self.modifications).zfill(4)+'_'+sender+'.xml')
 			except:
 				print 'There was some problem updating internal model to xml'
 			# Set and broadst the model
