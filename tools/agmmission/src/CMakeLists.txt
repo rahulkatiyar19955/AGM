@@ -20,6 +20,7 @@ SET ( SOURCES
   ${SOURCES}
   $ENV{ROBOCOMP}/classes/rapplication/rapplication.cpp
   $ENV{ROBOCOMP}/classes/qlog/qlog.cpp
+  ${CMAKE_SOURCE_DIR}/libagm/agm_modelDrawer.h
   main.cpp
   genericmonitor.cpp
   specificmonitor.cpp
