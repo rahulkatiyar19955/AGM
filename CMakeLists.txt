@@ -100,7 +100,7 @@ if (ROBOCOMP_SUPPORT)
 	SET(ICE_LIBS -lIce)
 	ROBOCOMP_WRAP_ICE( AGMWorldModel AGMExecutive Planning AGMCommonBehavior )
 	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
-	SUBDIRS (tools/agmmission tools/agminner)
+	SUBDIRS (${CMAKE_SOURCE_DIR}/tools/agmmission tools/agminner)
 endif (ROBOCOMP_SUPPORT)
 
 # LibXML
@@ -134,23 +134,23 @@ LINK_DIRECTORIES(${OSG_LIB_DIR})
 MACRO( WRAP_PYTHON_UI )
   FOREACH( input_file ${ARGN} )
     ADD_CUSTOM_COMMAND (
-      OUTPUT tools/ui/ui_${input_file}.py
-      COMMAND pyside-uic tools/ui/${input_file}.ui -o tools/ui/ui_${input_file}.py
-      DEPENDS tools/ui/${input_file}.ui
-      COMMENT "Generating tools/ui/ui_${input_file}.py from tools/ui/${input_file}.ui"
+      OUTPUT ${CMAKE_SOURCE_DIR}/tools/ui/ui_${input_file}.py
+      COMMAND pyside-uic ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.ui -o ${CMAKE_BINARY_DIR}/tools/ui/ui_${input_file}.py
+      DEPENDS ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.ui
+      COMMENT "Generating ${CMAKE_SOURCE_DIR}/tools/ui/ui_${input_file}.py from ${CMAKE_BINARY_DIR}/tools/ui/${input_file}.ui"
     )
-    ADD_CUSTOM_TARGET(ui_${input_file} ALL DEPENDS tools/ui/ui_${input_file}.py )
+    ADD_CUSTOM_TARGET(ui_${input_file} ALL DEPENDS ${CMAKE_SOURCE_DIR}/tools/ui/ui_${input_file}.py )
   ENDFOREACH( input_file )
 ENDMACRO( WRAP_PYTHON_UI )
 MACRO( WRAP_PYTHON_QRC )
   FOREACH( input_file ${ARGN} )
     ADD_CUSTOM_COMMAND (
-      OUTPUT tools/ui/${input_file}_rc.py
-      COMMAND pyside-rcc tools/ui/${input_file}.qrc -o tools/ui/${input_file}_rc.py
-      DEPENDS tools/ui/${input_file}.qrc
-      COMMENT "Generating tools/ui/${input_file}_rc.py from tools/ui/${input_file}.qrc"
+      OUTPUT ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}_rc.py
+      COMMAND pyside-rcc ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.qrc -o ${CMAKE_BINARY_DIR}/tools/ui/${input_file}_rc.py
+      DEPENDS ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.qrc
+      COMMENT "Generating ${CMAKE_BINARY_DIR}/tools/ui/${input_file}_rc.py from ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.qrc"
     )
-    ADD_CUSTOM_TARGET(${input_file}_rc ALL DEPENDS tools/ui/${input_file}_rc.py )
+    ADD_CUSTOM_TARGET(${input_file}_rc ALL DEPENDS ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}_rc.py )
   ENDFOREACH( input_file )
 ENDMACRO( WRAP_PYTHON_QRC )
 WRAP_PYTHON_UI( guiAGGLEditor guiGraphViewer appearance )
@@ -210,9 +210,9 @@ SET( INST_LIB_PATH   ${CMAKE_INSTALL_PREFIX}/lib )
 SET( INST_INCL_PATH  ${CMAKE_INSTALL_PREFIX}/include )
 SET( INST_SHARE_PATH ${CMAKE_INSTALL_PREFIX}/share/agm )
 
-INSTALL(FILES libagm.so DESTINATION ${INST_LIB_PATH}/ )
+INSTALL(FILES ${CMAKE_BINARY_DIR}/libagm.so DESTINATION ${INST_LIB_PATH}/ )
 INSTALL(FILES ${HEADER_FILES} DESTINATION ${INST_INCL_PATH}/ )
-INSTALL(PROGRAMS agm_xml2pddlProblem DESTINATION ${INST_BIN_PATH}/ )
+INSTALL(PROGRAMS ${CMAKE_BINARY_DIR}/agm_xml2pddlProblem DESTINATION ${INST_BIN_PATH}/ )
 INSTALL(PROGRAMS tools/agm_xmlViewer.py DESTINATION ${INST_BIN_PATH}/ RENAME agm_xmlViewer )
 INSTALL(PROGRAMS agm_xmlViewer3D DESTINATION ${INST_BIN_PATH}/ RENAME agm_xmlViewer3D )
 INSTALL(PROGRAMS tools/AGGLEditor.py DESTINATION ${INST_BIN_PATH}/ RENAME aggleditor)
@@ -247,7 +247,7 @@ INSTALL(PROGRAMS python/AGGL.py DESTINATION ${INST_SHARE_PATH})
 INSTALL(PROGRAMS tools/ui/ui_guiAGGLEditor.py DESTINATION ${INST_SHARE_PATH})
 INSTALL(PROGRAMS tools/ui/ui_guiGraphViewer.py DESTINATION ${INST_SHARE_PATH})
 INSTALL(PROGRAMS tools/ui/ui_appearance.py DESTINATION ${INST_SHARE_PATH})
-INSTALL(PROGRAMS tools/ui/resource_rc.py DESTINATION ${INST_SHARE_PATH})
+INSTALL(PROGRAMS ${CMAKE_BINARY_DIR}/tools/ui/resource_rc.py DESTINATION ${INST_SHARE_PATH})
 
 INSTALL(PROGRAMS tools/aggl_completion.bash DESTINATION /etc/bash_completion.d/ RENAME AGGLEditor)
 

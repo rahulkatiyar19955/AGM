@@ -49,7 +49,6 @@ SET( CMAKE_AUTOMOC TRUE )
 INCLUDE( ${QT_USE_FILE} )
 
 QT4_WRAP_UI( UI_HEADERS mainUI.ui )
-QT4_WRAP_CPP( MOC_SOURCES ${HEADERS} )
 
 
 # Specify construction and link process
