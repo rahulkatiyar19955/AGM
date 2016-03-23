@@ -25,6 +25,22 @@ SET (AGM_CODE
   libagm/graphModelViewer.cpp
 )
 
+
+SET (HEADER_FILES
+  libagm/agm.h
+  libagm/agm_modelDrawer.h
+  libagm/agm_modelEdge.h
+  libagm/agm_modelException.h
+  libagm/agm_model.h
+  libagm/agm_modelPrinter.h
+  libagm/agm_modelSymbols.h
+  libagm/agm_misc_functions.h
+  libagm/agm_modelConverter.h
+  libagm/agm_config.h
+  libagm/agm_plan.h
+  libagm/agm_inner.h
+  libagm/graphModelViewer.h
+)
 #  Show enabled optional features  #
 ####################################
 MESSAGE(STATUS "\n\nOptional features:")
@@ -195,7 +211,7 @@ SET( INST_INCL_PATH  ${CMAKE_INSTALL_PREFIX}/include )
 SET( INST_SHARE_PATH ${CMAKE_INSTALL_PREFIX}/share/agm )
 
 INSTALL(FILES libagm.so DESTINATION ${INST_LIB_PATH}/ )
-INSTALL(FILES ${HEADERS} DESTINATION ${INST_INCL_PATH}/ )
+INSTALL(FILES ${HEADER_FILES} DESTINATION ${INST_INCL_PATH}/ )
 INSTALL(PROGRAMS agm_xml2pddlProblem DESTINATION ${INST_BIN_PATH}/ )
 INSTALL(PROGRAMS tools/agm_xmlViewer.py DESTINATION ${INST_BIN_PATH}/ RENAME agm_xmlViewer )
 INSTALL(PROGRAMS agm_xmlViewer3D DESTINATION ${INST_BIN_PATH}/ RENAME agm_xmlViewer3D )
