@@ -28,7 +28,8 @@
  * @brief Search the name of the innermodel node,(the name is the unique key for innerModel ), in the AGM Model parameter. The innermodel id is stored in the attribute "name" of each symbol.
  * It is found, return the id of the symbol, the unique key for AGMSymbols, otherwise returns -1.
  *
- * @param n value of the attribute field name...
+ * @param m AGMModel to be used
+ * @param n value of the attribute field name
  * @return symbol ID, -1 if it is not found
  */
 int AGMInner::findSymbolIDWithInnerModelName(AGMModel::SPtr &m, QString n)
@@ -54,7 +55,9 @@ int AGMInner::findSymbolIDWithInnerModelName(AGMModel::SPtr &m, QString n)
  * 2 Go through rt edge starting from the agm symbol found before. Format Link a-RT->b
  * 3 Update the new InnerModel with the information stored in the edge
  *
+ * @param worldModel The AGMModel instance that will be used to extract the InnerModel
  * @param imNodeName InnerModelNode name to start the path
+ * @param ignoreMeshes whether or not to ignore mesh loading (which makes the process faster)
  * @return InnerModel* tree from InnerModelNode name
  */
 InnerModel* AGMInner::extractInnerModel(AGMModel::SPtr &worldModel, QString imNodeName, bool ignoreMeshes)
@@ -935,55 +938,21 @@ AGMModel::SPtr AGMInner::extractSymbolicGraph(AGMModel::SPtr &worldModel)
 /**
  * @brief Elimina del AGM en caliente, los nodos del innerModel original que no esten en el agm original.
  *
- * @param agmFilePath ...
- * @param imFilePath ...
+ * @param worldModel AGMModel to be modified
+ * @param imTmp InnerModel containing the nodes to be removed
  * @return AGMModel::SPtr limpio de innerModel (normalmente el propio del robot) pero con la info geometrica (RT) actualizadas para los symbolos del mundo "exterior"
  */
-// AGMModel::SPtr  AGMInner::remove_ImOriginal(string agmFilePath, string imFilePath)
-// {
-// 	AGMModel::SPtr  agmTmp = AGMModel::SPtr(new AGMModel());
-// 	cout<<"agmFilePath: " <<agmFilePath<<"\n";
-// 
-// 
-// 	AGMModelConverter::fromXMLToInternal(agmFilePath, agmTmp);
-// 	InnerModel *imTmp= new InnerModel (imFilePath);
-// 
-// 	std::cout<<agmTmp->numberOfSymbols()<<" "<<agmTmp->numberOfEdges()<<"\n";
-// 	AGMModelPrinter::printWorld(agmTmp);
-// 	imTmp->treePrint();
-// 
-// 	//if imNode not in agmOriginal, remove the symbol associated to the node in the agmCaliente if exist
-// 	foreach (QString n, imTmp->getIDKeys() )
-// 	{
-// 		qDebug()<<n;
-// 		//findName in the original
-// 		if (findSymbolIDWithInnerModelName(agmTmp,n)==-1 )
-// 		{
-// 			int symbolID=findSymbolIDWithInnerModelName(n);
-// 			if (symbolID!=-1)
-// 			{
-// 				qDebug()<<"remove en el agmCaliente :"<<symbolID<<QString::fromStdString( worldModel->getSymbol(symbolID)->toString());
-// 			}
-// 		}
-// 	}
-// 
-// 	return agmTmp;
-// }
-
-void  AGMInner::removeInnerModel(AGMModel::SPtr &worldModel, InnerModel *imTmp)
+void AGMInner::removeInnerModel(AGMModel::SPtr &worldModel, InnerModel *imTmp)
 {
 	//if imNode not in agmOriginal, remove the symbol associated to the node in the agmCaliente if exist
 	//imTmp->save("imTmp.xml");
 	//qDebug()<<imTmp->getIDKeys();
 	foreach (QString n, imTmp->getIDKeys() )
 	{
-		//qDebug()<<n;
-
 		int symbolID=-1;
 		symbolID=findSymbolIDWithInnerModelName(worldModel, n);
 		if (symbolID!=-1)
 		{
-			//qDebug()<<"remove en el agmCaliente :"<<symbolID<<QString::fromStdString( worldModel->getSymbol(symbolID)->toString());
 			worldModel->removeSymbol(symbolID);
 		}
 	}
@@ -1001,10 +970,12 @@ void  AGMInner::removeInnerModel(AGMModel::SPtr &worldModel, InnerModel *imTmp)
  * Given the InnerModelNode ID as key in the hash, it inserts under the AGM symbol (specified by its ID as value in the hash) the counterpart subgraph.
  * If there is any relationship, parents-->children in innermodel. It is created a edge between the corresponding AGMSymbols, if it the edge exist, it is added a new RT link.
  *
- * @param matchNode hash innerModelNode symbolID.
+ * @param worldModel The world model to fill with the InnerModel information
+ * @param im The InnerModel to include
+ * @param match Map matching innermodel to AGM model identifiers
  * @return void
  */
-void AGMInner::include_im(AGMModel::SPtr &worldModel, QHash<QString, int32_t>  match, InnerModel *im)
+void AGMInner::include_im(AGMModel::SPtr &worldModel, QHash<QString, int32_t> match, InnerModel *im)
 {
 	qDebug()<<match;
 	QHash<QString, int32_t>::const_iterator i = match.constBegin();

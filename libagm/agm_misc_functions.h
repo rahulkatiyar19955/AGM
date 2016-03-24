@@ -27,7 +27,7 @@ std::string int2str(const int32_t &i);
 
 /*!
  * \class AGMMisc
- * @ingroup C++API
+ * @ingroup CPPAPI
  * @brief Class containing several useful functions.
  *
  * Class containing several useful functions.
@@ -37,9 +37,11 @@ class AGMMisc
 {
 public:
 #if ROBOCOMP_SUPPORT == 1
-	/*! Publish a new world model (<em>worldModel</em>) using the proxy <em>AGMExecutive</em> using <em>oldModel</em> as the old model. */
+	/*! Proposes a new world model (<em>newModel</em>) using the proxy <em>AGMExecutive</em> provinding <em>sender</em> as additional information that might be interesting for debugging purposes. */
 	static void publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agmexecutive, std::string sender="unspecified");
+	/*! Modifies a node (<em>symbol</em>) using the proxy <em>AGMExecutive</em>. */
 	static void publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMExecutivePrx &agmexecutive);
+	/*! Modifies an edge (<em>edge</em>) using the proxy <em>AGMExecutive</em>. */
 	static void publishEdgeUpdate(AGMModelEdge &edge, AGMExecutivePrx &agmexecutive);
 #endif
 	static inline float str2float(const std::string &s, bool debug = false);

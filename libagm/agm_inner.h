@@ -43,6 +43,14 @@
 
 using namespace std;
 
+/*!
+ * \class AGMInner
+ * @ingroup CPPAPI
+ * @brief Class containg static methods related to extracting, and modifying InnerModel instances given an AGMModel and the other way around.
+ *
+ * More detailed information to come...
+ *
+ */
 class AGMInner
 {
 private:

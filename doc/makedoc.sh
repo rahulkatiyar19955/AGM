@@ -2,8 +2,8 @@
 doxygen=$2
 inputpath=$1
 
-echo "doxygen $doxygen"
-echo "inputpath $inputpath"
+echo "doxygen path: $doxygen"
+echo "input path: $inputpath"
 
 
 rm -rf doc/html

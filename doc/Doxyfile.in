@@ -659,7 +659,7 @@ SHOW_FILES             = YES
 # Folder Tree View (if specified).
 # The default value is: YES.
 
-SHOW_NAMESPACES        = YES
+SHOW_NAMESPACES        = NO
 
 # The FILE_VERSION_FILTER tag can be used to specify a program or script that
 # doxygen should invoke to get the current version for each file (typically from
@@ -810,19 +810,12 @@ RECURSIVE              = YES
 # Note that relative paths are relative to the directory from which doxygen is
 # run.
 
-EXCLUDE                = AGMAgent.h \
-                         AGMAgent.cpp \
-                         AGMWorldModel.h \
-                         AGMWorldModel.cpp \
-                         AGMCommonBehavior.h \
-                         AGMCommonBehavior.cpp \
-                         AGGLEditor.py \
+EXCLUDE                = AGGLEditor.py \
                          AGGLPlanner \
                          ../CMakeFiles \
                          CMakeFiles \
                          ../examples \
                          examples \
-                         lex.yy.c \
                          libagm/fake \
                          ../RoboCompAGMExecutive \
                          RoboCompAGMExecutive \
@@ -865,7 +858,19 @@ EXCLUDE_SYMLINKS       = YES
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories for example use the pattern */test/*
 
-EXCLUDE_PATTERNS       =
+EXCLUDE_PATTERNS       = *moc_* \
+                         *pyparsinglocal* \
+                         *AGMWorldModel.h \
+                         *AGMWorldModel.cpp \
+                         *AGMCommonBehavior.h \
+                         *AGMCommonBehavior.cpp \
+                         *Planning.h \
+                         *Planning.cpp \
+                         *main.cpp \
+                         *agminner* \
+                         *agmmission* \
+                         AGMExecutive.*
+                         
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
@@ -902,7 +907,7 @@ EXAMPLE_RECURSIVE      = NO
 # that contain images that are to be included in the documentation (see the
 # \image command).
 
-IMAGE_PATH             = doc/
+IMAGE_PATH             = @CMAKE_SOURCE_DIR@/doc/
 
 # The INPUT_FILTER tag can be used to specify a program that doxygen should
 # invoke to filter for each input file. Doxygen will invoke the filter program

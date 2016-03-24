@@ -591,6 +591,7 @@ class PyPlan(object):
 	# @param resultFile is the optional name of the file where the plan result will be stored.
 	# @param descomponiendo: added whe we are descomposing a jerarchical rule
 	# @param estadoIntermedio: python file with the intermediate status of the world, after whe apply the jerarchical rule
+	# @param awakenRules: the set of rules that are currently available for the planner to find a solution
 	def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile, descomponiendo=False, estadoIntermedio='', awakenRules=set()):
 		object.__init__(self)
 		# Get initial world mdoel
