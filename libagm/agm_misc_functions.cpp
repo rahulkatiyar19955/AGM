@@ -58,12 +58,12 @@ std::string int2str(const int32_t &i)
 
 #if ROBOCOMP_SUPPORT == 1
 
-void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agmexecutive, std::string sender)
+RoboCompAGMExecutive::ProposalError AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agmexecutive, std::string sender)
 {
 	newModel->removeDanglingEdges();
 	RoboCompAGMWorldModel::World newModelICE;
 	AGMModelConverter::fromInternalToIce(newModel, newModelICE);
-	agmexecutive->structuralChangeProposal(newModelICE, sender, "");
+	return agmexecutive->structuralChangeProposal(newModelICE, sender, "");
 }
 
 void AGMMisc::publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMExecutivePrx &agmexecutive)
