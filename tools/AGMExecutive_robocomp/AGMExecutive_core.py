@@ -295,14 +295,14 @@ class Executive(object):
 		print 'structuralChangeProposal acquire() a'
 		if self.mutex.acquire(blocking=False) == False:
 			print 'structuralChangeProposal acquire() IT WAS LOCKED'
-			return RoboCompAGMExecutive.ProposalError.Locked
+			throw RoboCompAGMExecutive.ProposalError.Locked
 		try:
 			print 'structuralChangeProposal acquire() z'
 
 			# Ignore outdated modifications
 			if worldModelICE.version != self.lastModification.version:
 				print 'outdated!??!  self='+str(self.lastModification.version)+'   ice='+str(worldModelICE.version)
-				return RoboCompAGMExecutive.ProposalError.OldModel
+				throw RoboCompAGMExecutive.ProposalError.OldModel
 			print 'inside'
 			# Here we're OK with the modification, accept it, but first check if replanning is necessary
 			worldModelICE.version += 1
@@ -334,10 +334,8 @@ class Executive(object):
 			except:
 				print 'There was some problem updating internal model to xml'
 		finally:
-			#print 'structuralChange release() a'
 			self.mutex.release()
-			#print 'structuralChange release() z'
-		return RoboCompAGMExecutive.ProposalError.NoError
+		return
 
 	def symbolUpdate(self, nodeModification):
 		self.symbolsUpdate([nodeModification])

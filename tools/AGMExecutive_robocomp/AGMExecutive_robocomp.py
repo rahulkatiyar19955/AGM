@@ -68,7 +68,7 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 		self.handler.deactivate()
 
 	def structuralChangeProposal(self, model, sender, log, current=None):
-		return self.handler.structuralChangeProposal(model, sender, log);
+		self.handler.structuralChangeProposal(model, sender, log);
 
 	def symbolUpdate(self, s, current=None):
 		self.handler.symbolUpdate(s)
