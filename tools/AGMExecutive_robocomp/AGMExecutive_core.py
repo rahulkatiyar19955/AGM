@@ -295,14 +295,14 @@ class Executive(object):
 		print 'structuralChangeProposal acquire() a'
 		if self.mutex.acquire(blocking=False) == False:
 			print 'structuralChangeProposal acquire() IT WAS LOCKED'
-			throw RoboCompAGMExecutive.Locked
+			raise RoboCompAGMExecutive.Locked()
 		try:
 			print 'structuralChangeProposal acquire() z'
 
 			# Ignore outdated modifications
 			if worldModelICE.version != self.lastModification.version:
 				print 'outdated!??!  self='+str(self.lastModification.version)+'   ice='+str(worldModelICE.version)
-				throw RoboCompAGMExecutive.OldModel
+				raise RoboCompAGMExecutive.OldModel()
 			print 'inside'
 			# Here we're OK with the modification, accept it, but first check if replanning is necessary
 			worldModelICE.version += 1

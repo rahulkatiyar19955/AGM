@@ -38,7 +38,7 @@ class AGMMisc
 public:
 #if ROBOCOMP_SUPPORT == 1
 	/*! Proposes a new world model (<em>newModel</em>) using the proxy <em>AGMExecutive</em> provinding <em>sender</em> as additional information that might be interesting for debugging purposes. */
-	static RoboCompAGMExecutive::ProposalError publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agmexecutive, std::string sender="unspecified");
+	static void publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agmexecutive, std::string sender="unspecified");
 	/*! Modifies a node (<em>symbol</em>) using the proxy <em>AGMExecutive</em>. */
 	static void publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMExecutivePrx &agmexecutive);
 	/*! Modifies an edge (<em>edge</em>) using the proxy <em>AGMExecutive</em>. */

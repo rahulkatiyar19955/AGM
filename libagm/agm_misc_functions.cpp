@@ -58,7 +58,7 @@ std::string int2str(const int32_t &i)
 
 #if ROBOCOMP_SUPPORT == 1
 
-RoboCompAGMExecutive::ProposalError AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agmexecutive, std::string sender)
+void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agmexecutive, std::string sender)
 {
 	newModel->removeDanglingEdges();
 	RoboCompAGMWorldModel::World newModelICE;
