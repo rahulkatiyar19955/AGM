@@ -63,7 +63,7 @@ void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agm
 	newModel->removeDanglingEdges();
 	RoboCompAGMWorldModel::World newModelICE;
 	AGMModelConverter::fromInternalToIce(newModel, newModelICE);
-	return agmexecutive->structuralChangeProposal(newModelICE, sender, "");
+	agmexecutive->structuralChangeProposal(newModelICE, sender, "");
 }
 
 void AGMMisc::publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMExecutivePrx &agmexecutive)
