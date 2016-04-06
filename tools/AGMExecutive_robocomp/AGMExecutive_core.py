@@ -334,6 +334,7 @@ class Executive(object):
 			except:
 				print 'There was some problem updating internal model to xml'
 		finally:
+			print 'structuralChangeProposal f'
 			self.mutex.release()
 		return
 

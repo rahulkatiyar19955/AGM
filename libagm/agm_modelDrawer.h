@@ -439,7 +439,10 @@ private:
 			double forceX=0., forceY=0.;
 			for (uint32_t n2=0; n2<nodes.size(); n2++)
 			{
-				if (n == n2) continue;
+				if (n == n2 or nodes[n2].show==false)
+				{
+					continue;
+				}
 				for (int d=0; d<2; d++)
 					i[d] = nodes[n].pos[d] - nodes[n2].pos[d];
 				if (i[0] == 0 and i[1] == 0)
