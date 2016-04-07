@@ -334,7 +334,6 @@ class Executive(object):
 			except:
 				print 'There was some problem updating internal model to xml'
 		finally:
-			print 'structuralChangeProposal f'
 			self.mutex.release()
 		return
 
@@ -536,7 +535,7 @@ class Executive(object):
 			except:
 				traceback.print_exc()
 				print 'Error generating PDDL-like version of the current plan'
-			#self.executiveVisualizationTopic.update(self.worldModelICE, AGMModelConversion.fromInternalToIce(self.target), planPDDL)
+			self.executiveVisualizationTopic.update(self.worldModelICE, ''.join(open(self.targetStr, "r").readlines()), planPDDL)
 		except:
 			traceback.print_exc()
 			print "can't publish executiveVisualizationTopic.update"
