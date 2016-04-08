@@ -94,7 +94,7 @@ public slots:
 	void itemSelected(QString nameItem);
 
 private:
-	bool refresh;
+	bool refreshPlan;
 	std::map<int, std::string> missionPaths;
 	QMutex modelMutex, planMutex;
 	AGMModel::SPtr worldModel, targetModel;
@@ -103,6 +103,7 @@ private:
 	AGMModelDrawer *modelDrawer, *targetDrawer;
 	RCDraw *rcdraw1, *rcdraw2;
 // 	GraphModelViewer *graphViewer;
+        std::string target;
 
 	osgGA::TrackballManipulator *manipulator;
 	OsgView *osgView;

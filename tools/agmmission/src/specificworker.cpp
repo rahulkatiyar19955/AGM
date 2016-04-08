@@ -27,7 +27,7 @@
 
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
-	refresh = false;
+	refreshPlan = false;
 	worldModel = AGMModel::SPtr(new AGMModel());
 	targetModel = AGMModel::SPtr(new AGMModel());
 
@@ -37,11 +37,6 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	
 	rcdraw1 = new RCDraw( modelWidget);
 	modelDrawer = new AGMModelDrawer(rcdraw1, tableWidget);
-	QPalette palette2 = targetWidget->palette();
-	palette2.setColor( backgroundRole(), QColor( 255, 255, 255 ) );
-	rcdraw2 = new RCDraw(targetWidget);
-	targetWidget->setPalette(palette2);
-	targetDrawer = new AGMModelDrawer(rcdraw2);
 
 	QTimer *secondTimer = new QTimer();
 	secondTimer->start(1000);
@@ -107,12 +102,15 @@ void SpecificWorker::compute( )
 
 // 	graphViewer->animateStep();
 	
-	if (refresh)
+	if (refreshPlan)
 	{
-		refresh = false;
+		refreshPlan = false;
+		QMutexLocker dd(&planMutex);                
+		/// Print Target
+		targetText->clear();
+		targetText->setText(QString::fromStdString(target));
 		/// Print PLAN
 		QString planString;
-		QMutexLocker dd(&planMutex);
 		for (uint i=0; i<plan.actions.size(); ++i)
 		{
 			planString += "<p><b>" + QString::number(i+1) + "</b> ";
@@ -132,34 +130,25 @@ void SpecificWorker::compute( )
 	}
 	
 	{
-		
-			
 		QMutexLocker dd(&modelMutex);
 		
 		
 		if (tabWidget->currentIndex()==0)
 		{
 			modelDrawer->update(worldModel);
-			targetDrawer->update(targetModel);
 			//void QScrollArea::ensureVisible ( int x, int y, int xmargin = 50, int ymargin = 50 )
 // 			qDebug()<<"***************************************************";
 // 			qDebug()<<"widgetSize"<<widgetSize;
 // 			qDebug()<<"***************************************************";
 // 			qDebug()<<"rcdraw1->getWindow()"<<rcdraw1->getWindow();
-		}
-// 		else if (tabWidget->currentIndex()==1 )
-// 		{
-// 			graphViewer->update(worldModel);
-// 			graphViewer->animateStep();
-// 		}
+                }
 		else if (tabWidget->currentIndex() == 1 )
 		{
-			targetDrawer->update(targetModel);
 			modelDrawer->update(worldModel);
 			modelDrawer->drawTable();
 			innerViewer->update();
-			osgView->autoResize();		
-			osgView->frame();			
+			osgView->autoResize();
+			osgView->frame();
 		}
 	}
 
@@ -204,7 +193,6 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &w)
 	printf("MODEL MODIFIED %d\n", __LINE__);
 	fillItemList();
 	printf("MODEL MODIFIED %d\n", __LINE__);
-	refresh = true;
 }
 
 
@@ -212,7 +200,6 @@ void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &n)
 {
 	QMutexLocker dd(&modelMutex);
 	AGMModelConverter::includeIceModificationInInternalModel(n, worldModel);
-	refresh = true;
 }
 
 void SpecificWorker::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &ns)
@@ -220,7 +207,6 @@ void SpecificWorker::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &n
 	QMutexLocker dd(&modelMutex);
 	for (auto n : ns)
 		AGMModelConverter::includeIceModificationInInternalModel(n, worldModel);
-	refresh = true;
 }
 
 
@@ -232,7 +218,6 @@ void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &es)
 		AGMModelConverter::includeIceModificationInInternalModel(e, worldModel);
 		AGMInner::updateImNodeFromEdge(worldModel, e, innerViewer->innerModel);
 	}
-	refresh = true;
 }
 
 void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &e)
@@ -240,21 +225,17 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &e)
 	QMutexLocker dd(&modelMutex);
 	AGMModelConverter::includeIceModificationInInternalModel(e, worldModel);
 	AGMInner::updateImNodeFromEdge(worldModel, e, innerViewer->innerModel);
-	refresh = true;
 }
 
 
 
-void SpecificWorker::update(const RoboCompAGMWorldModel::World &a,  const string &target, const RoboCompPlanning::Plan &pl)
+void SpecificWorker::update(const RoboCompAGMWorldModel::World &a,  const string &target_, const RoboCompPlanning::Plan &pl)
 {
-	printf("SpecificWorker::update\n");
-	{
-		QMutexLocker dd(&planMutex);
-		plan = pl;
-		refresh = true;
-                qDebug()<<"target"<<QString::fromStdString(target);
-                
-	}
+	printf("SpecificWorker::update plan and target\n");
+	QMutexLocker dd(&planMutex);
+	plan = pl;
+	target = target_;
+	refreshPlan = true;
 }
 
 void SpecificWorker::fillItemList()
