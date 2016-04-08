@@ -29,6 +29,7 @@ SET ( SOURCES
   specificworker.cpp
   agmcommonbehaviorI.cpp
   agmexecutivetopicI.cpp
+  agmexecutivevisualizationtopicI.cpp
 )
 
 

@@ -245,13 +245,15 @@ void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &e)
 
 
 
-void SpecificWorker::update(const RoboCompAGMWorldModel::World &a, const RoboCompAGMWorldModel::World &b, const RoboCompPlanning::Plan &pl)
+void SpecificWorker::update(const RoboCompAGMWorldModel::World &a,  const string &target, const RoboCompPlanning::Plan &pl)
 {
 	printf("SpecificWorker::update\n");
 	{
 		QMutexLocker dd(&planMutex);
 		plan = pl;
 		refresh = true;
+                qDebug()<<"target"<<QString::fromStdString(target);
+                
 	}
 }
 

@@ -82,7 +82,7 @@ public:
 	virtual void edgeUpdated(const RoboCompAGMWorldModel::Edge &e) = 0;
 	virtual void symbolUpdated(const RoboCompAGMWorldModel::Node &n) = 0;
 	virtual void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &ns) = 0;
-
+        virtual void update(const RoboCompAGMWorldModel::World &a, const string &target, const RoboCompPlanning::Plan &p) = 0;
 
 protected:
 	QTimer timer;

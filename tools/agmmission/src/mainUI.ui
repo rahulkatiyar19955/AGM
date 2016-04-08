@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>837</width>
-    <height>445</height>
+    <width>854</width>
+    <height>455</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -184,26 +184,7 @@ plan</string>
        <widget class="QWidget" name="dockWidgetContents_2">
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
-          <widget class="QWidget" name="targetWidget" native="true">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>1</horstretch>
-             <verstretch>1</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>300</width>
-             <height>100</height>
-            </size>
-           </property>
-           <property name="maximumSize">
-            <size>
-             <width>400</width>
-             <height>16777215</height>
-            </size>
-           </property>
-          </widget>
+          <widget class="QTextEdit" name="targetText"/>
          </item>
          <item>
           <widget class="QLabel" name="label_4">
@@ -392,7 +373,7 @@ plan</string>
                 <property name="geometry">
                  <rect>
                   <x>0</x>
-                  <y>-245</y>
+                  <y>0</y>
                   <width>900</width>
                   <height>900</height>
                  </rect>

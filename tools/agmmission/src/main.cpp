@@ -80,6 +80,7 @@
 
 #include <agmcommonbehaviorI.h>
 #include <agmexecutivetopicI.h>
+#include <agmexecutivevisualizationtopicI.h>
 
 #include <AGMExecutive.h>
 #include <AGMCommonBehavior.h>
@@ -260,6 +261,34 @@ int ::agmmission::run(int argc, char* argv[])
 
 
 
+
+		// Server adapter creation and publication
+		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMExecutiveVisualizationTopicTopic.Endpoints", tmp, ""))
+		{
+			cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AGMExecutiveVisualizationTopicProxy";
+		}
+		Ice::ObjectAdapterPtr AGMExecutiveVisualizationTopic_adapter = communicator()->createObjectAdapterWithEndpoints("agmexecutivevisualizationtopic", tmp);
+		AGMExecutiveVisualizationTopicPtr agmexecutivevisualizationtopicI_ = new AGMExecutiveVisualizationTopicI(worker);
+		Ice::ObjectPrx agmexecutivevisualizationtopic = AGMExecutiveVisualizationTopic_adapter->addWithUUID(agmexecutivevisualizationtopicI_)->ice_oneway();
+		IceStorm::TopicPrx agmexecutivevisualizationtopic_topic;
+		if(!agmexecutivevisualizationtopic_topic){
+		try {
+			agmexecutivevisualizationtopic_topic = topicManager->create("AGMExecutiveVisualizationTopic");
+		}
+		catch (const IceStorm::TopicExists&) {
+		//Another client created the topic
+		try{
+			agmexecutivevisualizationtopic_topic = topicManager->retrieve("AGMExecutiveVisualizationTopic");
+		}
+		catch(const IceStorm::NoSuchTopic&)
+		{
+			//Error. Topic does not exist
+			}
+		}
+		IceStorm::QoS qos;
+		agmexecutivevisualizationtopic_topic->subscribeAndGetPublisher(qos, agmexecutivevisualizationtopic);
+		}
+		AGMExecutiveVisualizationTopic_adapter->activate();
 
 		// Server adapter creation and publication
 		if (not GenericMonitor::configGetString(communicator(), prefix, "AGMExecutiveTopicTopic.Endpoints", tmp, ""))

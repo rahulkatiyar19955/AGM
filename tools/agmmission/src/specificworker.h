@@ -53,7 +53,7 @@ public:
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge &e);
 	void symbolUpdated(const RoboCompAGMWorldModel::Node &n);
 	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &ns);
-	void update(const RoboCompAGMWorldModel::World &a, const RoboCompAGMWorldModel::World &b, const RoboCompPlanning::Plan &p);
+	void update(const RoboCompAGMWorldModel::World &a, const string &target, const RoboCompPlanning::Plan &p);
 
 	bool setParams(RoboCompCommonBehavior::ParameterList params) { return true; }
 	bool activateAgent(const ParameterMap& params) {return true; }
