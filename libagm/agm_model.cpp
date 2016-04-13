@@ -35,6 +35,8 @@ AGMModel::AGMModel(const AGMModel &src)
 
 AGMModel::AGMModel(const std::string path)
 {
+	version = 0;
+
 	// Open file and make initial checks
 	xmlDocPtr doc;
 	if ((doc = xmlParseFile(path.c_str())) == NULL)

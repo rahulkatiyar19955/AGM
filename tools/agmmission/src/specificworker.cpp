@@ -144,7 +144,7 @@ void SpecificWorker::compute( )
                 }
 		else if (tabWidget->currentIndex() == 1 )
 		{
-			modelDrawer->update(worldModel);
+// 			modelDrawer->update(worldModel);
 			modelDrawer->drawTable();
 			innerViewer->update();
 			osgView->autoResize();
@@ -159,21 +159,15 @@ void SpecificWorker::compute( )
 
 void SpecificWorker::changeInner (InnerModel *inner)
 {
-	inner->save("inner.xml");
+	static InnerModel *b = innerModelVacio;
 	if (innerViewer)
 	{
-// 		qDebug()<<"----------- 1111 delete innerViewer ----------" ;	
-		//borra innermodel dentro de InnerModelViewer
-		osgView->getRootGroup()->removeChild(innerViewer);				
-		//delete innerViewer->innerModel;		
-// 		qDebug()<<"----------- delete AAAA innerModel ----------" ;	
-// 		delete innerViewer;		
-// 		qDebug()<<"----------- 2222 delete innerViewer ----------" ;		
-		
+		osgView->getRootGroup()->removeChild(innerViewer);
+		delete b;
+		b = inner;
 	}
 
 	innerViewer = new InnerModelViewer(inner, "root", osgView->getRootGroup(), true);
-// 	innerViewer->setMainCamera(manipulator, InnerModelViewer::TOP_POV);
 	lastChange = QTime::currentTime();
 }
 
@@ -184,15 +178,10 @@ bool SpecificWorker::setAgentParameters(const ParameterMap& params)
 
 void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &w)
 {
-	printf("MODEL MODIFIED %d\n", __LINE__);
 	QMutexLocker dd(&modelMutex);
-	printf("MODEL MODIFIED %d\n", __LINE__);
 	AGMModelConverter::fromIceToInternal(w, worldModel);
-	printf("MODEL MODIFIED %d\n", __LINE__);
 	changeInner(AGMInner::extractInnerModel(worldModel));
-	printf("MODEL MODIFIED %d\n", __LINE__);
 	fillItemList();
-	printf("MODEL MODIFIED %d\n", __LINE__);
 }
 
 

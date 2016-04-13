@@ -268,6 +268,12 @@ class Executive(object):
 
 		print 'INITIAL MODEL: ', self.initialModel
 		self.lastModification = self.initialModel
+		print self.lastModification.version
+		print self.lastModification.version
+		print self.lastModification.version
+		print self.lastModification.version
+		print self.lastModification.version
+		print self.lastModification.version
 		self.backModelICE  = None
 		self.setAndBroadcastModel(xmlModelParser.graphFromXML(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
@@ -293,9 +299,17 @@ class Executive(object):
 		print 'structuralChangeProposal', sender, log
 		# Get structuralChange mutex
 		print 'structuralChangeProposal acquire() a'
-		if self.mutex.acquire(blocking=False) == False:
-			print 'structuralChangeProposal acquire() IT WAS LOCKED'
-			raise RoboCompAGMExecutive.Locked()
+		for iixi in xrange(5):
+			gotMutex = self.mutex.acquire(blocking=False)
+			if gotMutex == True:
+				break
+			else:
+				if iixi == 4:
+					print 'structuralChangeProposal acquire() IT WAS LOCKED'
+					raise RoboCompAGMExecutive.Locked()
+				else:
+					time.sleep(0.03)
+		print 'CURRENT VERSION', self.lastModification.version
 		try:
 			print 'structuralChangeProposal acquire() z'
 
@@ -317,10 +331,10 @@ class Executive(object):
 			self.modifications += 1
 			self.worldModelICE = worldModelICE
 			# Store the model in XML
-			try:
-				internalModel.toXML('modification'+str(self.modifications).zfill(4)+'_'+sender+'.xml')
-			except:
-				print 'There was some problem updating internal model to xml'
+			#try:
+				#internalModel.toXML('modification'+str(self.modifications).zfill(4)+'_'+sender+'.xml')
+			#except:
+				#print 'There was some problem updating internal model to xml'
 			# Set and broadst the model
 			try:
 				self.setAndBroadcastModel(internalModel)
