@@ -141,10 +141,10 @@ void SpecificWorker::compute( )
 // 			qDebug()<<"widgetSize"<<widgetSize;
 // 			qDebug()<<"***************************************************";
 // 			qDebug()<<"rcdraw1->getWindow()"<<rcdraw1->getWindow();
-                }
+		}
 		else if (tabWidget->currentIndex() == 1 )
 		{
-// 			modelDrawer->update(worldModel);
+			modelDrawer->recalculatePositions();
 			modelDrawer->drawTable();
 			innerViewer->update();
 			osgView->autoResize();
