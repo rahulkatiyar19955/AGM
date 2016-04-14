@@ -26,7 +26,7 @@ SET (LIBS ${LIBS}
 
 SET (LIBS ${LIBS} -losgViewer )
 
-INCLUDE_DIRECTORIES( /usr/local/include/osg /usr/include/osgViewer )
+INCLUDE_DIRECTORIES( /usr/local/include/osg /usr/include/osgViewer /opt/robocomp/include  )
 
 SET( LIBS ${LIBS} -L/usr/local/lib64/ -losg -losgViewer -losgGA -losgText -losgDB -losgUtil )
 
