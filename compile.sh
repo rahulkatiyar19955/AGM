@@ -28,6 +28,6 @@ done
 #done
 PYTHON_BINDINGS="False"
 
-mkdir build
-cd build && cmake .. -DROBOCOMP_SUPPORT=${ROBOCOMP_SUPPORT} -DPYTHON_BINDINGS=${PYTHON_BINDINGS} && make -j4 && sudo make install
+mkdir -p build
+cd build && pwd && cmake .. -DROBOCOMP_SUPPORT=${ROBOCOMP_SUPPORT} -DPYTHON_BINDINGS=${PYTHON_BINDINGS} && make -j4 && sudo make install
 

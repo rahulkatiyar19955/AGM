@@ -84,6 +84,7 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 class PlannerCaller(threading.Thread):
 	def __init__(self, executive, agglPath):
 		threading.Thread.__init__(self)
+		self.lastPypyKill = time.time()
 		self.cache = PlanningCache()
 		self.plannerExecutionID = 0
 		self.executive = executive
@@ -131,6 +132,7 @@ class PlannerCaller(threading.Thread):
 					peid = '_'+str(self.plannerExecutionID)
 					self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
 				except:
+					print traceback.print_exc()
 					print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
 					sys.exit(1)
 				# CALL
@@ -339,6 +341,7 @@ class Executive(object):
 			try:
 				self.setAndBroadcastModel(internalModel)
 			except:
+				print traceback.print_exc()
 				print 'There was some problem broadcasting the model'
 				sys.exit(-1)
 			# Force replanning
@@ -346,6 +349,7 @@ class Executive(object):
 				if not (avoidReplanning or self.doNotPlan):
 					self.updatePlan()
 			except:
+				print traceback.print_exc()
 				print 'There was some problem updating internal model to xml'
 		finally:
 			self.mutex.release()
@@ -365,6 +369,7 @@ class Executive(object):
 					internal = AGMModelConversion.fromIceToInternal_node(symbol)
 					self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
 			except:
+				print traceback.print_exc()
 				print 'There was some problem with update node'
 				sys.exit(1)
 			self.executiveTopic.symbolsUpdated(symbols)
@@ -414,6 +419,7 @@ class Executive(object):
 				print 'do update plan'
 				self.updatePlan()
 		except:
+			print traceback.print_exc()
 			print 'There was some problem setting the mission'
 			sys.exit(1)
 		self.mutex.release()
@@ -443,6 +449,7 @@ class Executive(object):
 			self.publishExecutiveVisualizationTopic()
 			self.sendParams()
 		except:
+			print traceback.print_exc()
 			print 'There was some problem broadcasting the plan'
 			sys.exit(1)
 		self.mutex.release()
