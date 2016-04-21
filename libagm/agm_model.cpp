@@ -786,6 +786,7 @@ void AGMModel::removeSymbol(int32_t id)
 	{
 		symbols.erase(symbols.begin() + index);
 		removeEdgesRelatedToSymbol(id);
+		return;
 	}
 	AGMMODELEXCEPTION(std::string("Exception: Trying to remove unexisting symbol"));
 }
