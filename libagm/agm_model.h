@@ -348,8 +348,14 @@ public:
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
-
 	AGMModelEdge &getEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
+
+	/*! \brief get edge by providing two symbols and a label.
+	 *
+	 * \throws AGMException Nodes a and b must exist
+	 *
+	 */
+	AGMModelEdge &getEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName);
 
 
 

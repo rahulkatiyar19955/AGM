@@ -1030,6 +1030,7 @@ bool AGMModel::renameEdgeByIdentifiers(int32_t a, int32_t b, const std::string &
 	return renamed;
 }
 
+
 AGMModelEdge & AGMModel::getEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName)
 {
 	// Nodes must exist.
@@ -1056,6 +1057,14 @@ AGMModelEdge & AGMModel::getEdgeByIdentifiers(int32_t a, int32_t b, const std::s
 	AGMMODELEXCEPTION(std::string("Exception: AGMModel::getEdgeByIdentifiers EDGE  (")+s.str()+std::string(")."));
 
 }
+
+
+AGMModelEdge & AGMModel::getEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName)
+{
+	return getEdgeByIdentifiers(a->identifier, b->identifier, edgeName);
+}
+
+
 
 AGMModelSymbol::SPtr AGMModel::newSymbol(std::string typ, int32_t id)
 {
