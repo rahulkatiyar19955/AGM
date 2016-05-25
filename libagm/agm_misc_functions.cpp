@@ -73,11 +73,35 @@ void AGMMisc::publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMExecutivePrx &a
 	agmexecutive->symbolUpdate(iceSymbol);
 }
 
+void AGMMisc::publishNodesUpdate(std::vector<AGMModelSymbol::SPtr> symbols, AGMExecutivePrx &agmexecutive)
+{
+	RoboCompAGMWorldModel::NodeSequence symbol_sequence;
+	for (std::vector<AGMModelSymbol::SPtr>::iterator it=symbols.begin();it != symbols.end(); it++)
+	{
+		RoboCompAGMWorldModel::Node iceSymbol;
+		AGMModelConverter::fromInternalToIce(*it, iceSymbol);
+		symbol_sequence.push_back(iceSymbol);
+	}
+	agmexecutive->symbolsUpdate(symbol_sequence);
+}
+
 void AGMMisc::publishEdgeUpdate(AGMModelEdge &edge, AGMExecutivePrx &agmexecutive)
 {
 	RoboCompAGMWorldModel::Edge iceEdge;
 	AGMModelConverter::fromInternalToIce(&edge, iceEdge);
 	agmexecutive->edgeUpdate(iceEdge);
+}
+
+void AGMMisc::publishEdgesUpdate(std::vector<AGMModelEdge> edges, AGMExecutivePrx &agmexecutive)
+{
+	RoboCompAGMWorldModel::EdgeSequence edge_sequence;
+	for (std::vector<AGMModelEdge>::iterator it=edges.begin();it != edges.end(); it++)
+	{
+		RoboCompAGMWorldModel::Edge iceEdge;
+		AGMModelConverter::fromInternalToIce(&(*it), iceEdge);
+		edge_sequence.push_back(iceEdge);
+	}
+	agmexecutive->edgesUpdate(edge_sequence);
 }
 
 #endif

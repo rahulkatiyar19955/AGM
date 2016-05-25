@@ -41,8 +41,12 @@ public:
 	static void publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agmexecutive, std::string sender="unspecified");
 	/*! Modifies a node (<em>symbol</em>) using the proxy <em>AGMExecutive</em>. */
 	static void publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMExecutivePrx &agmexecutive);
+	/*! Modifies several nodes (<em>symbol</em>) using the proxy <em>AGMExecutive</em>. */
+	static void publishNodesUpdate(std::vector<AGMModelSymbol::SPtr> symbols, AGMExecutivePrx &agmexecutive);
 	/*! Modifies an edge (<em>edge</em>) using the proxy <em>AGMExecutive</em>. */
 	static void publishEdgeUpdate(AGMModelEdge &edge, AGMExecutivePrx &agmexecutive);
+	/*! Modifies several edges (<em>edge</em>) using the proxy <em>AGMExecutive</em>. */
+	static void publishEdgesUpdate(std::vector<AGMModelEdge> edges, AGMExecutivePrx &agmexecutive);
 #endif
 	static inline float str2float(const std::string &s, bool debug = false);
 	static inline int32_t str2int(const std::string &s);

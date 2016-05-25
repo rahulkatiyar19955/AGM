@@ -386,16 +386,16 @@ class Executive(object):
 		try:
 			#print 'edgesUpdate acquire() a'
 			self.mutex.acquire()
+			self.executiveTopic.edgesUpdated(edges)
 			#print 'edgesUpdate acquire() z'
 			for edge in edges:
-				internal = AGMModelConversion.fromIceToInternal_edge(edge)
+				#internal = AGMModelConversion.fromIceToInternal_edge(edge)
 				found = False
 				for i in xrange(len(self.currentModel.links)):
 					if str(self.currentModel.links[i].a) == str(edge.a):
 						if str(self.currentModel.links[i].b) == str(edge.b):
 							if str(self.currentModel.links[i].linkType) == str(edge.edgeType):
 								self.currentModel.links[i].attributes = copy.deepcopy(edge.attributes)
-								self.executiveTopic.edgeUpdated(edge)
 								found = True
 				if not found:
 					print 'couldn\'t update edge because no match was found'
