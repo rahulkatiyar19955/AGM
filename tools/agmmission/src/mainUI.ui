@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>854</width>
-    <height>455</height>
+    <width>1151</width>
+    <height>843</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -228,7 +228,7 @@ plan</string>
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="MinimumExpanding">
            <horstretch>15</horstretch>
-           <verstretch>2</verstretch>
+           <verstretch>4</verstretch>
           </sizepolicy>
          </property>
          <property name="minimumSize">
