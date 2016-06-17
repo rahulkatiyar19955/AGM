@@ -1,19 +1,24 @@
 #!/bin/sh
+doxygen=$2
+inputpath=$1
 
-rm -rf html/*
-cd ..
+echo "doxygen path: $doxygen"
+echo "input path: $inputpath"
+
+
+rm -rf doc/html
+
 export ROBOCOMP_SUPPORT=1
-make doc ROBOCOMP_SUPPORT=1
-cd -
-find html -type d -exec rmdir {} \; 2> /dev/null
-cp tabs.css html/tabs.css
-cp AGGLEditor.png html/AGGLEditor.png
-cp AGGLEditor_A.png html/AGGLEditor_A.png
-cp AGGLEditor_B.png html/AGGLEditor_B.png
-cp wholePicture.png html/wholePicture.png
-cp init0.png html/init0.png
-cp init2.png html/init2.png
-cp goal2.png html/goal2.png
+$doxygen doc/Doxyfile
+
+cp $inputpath/doc/tabs.css doc/html/tabs.css
+cp $inputpath/doc/AGGLEditor.png doc/html/AGGLEditor.png
+cp $inputpath/doc/AGGLEditor_A.png doc/html/AGGLEditor_A.png
+cp $inputpath/doc/AGGLEditor_B.png doc/html/AGGLEditor_B.png
+cp $inputpath/doc/wholePicture.png doc/html/wholePicture.png
+cp $inputpath/doc/init0.png doc/html/init0.png
+cp $inputpath/doc/init2.png doc/html/init2.png
+cp $inputpath/doc/goal2.png doc/html/goal2.png
 
 
 

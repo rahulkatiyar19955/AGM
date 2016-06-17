@@ -1,12 +1,15 @@
 #pragma once
 
-#include <agm_misc_functions.h>
-#include <agm_model.h>
-#include <agm_modelSymbols.h>
-#include <agm_modelPrinter.h>
-#include <agm_modelEdge.h>
-#include <agm_modelConverter.h>
-#include <agm_plan.h>
+#ifndef Q_MOC_RUN
+	#include <agm_misc_functions.h>
+	#include <agm_model.h>
+	#include <agm_modelSymbols.h>
+	#include <agm_modelPrinter.h>
+	#include <agm_modelEdge.h>
+	#include <agm_modelConverter.h>
+	#include <agm_plan.h>
+	#include <agm_inner.h>
+#endif
 
 /** @defgroup CPPAPI AGM's C++ API
 

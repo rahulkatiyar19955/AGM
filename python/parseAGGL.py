@@ -1,6 +1,6 @@
 from pyparsinglocal import Word, alphas, alphanums, nums, OneOrMore, CharsNotIn
 from pyparsinglocal import Literal, CaselessLiteral, Combine, Optional, Suppress
-from pyparsinglocal import ZeroOrMore, Group, StringEnd, srange
+from pyparsinglocal import ZeroOrMore, Group, StringEnd, srange, Each
 from AGGL import *
 #from PySide.QtCore import *
 #from PySide.QtGui import *
@@ -35,6 +35,10 @@ def getAGGLMetaModels():
 	pt = Suppress(".")
 	pc = Suppress(")")
 	no = Suppress("!")
+	
+	dormant =        (Optional(CaselessLiteral("dormant"))).setResultsName("dormant")
+	activatesRules = (Optional(Suppress(CaselessLiteral("activates")) + po + ids + ZeroOrMore(co + ids) + pc)).setResultsName("activates") 
+
 
 	# LINK
 	link  = Group(an.setResultsName("lhs") + lk + an.setResultsName("rhs") + po + Optional(no).setResultsName("no") + an.setResultsName("linkType") + pc + neg.setResultsName("enabled"))
@@ -54,10 +58,9 @@ def getAGGLMetaModels():
 	Prm = Optional(parameters   + op + almostanything + cl).setResultsName("parameters")
 	Cnd = Optional(precondition + op + almostanything + cl).setResultsName("precondition")
 	Eft = Optional(effect       + op + almostanything + cl).setResultsName("effect")
-	rule_nrm = Group(an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(ruleSuccess) + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
+	rule_nrm = Group(dormant.setResultsName("dormant") + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(ruleSuccess) + activatesRules.setResultsName("activates") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 	# HIERARCHICAL RULE
-	allowedRules = almostanything + OneOrMore(Literal(",") + almostanything)
-	rule_hierarchical = Group(Literal("hierarchical").setResultsName("hierarchical") + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(ruleSuccess) + Optional(allowedRules)+ op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
+	rule_hierarchical = Group(dormant.setResultsName("dormant") + Literal("hierarchical").setResultsName("hierarchical") + dormant.setResultsName("dormant") + an.setResultsName("name") + cn + an.setResultsName("passive") + po + nu.setResultsName("cost") + pc + Optional(ruleSuccess)  + activatesRules.setResultsName("activates") + op + graph.setResultsName("lhs") + ar + graph.setResultsName("rhs") + Prm + Cnd + Eft + cl)
 	# indlude
 	include = Group(Suppress("include") + po + incPath.setResultsName("includefile") + pc)
 	# GENERAL RULE
@@ -115,6 +118,11 @@ class AGMGraphParsing:
 class AGMRuleParsing:
 	@staticmethod
 	def parseRuleFromAST(i, parameters, precondition, effect, verbose=False):
+		# dormant
+		dormant = False
+		if i.dormant == 'dormant':
+			dormant = True
+		# passive
 		passive = False
 		if i.passive == 'passive':
 			passive = True
@@ -123,13 +131,25 @@ class AGMRuleParsing:
 		else:
 			print 'Error parsing rule', i.name+':', i.passive, 'is not a valid active/passive definition only "active" or "passive".'
 			sys.exit(-345)
+		# activates
+		activates = []
+		for activatedRule in i.activates:
+			activates.append(str(activatedRule))
+
+		if len(i.activates)>0 or dormant:
+			print i.name,
+			if len(i.activates)>0:
+				print 'ACTIVATES('+str(i.activates)+')',
+			if dormant:
+				print 'ISDORMANT',
+			print ''
+
 		#print i.name+'('+i.hierarchical+')'
 		if len(i.hierarchical)>0:
 			#print "Hierarchical rule:", i.name
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-			print i.success
-			hierarchical = AGMHierarchicalRule(i.name, LHS, RHS, passive, i.cost, i.success)
+			hierarchical = AGMHierarchicalRule(i.name, LHS, RHS, passive, i.cost, i.success, dormant=dormant, activates=activates)
 			return hierarchical
 		elif len(i.atomss)==0: # We are dealing with a normal rule!
 			#print 'Normal rule:', i.name
@@ -138,7 +158,7 @@ class AGMRuleParsing:
 			LHS = AGMGraphParsing.parseGraphFromAST(i.lhs, verbose)
 			if verbose: print '\t===>'
 			RHS = AGMGraphParsing.parseGraphFromAST(i.rhs, verbose)
-			regular = AGMRule(i.name, LHS, RHS, passive, i.cost, i.success, parameters, precondition, effect)
+			regular = AGMRule(i.name, LHS, RHS, passive, i.cost, i.success, parameters, precondition, effect, dormant=dormant, activates=activates)
 			if len(i.conditions) > 0:
 				regular.conditions = str(i.conditions[0])
 			else:
@@ -262,6 +282,7 @@ class AGMFileDataParsing:
 						effectRec = AGMFileDataParsing.interpretEffect(effectTree)
 				# Build rule
 				rule = AGMRuleParsing.parseRuleFromAST(i, parametersList, preconditionRec, effectRec, verbose)
+				#print type(rule)
 				rule.parameters      = parametersStr
 				rule.parametersAST   = parametersList
 				rule.precondition    = preconditionStr

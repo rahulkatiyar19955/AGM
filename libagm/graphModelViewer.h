@@ -2,26 +2,27 @@
 #include <QtOpenGL/QGLWidget>
 
 #include <osgQt/GraphicsWindowQt>
-#include <osgViewer/CompositeViewer>
-#include <osgViewer/ViewerEventHandlers>
-#include <osgGA/TrackballManipulator>
+#ifndef Q_MOC_RUN
+	#include <osgViewer/CompositeViewer>
+	#include <osgViewer/ViewerEventHandlers>
+	#include <osgGA/TrackballManipulator>
 
-#include <osg/Geode>
-#include <osg/ShapeDrawable>
-#include <osg/Material>
-#include <osg/Texture2D>
-#include <osgUtil/ShaderGen>
-#include <osgViewer/Viewer>
-#include <osgDB/ReadFile>
-#include <osgDB/WriteFile>
-#include <osg/Math>
-#include <osgText/Font3D>
-#include <osgText/Text>
-#include <osgText/Text3D>
+	#include <osg/Geode>
+	#include <osg/ShapeDrawable>
+	#include <osg/Material>
+	#include <osg/Texture2D>
+	#include <osgUtil/ShaderGen>
+	#include <osgViewer/Viewer>
+	#include <osgDB/ReadFile>
+	#include <osgDB/WriteFile>
+	#include <osg/Math>
+	#include <osgText/Font3D>
+	#include <osgText/Text>
+	#include <osgText/Text3D>
+#endif
 
 #define RADIUS 100.
 #define TIPSIZE 60.
-
 
 #include "agm.h"
 

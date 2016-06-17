@@ -19,23 +19,23 @@
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
 
-#include <genericworker.h>
 
+
+#include <agm_modelDrawer.h>
+#include <graphModelViewer.h>
 
 #ifndef Q_MOC_RUN
+	#include <agm_modelPrinter.h>
+	#include <genericworker.h>
 	#include <agm.h>
 	#include <agm_model.h>
-	#include <agm_modelPrinter.h>
-	#include <agm_modelDrawer.h>
-	#include <graphModelViewer.h>
-	#include <agmInner/agmInner.h>
-#endif
 
-#include <innermodel/innermodel.h>
-#include <innermodel/innermodeldraw.h>
-#include <innermodel/innermodelreader.h>
-#include <osgviewer/osgview.h>
-#include <innermodel/innermodelviewer.h>
+	#include <innermodel/innermodel.h>
+	#include <innermodel/innermodeldraw.h>
+	#include <innermodel/innermodelreader.h>
+	#include <osgviewer/osgview.h>
+	#include <innermodel/innermodelviewer.h>
+#endif
 
 /**
 	   \brief
@@ -48,11 +48,12 @@ Q_OBJECT
 public:
 	SpecificWorker(MapPrx& mprx);
 	~SpecificWorker();
-	void structuralChange(const RoboCompAGMWorldModel::Event& modification);
-	void symbolUpdated(const RoboCompAGMWorldModel::Node& modification);
-	void edgeUpdated(const RoboCompAGMWorldModel::Edge& modification);
-	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence& modification);
-	void update(const RoboCompAGMWorldModel::World &a, const RoboCompAGMWorldModel::World &b, const RoboCompPlanning::Plan &p);
+	void structuralChange(const RoboCompAGMWorldModel::World &w);
+	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &es);
+	void edgeUpdated(const RoboCompAGMWorldModel::Edge &e);
+	void symbolUpdated(const RoboCompAGMWorldModel::Node &n);
+	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &ns);
+	void update(const RoboCompAGMWorldModel::World &a, const string &target, const RoboCompPlanning::Plan &p);
 
 	bool setParams(RoboCompCommonBehavior::ParameterList params) { return true; }
 	bool activateAgent(const ParameterMap& params) {return true; }
@@ -75,9 +76,7 @@ public slots:
 
 	void activateClicked();
 	void deactivateClicked();
-	void resetClicked();
 
-// 	void broadcastButtonClicked();
 	void broadcastPlanButtonClicked();
 	void broadcastModelButtonClicked();
 
@@ -95,7 +94,7 @@ public slots:
 	void itemSelected(QString nameItem);
 
 private:
-	bool refresh;
+	bool refreshPlan;
 	std::map<int, std::string> missionPaths;
 	QMutex modelMutex, planMutex;
 	AGMModel::SPtr worldModel, targetModel;
@@ -104,12 +103,12 @@ private:
 	AGMModelDrawer *modelDrawer, *targetDrawer;
 	RCDraw *rcdraw1, *rcdraw2;
 // 	GraphModelViewer *graphViewer;
+        std::string target;
 
 	osgGA::TrackballManipulator *manipulator;
 	OsgView *osgView;
 	InnerModel *innerModelVacio;
 	InnerModelViewer *innerViewer; 
-// 	AgmInner agmInner;
 
 
 	

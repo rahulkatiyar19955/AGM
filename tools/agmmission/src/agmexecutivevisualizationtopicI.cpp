@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2016 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -22,37 +22,20 @@ AGMExecutiveVisualizationTopicI::AGMExecutiveVisualizationTopicI(GenericWorker *
 {
 	worker = _worker;
 	mutex = worker->mutex;       // Shared worker mutex
-	// Component initialization...
 }
 
 
 AGMExecutiveVisualizationTopicI::~AGMExecutiveVisualizationTopicI()
 {
-	// Free component resources here
 }
 
-// Component functions, implementation
-void AGMExecutiveVisualizationTopicI::update(const RoboCompAGMWorldModel::World& world, const RoboCompAGMWorldModel::World& target, const RoboCompPlanning::Plan& plan, const Ice::Current&)
+void AGMExecutiveVisualizationTopicI::update(const RoboCompAGMWorldModel::World  &world, const string &target, const RoboCompPlanning::Plan  &plan, const Ice::Current&)
 {
-	printf("%s: %d\n", __FILE__, __LINE__);
-	worker->update(world,target,plan);
-	printf("%s: %d\n", __FILE__, __LINE__);
+	worker->update(world, target, plan);
 }
 
-void AGMExecutiveVisualizationTopicI::successFulChange(const RoboCompPlanning::ActionSequence &s, const Ice::Current&)
-{
-	printf("%s: %d\n", __FILE__, __LINE__);
-}
 
-void AGMExecutiveVisualizationTopicI::aimedChange(const RoboCompPlanning::Action &a, const Ice::Current&)
-{
-	printf("%s: %d\n", __FILE__, __LINE__);
-}
 
-void AGMExecutiveVisualizationTopicI::invalidChange(const std::string &c, const Ice::Current&)
-{
-	printf("%s: %d\n", __FILE__, __LINE__);
-}
 
 
 

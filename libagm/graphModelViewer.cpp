@@ -1,7 +1,9 @@
 #include "graphModelViewer.h"
 
 
-#include <osgGA/TrackballManipulator>
+#ifndef Q_MOC_RUN
+	#include <osgGA/TrackballManipulator>
+#endif
 
 SymbolNode::SymbolNode(std::string _id, std::string _stype) : osg::Group()
 {

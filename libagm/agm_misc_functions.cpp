@@ -58,32 +58,50 @@ std::string int2str(const int32_t &i)
 
 #if ROBOCOMP_SUPPORT == 1
 
-void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMAgentTopicPrx &agmagenttopic, AGMModel::SPtr &oldModel, std::string sender)
+void AGMMisc::publishModification(AGMModel::SPtr &newModel, AGMExecutivePrx &agmexecutive, std::string sender)
 {
-	newModel->save("new.xml");
-	oldModel->save("old.xml");
-	RoboCompAGMWorldModel::Event e;
-	e.sender = sender;
-	e.why = RoboCompAGMWorldModel::BehaviorBasedModification;
-	oldModel->removeDanglingEdges();
-	AGMModelConverter::fromInternalToIce(oldModel, e.backModel);
 	newModel->removeDanglingEdges();
-	AGMModelConverter::fromInternalToIce(newModel, e.newModel);
-	agmagenttopic->structuralChange(e);
+	RoboCompAGMWorldModel::World newModelICE;
+	AGMModelConverter::fromInternalToIce(newModel, newModelICE);
+	agmexecutive->structuralChangeProposal(newModelICE, sender, "");
 }
 
-void AGMMisc::publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMAgentTopicPrx &agmagenttopic)
+void AGMMisc::publishNodeUpdate(AGMModelSymbol::SPtr &symbol, AGMExecutivePrx &agmexecutive)
 {
 	RoboCompAGMWorldModel::Node iceSymbol;
 	AGMModelConverter::fromInternalToIce(symbol, iceSymbol);
-	agmagenttopic->symbolUpdated(iceSymbol);
+	agmexecutive->symbolUpdate(iceSymbol);
 }
 
-void AGMMisc::publishEdgeUpdate(AGMModelEdge &edge, AGMAgentTopicPrx &agmagenttopic)
+void AGMMisc::publishNodesUpdate(std::vector<AGMModelSymbol::SPtr> symbols, AGMExecutivePrx &agmexecutive)
+{
+	RoboCompAGMWorldModel::NodeSequence symbol_sequence;
+	for (std::vector<AGMModelSymbol::SPtr>::iterator it=symbols.begin();it != symbols.end(); it++)
+	{
+		RoboCompAGMWorldModel::Node iceSymbol;
+		AGMModelConverter::fromInternalToIce(*it, iceSymbol);
+		symbol_sequence.push_back(iceSymbol);
+	}
+	agmexecutive->symbolsUpdate(symbol_sequence);
+}
+
+void AGMMisc::publishEdgeUpdate(AGMModelEdge &edge, AGMExecutivePrx &agmexecutive)
 {
 	RoboCompAGMWorldModel::Edge iceEdge;
 	AGMModelConverter::fromInternalToIce(&edge, iceEdge);
-	agmagenttopic->edgeUpdated(iceEdge);
+	agmexecutive->edgeUpdate(iceEdge);
+}
+
+void AGMMisc::publishEdgesUpdate(std::vector<AGMModelEdge> edges, AGMExecutivePrx &agmexecutive)
+{
+	RoboCompAGMWorldModel::EdgeSequence edge_sequence;
+	for (std::vector<AGMModelEdge>::iterator it=edges.begin();it != edges.end(); it++)
+	{
+		RoboCompAGMWorldModel::Edge iceEdge;
+		AGMModelConverter::fromInternalToIce(&(*it), iceEdge);
+		edge_sequence.push_back(iceEdge);
+	}
+	agmexecutive->edgesUpdate(edge_sequence);
 }
 
 #endif
@@ -115,11 +133,6 @@ std::string AGMMisc::int2str(const int32_t &i)
 {
 	return ::int2str(i);
 }
-
-
-
-
-
 
 
 

@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2016 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -16,8 +16,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef AGMEXECUTIVEVISUALIZATIONTOPICI_H
-#define AGMEXECUTIVEVISUALIZATIONTOPICI_H
+#ifndef AGMEXECUTIVEVISUALIZATIONTOPIC_H
+#define AGMEXECUTIVEVISUALIZATIONTOPIC_H
 
 // QT includes
 #include <QtCore/QObject>
@@ -37,12 +37,8 @@ Q_OBJECT
 public:
 	AGMExecutiveVisualizationTopicI( GenericWorker *_worker, QObject *parent = 0 );
 	~AGMExecutiveVisualizationTopicI();
-	void  update(const RoboCompAGMWorldModel::World& world, const RoboCompAGMWorldModel::World& target, const RoboCompPlanning::Plan& plan, const Ice::Current& = Ice::Current());
-
-	void  successFulChange(const RoboCompPlanning::ActionSequence &s, const Ice::Current&);
-	void  aimedChange(const RoboCompPlanning::Action &a, const Ice::Current&);
-	void  invalidChange(const std::string &c, const Ice::Current&);
-
+	
+	void update(const RoboCompAGMWorldModel::World  &world, const string &target, const RoboCompPlanning::Plan  &plan, const Ice::Current&);
 
 	QMutex *mutex;
 private:

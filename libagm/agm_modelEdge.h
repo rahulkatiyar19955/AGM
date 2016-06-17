@@ -24,8 +24,8 @@ public:
 	AGMModelEdge &operator=(const AGMModelEdge &src);
 	AGMModelEdge *operator->() { return this; }
 
-	std::string getLabel() const;
-	std::pair<int32_t, int32_t> getSymbolPair() const;
+	inline std::string getLabel() const { return linking; }
+	inline std::pair<int32_t, int32_t> getSymbolPair() const { return symbolPair; }
 
 	void setLabel(std::string l);
 	void setSymbolPair(std::pair<int32_t, int32_t> p);

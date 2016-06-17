@@ -5,24 +5,39 @@ AGMCommonBehavior.Endpoints=tcp -p 11198
 AGMAgentTopic.Endpoints=tcp -p 12198
 
 # R E M O T E    P R O X I E S
-PlanningProxy = planning:tcp              -h localhost -p 10195
-#SpeechProxy   = speech:tcp                -h localhost -p 10021
-IceStormProxy = IceStorm/TopicManager:tcp -p 9999
+IceStormProxy = IceStorm/TopicManager:tcp -h localhost -p 9999
 
 # A G M   -   F i l e   p a t h s
-AGGLPath = /home/ljmanso/cajasvacias1/Files/cajasVacias1_v3.aggl
-InitialModelPath = /home/robocomp/cajasvacias1/Files/initialModel.xml
-InitialMissionPath = /home/robocomp/cajasvacias1/Files/targetModel.xml
+AGGLPath =           /home/robocomp/robocomp/components/prp/planningDomain/domain.aggl
+InitialModelPath =   /home/robocomp/robocomp/components/prp/etc/initialModel.xml
+InitialMissionPath = /home/robocomp/robocomp/components/prp/etc/target.aggt
+
 
 # A G E N T S
-AGENTS = navegacion,rompellaves
-navegacion  = agmcommonbehavior:tcp -h localhost -p 10333
-rompellaves = agmcommonbehavior:tcp -h localhost -p 10334 
+AGENTS = navigation,object,oracle
+navigation = agmcommonbehavior:tcp -h localhost -p 10330
+object = agmcommonbehavior:tcp -h localhost -p 10331
+oracle = agmcommonbehavior:tcp -h localhost -p 10332
+
+
+WriteAcceptedModels=True
+
 
 Ice.Warn.Connections=0
 Ice.Trace.Network=0
 Ice.Trace.Protocol=0
+
 Ice.ACM.Client=10
 Ice.ACM.Server=10
 
-# END
+Ice.ThreadPool.Client.Size=50
+Ice.ThreadPool.Server.Size=50
+
+Ice.MessageSizeMax=2000480
+
+
+Ice.Override.ConnectTimeout=1000
+Ice.Override.CloseTimeout=1000
+Ice.Override.Timeout=1000
+
+

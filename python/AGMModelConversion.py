@@ -1,4 +1,5 @@
 import sys, os, Ice
+
 # Check that RoboComp has been correctly detected
 ROBOCOMP = ''
 try:
@@ -19,8 +20,9 @@ from AGGL import *
 
 def fromInternalToIce(src):
 	# Create new model
-	dst = RoboCompAGMWorldModel.World([], [])
-	# Copy indices
+	dst = RoboCompAGMWorldModel.World(nodes=[], edges=[], version=0)
+	dst.version = int(src.version)
+	## Copy indices
 	for nodeSrc in src.nodes.values():
 		nodeDst = RoboCompAGMWorldModel.Node()
 		nodeDst.nodeType = nodeSrc.sType
@@ -28,30 +30,30 @@ def fromInternalToIce(src):
 			nodeDst.nodeIdentifier = int(nodeSrc.name)
 		except:
 			nodeDst.nodeIdentifier = -1
-		#if nodeDst.nodeIdentifier == -1:
-			#print "Can't transform models containing nodes with invalid identifiers (type: " + nodeDst.nodeType + ").\n"
-			#sys.exit(-1)
+		if nodeDst.nodeIdentifier == -1:
+			print "Can't transform models containing nodes with invalid identifiers (type: " + nodeDst.nodeType + ").\n"
+			sys.exit(-1)
 		nodeDst.attributes = nodeSrc.attributes
 		dst.nodes.append(nodeDst)
-	# Copy links
-	for srcLink in src.links:
 
+	## Copy links
+	for srcLink in src.links:
 		dstLink = RoboCompAGMWorldModel.Edge()
 		dstLink.edgeType = srcLink.linkType
 		try:
 			dstLink.a = int(srcLink.a)
 		except:
 			dstLink.a = -1
-		#if dstLink.a == -1:
-			#print "Can't transform models containing edges linking invalid identifiers (type: "+dstLink.edgeType+").\n"
-			#sys.exit(-1)
+		if dstLink.a == -1:
+			print "Can't transform models containing edges linking invalid identifiers (type: "+dstLink.edgeType+").\n"
+			sys.exit(-1)
 		try:
 			dstLink.b = int(srcLink.b)
 		except:
 			dstLink.b = -1
-		#if dstLink.b == -1:
-			#print "Can't transform models containing edges linking invalid identifiers (type: "+dstLink.edgeType+").\n"
-			#sys.exit(-1)
+		if dstLink.b == -1:
+			print "Can't transform models containing edges linking invalid identifiers (type: "+dstLink.edgeType+").\n"
+			sys.exit(-1)
 
 		dstLink.attributes = srcLink.attributes
 		dst.edges.append(dstLink)
@@ -74,22 +76,16 @@ def fromIceToInternal_model(src, ignoreInvalidEdges=False):
 			sys.exit(-1)
 
 	for srcLink in src.edges:
-		if srcLink.a == 100 and srcLink.b == 1:
-			print 'AXXXXX', srcLink
-			print 'AXXXXX', srcLink.attributes
 		if srcLink.a == -1 or srcLink.b == -1:
 			raise Exception("Can't transform models containing nodes with invalid identifiers (type: "+src.edges[i].edgeType+").\n")
 			sys.exit(-1)
 		edge = AGMLink(str(srcLink.a), str(srcLink.b), srcLink.edgeType,srcLink.attributes)
-		if edge.a == '100' and edge.b == '1':
-			print 'BXXXXX', edge
-			print 'BXXXXX', edge.attributes
-
 		if str(srcLink.a) in knownNodes and str(srcLink.b) in knownNodes:
 			dst.links.append(edge)
 		else:
 			if not ignoreInvalidEdges:
 				raise Exception('I was sent a model with an edge linkning a non-existing node.')
+	dst.version = int(src.version)
 	return dst
 
 def fromIceToInternal_node(node):

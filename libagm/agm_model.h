@@ -4,13 +4,18 @@
 #include <iostream>
 #include <fstream>
 
+#include <libxml2/libxml/parser.h>
+#include <libxml2/libxml/tree.h>
+
 
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread.hpp>
 
 #include <agm_modelException.h>
+
 #if ROBOCOMP_SUPPORT == 1
+#include <AGMExecutive.h>
 #include <AGMWorldModel.h>
 #include <AGMCommonBehavior.h>
 #endif
@@ -85,6 +90,8 @@ public:
 	AGMModel(const AGMModel::SPtr &src);
 	//! Copy constructor using a reference.
 	AGMModel(const AGMModel &src);
+	//! File constructor.
+	AGMModel(const std::string xmlFilePath);
 	//! Destructor.
 	~AGMModel();
 	//! Assignment operator.
@@ -106,15 +113,15 @@ public:
 	/*! Removes a particular symbol of the model given its identifier. It must be noted that by removing a symbol <strong>we will also delete all edges related to such symbol</strong>.
 	 * \attention It must be noted that by removing a symbol <strong>we will also delete all edges related to such symbol</strong>.
 	 */
-	bool removeSymbol(int32_t id);
+	void removeSymbol(int32_t id);
 
 
 	/*! Removes a particular symbol of the model given its identifier. It must be noted that by removing a symbol <strong>we will also delete all edges related to such symbol</strong>.
 	 * \attention It must be noted that by removing a symbol <strong>we will also delete all edges related to such symbol</strong>.
 	 */
-	bool removeSymbol(AGMModelSymbol::SPtr s)
+	void removeSymbol(AGMModelSymbol::SPtr s)
 	{
-		return removeSymbol(s->identifier);
+		removeSymbol(s->identifier);
 	}
 
 
@@ -142,7 +149,7 @@ public:
 
 	/// Removes all edges related to an unexisting symbol. Dangling edges only exist if users remove symbols using the variable <em>symbols</em> directly, which is disencouraged. Generally it's a better idea to remove symbols using the method <em>removeSymbol</em>.
 	bool removeDanglingEdges();
-	
+
 	void save(std::string xmlFilePath);
 
 
@@ -255,8 +262,8 @@ public:
 	 *
 	 */
 	int32_t getLinkedID(    int32_t id, std::string linkname, int32_t i=0) const;
-	
-	
+
+
 	AGMModelSymbol::SPtr getParentByLink(int32_t id, std::string linkname, int32_t i=0) const;
 
 
@@ -285,7 +292,7 @@ public:
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
-	bool addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr=std::map<std::string, std::string>());
+	void addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr=std::map<std::string, std::string>());
 
 
 	/*! \brief Includes a new edge from the symbol 'a' to the symbol 'b', with an optional attribute map.  Returns True on success.
@@ -293,9 +300,9 @@ public:
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
-	bool addEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName, std::map<std::string, std::string> atr=std::map<std::string, std::string>())
+	void addEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName, std::map<std::string, std::string> atr=std::map<std::string, std::string>())
 	{
-		return addEdgeByIdentifiers(a->identifier, b->identifier, edgeName, atr);
+		addEdgeByIdentifiers(a->identifier, b->identifier, edgeName, atr);
 	}
 
 
@@ -304,7 +311,7 @@ public:
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
-	bool removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
+	void removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
 
 
 	/*! \brief Includes a new edge from the symbol 'a' to the symbol 'b' with label edgeName, with an optional attribute map.  Returns True on success.
@@ -312,9 +319,9 @@ public:
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
-	bool removeEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName)
+	void removeEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName)
 	{
-		return removeEdgeByIdentifiers(a->identifier, b->identifier, edgeName);
+		removeEdgeByIdentifiers(a->identifier, b->identifier, edgeName);
 	}
 
 
@@ -325,7 +332,7 @@ public:
 	 */
 	bool renameEdgeByIdentifiers(int32_t a, int32_t b, const std::string &was, const std::string &will);
 
-	
+
 	/*! \brief Renames an edge in the model given the identifiers of two symbols, the previous and new label. Returns True on success.
 	 *
 	 * \throws AGMException Nodes a and b must exist
@@ -335,14 +342,20 @@ public:
 	{
 		return renameEdgeByIdentifiers(a->identifier, b->identifier, was, will);
 	}
-	
-	/*! \brief get edge by indentifiers of two symbols and label. 
+
+	/*! \brief get edge by indentifiers of two symbols and label.
 	 *
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
-
 	AGMModelEdge &getEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName);
+
+	/*! \brief get edge by providing two symbols and a label.
+	 *
+	 * \throws AGMException Nodes a and b must exist
+	 *
+	 */
+	AGMModelEdge &getEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName);
 
 
 
@@ -380,6 +393,8 @@ public:
 	int32_t size() { return symbols.size(); }
 	/// Vector of the edges that the model holds.
 	std::vector<AGMModelEdge> edges;
+	/// Version ID of the model
+	int32_t version;
 private:
 
 	/// Overwrites the symbols attribute with the vector provided.

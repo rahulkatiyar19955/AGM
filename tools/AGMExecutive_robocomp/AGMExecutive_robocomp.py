@@ -46,12 +46,10 @@ if len(ROBOCOMP)<1:
 
 preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
 Ice.loadSlice(preStr+"AGMCommonBehavior.ice")
-Ice.loadSlice(preStr+"AGMAgent.ice")
 Ice.loadSlice(preStr+"AGMExecutive.ice")
 Ice.loadSlice(preStr+"AGMWorldModel.ice")
 Ice.loadSlice(preStr+"Speech.ice")
 import RoboCompAGMCommonBehavior
-import RoboCompAGMAgent
 import RoboCompAGMExecutive
 import RoboCompAGMWorldModel
 import RoboCompSpeech
@@ -62,42 +60,53 @@ from agglplanningcache import *
 class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 	def __init__(self, _handler):
 		self.handler = _handler
-	def broadcastModel(self, current=None):
-		self.handler.broadcastModel()
-	def broadcastPlan(self, current=None):
-		self.handler.broadcastPlan()
+
 	def activate(self, current=None):
-		pass
+		self.handler.activate()
+
 	def deactivate(self, current=None):
-		pass
-	def reset(self, current=None):
-		self.handler.reset()
+		self.handler.deactivate()
+
+	def structuralChangeProposal(self, model, sender, log, current=None):
+		self.handler.structuralChangeProposal(model, sender, log);
+
+	def symbolUpdate(self, s, current=None):
+		self.handler.symbolUpdate(s)
+
+	def symbolsUpdate(self, s, current=None):
+		self.handler.symbolsUpdate(ss)
+
+	def edgeUpdate(self, e, current=None):
+		#print 'robocomp edgesUpdate a'
+		self.handler.edgeUpdate(e)
+		#print 'robocomp edgesUpdate z'
+
+	def edgesUpdate(self, es, current=None):
+		self.handler.edgesUpdate(es)
+
 	def setMission(self, target, current=None):
 		self.handler.setMission(target, avoidUpdate=False)
+ 
+	def getModel(self, current=None):
+		return self.handler.getModel()
+ 
+	def getNode(self, current=None):
+		return self.handler.getNode()
+ 
+	def getEdge(self, current=None):
+		return self.handler.getEdge()
+
 	def getData(self, current=None):
-		return world, target, plan
-	def world2agmgraph(self, target):
-		ret = AGMModelConversion.fromIceToInternal_model(target, ignoreInvalidEdges=True)
-		#ret = AGMGraph()
-		#for node in target.nodes:
-			#ret.addNode(0,0, node.nodeIdentifier, node.nodeType, attributes=node.attributes)
-		#for edge in target.edges:
-			#ret.addEdge(edge.a, edge.b, edge.edgeType)
-		return ret
+		return self.handler.getData()
 
-class AGMCommonBehaviorI (RoboCompAGMCommonBehavior.AGMCommonBehavior):
-	def __init__(self, _handler):
-		self.handler = _handler
+	def broadcastModel(self, current=None):
+		self.handler.broadcastModel()
 
-class AGMAgentTopicI (RoboCompAGMAgent.AGMAgentTopic):
-	def __init__(self, _handler):
-		self.handler = _handler
-	def structuralChange(self, modification, current=None):
-		self.handler.structuralChange(modification)
-	def symbolUpdated(self, nodeModification, current=None):
-		self.handler.symbolUpdated(nodeModification)
-	def edgeUpdated(self, edgeModification, current=None):
-		self.handler.edgeUpdated(edgeModification)
+	def broadcastPlan(self, current=None):
+		self.handler.broadcastPlan()
+
+
+
 
 from AGMExecutive_core import Executive
 
@@ -109,9 +118,10 @@ class Server (Ice.Application):
 			self.shutdownOnInterrupt()
 
 			# Get component's parameters from config file
-			initialModelPath =   self.communicator().getProperties().getProperty( "InitialModelPath" )
-			agglPath =           self.communicator().getProperties().getProperty( "AGGLPath" )
+			initialModelPath   = self.communicator().getProperties().getProperty( "InitialModelPath" )
+			agglPath           = self.communicator().getProperties().getProperty( "AGGLPath" )
 			initialMissionPath = self.communicator().getProperties().getProperty( "InitialMissionPath" )
+			doNotPlan          = self.communicator().getProperties().getProperty( "DoNotPlan" )
 
 			# Get a proxy for the Speech
 			proxy = self.communicator().getProperties().getProperty( "SpeechProxy" )
@@ -163,19 +173,12 @@ class Server (Ice.Application):
 			executiveVisualizationTopic = RoboCompAGMExecutive.AGMExecutiveVisualizationTopicPrx.uncheckedCast(pub)
 
 			# Create the executive
-			executive = Executive(agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech)
-			executiveI = ExecutiveI(executive)
-			agmcommonbehaviorI = AGMCommonBehaviorI(executive)
-
+			executive = Executive(agglPath, initialModelPath, initialMissionPath, doNotPlan, executiveTopic, executiveVisualizationTopic, speech)
 			# AGMExecutive server
+			executiveI = ExecutiveI(executive)
 			adapterExecutive = self.communicator().createObjectAdapter('AGMExecutive')
 			adapterExecutive.add(executiveI, self.communicator().stringToIdentity('agmexecutive'))
 			adapterExecutive.activate()
-
-			# AGMCommonBehavior
-			adapterAGMCommonBehavior = self.communicator().createObjectAdapter('AGMCommonBehavior')
-			adapterAGMCommonBehavior.add(agmcommonbehaviorI, self.communicator().stringToIdentity('agmcommonbehavior'))
-			adapterAGMCommonBehavior.activate()
 
 
 			# Read agent's configurations and create the correspoding proxies
@@ -197,37 +200,12 @@ class Server (Ice.Application):
 				else:
 					print 'Agent', agent, 'was not properly configured. Check config file'
 
-
-			# Subscribe to AGMAgentTopic
-			print 'Subscribing to AGMAgentTopic'
-			print 'Subscribing to AGMAgentTopic'
-			proxy = self.communicator().getProperties().getProperty( "IceStormProxy")
-			topicManager = IceStorm.TopicManagerPrx.checkedCast(self.communicator().stringToProxy(proxy))
-			adapterT = self.communicator().createObjectAdapter("AGMAgentTopic")
-			agentTopic = AGMAgentTopicI(executive)
-			proxyT = adapterT.addWithUUID(agentTopic).ice_oneway()
-			AGMAgentTopic_subscription = False
-			while not AGMAgentTopic_subscription:
-				try:
-					topic = topicManager.retrieve("AGMAgentTopic")
-					qos = {}
-					topic.subscribeAndGetPublisher(qos, proxyT)
-					adapterT.activate()
-					AGMAgentTopic_subscription = True
-				except IceStorm.NoSuchTopic:
-					print "Error! No topic found! Sleeping for a while..."
-					time.sleep(1)
-
-			# Run executive thread
 			print 'AGMExecutive initialization ok'
-			#executive.start()
 
 			print '-------------------------------------------------------------'
 			print '----     R u n     A G M E x e c u t i v e,     r u n   -----'
 			print '-------------------------------------------------------------'
-			#executive.mutex.acquire()
 			executive.updatePlan()
-			#executive.mutex.release()
 			self.shutdownOnInterrupt()
 			self.communicator().waitForShutdown()
 		except:

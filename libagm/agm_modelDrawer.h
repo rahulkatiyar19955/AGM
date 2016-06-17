@@ -7,16 +7,17 @@
 #include <stdlib.h>
 #include <string>
 
-
 #ifndef Q_MOC_RUN
-	#include <agm_model.h>
-	#include <agm_modelEdge.h>
-	#include <agm_modelSymbols.h>
-	#include <agm_modelPrinter.h>
-	#include <agm_misc_functions.h>
+#include <agm_modelPrinter.h>
+#include <agm_misc_functions.h>
+#include <agm_model.h>
+#include <agm_modelEdge.h>
+#include <agm_modelSymbols.h>
 #endif
 
 #include <rcdraw/rcdraw.h>
+
+
 
 
 #define SPRING_LENGTH 17.
@@ -240,6 +241,115 @@ public:
 		
 	}
 
+	/// Move the nodes according to a edges-attraction / nodes-repulsion simulation.
+	void recalculatePositions()
+	{
+		static QTime timer = QTime::currentTime();
+		float time = double(timer.elapsed())/1000.;
+		timer = QTime::currentTime();
+		if (time > 500) time = 500;
+
+		// Compute forces and integrate velocities, storing updated velocities in nodes[n].vel[0-1]
+		for (uint32_t n=0; n<nodes.size(); n++)
+		{
+			if (nodes[n].show==false)
+				continue;
+			int32_t i[2];
+			double forceX=0., forceY=0.;
+			for (uint32_t n2=0; n2<nodes.size(); n2++)
+			{
+				if (n == n2 or nodes[n2].show==false)
+				{
+					continue;
+				}
+				for (int d=0; d<2; d++)
+					i[d] = nodes[n].pos[d] - nodes[n2].pos[d];
+				if (i[0] == 0 and i[1] == 0)
+				{
+					nodes[n2].pos[0]++;
+					nodes[n2].pos[1]++;
+					for (int d=0; d<2; d++)
+						i[d] = nodes[n].pos[d] - nodes[n2].pos[d];
+				}
+				float angle = atan2(i[1], i[0]);
+				float dist1 = pow((abs((i[1]*i[1]) + (i[0]*i[0]))), 0.5);
+				if (dist1 < SPRING_LENGTH)
+					dist1 = SPRING_LENGTH;
+				float dist2 = pow(dist1, 2.);
+				float force = FIELD_FORCE_MULTIPLIER / dist2;
+				forceX += force * cos(angle);
+				forceY += force * sin(angle);
+			}
+			for (uint32_t n2=0; n2<nodes.size(); n2++)
+			{
+				if(std::find(nodes[n].edges.begin(), nodes[n].edges.end(), n2) != nodes[n].edges.end())
+				{
+					for (int d=0; d<2; d++)
+						i[d] = nodes[n].pos[d] - nodes[n2].pos[d];
+					float angle = atan2(i[1], i[0]);
+					float force = sqrt(abs((i[1]*i[1]) + (i[0]*i[0])));
+					if (force <= SPRING_LENGTH) continue;
+					force -= SPRING_LENGTH;
+					force = force * HOOKES_CONSTANT;
+					forceX -= force * cos(angle);
+					forceY -= force * sin(angle);
+				}
+			}
+
+			nodes[n].vel[0] = (nodes[n].vel[0] + (forceX*time))*FRICTION;
+			nodes[n].vel[1] = (nodes[n].vel[1] + (forceY*time))*FRICTION;
+			float v = sqrt((nodes[n].vel[0]*nodes[n].vel[0]) + (nodes[n].vel[1]*nodes[n].vel[1]));
+			float MAX = 50;
+			if (v > MAX)
+			{
+				nodes[n].vel[0] = nodes[n].vel[0] / v * MAX;
+				nodes[n].vel[1] = nodes[n].vel[1] / v * MAX;
+			}
+		}
+		// Integrate velocities, storing the result in nodes[n].pos
+		// Also, implement friction by multipling velocities by FRICTION
+		for (uint32_t n=0; n<nodes.size(); n++)
+		{
+			if (nodes[n].show==false)
+				continue;
+			for (int d=0; d<2; d++)
+			{
+				nodes[n].pos[d] += nodes[n].vel[d];
+			}
+		}
+
+		if (nodes.size() > 0)
+		{
+			double totalX = 0;
+			double totalY = 0;
+			for (uint32_t n=0; n<nodes.size(); n++)
+			{
+				if (nodes[n].show==false)
+					continue;
+				totalX += nodes[n].pos[0];
+				totalY += nodes[n].pos[1];
+			}
+			
+			double nodesSizeShow=0;
+			for (uint32_t n=0; n<nodes.size(); n++)
+			{
+				if (nodes[n].show==false)
+					nodesSizeShow++;
+			}
+			
+			totalX /= nodes.size()-nodesSizeShow;
+			totalY /= nodes.size()-nodesSizeShow;
+			for (uint32_t n=0; n<nodes.size(); n++)
+			{
+				if (nodes[n].show==false)
+					continue;
+				nodes[n].pos[0] -= totalX;
+				nodes[n].pos[1] -= totalY;
+			}
+		}
+	}
+
+
 private:
 	/// Inspects the current model to detect significant changes.
 	void updateStructure()
@@ -419,111 +529,6 @@ private:
 			}
 		}
 		modified = true;
-	}
-
-	/// Move the nodes according to a edges-attraction / nodes-repulsion simulation.
-	void recalculatePositions()
-	{
-		static QTime timer = QTime::currentTime();
-		float time = double(timer.elapsed())/1000.;
-		timer = QTime::currentTime();
-		if (time > 500) time = 500;
-
-		// Compute forces and integrate velocities, storing updated velocities in nodes[n].vel[0-1]
-		for (uint32_t n=0; n<nodes.size(); n++)
-		{
-			if (nodes[n].show==false)
-				continue;
-			int32_t i[2];
-			double forceX=0., forceY=0.;
-			for (uint32_t n2=0; n2<nodes.size(); n2++)
-			{
-				if (n == n2) continue;
-				for (int d=0; d<2; d++)
-					i[d] = nodes[n].pos[d] - nodes[n2].pos[d];
-				if (i[0] == 0 and i[1] == 0)
-				{
-					nodes[n2].pos[0]++;
-					nodes[n2].pos[1]++;
-					for (int d=0; d<2; d++)
-						i[d] = nodes[n].pos[d] - nodes[n2].pos[d];
-				}
-				float angle = atan2(i[1], i[0]);
-				float dist1 = pow((abs((i[1]*i[1]) + (i[0]*i[0]))), 0.5);
-				if (dist1 < SPRING_LENGTH)
-					dist1 = SPRING_LENGTH;
-				float dist2 = pow(dist1, 2.);
-				float force = FIELD_FORCE_MULTIPLIER / dist2;
-				forceX += force * cos(angle);
-				forceY += force * sin(angle);
-			}
-			for (uint32_t n2=0; n2<nodes.size(); n2++)
-			{
-				if(std::find(nodes[n].edges.begin(), nodes[n].edges.end(), n2) != nodes[n].edges.end())
-				{
-					for (int d=0; d<2; d++)
-						i[d] = nodes[n].pos[d] - nodes[n2].pos[d];
-					float angle = atan2(i[1], i[0]);
-					float force = sqrt(abs((i[1]*i[1]) + (i[0]*i[0])));
-					if (force <= SPRING_LENGTH) continue;
-					force -= SPRING_LENGTH;
-					force = force * HOOKES_CONSTANT;
-					forceX -= force * cos(angle);
-					forceY -= force * sin(angle);
-				}
-			}
-
-			nodes[n].vel[0] = (nodes[n].vel[0] + (forceX*time))*FRICTION;
-			nodes[n].vel[1] = (nodes[n].vel[1] + (forceY*time))*FRICTION;
-			float v = sqrt((nodes[n].vel[0]*nodes[n].vel[0]) + (nodes[n].vel[1]*nodes[n].vel[1]));
-			float MAX = 50;
-			if (v > MAX)
-			{
-				nodes[n].vel[0] = nodes[n].vel[0] / v * MAX;
-				nodes[n].vel[1] = nodes[n].vel[1] / v * MAX;
-			}
-		}
-		// Integrate velocities, storing the result in nodes[n].pos
-		// Also, implement friction by multipling velocities by FRICTION
-		for (uint32_t n=0; n<nodes.size(); n++)
-		{
-			if (nodes[n].show==false)
-				continue;
-			for (int d=0; d<2; d++)
-			{
-				nodes[n].pos[d] += nodes[n].vel[d];
-			}
-		}
-
-		if (nodes.size() > 0)
-		{
-			double totalX = 0;
-			double totalY = 0;
-			for (uint32_t n=0; n<nodes.size(); n++)
-			{
-				if (nodes[n].show==false)
-					continue;
-				totalX += nodes[n].pos[0];
-				totalY += nodes[n].pos[1];
-			}
-			
-			double nodesSizeShow=0;
-			for (uint32_t n=0; n<nodes.size(); n++)
-			{
-				if (nodes[n].show==false)
-					nodesSizeShow++;
-			}
-			
-			totalX /= nodes.size()-nodesSizeShow;
-			totalY /= nodes.size()-nodesSizeShow;
-			for (uint32_t n=0; n<nodes.size(); n++)
-			{
-				if (nodes[n].show==false)
-					continue;
-				nodes[n].pos[0] -= totalX;
-				nodes[n].pos[1] -= totalY;
-			}
-		}
 	}
 
 	// Actually draw the model in the widget.

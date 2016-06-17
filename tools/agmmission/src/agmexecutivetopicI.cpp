@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2016 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -22,42 +22,40 @@ AGMExecutiveTopicI::AGMExecutiveTopicI(GenericWorker *_worker, QObject *parent) 
 {
 	worker = _worker;
 	mutex = worker->mutex;       // Shared worker mutex
-	// Component initialization...
 }
 
 
 AGMExecutiveTopicI::~AGMExecutiveTopicI()
 {
-	// Free component resources here
 }
 
-// Component functions, implementation
-void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::Event& modification, const Ice::Current&)
+void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::World  &w, const Ice::Current&)
 {
-// 	printf("%s: %d\n", __FILE__, __LINE__);
-	worker->structuralChange(modification);
-// 	printf("%s: %d\n", __FILE__, __LINE__);
+	worker->structuralChange(w);
 }
 
-void AGMExecutiveTopicI::symbolUpdated(const RoboCompAGMWorldModel::Node& modification, const Ice::Current&)
+void AGMExecutiveTopicI::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &es, const Ice::Current&)
 {
-// 	printf("%s: %d\n", __FILE__, __LINE__);
-	worker->symbolUpdated(modification);
-// 	printf("%s: %d\n", __FILE__, __LINE__);
+	worker->edgesUpdated(es);
 }
 
-void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge& modification, const Ice::Current&)
+void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge  &e, const Ice::Current&)
 {
-// 	printf("%s: %d\n", __FILE__, __LINE__);
-	worker->edgeUpdated(modification);
-// 	printf("%s: %d\n", __FILE__, __LINE__);
+	worker->edgeUpdated(e);
 }
 
-void AGMExecutiveTopicI::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence& modifications, const Ice::Current&)
+void AGMExecutiveTopicI::symbolUpdated(const RoboCompAGMWorldModel::Node  &n, const Ice::Current&)
 {
-// 	printf("%s: %d\n", __FILE__, __LINE__);
-	worker->edgesUpdated(modifications);
-// 	printf("%s: %d\n", __FILE__, __LINE__);
+	worker->symbolUpdated(n);
 }
+
+void AGMExecutiveTopicI::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence  &ns, const Ice::Current&)
+{
+	worker->symbolsUpdated(ns);
+}
+
+
+
+
 
 

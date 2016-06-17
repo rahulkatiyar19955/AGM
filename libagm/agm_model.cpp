@@ -9,21 +9,19 @@
 AGMModel::AGMModel()
 {
 	lastId = 0;
-// 	printf("new model: (%p)\n", this);
+	version = 0;
 }
 
 AGMModel::~AGMModel()
 {
-// 	printf("delete model: (%p)\n", this);
 	lastId = 0;
+	version = 0;
 	symbols.clear();
 	edges.clear();
 }
 
 AGMModel::AGMModel(const AGMModel::SPtr &src)
 {
-// 	printf("new model (sptr): (%p)\n", this);
-	//printf("AGMModel::AGMModel(const AGMModel::SPtr &src)\n");
 	setFrom(*src);
 }
 
@@ -32,6 +30,111 @@ AGMModel::AGMModel(const AGMModel &src)
 	//printf("AGMModel::AGMModel(const AGMModel &src)\n");
 // 	printf("new model (&): (%p)\n", this);
 	setFrom(src);
+}
+
+
+AGMModel::AGMModel(const std::string path)
+{
+	version = 0;
+
+	// Open file and make initial checks
+	xmlDocPtr doc;
+	if ((doc = xmlParseFile(path.c_str())) == NULL)
+	{
+		fprintf(stderr,"Can't read XML file - probably a syntax error. \n");
+		exit(1);
+	}
+	xmlNodePtr root;
+	if ((root = xmlDocGetRootElement(doc)) == NULL)
+	{
+		fprintf(stderr,"Can't read XML file - empty document\n");
+		xmlFreeDoc(doc);
+		exit(1);
+	}
+	if (xmlStrcmp(root->name, (const xmlChar *) "AGMModel"))
+	{
+		fprintf(stderr,"Can't read XML file - root node != AGMModel");
+		xmlFreeDoc(doc);
+		exit(1);
+	}
+
+	
+	// Read symbols (just symbols, then links in other loop)
+	for (xmlNodePtr cur=root->xmlChildrenNode; cur!=NULL; cur=cur->next)
+	{
+		if (xmlStrcmp(cur->name, (const xmlChar *)"symbol") == 0)
+		{
+			xmlChar *stype = xmlGetProp(cur, (const xmlChar *)"type");
+			xmlChar *sid = xmlGetProp(cur, (const xmlChar *)"id");
+			AGMModelSymbol::SPtr s = newSymbol(atoi((char *)sid), (char *)stype);
+			xmlFree(sid);
+			xmlFree(stype);
+
+			for (xmlNodePtr cur2=cur->xmlChildrenNode; cur2!=NULL; cur2=cur2->next)
+			{
+				if (xmlStrcmp(cur2->name, (const xmlChar *)"attribute") == 0)
+				{
+					xmlChar *attr_key   = xmlGetProp(cur2, (const xmlChar *)"key");
+					xmlChar *attr_value = xmlGetProp(cur2, (const xmlChar *)"value");
+					s->setAttribute(std::string((char *)attr_key), std::string((char *)attr_value));
+					xmlFree(attr_key);
+					xmlFree(attr_value);
+				}
+				else if (xmlStrcmp(cur2->name, (const xmlChar *)"comment") == 0) { }           // coments are always ignored
+				else if (xmlStrcmp(cur2->name, (const xmlChar *)"text") == 0) { }     // we'll ignore 'text'
+				else { printf("unexpected tag inside symbol: %s\n", cur2->name); exit(-1); } // unexpected tags make the program exit
+			}
+		}
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"link") == 0) { }     // we'll ignore links in this first loop
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"text") == 0) { }     // we'll ignore 'text'
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"comment") == 0) { }  // coments are always ignored
+		else { printf("unexpected tag #1: %s\n", cur->name); exit(-1); }      // unexpected tags make the program exit
+	}
+	
+	// Read links
+	for (xmlNodePtr cur=root->xmlChildrenNode; cur!=NULL; cur=cur->next)
+	{
+		if (xmlStrcmp(cur->name, (const xmlChar *)"link") == 0)
+		{
+			xmlChar *srcn = xmlGetProp(cur, (const xmlChar *)"src");
+			if (srcn == NULL) { printf("Link %s lacks of attribute 'src'.\n", (char *)cur->name); exit(-1); }
+			int a = atoi((char *)srcn);
+			xmlFree(srcn);
+
+			xmlChar *dstn = xmlGetProp(cur, (const xmlChar *)"dst");
+			if (dstn == NULL) { printf("Link %s lacks of attribute 'dst'.\n", (char *)cur->name); exit(-1); }
+			int b = atoi((char *)dstn);
+			xmlFree(dstn);
+
+			
+			xmlChar *label = xmlGetProp(cur, (const xmlChar *)"label");
+			if (label == NULL) { printf("Link %s lacks of attribute 'label'.\n", (char *)cur->name); exit(-1); }
+			std::string edgeName((char *)label);
+			xmlFree(label);
+
+			std::map<std::string, std::string> attrs;
+			for (xmlNodePtr cur2=cur->xmlChildrenNode; cur2!=NULL; cur2=cur2->next)
+			{
+				if (xmlStrcmp(cur2->name, (const xmlChar *)"linkAttribute") == 0)
+				{
+					xmlChar *attr_key   = xmlGetProp(cur2, (const xmlChar *)"key");
+					xmlChar *attr_value = xmlGetProp(cur2, (const xmlChar *)"value");
+					attrs[std::string((char *)attr_key)] = std::string((char *)attr_value);
+					xmlFree(attr_key);
+					xmlFree(attr_value);
+				}
+				else if (xmlStrcmp(cur2->name, (const xmlChar *)"comment") == 0) { }           // coments are always ignored
+				else if (xmlStrcmp(cur2->name, (const xmlChar *)"text") == 0) { }     // we'll ignore 'text'
+				else { printf("unexpected tag inside symbol: %s ==> %s\n", cur2->name,xmlGetProp(cur2, (const xmlChar *)"id") ); exit(-1); } // unexpected tags make the program exit
+			}
+			
+			addEdgeByIdentifiers(a, b, edgeName, attrs);
+		}
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"symbol") == 0) { }   // symbols are now ignored
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"text") == 0) { }     // we'll ignore 'text'
+		else if (xmlStrcmp(cur->name, (const xmlChar *)"comment") == 0) { }  // comments are always ignored
+		else { printf("unexpected tag #2: %s\n", cur->name); exit(-1); }      // unexpected tags make the program exit
+	}
 }
 
 AGMModel &AGMModel::operator=(const AGMModel &src)
@@ -44,6 +147,7 @@ AGMModel &AGMModel::operator=(const AGMModel &src)
 void AGMModel::setFrom(const AGMModel &src)
 {
 	lastId = src.lastId;
+	version = src.version;
 
 	symbols.clear();
 	for (uint32_t i=0; i<src.symbols.size(); ++i)
@@ -77,6 +181,7 @@ void AGMModel::resetLastId()
 void AGMModel::clear()
 {
 	lastId = 0;
+	version = 0;
 	symbols.clear();
 	edges.clear();
 }
@@ -673,7 +778,7 @@ AGMModelSymbol::SPtr AGMModel::getSymbolByName(const std::string &ss) const
 }
 
 
-bool AGMModel::removeSymbol(int32_t id)
+void AGMModel::removeSymbol(int32_t id)
 {
 	removeEdgesRelatedToSymbol(id);
 	int32_t index = getIndexByIdentifier(id);
@@ -681,9 +786,9 @@ bool AGMModel::removeSymbol(int32_t id)
 	{
 		symbols.erase(symbols.begin() + index);
 		removeEdgesRelatedToSymbol(id);
-		return true;
+		return;
 	}
-	return false;
+	AGMMODELEXCEPTION(std::string("Exception: Trying to remove unexisting symbol"));
 }
 
 bool AGMModel::removeDanglingEdges()
@@ -716,17 +821,17 @@ bool AGMModel::removeDanglingEdges()
 	return any;
 }
 // <AGMModel>
-// 
-// 	<!-- R O O M -->	
+//
+// 	<!-- R O O M -->
 // 	<symbol id="2" type="room" />
-// 	
+//
 // 	<!-- R O B O T -->
 // 	<symbol id="1" type="robot">
 // 	</symbol>
-// 	
-// 	<link src="1" dst="2" label="in" />	
-// 
-// 	
+//
+// 	<link src="1" dst="2" label="in" />
+//
+//
 // 	<!-- non-Explored table -->
 // 	<symbol id="5" type="object">
 // 		<attribute key="tag" value="0" />
@@ -734,7 +839,7 @@ bool AGMModel::removeDanglingEdges()
 // 	</symbol>
 // 	<link src="1" dst="5" label="know" />
 // 	<link src="5" dst="2" label="in" />
-// 
+//
 // </AGMModel>
 
 
@@ -743,10 +848,10 @@ void AGMModel::save(std::string xmlFilePath)
 	std::ofstream myfile;
 	myfile.open (xmlFilePath);
 	myfile <<  "<AGMModel>\n\n";
-  
+
 	for (uint32_t i=0; i<symbols.size(); ++i)
 	{
-		
+
 		myfile <<"<symbol id=\""<<symbols[i]->identifier<<"\" type=\""<<symbols[i]->symbolType<<"\"";//>\n";
 		if (symbols[i]->attributes.size()>0)
 		{
@@ -754,20 +859,20 @@ void AGMModel::save(std::string xmlFilePath)
 			std::map<std::string, std::string>::const_iterator itr = symbols[i]->attributes.begin();
 			for(; itr!=symbols[i]->attributes.end(); ++itr)
 			{
-				myfile <<"\t<attribute key=\"" << itr->first <<"\" value=\""<<itr->second<<"\" />\n";			
+				myfile <<"\t<attribute key=\"" << itr->first <<"\" value=\""<<itr->second<<"\" />\n";
 			}
-		
+
 			myfile <<"</symbol>\n";
-		}			
+		}
 		else
 			myfile <<"/>\n";
-			
+
 	}
-	
-	myfile <<"\n\n"; 
+
+	myfile <<"\n\n";
 	for (uint32_t i=0; i<edges.size(); ++i)
 	{
-		 
+
 		myfile <<"<link src=\""<<edges[i].symbolPair.first<<"\" dst=\""<<edges[i].symbolPair.second<<"\" label=\""<<edges[i].linking<<"\"";//> \n";
 		if (edges[i]->attributes.size()>0)
 		{
@@ -775,14 +880,14 @@ void AGMModel::save(std::string xmlFilePath)
 			std::map<std::string, std::string>::const_iterator itr = edges[i].attributes.begin();
 			for(; itr!=edges[i].attributes.end(); ++itr)
 			{
-				myfile <<"\t<linkAttribute key=\"" << itr->first <<"\" value=\""<<itr->second<<"\" />\n";			
+				myfile <<"\t<linkAttribute key=\"" << itr->first <<"\" value=\""<<itr->second<<"\" />\n";
 			}
 			myfile <<"</link>\n";
 		}
 		else
 			myfile <<"/>\n";
-		
-			
+
+
 	}
 	myfile <<  "\n</AGMModel>\n";
 	myfile.close();
@@ -843,7 +948,7 @@ int32_t AGMModel::getNewId()
 }
 
 
-bool AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr)
+void AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr)
 {
 	// Nodes must exist.
 	if (a < 0 or b < 0)
@@ -860,18 +965,17 @@ bool AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edg
 			{
 				if (edges[i].getLabel() == edgeName)
 				{
-					return false;
+					AGMMODELEXCEPTION(std::string("Exception: addEdgeByIdentifiers"));
 				}
 			}
 		}
 	}
 	AGMModelEdge edge(a, b, edgeName, atr);
 	edges.push_back(edge);
-	return true;
 }
 
 
-bool AGMModel::removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName)
+void AGMModel::removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName)
 {
 	// Nodes must exist.
 	if (a < 0 or b < 0)
@@ -895,7 +999,9 @@ bool AGMModel::removeEdgeByIdentifiers(int32_t a, int32_t b, const std::string &
 			}
 		}
 	}
-	return removed;
+
+	if (not removed)
+		AGMMODELEXCEPTION(std::string("Exception: removeEdgeByIdentifiers"));
 }
 
 bool AGMModel::renameEdgeByIdentifiers(int32_t a, int32_t b, const std::string &was, const std::string &will)
@@ -924,6 +1030,7 @@ bool AGMModel::renameEdgeByIdentifiers(int32_t a, int32_t b, const std::string &
 	return renamed;
 }
 
+
 AGMModelEdge & AGMModel::getEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName)
 {
 	// Nodes must exist.
@@ -948,8 +1055,16 @@ AGMModelEdge & AGMModel::getEdgeByIdentifiers(int32_t a, int32_t b, const std::s
 	std::ostringstream s;
 	s << "Exception: " <<  a << " "<< b <<" "<<edgeName;
 	AGMMODELEXCEPTION(std::string("Exception: AGMModel::getEdgeByIdentifiers EDGE  (")+s.str()+std::string(")."));
-	
+
 }
+
+
+AGMModelEdge & AGMModel::getEdge(AGMModelSymbol::SPtr a, AGMModelSymbol::SPtr b, const std::string &edgeName)
+{
+	return getEdgeByIdentifiers(a->identifier, b->identifier, edgeName);
+}
+
+
 
 AGMModelSymbol::SPtr AGMModel::newSymbol(std::string typ, int32_t id)
 {

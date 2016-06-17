@@ -25,13 +25,11 @@ if len(ROBOCOMP)<1:
 	sys.exit()
 preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
 Ice.loadSlice(preStr+"AGMCommonBehavior.ice")
-Ice.loadSlice(preStr+"AGMAgent.ice")
 Ice.loadSlice(preStr+"AGMExecutive.ice")
 Ice.loadSlice(preStr+"AGMWorldModel.ice")
 Ice.loadSlice(preStr+"Speech.ice")
 Ice.loadSlice(preStr+"Planning.ice")
 import RoboCompAGMCommonBehavior
-import RoboCompAGMAgent
 import RoboCompAGMExecutive
 import RoboCompAGMWorldModel
 import RoboCompSpeech
@@ -83,96 +81,102 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 	sys.exit(692)
 
 
-
-class Executive(object):
-	def __init__(self, agglPath, initialModelPath, initialMissionPath, executiveTopic, executiveVisualizationTopic, speech):
-		#threading.Thread.__init__(self)
-		self.mutex = threading.RLock()
-		self.pypyKillMutex = threading.RLock()
-		self.pypyInProgress = 0
-		self.plannerExecutionID=0
-		self.agents = dict()
-		self.plan = None
-		self.modifications = 0
+class PlannerCaller(threading.Thread):
+	def __init__(self, executive, agglPath):
+		threading.Thread.__init__(self)
 		self.lastPypyKill = time.time()
 		self.cache = PlanningCache()
-
-		# Set proxies
-		self.executiveTopic = executiveTopic
-		self.executiveVisualizationTopic = executiveVisualizationTopic
-		self.speech = speech
-
+		self.plannerExecutionID = 0
+		self.executive = executive
+		self.working = False
+		self.plannerCallerMutex = threading.RLock()
 		self.agglPath = agglPath
 		self.agmData = AGMFileDataParsing.fromFile(self.agglPath)
 		self.agmData.generateAGGLPlannerCode("/tmp/domainActive.py", skipPassiveRules=False)
 		self.agmData.generateAGGLPlannerCode("/tmp/domainPasive.py", skipPassiveRules=True)
-		self.initialModelPath = initialModelPath
-		self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
-		self.backModelICE  = None
-		self.setModel(xmlModelParser.graphFromXML(initialModelPath))
-		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
-		self.setMission(initialMissionPath, avoidUpdate=True)
-
-	def setAgent(self, name, proxy):
-		self.agents[name] = proxy
-	def broadcastPlan(self):
-		self.mutex.acquire( )
-		try:
-			self.publishExecutiveVisualizationTopic()
-			self.sendParams()
-		except:
-			print 'There was some problem broadcasting the plan'
-			sys.exit(1)
-		self.mutex.release()
-	def broadcastModel(self):
-		self.mutex.acquire( )
-		try:
-			print '<<<broadcastinnn'
-			print self.currentModel.filterGeometricSymbols()
-			ev = RoboCompAGMWorldModel.Event()
-			if self.backModelICE == None:
-				ev.backModel = AGMModelConversion.fromInternalToIce(self.currentModel)
-			else:
-				ev.backModel = self.backModelICE
-			ev.newModel = AGMModelConversion.fromInternalToIce(self.currentModel)
-			self.executiveTopic.structuralChange(ev)
-			self.backModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
-			print 'broadcastinnn>>>'
-		except:
-			print 'There was some problem broadcasting the model'
-			sys.exit(1)
-		self.mutex.release()
-	def reset(self):
-		self.mutex.acquire( )
-		self.currentModel = xmlModelParser.graphFromXML(self.initialModelPath)
-		self.updatePlan()
-		self.mutex.release()
-	def setModel(self, model):
-		#print model
-		self.currentModel = model
-		self.broadcastModel()
-	def setMission(self, target, avoidUpdate=False):
-		self.mutex.acquire( )
-		try:
-			temp = AGMFileDataParsing.targetFromFile(target)
-			self.target = generateTarget_AGGT(temp)
-			ofile = open("/tmp/target.py", 'w')
-			ofile.write(self.target)
-			ofile.close()
-			if not avoidUpdate:
-				print 'do update plan'
-				self.updatePlan()
-		except:
-			print 'There was some problem setting the mission'
-			sys.exit(1)
-		self.mutex.release()
-	def ignoreCommentsInPlan(self, plan):
-		ret = []
-		for i in plan:
-			if len(i) > 0:
-				if i[0] != '#':
-					ret.append(i)
-		return ret
+	def setWork(self, currentModel):
+		print 'PlannerCaller::setWork 0'
+		# Kill any previous planning process
+		while self.plannerCallerMutex.acquire(0)==False:
+			now = time.time()
+			elap = (now - self.lastPypyKill)
+			if elap > 2.:
+				try: subprocess.call(["killall", "-9", "pypy"])
+				except: pass
+				self.lastPypyKill = now
+			time.sleep(0.1)
+		# Set work
+		print 'PlannerCaller::setWork 1'
+		self.working = True
+		self.currentModel = currentModel
+		# End
+		self.plannerCallerMutex.release()
+	def run(self):
+		while True:
+			# Continue if we can't acquire the mutex
+			if self.plannerCallerMutex.acquire(0)==False:
+				time.sleep(0.05)
+				continue
+			# Continue if there's no work to do
+			if not self.working:
+				self.plannerCallerMutex.release()
+				time.sleep(0.05)
+				continue
+			print 'PlannerCaller::run 2'
+			try:
+				# Run planner
+				start = time.time()
+				#PRE
+				try:
+					self.plannerExecutionID+=1
+					peid = '_'+str(self.plannerExecutionID)
+					self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
+				except:
+					print traceback.print_exc()
+					print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
+					sys.exit(1)
+				# CALL
+				argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
+				print 'Ask cache'
+				cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
+				if cacheResult:
+					print 'Got plan from cache'
+					print '<<<'
+					print cacheResult[1]
+					print '>>>'
+					cacheSuccess = cacheResult[0]
+					cachePlan = cacheResult[1]
+					lines = cacheResult[1].split('\n')
+				else:
+					print 'Running the planner...'
+					try:
+						print argsss
+						subprocess.call(argsss)
+					except:
+						pass
+					#POST Check if the planner was killed
+					print 'pkm2'
+					#print plan
+					#CONTINUE?                       Probably it's better just to try to open the file and consider it was killed if there's no result file...
+					end = time.time()
+					print 'It took', end - start, 'seconds'
+					print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
+					self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
+					ofile = open("/tmp/result"+peid+".txt", 'r')
+					lines = self.ignoreCommentsInPlan(ofile.readlines())
+					ofile.close()
+				# Get the output
+				try:
+					self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
+					print self.plan
+					stored, stepsFwd = self.callMonitoring(peid)
+				except: # The planner was probably killed
+					traceback.print_exc()
+					return
+				self.working = False
+				self.executive.gotPlan(self.plan)
+			finally:
+				self.plannerCallerMutex.release()
 
 	def callMonitoring(self, peid):
 		stored = False
@@ -230,97 +234,280 @@ class Executive(object):
 		print 'done callMonitoring', stored, stepsFwd
 		return stored, stepsFwd
 
-	def updatePlan(self):
-		# Kill any previous planning process
+	def ignoreCommentsInPlan(self, plan):
+		ret = []
+		for i in plan:
+			if len(i) > 0:
+				if i[0] != '#':
+					ret.append(i)
+		return ret
+
+
+class Executive(object):
+	def __init__(self, agglPath, initialModelPath, initialMissionPath, doNotPlan, executiveTopic, executiveVisualizationTopic, speech):
+		self.doNotPlan = doNotPlan
+		self.executiveActive = True
+		self.mutex = threading.RLock()
+		self.agents = dict()
+		self.plan = None
+		self.modifications = 0
+		self.plannerCaller = PlannerCaller(self, agglPath)
+		self.plannerCaller.start()
+
+		# Set proxies
+		self.executiveTopic = executiveTopic
+		self.executiveVisualizationTopic = executiveVisualizationTopic
+		self.speech = speech
+
+		self.agglPath = agglPath
+		self.initialModelPath = initialModelPath
 		try:
-			subprocess.call(["killall", "-9", "pypy"])
-		except:
-			pass
-		# First, try with the current plan
-		stored = False
-		if self.plan != None and False:
-			self.pypyKillMutex.acquire()
-			try:
-				peid = '_'+str(self.plannerExecutionID)
-			except:
-				print 'There was some problem broadcasting the model'
-				sys.exit(1)
-			self.pypyKillMutex.release()
-			stored, stepsFwd = self.callMonitoring(peid)
-			print stored, stepsFwd
-		else:
-			print 'There was no previous plan'
+			self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
+		except Exception, e:
+			print 'Can\'t open ' + initialModelPath + '.'
+			sys.exit(-1)
 
-		print 'Running the planner?', stored==False
-		if stored == False:
-			# Run planner
-			start = time.time()
-			#PRE
-			self.pypyKillMutex.acquire()
-			try:
-				self.pypyInProgress += 1
-				self.plannerExecutionID+=1
-				peid = '_'+str(self.plannerExecutionID)
-				self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
-			except:
-				print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
-				sys.exit(1)
-			self.pypyKillMutex.release()
-			# CALL
-			argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
-			print 'Ask cache'
-			cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
-			if cacheResult:
-				print 'Got plan from cache'
-				print '<<<'
-				print cacheResult[1]
-				print '>>>'
-				cacheSuccess = cacheResult[0]
-				cachePlan = cacheResult[1]
-				lines = cacheResult[1].split('\n')
+
+		print 'INITIAL MODEL: ', self.initialModel
+		self.lastModification = self.initialModel
+		print self.lastModification.version
+		print self.lastModification.version
+		print self.lastModification.version
+		print self.lastModification.version
+		print self.lastModification.version
+		print self.lastModification.version
+		self.backModelICE  = None
+		self.setAndBroadcastModel(xmlModelParser.graphFromXML(initialModelPath))
+		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
+		self.setMission(initialMissionPath, avoidUpdate=True)
+
+	#########################################################################
+	#                                                                     ###
+	# E X E C U T I V E   I N T E R F A C E   I M P L E M E N T A T I O N ###
+	#                                                                     ###
+	#                         b e g i n s   h e r e                       ###
+	#                                                                     ###
+	#########################################################################
+	def activate(self):
+		self.executiveActive = True
+
+	def deactivate(self):
+		self.executiveActive = False
+
+	def structuralChangeProposal(self, worldModelICE, sender, log):
+		#
+		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
+		#
+		print 'structuralChangeProposal', sender, log
+		# Get structuralChange mutex
+		print 'structuralChangeProposal acquire() a'
+		for iixi in xrange(5):
+			gotMutex = self.mutex.acquire(blocking=False)
+			if gotMutex == True:
+				break
 			else:
-				print 'Running the planner...'
-				try:
-					print argsss
-					subprocess.call(argsss)
-				except:
-					pass
-				#POST Check if the planner was killed
-				print 'pkm2'
-				self.pypyKillMutex.acquire()
-				try:
-					self.pypyInProgress -= 1
-					if self.pypyInProgress == 0:
-						plannerWasKilled = False
-					else:
-						plannerWasKilled = True
-				except:
-					print 'There was some problem doing this'
-					sys.exit(1)
-				self.pypyKillMutex.release()
-				#CONTINUE?                       Probably i'ts better just to try to open the file and consider it was killed if there's no result file...
-				#if plannerWasKilled:
-					#print 'There\'s another planning process running... abort'
-					#return
-				end = time.time()
-				print 'It took', end - start, 'seconds'
-				print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
-				self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
-				ofile = open("/tmp/result"+peid+".txt", 'r')
-				lines = self.ignoreCommentsInPlan(ofile.readlines())
-				ofile.close()
-			# Get the output
-			try:
-				self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
-				stored, stepsFwd = self.callMonitoring(peid)
-			except: # The planner was probably killed
-				traceback.print_exc()
-				return
-		else:
-			print 'Got plan from monitorization'
-			print self.plan
-			print 'Got plan from monitorization'
+				if iixi == 4:
+					print 'structuralChangeProposal acquire() IT WAS LOCKED'
+					raise RoboCompAGMExecutive.Locked()
+				else:
+					time.sleep(0.03)
+		print 'CURRENT VERSION', self.lastModification.version
+		try:
+			print 'structuralChangeProposal acquire() z'
 
+			# Ignore outdated modifications
+			if worldModelICE.version != self.lastModification.version:
+				print 'outdated!??!  self='+str(self.lastModification.version)+'   ice='+str(worldModelICE.version)
+				raise RoboCompAGMExecutive.OldModel()
+			print 'inside'
+			# Here we're OK with the modification, accept it, but first check if replanning is necessary
+			worldModelICE.version += 1
+			internalModel = AGMModelConversion.fromIceToInternal_model(worldModelICE, ignoreInvalidEdges=True) # set internal model
+			try:                                                                                               # is replanning necessary?
+				avoidReplanning = False
+				if internalModel.equivalent(self.lastModification):
+					avoidReplanning = True
+			except AttributeError:
+				pass
+			self.lastModification = internalModel                                                              # store last modification
+			self.modifications += 1
+			self.worldModelICE = worldModelICE
+			# Store the model in XML
+			#try:
+				#internalModel.toXML('modification'+str(self.modifications).zfill(4)+'_'+sender+'.xml')
+			#except:
+				#print 'There was some problem updating internal model to xml'
+			# Set and broadst the model
+			try:
+				self.setAndBroadcastModel(internalModel)
+			except:
+				print traceback.print_exc()
+				print 'There was some problem broadcasting the model'
+				sys.exit(-1)
+			# Force replanning
+			try:
+				if not (avoidReplanning or self.doNotPlan):
+					self.updatePlan()
+			except:
+				print traceback.print_exc()
+				print 'There was some problem updating internal model to xml'
+		finally:
+			self.mutex.release()
+		return
+
+	def symbolUpdate(self, nodeModification):
+		self.symbolsUpdate([nodeModification])
+
+
+	def symbolsUpdate(self, symbols):
+		try:
+			#print 'symbolsUpdate acquire() a'
+			self.mutex.acquire()
+			#print 'symbolsUpdate acquire() z'
+			try:
+				for symbol in symbols:
+					internal = AGMModelConversion.fromIceToInternal_node(symbol)
+					self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
+			except:
+				print traceback.print_exc()
+				print 'There was some problem with update node'
+				sys.exit(1)
+			self.executiveTopic.symbolsUpdated(symbols)
+		finally:
+			#print 'symbolsUpdate release() a'
+			self.mutex.release()
+			#print 'symbolsUpdate release() z'
+
+
+	def edgeUpdate(self, edge):
+		self.edgesUpdate([edge])
+
+	def edgesUpdate(self, edges):
+		try:
+			#print 'edgesUpdate acquire() a'
+			self.mutex.acquire()
+			self.executiveTopic.edgesUpdated(edges)
+			#print 'edgesUpdate acquire() z'
+			for edge in edges:
+				#internal = AGMModelConversion.fromIceToInternal_edge(edge)
+				found = False
+				for i in xrange(len(self.currentModel.links)):
+					if str(self.currentModel.links[i].a) == str(edge.a):
+						if str(self.currentModel.links[i].b) == str(edge.b):
+							if str(self.currentModel.links[i].linkType) == str(edge.edgeType):
+								self.currentModel.links[i].attributes = copy.deepcopy(edge.attributes)
+								found = True
+				if not found:
+					print 'couldn\'t update edge because no match was found'
+					print 'edge', edge.a, edge.b, edge.edgeType
+		finally:
+			#print 'edgesUpdate release() a'
+			self.mutex.release()
+			#print 'edgesUpdate release() z'
+
+
+	def setMission(self, target, avoidUpdate=False):
+		self.mutex.acquire()
+		self.targetStr = target
+		try:
+			temp = AGMFileDataParsing.targetFromFile(target)
+			self.target = generateTarget_AGGT(temp)
+			ofile = open("/tmp/target.py", 'w')
+			ofile.write(self.target)
+			ofile.close()
+			if not avoidUpdate:
+				print 'do update plan'
+				self.updatePlan()
+		except:
+			print traceback.print_exc()
+			print 'There was some problem setting the mission'
+			sys.exit(1)
+		self.mutex.release()
+
+
+
+	def getModel(self):
+		return self.worldModelICE
+
+
+	def getNode(self, identifier):
+		for n in self.worldModelICE.nodes:
+			if n.nodeIdentifier == identifier:
+				return n
+
+	def getEdge(self, srcIdentifier, dstIdentifier, label):
+		for e in self.worldModelICE.edges:
+			if e.a == srcIdentifier and e.b == dstIdentifier and e.edgeType == label:
+				return e
+
+	def getData(self):
+		return self.worldModelICE, self.targetStr, self.plan
+
+	def broadcastPlan(self):
+		self.mutex.acquire( )
+		try:
+			self.publishExecutiveVisualizationTopic()
+			self.sendParams()
+		except:
+			print traceback.print_exc()
+			print 'There was some problem broadcasting the plan'
+			sys.exit(1)
+		self.mutex.release()
+
+	def broadcastModel(self):
+		self.mutex.acquire( )
+		try:
+			print '<<<broadcastinnn'
+			print self.currentModel.filterGeometricSymbols()
+			self.executiveTopic.structuralChange(AGMModelConversion.fromInternalToIce(self.currentModel))
+			print 'broadcastinnn>>>'
+		except:
+			print traceback.print_exc()
+			print 'There was some problem broadcasting the model'
+			sys.exit(1)
+		self.mutex.release()
+	#########################################################################
+	#                                                                     ###
+	# E X E C U T I V E   I N T E R F A C E   I M P L E M E N T A T I O N ###
+	#                                                                     ###
+	#                            e n d s    h e r e                       ###
+	#                                                                     ###
+	#########################################################################
+
+
+
+	def setAgent(self, name, proxy):
+		self.agents[name] = proxy
+
+
+	def setAndBroadcastModel(self, model):
+		#print model
+		self.currentModel = model
+		self.broadcastModel()
+
+
+	def updatePlan(self):
+		self.plannerCaller.setWork(self.currentModel)
+		# MONITORING DEACTIVATED WARNING TODO FIXME
+				#stored = False
+				#if self.plan != None and False:
+					#self.pypyKillMutex.acquire()
+					#try:
+						#peid = '_'+str(self.plannerExecutionID)
+					#except:
+						#print 'There was some problem broadcasting the model'
+						#sys.exit(1)
+					#self.pypyKillMutex.release()
+					#stored, stepsFwd = self.callMonitoring(peid)
+					#print stored, stepsFwd
+				#else:
+					#print 'There was no previous plan'
+
+				#print 'Running the planner?', stored==False
+				#if stored == False:
+
+	def gotPlan(self, plan):
+		self.plan = plan
 		# Extract first action
 		action = "none"
 		parameterMap = dict()
@@ -369,7 +556,7 @@ class Executive(object):
 			except:
 				traceback.print_exc()
 				print 'Error generating PDDL-like version of the current plan'
-			#self.executiveVisualizationTopic.update(self.worldModelICE, AGMModelConversion.fromInternalToIce(self.target), planPDDL)
+			self.executiveVisualizationTopic.update(self.worldModelICE, ''.join(open(self.targetStr, "r").readlines()), planPDDL)
 		except:
 			traceback.print_exc()
 			print "can't publish executiveVisualizationTopic.update"
@@ -386,77 +573,4 @@ class Executive(object):
 				print '     (can\'t connect to', agent, '!!!)',
 			print ''
 
-	def structuralChange(self, modification):
-		#
-		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
-		#
-		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
-		#
-		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
-		#
-		# Handle model conversion and verification that the model is not the current model
-		print 'nos llega cambio estructural'
-		worldModelICE = modification.newModel
-		internalModel = AGMModelConversion.fromIceToInternal_model(worldModelICE, ignoreInvalidEdges=True)
-		try:
-#			if internalModel.equivalent(self.lastModification):
-#				return
-#			else:
-				self.lastModification = internalModel
-		except AttributeError:
-			self.lastModification = internalModel
-		#
-		sup = self.modifications
-		self.modifications += 1
-		print "<<<<<<<<<<<modificationProposal(self, modification) (", sup, ') by', modification.sender
-		print 'Tryin...'
-		while self.mutex.acquire(0)==False:
-			now = time.time()
-			elap = (now - self.lastPypyKill)
-			print 'couldn\'t acquire', elap
-			if elap > 3.:
-				try:
-					subprocess.call(["killall", "-9", "pypy"])
-				except:
-					pass
-				self.lastPypyKill = now
-			time.sleep(1)
-		try:
-			self.worldModelICE = worldModelICE
-			internalModel.toXML('modification'+(str(self.modifications).zfill(4))+'.xml')
-			self.setModel(internalModel)
-			self.updatePlan()
-		except:
-			print 'There was some problem updating internal model to xml'
-		self.mutex.release()
-		print "modificationProposal(self, modification)>>>>>>>>>>>", sup
 
-	def symbolUpdated(self, nodeModification):
-		self.mutex.acquire( )
-		try:
-			internal = AGMModelConversion.fromIceToInternal_node(nodeModification)
-			self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
-			self.executiveTopic.symbolUpdated(nodeModification)
-		except:
-			print 'There was some problem with update node'
-			self.mutex.release()
-			sys.exit(1)
-		self.mutex.release()
-
-	def edgeUpdated(self, edgeModification):
-		self.mutex.acquire()
-		internal = AGMModelConversion.fromIceToInternal_edge(edgeModification)
-		#self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
-		found = False
-		for i in xrange(len(self.currentModel.links)):
-			if str(self.currentModel.links[i].a) == str(edgeModification.a):
-				if str(self.currentModel.links[i].b) == str(edgeModification.b):
-					if str(self.currentModel.links[i].linkType) == str(edgeModification.edgeType):
-						self.currentModel.links[i].attributes = copy.deepcopy(edgeModification.attributes)
-						self.executiveTopic.edgeUpdated(edgeModification)
-						found = True
-		self.mutex.release()
-		if not found:
-			print 'couldn\'t update edge because no match was found'
-			print 'edge', edgeModification.a, edgeModification.b, edgeModification.edgeType
-			#sys.exit(-1)

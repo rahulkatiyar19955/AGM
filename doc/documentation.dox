@@ -36,21 +36,21 @@
 
 \page agmworks How does AGM work?
 
-In the context of AGM, behavior is the resulting phenomena of the coordinated interaction between the main modules of the architecture. In every AGM-based architecture, we can find three types of modules:
-- a pool of <b><em>agents</em></b>, which are the modules that do the "real work" by interacting with the physical environment
-- a <b><em>grammar-based controller</em></b>, in charge of controlling the agents and managing the robot's knowledge
+In the context of AGM, behavior is the phenomena resulting from the coordinated interaction between the main modules of the architecture. In every AGM-based architecture, we can find three types of modules:
+- a pool of <b><em>agents</em></b>, which are the modules that do the "real work" (e.g., by interacting with the physical environment)
+- a <b><em>grammar-based controller</em></b>, in charge of controlling the agents and managing the robot's model of the environment
 - and a <b><em>planner</em></b>, which used by the controller to find plans and verify structural changes in the robot's knowledge
 
 \image html wholePicture.png
 
 Each grammar-based controller is composed of three elements:
-- the current world <b><em>model</em></b>
-- the <b><em>grammar</em></b> of the world, which is specified using the AGGL language
-- the <b><em>mission</em></b> of the robot, which is also stored in a separate file
-- and the <b><em>executive</em></b>, which is the software using or controlling the previous elements
+- The current world <b><em>model</em></b>. This is one of the most novel elements of the architecture. AGM models can contain not only symbolic information but also metric information.
+- The <b><em>grammar</em></b> of the world, which is specified using the AGGL language. The main advantage of AGGL against other similar languages is that it is a visual language and thus can be easily interpreted by persons which are not experts in automated planning.
+- The <b><em>mission</em></b> of the robot, which is also stored in a separate file.
+- The <b><em>executive</em></b>, which is the software in charge of controlling the previous elements
+1
 
-
-AGM works as a loop where the beggining of each cycle is triggered by world model change proposals from one of the agents. When an agent which finishes performing an action, perceiving a new world element or any modification in the environment that should affect the robot's behavior, it proposes world model changes to the executive. These changes are verified by the executive and, if they are correct, the world model is updated (and broadcasted to all of the agents) and the plan is updated, entering in a loop in which AGM configure agents and, after performing some action or detecting the world model should be updated, these agents propose model changes.
+AGM works as a loop where the beggining of each cycle is triggered by world model change proposals from one of the agents. When an agent which finishes performing an action, perceiving a new world element or any modification in the environment that should affect the robot's behavior, it proposes world model changes to the executive. These changes are verified by the executive and, if they are correct, the world model is updated and broadcasted to all of the agents and the plan is updated. Again, after performing some action or detecting that the world model should be updated, these agents propose model changes.
 
 AGM provides the executive and the planner. The rest of the elements of the architecture --the agents and the grammar-- is domain-dependent and depends on the tasks each robot is required to perform.
 
@@ -84,11 +84,13 @@ Optional dependencies:
 apt-get install python-numpy python-imaging
 \endcode
 
-Once the dependencies have been installed AGM and its associated applications can safely be installed using a script that allows users to select which optional features to activate (you can also run cmake-gui manually if you wish):
+Once the dependencies have been installed AGM can be installed using a script that allows users to select which optional features to activate (you can also run cmake-gui manually if you wish):
 
 \code{.sh}
 sh compile.sh
 \endcode
+
+In case you decide to use the script you will be asked whether or not you want RoboComp and Python support.
 
 \section compilationproblems Common compilation problems
 
@@ -146,6 +148,24 @@ hri         = agmcommonbehavior:tcp -h localhost -p 10333
 
 
 
+
+/**
+\page agmmodelstutorial How does an AGM model look like?
+
+\tableofcontents
+
+AGM models are graph-like structures with typed and attributed nodes and edges. Edges are identified by the source and destination nodes and their type. Edges are identified by an unique numeric identifier.
+
+\section agmmodelnode Nodes
+The library that implements the core of AGM (libagm).
+
+The API of the library is available here.
+
+\section agmmodeledge Edges
+The visual editor, AGGLEditor, eases the process of designing grammars. It's use is described in its own page: \ref AGGLEditor.
+
+
+**/
 
 /**
 \page components What do I get with AGM?
@@ -321,6 +341,7 @@ The code generation of the heuristic is implemented in generateTarget(graph)
 \page tutorials Tutorials
 
  - The concept behind AGM: \ref agmworks "how does AGM work in a robot?"
+ - AGM models: \ref agmmodelstutorial
  - What do I get with AGM? \ref components "AGM components"
  - How to install AGM: \ref installation "AGM installation"
  - Creating an AGGL domain: \ref AGGLEditor "using aggleditor"
