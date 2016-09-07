@@ -92,6 +92,7 @@ public slots:
 	void showMesh();
 	void showPlane();
 	void itemSelected(QString nameItem);
+	void saveModel();
 
 private:
 	bool refreshPlan;

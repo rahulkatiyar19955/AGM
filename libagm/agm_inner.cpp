@@ -188,11 +188,10 @@ void AGMInner::edgeToInnerModel(AGMModel::SPtr &worldModel, AGMModelEdge edge, I
 
 void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerModel* imNew,InnerModelNode *parentNode, AGMModelSymbol::SPtr s, float tx, float ty, float tz, float rx, float ry, float rz, bool ignoreMeshes)
 {
-
-try
+	try
 	{
 	QString nodeName = QString::fromStdString(s->getAttribute("imName"));
-//  	std::cout<<"\nadding "<<nodeName.toStdString();
+//	std::cout<<"\nadding "<<nodeName.toStdString();
 // 	std::cout<<" type "<<s->getAttribute("imType");
 // 	std::cout<<" parent->id "<<parentNode->id.toStdString();
 // 	std::cout<<" attrs.size() "<<s->attributes.size()<<"\n";
@@ -222,11 +221,12 @@ try
 
 		try
 		{
-			InnerModelTransform* tf=imNew->newTransform (nodeName, engine,parentNode,tx,ty,tz,rx,ry,rz, mass);
+			InnerModelTransform* tf=imNew->newTransform(nodeName, engine, parentNode, tx, ty, tz, rx, ry, rz, mass);
 			parentNode->addChild(tf);
 		}
 		catch (...)
 		{
+			imNew->updateTransformValues(nodeName, tx, ty, tz, rx, ry, rz);
 			qDebug()<<"\tExiste transform "<<nodeName;
 		}
 	}
@@ -338,7 +338,7 @@ try
 		QString texture="";
 		try
 		{
-			texture =QString::fromStdString(s->getAttribute("texture"));
+			texture = QString::fromStdString(s->getAttribute("texture"));
 		}
 		catch (...)
 		{
@@ -347,11 +347,12 @@ try
 
 		try
 		{
-			InnerModelPlane *plane=imNew->newPlane (nodeName,parentNode, texture,width,height,depth, repeat,nx,ny,nz,px,py,pz,collidable);
+			InnerModelPlane *plane=imNew->newPlane(nodeName, parentNode, texture, width, height, depth, repeat, nx, ny, nz, px, py, pz, collidable);
 			parentNode->addChild(plane);
 		}
 		catch (...)
 		{
+			imNew->updatePlaneValues(nodeName, nx, ny, nz, px, py, pz);
 			qDebug()<<"\tExiste plane"<<nodeName;
 		}
 
@@ -403,7 +404,9 @@ try
 		try
 		{
 			if (s->getAttribute("collidable")=="true")
+			{
 				collidable = true;
+			}
 		}
 		catch (...)
 		{
@@ -416,7 +419,9 @@ try
 		try
 		{
 			if (s->getAttribute("render")=="WireframeRendering")
+			{
 				render = InnerModelMesh::WireframeRendering;
+			}
 		}
 		catch (...)
 		{
@@ -425,11 +430,23 @@ try
 
 		try
 		{
-			InnerModelMesh *mesh=imNew->newMesh(nodeName,parentNode,meshPath,scalex,scaley,scalez,render,tx,ty,tz,rx,ry,rz, collidable);
+			InnerModelMesh *mesh=imNew->newMesh(nodeName, parentNode, meshPath, scalex, scaley, scalez, render, tx, ty, tz, rx, ry, rz, collidable);
 			parentNode->addChild(mesh);
 		}
 		catch (...)
 		{
+			InnerModelMesh *mesh = imNew->getMesh(nodeName);
+			mesh->render = (InnerModelMesh::RenderingModes)render;
+			mesh->meshPath = meshPath;
+			mesh->scalex = scalex;
+			mesh->scaley = scaley;
+			mesh->scalez = scalez;
+			mesh->tx = tx;
+			mesh->ty = ty;
+			mesh->tz = tz;
+			mesh->rx = rx;
+			mesh->ry = ry;
+			mesh->rz = rz;
 			qDebug()<<"\tExiste mesh"<<nodeName;
 		}
 	}
@@ -519,11 +536,13 @@ try
 
 		try
 		{
-			InnerModelCamera *c =imNew->newCamera(nodeName,parentNode,width,height,focal);
+			InnerModelCamera *c = imNew->newCamera(nodeName, parentNode, width, height, focal);
 			parentNode->addChild(c);
 		}
 		catch (...)
 		{
+			InnerModelCamera *camera = imNew->getCamera(nodeName);
+			camera->updateValues(width, height, focal);
 			qDebug()<<"\tExists InnerModelCamera"<<nodeName;
 		}
 	}
@@ -1136,21 +1155,20 @@ void AGMInner::includeInnerModel(AGMModel::SPtr &worldModel, int symbolID, Inner
 	catch (...)
 	{
 		std::cout<<"AGMSymbol does not has imType attribute adding default value transform \n";
-		symbol->setAttribute("imType","transform");
-	
+		symbol->setAttribute("imType", "transform");
 	}
-	
+
 	try
 	{
 		symbol->getAttribute("imName");
 	}
 	catch (...)
 	{
-		string imName =symbol->symbolType+"_"+int2str(symbolID);
+		string imName = symbol->symbolType+"_"+int2str(symbolID);
 		std::cout<<"AGMSymbol: "<< symbol->toString()<<" does not has imName attribute. Adding imName: "<<imName<<"\n";		
 		symbol->setAttribute("imName",imName);
 	}
-	recursiveInsertion(worldModel,im->getRoot(),symbolID);
+	recursiveInsertion(worldModel, im->getRoot(), symbolID);
 
 }
 
@@ -1159,13 +1177,15 @@ void AGMInner::recursiveInsertion(AGMModel::SPtr &worldModel, InnerModelNode* no
 	QList<InnerModelNode*>::iterator i;
 	int p=symbolID;
 
+	
 	for (i=node->children.begin(); i!=node->children.end(); i++)
 	{
+		printf("%s:\n", (*i)->id.toStdString().c_str());
 		//Search name (key) of the innerModel node in AGM
 		int existingID = findSymbolIDWithInnerModelName (worldModel, (*i)->id ) ;
 		if ( existingID == -1 )
 		{
-			qDebug()<<node->id<<"link"<<(*i)->id;
+			qDebug() << "\t" << node->id << "link existing " << existingID << "  " << (*i)->id;
 			//symbol
 			std::map<std::string, std::string> attrs;
 			attrs = ImNodeToSymbol((*i));
@@ -1194,11 +1214,44 @@ void AGMInner::recursiveInsertion(AGMModel::SPtr &worldModel, InnerModelNode* no
 				linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str((*i)->getRzValue())));
 			}
 
-			worldModel->addEdgeByIdentifiers(p,id,"RT",linkAttrs);
-			recursiveInsertion(worldModel, (*i),id);
+			worldModel->addEdgeByIdentifiers(p, id, "RT", linkAttrs);
+			recursiveInsertion(worldModel, (*i), id);
 		}
 		else
-			recursiveInsertion(worldModel, (*i),existingID);
+		{
+			qDebug() << "\t" << node->id << "link new " << existingID << "  " << (*i)->id;
+			recursiveInsertion(worldModel, (*i), existingID);
+			//edge
+			std::map<std::string, std::string> linkAttrs;
+			if (worldModel->getSymbol(existingID)->typeString()=="mesh")
+			{
+				InnerModelMesh* mesh = dynamic_cast<InnerModelMesh*>((*i));
+				linkAttrs.insert ( std::pair<std::string,std::string>("tx",float2str(mesh->tx)) );
+				linkAttrs.insert ( std::pair<std::string,std::string>("ty",float2str(mesh->ty)) );
+				linkAttrs.insert ( std::pair<std::string,std::string>("tz",float2str(mesh->tz)) );
+				linkAttrs.insert ( std::pair<std::string,std::string>("rx",float2str(mesh->rx)) );
+				linkAttrs.insert ( std::pair<std::string,std::string>("ry",float2str(mesh->ry)) );
+				linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str(mesh->rz)) );
+			}
+			else
+			{
+				linkAttrs.insert ( std::pair<std::string,std::string>("tx",float2str((*i)->getTr().x())) );
+				linkAttrs.insert ( std::pair<std::string,std::string>("ty",float2str((*i)->getTr().y())) );
+				linkAttrs.insert ( std::pair<std::string,std::string>("tz",float2str((*i)->getTr().z())) );
+				linkAttrs.insert ( std::pair<std::string,std::string>("rx",float2str((*i)->getRxValue())));
+				linkAttrs.insert ( std::pair<std::string,std::string>("ry",float2str((*i)->getRyValue())));
+				linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str((*i)->getRzValue())));
+			}
+
+			try
+			{
+				worldModel->addEdgeByIdentifiers(p, existingID, "RT", linkAttrs);
+			}
+			catch (...)
+			{
+				qFatal("aqui");
+			}
+		}
 	}
 }
 

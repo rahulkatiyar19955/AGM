@@ -166,6 +166,13 @@ plan</string>
        </property>
       </widget>
      </item>
+     <item>
+      <widget class="QPushButton" name="saveButton">
+       <property name="text">
+        <string>save model</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>

@@ -58,6 +58,8 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	connect(meshCheck,           SIGNAL(clicked()), this, SLOT(showMesh()));
 	connect(planeCheck,           SIGNAL(clicked()), this, SLOT(showPlane()));
 
+	connect(saveButton,           SIGNAL(clicked()), this, SLOT(saveModel()));
+
 	
 	connect(itemList,     SIGNAL(activated(QString)), this, SLOT(itemSelected(QString)));
 	
@@ -68,7 +70,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	scrollArea->setAlignment (Qt::AlignCenter);
 	QSize  widgetSize = modelWidget->size();
 	scrollArea->ensureVisible(widgetSize.width()/2,widgetSize.height()/2 );
-	innerModelVacio = new InnerModel();	
+	innerModelVacio = new InnerModel();
 	osgView = new OsgView(  inner3D );
 	show();
 	
@@ -384,6 +386,13 @@ void SpecificWorker::setGeometry()
 {
 // 	graphViewer->setGeometry(0, 0, widget3D->width(), widget3D->height());
 }
+
+void SpecificWorker::saveModel()
+{
+	QString f = QFileDialog::getSaveFileName(this, "Choose a file to save the current model");
+	worldModel->save(f.toStdString());
+}
+
 
 
 
