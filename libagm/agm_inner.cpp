@@ -188,9 +188,10 @@ void AGMInner::edgeToInnerModel(AGMModel::SPtr &worldModel, AGMModelEdge edge, I
 
 void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerModel* imNew,InnerModelNode *parentNode, AGMModelSymbol::SPtr s, float tx, float ty, float tz, float rx, float ry, float rz, bool ignoreMeshes)
 {
+	QString nodeName;
 	try
 	{
-		QString nodeName = QString::fromStdString(s->getAttribute("imName"));
+		nodeName = QString::fromStdString(s->getAttribute("imName"));
 	}
 	catch (...)
 	{
@@ -200,7 +201,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 	// 	std::cout<<" parent->id "<<parentNode->id.toStdString();
 	// 	std::cout<<" attrs.size() "<<s->attributes.size()<<"\n";
 
-	const std::string imType;
+	std::string imType;
 	try
 	{
 		imType = s->getAttribute("imType");
