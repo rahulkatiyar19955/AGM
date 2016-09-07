@@ -1,4 +1,5 @@
 #include <agm_plan.h>
+#include <vector>
 
 
 AGMAction AGMAction::fromString(std::string actionStr)
