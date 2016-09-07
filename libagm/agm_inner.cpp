@@ -190,21 +190,36 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 {
 	try
 	{
-	QString nodeName = QString::fromStdString(s->getAttribute("imName"));
-//	std::cout<<"\nadding "<<nodeName.toStdString();
-// 	std::cout<<" type "<<s->getAttribute("imType");
-// 	std::cout<<" parent->id "<<parentNode->id.toStdString();
-// 	std::cout<<" attrs.size() "<<s->attributes.size()<<"\n";
-
-
-	if (s->getAttribute("imType")=="transform")
+		QString nodeName = QString::fromStdString(s->getAttribute("imName"));
+	}
+	catch (...)
 	{
-		//std::cout<<"\t type: "<<s->getAttribute("imType") <<"\n";
-		QString engine ="static";
+		qFatal("Couldn't get imName attribute for symbol %d\n", s->identifier);
+	}
+	//	std::cout<<"\nadding "<<nodeName.toStdString();
+	// 	std::cout<<" parent->id "<<parentNode->id.toStdString();
+	// 	std::cout<<" attrs.size() "<<s->attributes.size()<<"\n";
+
+	const std::string imType;
+	try
+	{
+		imType = s->getAttribute("imType");
+	}
+	catch (...)
+	{
+		std::cout<<"\ncouldn't find the attribute imType in "<< s->toString()<<"\n";
+		std::cout<<"\ns->attributes[imName]<< "<<s->getAttribute("imName")<<"\n";
+		exit(0);
+	}
+
+	if (imType=="transform")
+	{
+		//std::cout<<"\t type: "<<imType <<"\n";
+		QString engine = "static";
 		float mass =0.;
 		try
 		{
-			 engine=QString::fromStdString(s->getAttribute("engine"));
+			engine = QString::fromStdString(s->getAttribute("engine"));
 		}
 		catch (...)
 		{
@@ -213,7 +228,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		try
 		{
 			mass = str2float(s->getAttribute("mass"));
-		 }
+		}
 		catch (...)
 		{
 			//std::cout<<"\tattribute mass not found \n";
@@ -221,7 +236,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 
 		try
 		{
-			InnerModelTransform* tf=imNew->newTransform(nodeName, engine, parentNode, tx, ty, tz, rx, ry, rz, mass);
+			InnerModelTransform* tf = imNew->newTransform(nodeName, engine, parentNode, tx, ty, tz, rx, ry, rz, mass);
 			parentNode->addChild(tf);
 		}
 		catch (...)
@@ -230,9 +245,9 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 			qDebug()<<"\tExiste transform "<<nodeName;
 		}
 	}
-	else if (s->getAttribute("imType")=="plane")
+	else if (imType=="plane")
 	{
-// // 		std::cout<<"\t type: "<<s->getAttribute("imType") <<"\n";
+// // 		std::cout<<"\t type: "<<imType <<"\n";
 		float width=0.;
 		float height=0.;
 		float depth=0.;
@@ -357,10 +372,10 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		}
 
 	}
-	else if (s->getAttribute("imType")=="mesh")
+	else if (imType=="mesh")
 	{
 		if (ignoreMeshes) return;
-// 		std::cout<<"\t type: "<<s->getAttribute("imType") <<"\n";
+// 		std::cout<<"\t type: "<<imType <<"\n";
 		QString meshPath="";
 		try
 		{
@@ -375,30 +390,12 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		float scalex,scaley,scalez;
 		scalex=scaley=scalez=0.;
 
-		try
-		{
-			scalex= str2float(s->getAttribute("scalex"));
-		}
-		catch (...)
-		{
-
-		}
-		try
-		{
-			scaley=str2float(s->getAttribute("scaley"));
-		}
-		catch (...)
-		{
-
-		}
-		try
-		{
-			scalez=str2float(s->getAttribute("scalez"));
-		}
-		catch (...)
-		{
-
-		}
+		try { scalex= str2float(s->getAttribute("scalex")); }
+		catch (...) { }
+		try { scaley=str2float(s->getAttribute("scaley")); }
+		catch (...) { }
+		try { scalez=str2float(s->getAttribute("scalez")); }
+		catch (...) { }
 
 		bool collidable = false;
 		try
@@ -450,49 +447,49 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 			qDebug()<<"\tExiste mesh"<<nodeName;
 		}
 	}
-	else if (s->getAttribute("imType")=="rgbd")
+	else if (imType=="rgbd")
 	{
-// 		std::cout<<"\t type: "<<s->getAttribute("imType") <<"\n";
+// 		std::cout<<"\t type: "<<imType <<"\n";
 
 		int port=0;
 		try
 		{
-			 port =str2int(s->getAttribute("port"));
+			port =str2int(s->getAttribute("port"));
 		}
-		catch (...)	{}
+		catch (...) {}
 
 		float noise, focal, height, width;
 
 		noise=0.;
 		try
 		{
-			 noise = str2float(s->getAttribute("noise"));
+			noise = str2float(s->getAttribute("noise"));
 		}
-		catch (...)	{}
+		catch (...) {}
 		focal=0.;
 		try
 		{
-			 focal = str2float(s->getAttribute("focal"));
+			focal = str2float(s->getAttribute("focal"));
 		}
-		catch (...)	{}
+		catch (...) {}
 
 		height=0.;
 		try
 		{
-			 height = str2float(s->getAttribute("height"));
+			height = str2float(s->getAttribute("height"));
 		}
-		catch (...)	{}
+		catch (...) {}
 		width=0.;
 		try
 		{
-			 width = str2float(s->getAttribute("width"));
+			width = str2float(s->getAttribute("width"));
 		}
-		catch (...)	{}
+		catch (...) {}
 
 		QString ifconfig="";
 		try
 		{
-			 ifconfig=QString::fromStdString(s->getAttribute("ifconfig"));
+			ifconfig=QString::fromStdString(s->getAttribute("ifconfig"));
 		}
 		catch (...)
 		{
@@ -509,30 +506,30 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 // 			qDebug()<<"\trgbd error"<<nodeName;
 		}
 	}
-	else if (s->getAttribute("imType")=="camera")
+	else if (imType=="camera")
 	{
-// 		std::cout<<"\t type: "<<s->getAttribute("imType") <<"\n";
+// 		std::cout<<"\t type: "<<imType <<"\n";
 
 		float focal, height, width;
 		focal=0.;
 		try
 		{
-			 focal = str2float(s->getAttribute("focal"));
+			focal = str2float(s->getAttribute("focal"));
 		}
-		catch (...)	{}
+		catch (...) {}
 
 		height=0.;
 		try
 		{
-			 height = str2float(s->getAttribute("height"));
+			height = str2float(s->getAttribute("height"));
 		}
-		catch (...)	{}
+		catch (...) {}
 		width=0.;
 		try
 		{
-			 width = str2float(s->getAttribute("width"));
+			width = str2float(s->getAttribute("width"));
 		}
-		catch (...)	{}
+		catch (...) {}
 
 		try
 		{
@@ -546,13 +543,13 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 			qDebug()<<"\tExists InnerModelCamera"<<nodeName;
 		}
 	}
-	else if (s->getAttribute("imType")=="omniRobot")
+	else if (imType=="omniRobot")
 	{
 		int port=0;
 		float noise =0.;
 		try
 		{
-			 port= str2int(s->getAttribute("port"));
+			port= str2int(s->getAttribute("port"));
 		}
 		catch (...)
 		{
@@ -561,7 +558,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		try
 		{
 			noise = str2float(s->getAttribute("noise"));
-		 }
+		}
 		catch (...)
 		{
 // 			std::cout<<"\tattribute not found \n";
@@ -588,12 +585,12 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 			qDebug()<<"\tExists omni"<<nodeName;
 		}
 	}
-	else if (s->getAttribute("imType")=="laser")
+	else if (imType=="laser")
 	{
 		float angle =M_PIl;
 		try
 		{
-			 angle= str2float(s->getAttribute("angle"));
+			angle= str2float(s->getAttribute("angle"));
 		}
 		catch (...)
 		{
@@ -602,7 +599,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		QString ifconfig="";
 		try
 		{
-			 ifconfig=QString::fromStdString(s->getAttribute("ifconfig"));
+			ifconfig=QString::fromStdString(s->getAttribute("ifconfig"));
 		}
 		catch (...)
 		{
@@ -611,7 +608,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		int max = 30000;
 		try
 		{
-			 max= str2int(s->getAttribute("max"));
+			max= str2int(s->getAttribute("max"));
 		}
 		catch (...)
 		{
@@ -621,7 +618,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		int measures =360;
 		try
 		{
-			 measures= str2int(s->getAttribute("measures"));
+			measures= str2int(s->getAttribute("measures"));
 		}
 		catch (...)
 		{
@@ -630,7 +627,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		int min =0;
 		try
 		{
-			 min= str2int(s->getAttribute("min"));
+			min= str2int(s->getAttribute("min"));
 		}
 		catch (...)
 		{
@@ -639,7 +636,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		int port=0;
 		try
 		{
-			 port= str2int(s->getAttribute("port"));
+			port= str2int(s->getAttribute("port"));
 		}
 		catch (...)
 		{
@@ -656,9 +653,9 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 // 			qDebug()<<"\tExists Laser"<<nodeName;
 		}
 	}
-	else if (s->getAttribute("imType")=="joint")
+	else if (imType=="joint")
 	{
-// 		std::cout<<"\t type: "<<s->getAttribute("imType") <<"\n";
+// 		std::cout<<"\t type: "<<imType <<"\n";
 		//QString id_, float lx_, float ly_, float lz_, float hx_, float hy_, float hz_, float tx_, float ty_, float tz_, float rx_, ;
 		//float ry_, float rz_, float min_, float max_, uint32_t port_, std::string axis_, float home_,
 
@@ -773,13 +770,6 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 			throw err;
 		}
 
-	}
- }
-	catch (...)
-	{
-		std::cout<<"\ncouldn't find the attribute imType in "<< s->toString()<<"\n";
-		std::cout<<"\ns->attributes[imName]<< "<<s->getAttribute("imName")<<"\n";
-		exit(0);
 	}
 
 }
