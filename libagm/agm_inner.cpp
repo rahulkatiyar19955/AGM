@@ -62,10 +62,28 @@ int AGMInner::findSymbolIDWithInnerModelName(AGMModel::SPtr &m, QString n)
  */
 InnerModel* AGMInner::extractInnerModel(AGMModel::SPtr &worldModel, QString imNodeName, bool ignoreMeshes)
 {
+// 	bool ret;
+// 	QList<int> ll;
+// 	int s = 100;
+// 	          checkLoop(worldModel, int& symbolID, QList< int >& visited, string linkType, bool& loop);
+// 	AGMInner::checkLoop(worldModel, s, ll, "RT", ret);
+// 	printf("RET: %d\n", ret);
+// 	printf("RET: %d\n", ret);
+// 	printf("RET: %d\n", ret);
+
+
 	InnerModel *imNew = new InnerModel();
+// 	printf("  %s: %d\n", __FUNCTION__, __LINE__);
 	int symbolID = findSymbolIDWithInnerModelName(worldModel,imNodeName);
+// 	printf("  %s: %d\n", __FUNCTION__, __LINE__);
 	if (symbolID > -1)
+	{
+// 	printf("  %s: %d\n", __FUNCTION__, __LINE__);
 		recorrer(worldModel, imNew, symbolID, ignoreMeshes);
+// 	printf("  %s: %d\n", __FUNCTION__, __LINE__);
+	}
+// 	printf("  %s: %d\n", __FUNCTION__, __LINE__);
+
 	return imNew;
 }
 
@@ -77,8 +95,9 @@ InnerModel* AGMInner::extractInnerModel(AGMModel::SPtr &worldModel, QString imNo
  * @param symbolID ID del symbolo punto de partida
  * @return void
  */
-void AGMInner::recorrer(AGMModel::SPtr &worldModel, InnerModel* imNew, int& symbolID, bool ignoreMeshes)
+void AGMInner::recorrer(AGMModel::SPtr &worldModel, InnerModel* imNew, const int &symbolID, bool ignoreMeshes)
 {
+// 	printf("    %s: %d   symbol:%d\n", __FUNCTION__, __LINE__, symbolID);
 	const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(symbolID);
 	for (AGMModelSymbol::iterator edge_itr=symbol->edgesBegin(worldModel); edge_itr!=symbol->edgesEnd(worldModel); edge_itr++)
 	{
@@ -87,8 +106,11 @@ void AGMInner::recorrer(AGMModel::SPtr &worldModel, InnerModel* imNew, int& symb
 		if ((*edge_itr)->getLabel() == "RT" && (*edge_itr)->getSymbolPair().first==symbolID )
 		{
 			int second = (*edge_itr)->getSymbolPair().second;
+// 	printf("    %s: %d   _ %d\n", __FUNCTION__, __LINE__, symbolID);
 			edgeToInnerModel(worldModel, (*edge_itr), imNew, ignoreMeshes);
-			recorrer(worldModel,imNew, second, ignoreMeshes);
+// 	printf("    %s: %d   _ %d\n", __FUNCTION__, __LINE__, symbolID);
+			recorrer(worldModel, imNew, second, ignoreMeshes);
+// 	printf("    %s: %d   _ %d\n", __FUNCTION__, __LINE__, symbolID);
 		}
 	}
 }
@@ -104,6 +126,7 @@ void AGMInner::recorrer(AGMModel::SPtr &worldModel, InnerModel* imNew, int& symb
  */
 void AGMInner::edgeToInnerModel(AGMModel::SPtr &worldModel, AGMModelEdge edge, InnerModel* imNew, bool ignoreMeshes)
 {
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 	InnerModelNode* nodeA = NULL;
 	//InnerModelNode* nodeB = NULL;
 
@@ -167,13 +190,18 @@ void AGMInner::edgeToInnerModel(AGMModel::SPtr &worldModel, AGMModelEdge edge, I
 	if (nodeA==NULL)
 	{
 // 		qDebug()<<"node A null"<<nameA;
+		
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 		insertSymbolToInnerModelNode(worldModel,imNew,imNew->getRoot(), symbolA,tx,ty,tz,rx,ry,rz, ignoreMeshes);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 		nodeA=imNew->getNode(nameA);
 	}
 
 	try
 	{
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 		insertSymbolToInnerModelNode(worldModel,imNew,nodeA, symbolB,tx,ty,tz,rx,ry,rz, ignoreMeshes);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 	}
 	catch(string e)
 	{
@@ -188,6 +216,7 @@ void AGMInner::edgeToInnerModel(AGMModel::SPtr &worldModel, AGMModelEdge edge, I
 
 void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerModel* imNew,InnerModelNode *parentNode, AGMModelSymbol::SPtr s, float tx, float ty, float tz, float rx, float ry, float rz, bool ignoreMeshes)
 {
+// 	printf("        %s: %d\n", __FUNCTION__, __LINE__);
 	QString nodeName;
 	try
 	{
@@ -215,7 +244,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 
 	if (imType=="transform")
 	{
-		//std::cout<<"\t type: "<<imType <<"\n";
+		std::cout<<"\t type: "<<imType <<"\n";
 		QString engine = "static";
 		float mass =0.;
 		try
@@ -242,8 +271,11 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		}
 		catch (...)
 		{
+// 	printf("        %s: %d\n", __FUNCTION__, __LINE__);
 			imNew->updateTransformValues(nodeName, tx, ty, tz, rx, ry, rz);
+// 	printf("        %s: %d\n", __FUNCTION__, __LINE__);
 			qDebug()<<"\tExiste transform "<<nodeName;
+// 	printf("        %s: %d\n", __FUNCTION__, __LINE__);
 		}
 	}
 	else if (imType=="plane")
@@ -770,7 +802,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 			std::cout<<err;
 			throw err;
 		}
-
+		qFatal("?? %d", __LINE__);
 	}
 
 }
@@ -859,6 +891,7 @@ void AGMInner::updateAgmWithInnerModel(AGMModel::SPtr &worldModel, InnerModel* i
 		}
 // 		std::cout << '\n';
 	}
+// 	printf("%s: %d\n", __FUNCTION__, __LINE__);
 }
 
 //AGMMisc::publishEdgeUpdate(edge,agmexecutive_proxy);
@@ -1165,13 +1198,10 @@ void AGMInner::includeInnerModel(AGMModel::SPtr &worldModel, int symbolID, Inner
 
 void AGMInner::recursiveInsertion(AGMModel::SPtr &worldModel, InnerModelNode* node, int &symbolID)
 {
-	QList<InnerModelNode*>::iterator i;
-	int p=symbolID;
-
-	
-	for (i=node->children.begin(); i!=node->children.end(); i++)
+// 	int p=symbolID;
+	for (auto i=node->children.begin(); i!=node->children.end(); i++)
 	{
-		printf("%s:\n", (*i)->id.toStdString().c_str());
+// 		printf("%s:\n", (*i)->id.toStdString().c_str());
 		//Search name (key) of the innerModel node in AGM
 		int existingID = findSymbolIDWithInnerModelName (worldModel, (*i)->id ) ;
 		if ( existingID == -1 )
@@ -1204,25 +1234,32 @@ void AGMInner::recursiveInsertion(AGMModel::SPtr &worldModel, InnerModelNode* no
 				linkAttrs.insert ( std::pair<std::string,std::string>("ry",float2str((*i)->getRyValue())));
 				linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str((*i)->getRzValue())));
 			}
-
-			worldModel->addEdgeByIdentifiers(p, id, "RT", linkAttrs);
+			if (id != symbolID)
+			{
+				worldModel->addEdgeByIdentifiers(symbolID, id, "RT", linkAttrs);
+			}
 			recursiveInsertion(worldModel, (*i), id);
 		}
 		else
 		{
-			qDebug() << "\t" << node->id << "link new " << existingID << "  " << (*i)->id;
-			recursiveInsertion(worldModel, (*i), existingID);
 			//edge
 			std::map<std::string, std::string> linkAttrs;
 			if (worldModel->getSymbol(existingID)->typeString()=="mesh")
 			{
-				InnerModelMesh* mesh = dynamic_cast<InnerModelMesh*>((*i));
-				linkAttrs.insert ( std::pair<std::string,std::string>("tx",float2str(mesh->tx)) );
-				linkAttrs.insert ( std::pair<std::string,std::string>("ty",float2str(mesh->ty)) );
-				linkAttrs.insert ( std::pair<std::string,std::string>("tz",float2str(mesh->tz)) );
-				linkAttrs.insert ( std::pair<std::string,std::string>("rx",float2str(mesh->rx)) );
-				linkAttrs.insert ( std::pair<std::string,std::string>("ry",float2str(mesh->ry)) );
-				linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str(mesh->rz)) );
+				InnerModelMesh* mesh;
+				if ( (mesh=dynamic_cast<InnerModelMesh*>((*i)) ))
+				{
+					linkAttrs.insert ( std::pair<std::string,std::string>("tx",float2str(mesh->tx)) );
+					linkAttrs.insert ( std::pair<std::string,std::string>("ty",float2str(mesh->ty)) );
+					linkAttrs.insert ( std::pair<std::string,std::string>("tz",float2str(mesh->tz)) );
+					linkAttrs.insert ( std::pair<std::string,std::string>("rx",float2str(mesh->rx)) );
+					linkAttrs.insert ( std::pair<std::string,std::string>("ry",float2str(mesh->ry)) );
+					linkAttrs.insert ( std::pair<std::string,std::string>("rz",float2str(mesh->rz)) );
+				}
+				else
+				{
+					qFatal("Wrong mesh definition");
+				}
 			}
 			else
 			{
@@ -1236,12 +1273,16 @@ void AGMInner::recursiveInsertion(AGMModel::SPtr &worldModel, InnerModelNode* no
 
 			try
 			{
-				worldModel->addEdgeByIdentifiers(p, existingID, "RT", linkAttrs);
+				if (existingID != symbolID)
+				{
+					worldModel->addEdgeByIdentifiers(symbolID, existingID, "RT", linkAttrs);
+				}
 			}
 			catch (...)
 			{
 				qFatal("aqui");
 			}
+			recursiveInsertion(worldModel, (*i), existingID);
 		}
 	}
 }
