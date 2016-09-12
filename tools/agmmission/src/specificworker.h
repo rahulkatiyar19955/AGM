@@ -87,6 +87,12 @@ public slots:
 		missions->addItem(QString::fromStdString(name));
 		missionPaths[missions->count()-1] = path;
 	}
+	void setStopMission(std::string m)
+	{
+		stopMission = m;
+	}
+	void stop();
+
 	void imShow();
 	void showRobot();
 	void showMesh();
@@ -94,8 +100,11 @@ public slots:
 	void itemSelected(QString nameItem);
 	void saveModel();
 
+	
+	
 private:
 	bool refreshPlan;
+	std::string stopMission;
 	std::map<int, std::string> missionPaths;
 	QMutex modelMutex, planMutex;
 	AGMModel::SPtr worldModel, targetModel;
@@ -103,8 +112,7 @@ private:
 	RoboCompPlanning::Plan plan;
 	AGMModelDrawer *modelDrawer, *targetDrawer;
 	RCDraw *rcdraw1, *rcdraw2;
-// 	GraphModelViewer *graphViewer;
-        std::string target;
+	std::string target;
 
 	osgGA::TrackballManipulator *manipulator;
 	OsgView *osgView;
@@ -112,8 +120,6 @@ private:
 	InnerModelViewer *innerViewer; 
 
 
-	
-// 	void updateInner3D();
 	void insertNodeInnerModel(InnerModelNode* node);
 	void changeInner (InnerModel *inner);
 	void fillItemList();

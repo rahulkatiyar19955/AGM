@@ -48,17 +48,14 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	connect(broadcastModelButton, SIGNAL(clicked()), this, SLOT(broadcastModelButtonClicked()));
 	connect(broadcastPlanButton,  SIGNAL(clicked()), this, SLOT(broadcastPlanButtonClicked()));
 
-	//connect(activateButton,       SIGNAL(clicked()), this, SLOT(activateClicked()));
-	//connect(deactivateButton,     SIGNAL(clicked()), this, SLOT(deactivateClicked()));
-	//connect(resetButton,          SIGNAL(clicked()), this, SLOT(resetClicked()));
-
 	connect(setMissionButton,     SIGNAL(clicked()), this, SLOT(setMission()));
-	connect(imCheck,           SIGNAL(clicked()), this, SLOT(imShow()));
+	connect(imCheck,              SIGNAL(clicked()), this, SLOT(imShow()));
 	connect(robotCheck,           SIGNAL(clicked()), this, SLOT(showRobot()));
-	connect(meshCheck,           SIGNAL(clicked()), this, SLOT(showMesh()));
+	connect(meshCheck,            SIGNAL(clicked()), this, SLOT(showMesh()));
 	connect(planeCheck,           SIGNAL(clicked()), this, SLOT(showPlane()));
 
 	connect(saveButton,           SIGNAL(clicked()), this, SLOT(saveModel()));
+	connect(stopMissionButton,    SIGNAL(clicked()), this, SLOT(stop()));
 
 	
 	connect(itemList,     SIGNAL(activated(QString)), this, SLOT(itemSelected(QString)));
@@ -328,10 +325,8 @@ void SpecificWorker::setMission()
 
 	try
 	{
-		agmexecutive_proxy->deactivate();
 		printf("mission path: %s\n", missionPaths[missions->currentIndex()].c_str());
 		agmexecutive_proxy->setMission(missionPaths[missions->currentIndex()]);
-		agmexecutive_proxy->activate(); 
 	}
 	catch(const Ice::Exception & e)
 	{
@@ -395,4 +390,8 @@ void SpecificWorker::saveModel()
 
 
 
-
+void SpecificWorker::stop()
+{
+	printf("mission path: %s\n", stopMission.c_str());
+	agmexecutive_proxy->setMission(stopMission);
+}
