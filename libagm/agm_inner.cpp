@@ -80,7 +80,7 @@ InnerModel* AGMInner::extractInnerModel(AGMModel::SPtr &worldModel, QString imNo
 
 	// Perform the extraction assuming the model is RT-loop-less
 	InnerModel *imNew = new InnerModel();
-	qDebug() << "Calling recorrer";
+// 	qDebug() << "Calling recorrer";
 	recorrer(worldModel, imNew, symbolID, ignoreMeshes);
 
 	return imNew;
@@ -272,7 +272,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 // 	printf("        %s: %d\n", __FUNCTION__, __LINE__);
 			imNew->updateTransformValues(nodeName, tx, ty, tz, rx, ry, rz);
 // 	printf("        %s: %d\n", __FUNCTION__, __LINE__);
-			qDebug()<<"\tExiste transform "<<nodeName;
+// 			qDebug()<<"\tExiste transform "<<nodeName;
 // 	printf("        %s: %d\n", __FUNCTION__, __LINE__);
 		}
 	}
@@ -399,7 +399,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		catch (...)
 		{
 			imNew->updatePlaneValues(nodeName, nx, ny, nz, px, py, pz);
-			qDebug()<<"\tExiste plane"<<nodeName;
+// 			qDebug()<<"\tExiste plane"<<nodeName;
 		}
 
 	}
@@ -475,7 +475,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 			mesh->rx = rx;
 			mesh->ry = ry;
 			mesh->rz = rz;
-			qDebug()<<"\tExiste mesh"<<nodeName;
+// 			qDebug()<<"\tExiste mesh"<<nodeName;
 		}
 	}
 	else if (imType=="rgbd")
@@ -571,7 +571,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		{
 			InnerModelCamera *camera = imNew->getCamera(nodeName);
 			camera->updateValues(width, height, focal);
-			qDebug()<<"\tExists InnerModelCamera"<<nodeName;
+// 			qDebug()<<"\tExists InnerModelCamera"<<nodeName;
 		}
 	}
 	else if (imType=="omniRobot")
@@ -613,7 +613,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		}
 		catch (...)
 		{
-			qDebug()<<"\tExists omni"<<nodeName;
+// 			qDebug()<<"\tExists omni"<<nodeName;
 		}
 	}
 	else if (imType=="laser")
@@ -776,7 +776,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 		}
 		catch (...)
 		{
-			qDebug()<<"\tExists joint"<<nodeName<<"parent"<< parentNode->id;
+// 			qDebug()<<"\tExists joint"<<nodeName<<"parent"<< parentNode->id;
 		}
 
 	}
@@ -1018,7 +1018,7 @@ void AGMInner::removeInnerModel(AGMModel::SPtr &worldModel, InnerModel *imTmp)
  */
 void AGMInner::include_im(AGMModel::SPtr &worldModel, QHash<QString, int32_t> match, InnerModel *im)
 {
-	qDebug()<<match;
+// 	qDebug()<<match;
 	QHash<QString, int32_t>::const_iterator i = match.constBegin();
 
 	QList<QString> lNode =match.keys();
@@ -1125,7 +1125,7 @@ void AGMInner::include_im(AGMModel::SPtr &worldModel, QHash<QString, int32_t> ma
 		for (int j = 0; j < lNode.size(); ++j)
 		{
 			InnerModelNode *nodeSong=im->getNode(lNode.at(j));
-			qDebug()<<"InnerModel link"<<node->id <<"--RT-->"<<nodeSong->id;
+// 			qDebug()<<"InnerModel link"<<node->id <<"--RT-->"<<nodeSong->id;
 			if ( node->children.contains(nodeSong) )
 			{
 				//si no existe ya esta relacion
@@ -1203,7 +1203,7 @@ void AGMInner::recursiveInsertion(AGMModel::SPtr &worldModel, InnerModelNode* no
 		int existingID = findSymbolIDWithInnerModelName (worldModel, (*i)->id ) ;
 		if ( existingID == -1 )
 		{
-			qDebug() << "\t" << node->id << "link existing " << existingID << "  " << (*i)->id;
+// 			qDebug() << "\t" << node->id << "link existing " << existingID << "  " << (*i)->id;
 			//symbol
 			std::map<std::string, std::string> attrs;
 			attrs = ImNodeToSymbol((*i));
