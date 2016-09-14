@@ -96,7 +96,7 @@ InnerModel* AGMInner::extractInnerModel(AGMModel::SPtr &worldModel, QString imNo
  */
 void AGMInner::recorrer(AGMModel::SPtr &worldModel, InnerModel* imNew, const int &symbolID, bool ignoreMeshes)
 {
-	printf("    %s: %d   symbol:%d\n", __FUNCTION__, __LINE__, symbolID);
+// 	printf("    %s: %d   symbol:%d\n", __FUNCTION__, __LINE__, symbolID);
 	const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(symbolID);
 	for (AGMModelSymbol::iterator edge_itr=symbol->edgesBegin(worldModel); edge_itr!=symbol->edgesEnd(worldModel); edge_itr++)
 	{
@@ -105,11 +105,11 @@ void AGMInner::recorrer(AGMModel::SPtr &worldModel, InnerModel* imNew, const int
 		if ((*edge_itr)->getLabel() == "RT" && (*edge_itr)->getSymbolPair().first==symbolID )
 		{
 			int second = (*edge_itr)->getSymbolPair().second;
-	printf("    %s: %d   _ %d\n", __FUNCTION__, __LINE__, symbolID);
+// 	printf("    %s: %d   _ %d\n", __FUNCTION__, __LINE__, symbolID);
 			edgeToInnerModel(worldModel, (*edge_itr), imNew, ignoreMeshes);
-	printf("    %s: %d   _ %d\n", __FUNCTION__, __LINE__, symbolID);
+// 	printf("    %s: %d   _ %d\n", __FUNCTION__, __LINE__, symbolID);
 			recorrer(worldModel, imNew, second, ignoreMeshes);
-	printf("    %s: %d   _ %d\n", __FUNCTION__, __LINE__, symbolID);
+// 	printf("    %s: %d   _ %d\n", __FUNCTION__, __LINE__, symbolID);
 		}
 	}
 }
@@ -125,33 +125,33 @@ void AGMInner::recorrer(AGMModel::SPtr &worldModel, InnerModel* imNew, const int
  */
 void AGMInner::edgeToInnerModel(AGMModel::SPtr &worldModel, AGMModelEdge edge, InnerModel* imNew, bool ignoreMeshes)
 {
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 	InnerModelNode* nodeA = NULL;
 	//InnerModelNode* nodeB = NULL;
 
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 	int first = edge->getSymbolPair().first;    
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 	int second = edge->getSymbolPair().second;
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 
 	AGMModelSymbol::SPtr symbolA = worldModel->getSymbol(first);
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 	AGMModelSymbol::SPtr symbolB = worldModel->getSymbol(second);
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 
 	QString nameA, nameB;
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 	
 	try
 	{
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 		nameA = QString::fromStdString(symbolA->getAttribute("imName"));
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 	}
 	catch(...)
 	{
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 		string defaultName = symbolA->symbolType +"_"+int2str(symbolA->identifier);
 		printf("Couldn't find attribute imName for %s . Creating a default name: %s \n", nameA.toStdString().c_str(), defaultName.c_str());
 		symbolA->setAttribute("imName", defaultName);
@@ -159,13 +159,13 @@ void AGMInner::edgeToInnerModel(AGMModel::SPtr &worldModel, AGMModelEdge edge, I
 	}
 	try
 	{
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 		nameB = QString::fromStdString(symbolB->getAttribute("imName"));		
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 	}
 	catch(...)
 	{
-	printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 		string defaultName = symbolB->symbolType +"_"+int2str(symbolB->identifier);
 		printf("Couldn't find attribute imName for %s. Creating a default name: %s\n", nameB.toStdString().c_str(), defaultName.c_str());
 		symbolB->setAttribute("imName", defaultName);
@@ -189,17 +189,17 @@ void AGMInner::edgeToInnerModel(AGMModel::SPtr &worldModel, AGMModelEdge edge, I
 	{
 		qDebug()<<"node A null"<<nameA;
 		
-printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// printf("      %s: %d\n", __FUNCTION__, __LINE__);
 		insertSymbolToInnerModelNode(worldModel,imNew,imNew->getRoot(), symbolA,tx,ty,tz,rx,ry,rz, ignoreMeshes);
-printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// printf("      %s: %d\n", __FUNCTION__, __LINE__);
 		nodeA=imNew->getNode(nameA);
 	}
 
 	try
 	{
-printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// printf("      %s: %d\n", __FUNCTION__, __LINE__);
 		insertSymbolToInnerModelNode(worldModel,imNew,nodeA, symbolB,tx,ty,tz,rx,ry,rz, ignoreMeshes);
-printf("      %s: %d\n", __FUNCTION__, __LINE__);
+// printf("      %s: %d\n", __FUNCTION__, __LINE__);
 	}
 	catch(string e)
 	{
