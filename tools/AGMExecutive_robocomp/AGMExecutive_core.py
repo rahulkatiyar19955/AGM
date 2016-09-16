@@ -111,15 +111,21 @@ class PlannerCaller(threading.Thread):
 		self.currentModel = currentModel
 		# End
 		self.plannerCallerMutex.release()
+
 	def run(self):
 		while True:
+			#print '::run'
 			# Continue if we can't acquire the mutex
-			if self.plannerCallerMutex.acquire(0)==False:
+			if self.plannerCallerMutex.acquire(False)==False:
+				#print '::run: mutex acquire'
+				#time.sleep(1)
 				time.sleep(0.05)
 				continue
 			# Continue if there's no work to do
 			if not self.working:
 				self.plannerCallerMutex.release()
+				#print '::run: no self.working'
+				#time.sleep(1)
 				time.sleep(0.05)
 				continue
 			print 'PlannerCaller::run 2'
@@ -138,7 +144,11 @@ class PlannerCaller(threading.Thread):
 				# CALL
 				argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
 				print 'Ask cache'
-				cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
+				try:
+					cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
+				except:
+					cacheResult = False
+				#cacheResult = False
 				if cacheResult:
 					print 'Got plan from cache'
 					print '<<<'
@@ -161,8 +171,12 @@ class PlannerCaller(threading.Thread):
 					end = time.time()
 					print 'It took', end - start, 'seconds'
 					print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
+					try:
+						ofile = open("/tmp/result"+peid+".txt", 'r')
+					except:
+						self.working = False
+						pass
 					self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
-					ofile = open("/tmp/result"+peid+".txt", 'r')
 					lines = self.ignoreCommentsInPlan(ofile.readlines())
 					ofile.close()
 				# Get the output
@@ -177,6 +191,8 @@ class PlannerCaller(threading.Thread):
 				self.executive.gotPlan(self.plan)
 			finally:
 				self.plannerCallerMutex.release()
+
+
 
 	def callMonitoring(self, peid):
 		stored = False

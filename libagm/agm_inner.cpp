@@ -100,7 +100,7 @@ void AGMInner::recorrer(AGMModel::SPtr &worldModel, InnerModel* imNew, const int
 	const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(symbolID);
 	for (AGMModelSymbol::iterator edge_itr=symbol->edgesBegin(worldModel); edge_itr!=symbol->edgesEnd(worldModel); edge_itr++)
 	{
-		std::cout<<(*edge_itr).toString(worldModel)<<"\n";
+		//std::cout<<(*edge_itr).toString(worldModel)<<"\n";
 		//comprobamos el id del simbolo para evitar los arcos que le llegan y seguir solo los que salen del nodo
 		if ((*edge_itr)->getLabel() == "RT" && (*edge_itr)->getSymbolPair().first==symbolID )
 		{
@@ -187,7 +187,7 @@ void AGMInner::edgeToInnerModel(AGMModel::SPtr &worldModel, AGMModelEdge edge, I
 	nodeA=imNew->getNode(nameA);
 	if (nodeA==NULL)
 	{
-		qDebug()<<"node A null"<<nameA;
+// 		qDebug()<<"node A null"<<nameA;
 		
 // printf("      %s: %d\n", __FUNCTION__, __LINE__);
 		insertSymbolToInnerModelNode(worldModel,imNew,imNew->getRoot(), symbolA,tx,ty,tz,rx,ry,rz, ignoreMeshes);
@@ -242,7 +242,7 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 
 	if (imType=="transform")
 	{
-		std::cout<<"\t type: "<<imType <<"\n";
+		//std::cout<<"\t type: "<<imType <<"\n";
 		QString engine = "static";
 		float mass =0.;
 		try

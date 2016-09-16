@@ -69,6 +69,7 @@ class PlanningCache:
 		except:
 			self.data[checksum] = []
 			self.data[checksum].append((domain, initialstate, goalstate, plan, success))
+		return True
 
 	def getPlan(self, domain, initialstate, goalstate):
 		domain = string.rstrip(domain, '\n')
@@ -102,9 +103,12 @@ class PlanningCache:
 		return self.getPlan(domain, initialstate, goalstate)
 
 	def includeFromFiles(self, domainF, initialstateF, goalstateF, planF, success, shouldIWrite=True):
-		domain       = open(domainF,       'r').read()
-		initialstate = re.sub('<attribute [^>]*>', '', open(initialstateF, 'r').read())
-		goalstate    = re.sub('<attribute [^>]*>', '', open(goalstateF,    'r').read())
-		plan         = open(planF,         'r').read()
+		try:
+			domain       = open(domainF,       'r').read()
+			initialstate = re.sub('<attribute [^>]*>', '', open(initialstateF, 'r').read())
+			goalstate    = re.sub('<attribute [^>]*>', '', open(goalstateF,    'r').read())
+			plan         = open(planF,         'r').read()
+		except:
+			return False
 		return self.include(domain, initialstate, goalstate, plan, success, shouldIWrite)
 
