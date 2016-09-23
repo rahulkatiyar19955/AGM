@@ -27,15 +27,14 @@ preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
 Ice.loadSlice(preStr+"AGMCommonBehavior.ice")
 Ice.loadSlice(preStr+"AGMExecutive.ice")
 Ice.loadSlice(preStr+"AGMWorldModel.ice")
-Ice.loadSlice(preStr+"Speech.ice")
 Ice.loadSlice(preStr+"Planning.ice")
 import RoboCompAGMCommonBehavior
 import RoboCompAGMExecutive
 import RoboCompAGMWorldModel
-import RoboCompSpeech
 import RoboCompPlanning
 
 import AGMModelConversion
+
 
 #ret, stepsFwd, planMonitoring =
 def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, plan, stepsFwd=0):
@@ -98,6 +97,7 @@ class PlannerCaller(threading.Thread):
 		print 'PlannerCaller::setWork 0'
 		# Kill any previous planning process
 		while self.plannerCallerMutex.acquire(0)==False:
+			print 'PlannerCaller::setWork 0.5'
 			now = time.time()
 			elap = (now - self.lastPypyKill)
 			if elap > 2.:
@@ -144,11 +144,11 @@ class PlannerCaller(threading.Thread):
 				# CALL
 				argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
 				print 'Ask cache'
-				try:
-					cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
-				except:
-					cacheResult = False
-				#cacheResult = False
+				#try:
+					#cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
+				#except:
+					#cacheResult = False
+				cacheResult = False
 				if cacheResult:
 					print 'Got plan from cache'
 					print '<<<'
@@ -161,12 +161,13 @@ class PlannerCaller(threading.Thread):
 					print 'Running the planner...'
 					try:
 						print argsss
+						print 'call', argsss
 						subprocess.call(argsss)
+						print 'done calling', argsss
 					except:
-						pass
+						traceback.print_exc()
 					#POST Check if the planner was killed
 					print 'pkm2'
-					#print plan
 					#CONTINUE?                       Probably it's better just to try to open the file and consider it was killed if there's no result file...
 					end = time.time()
 					print 'It took', end - start, 'seconds'
@@ -174,11 +175,15 @@ class PlannerCaller(threading.Thread):
 					try:
 						ofile = open("/tmp/result"+peid+".txt", 'r')
 					except:
-						self.working = False
+						print "Can't open plan. We assume a new context was forced"
+						continue
+					try:
+						self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
+						lines = self.ignoreCommentsInPlan(ofile.readlines())
+						ofile.close()
+					except:
+						print 'Weird error xx'
 						pass
-					self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
-					lines = self.ignoreCommentsInPlan(ofile.readlines())
-					ofile.close()
 				# Get the output
 				try:
 					self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
@@ -260,9 +265,8 @@ class PlannerCaller(threading.Thread):
 
 
 class Executive(object):
-	def __init__(self, agglPath, initialModelPath, initialMissionPath, doNotPlan, executiveTopic, executiveVisualizationTopic, speech):
+	def __init__(self, agglPath, initialModelPath, initialMissionPath, doNotPlan, executiveTopic, executiveVisualizationTopic):
 		self.doNotPlan = doNotPlan
-		self.executiveActive = True
 		self.mutex = threading.RLock()
 		self.agents = dict()
 		self.plan = None
@@ -273,7 +277,6 @@ class Executive(object):
 		# Set proxies
 		self.executiveTopic = executiveTopic
 		self.executiveVisualizationTopic = executiveVisualizationTopic
-		self.speech = speech
 
 		self.agglPath = agglPath
 		self.initialModelPath = initialModelPath
@@ -286,29 +289,24 @@ class Executive(object):
 
 		print 'INITIAL MODEL: ', self.initialModel
 		self.lastModification = self.initialModel
-		print self.lastModification.version
-		print self.lastModification.version
-		print self.lastModification.version
-		print self.lastModification.version
-		print self.lastModification.version
-		print self.lastModification.version
+		print 'initial model version', self.lastModification.version
 		self.backModelICE  = None
 		self.setAndBroadcastModel(xmlModelParser.graphFromXML(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 		self.setMission(initialMissionPath, avoidUpdate=True)
 
-	#########################################################################
-	#                                                                     ###
-	# E X E C U T I V E   I N T E R F A C E   I M P L E M E N T A T I O N ###
-	#                                                                     ###
-	#                         b e g i n s   h e r e                       ###
-	#                                                                     ###
-	#########################################################################
+	#######################################################################
+	#                                                                     #
+	# E X E C U T I V E   I N T E R F A C E   I M P L E M E N T A T I O N #
+	#                                                                     #
+	#                         b e g i n s   h e r e                       #
+	#                                                                     #
+	#######################################################################
 	def activate(self):
-		self.executiveActive = True
+		return True
 
 	def deactivate(self):
-		self.executiveActive = False
+		return True
 
 	def structuralChangeProposal(self, worldModelICE, sender, log):
 		#
@@ -330,7 +328,6 @@ class Executive(object):
 		print 'CURRENT VERSION', self.lastModification.version
 		try:
 			print 'structuralChangeProposal acquire() z'
-
 			# Ignore outdated modifications
 			if worldModelICE.version != self.lastModification.version:
 				print 'outdated!??!  self='+str(self.lastModification.version)+'   ice='+str(worldModelICE.version)
@@ -339,12 +336,13 @@ class Executive(object):
 			# Here we're OK with the modification, accept it, but first check if replanning is necessary
 			worldModelICE.version += 1
 			internalModel = AGMModelConversion.fromIceToInternal_model(worldModelICE, ignoreInvalidEdges=True) # set internal model
-			try:                                                                                               # is replanning necessary?
-				avoidReplanning = False
-				if internalModel.equivalent(self.lastModification):
-					avoidReplanning = True
-			except AttributeError:
-				pass
+			avoidReplanning = False
+			# UNCOMMENT THIS!!! WARNING TODO ERROR CUIDADO 
+			#try:                                                                                               # is replanning necessary?
+				#if internalModel.equivalent(self.lastModification):
+					#avoidReplanning = True
+			#except AttributeError:
+				#pass
 			self.lastModification = internalModel                                                              # store last modification
 			self.modifications += 1
 			self.worldModelICE = worldModelICE
@@ -374,12 +372,9 @@ class Executive(object):
 	def symbolUpdate(self, nodeModification):
 		self.symbolsUpdate([nodeModification])
 
-
 	def symbolsUpdate(self, symbols):
 		try:
-			#print 'symbolsUpdate acquire() a'
 			self.mutex.acquire()
-			#print 'symbolsUpdate acquire() z'
 			try:
 				for symbol in symbols:
 					internal = AGMModelConversion.fromIceToInternal_node(symbol)
@@ -390,9 +385,7 @@ class Executive(object):
 				sys.exit(1)
 			self.executiveTopic.symbolsUpdated(symbols)
 		finally:
-			#print 'symbolsUpdate release() a'
 			self.mutex.release()
-			#print 'symbolsUpdate release() z'
 
 
 	def edgeUpdate(self, edge):
@@ -417,10 +410,7 @@ class Executive(object):
 					print 'couldn\'t update edge because no match was found'
 					print 'edge', edge.a, edge.b, edge.edgeType
 		finally:
-			#print 'edgesUpdate release() a'
 			self.mutex.release()
-			#print 'edgesUpdate release() z'
-
 
 	def setMission(self, target, avoidUpdate=False):
 		self.mutex.acquire()
