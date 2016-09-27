@@ -110,7 +110,8 @@ public:
 	static void  removeInnerModel(AGMModel::SPtr &worldModel, InnerModel*imTmp);
 
 	//find a loop from a symbolID throught a fixed linkType
-	static void checkLoop( AGMModel::SPtr &worldModel, int& symbolID, QList< int >& visited, string linkType, bool& loop);
+	static bool loop         ( AGMModel::SPtr &worldModel, int& symbolID,                        string linkType);
+	static bool loopRecursive( AGMModel::SPtr &worldModel, int& symbolID, QList< int >& visited, string linkType);
 
 	//Deprecated (no se cual fue su objetivo)
 	//static AGMModel::SPtr remove_ImOriginal(string agmFilePath, string imFilePath);

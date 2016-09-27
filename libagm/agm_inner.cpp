@@ -70,10 +70,7 @@ InnerModel* AGMInner::extractInnerModel(AGMModel::SPtr &worldModel, QString imNo
 	}
 
 	// Check RT loops
-	bool ret;
-	QList<int> ll;
-	AGMInner::checkLoop(worldModel, symbolID, ll, "RT", ret);
-	if (not ret)
+	if (AGMInner::loop(worldModel, symbolID, "RT"))
 	{
 		qFatal("ERROR: detected RT loop!");
 	}
@@ -805,31 +802,38 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 
 }
 
-void AGMInner::checkLoop(AGMModel::SPtr &worldModel, int& symbolID, QList<int> &visited, string linkType, bool &loop)
+
+
+bool AGMInner::loop(AGMModel::SPtr &worldModel, int &symbolID, string linkType)
 {
-	if (visited.contains(symbolID) )
+	QList<int> visited;
+	if (AGMInner::loopRecursive(worldModel, symbolID, visited, linkType))
 	{
-		loop=true;
-		visited.append(symbolID);
-		return;
+		return true;
 	}
-	else
-		visited.append(symbolID);
+	return false;
+}
+
+
+bool AGMInner::loopRecursive(AGMModel::SPtr &worldModel, int &symbolID, QList<int> &visited, string linkType)
+{
+	if (visited.contains(symbolID))
+		return true;
+
+	visited.append(symbolID);
 
 	const AGMModelSymbol::SPtr &symbol = worldModel->getSymbol(symbolID);
-	for (AGMModelSymbol::iterator edge_itr=symbol->edgesBegin(worldModel); edge_itr!=symbol->edgesEnd(worldModel); edge_itr++)
+	for (auto edge_itr=symbol->edgesBegin(worldModel); edge_itr!=symbol->edgesEnd(worldModel); edge_itr++)
 	{
-		//std::cout<<(*edge_itr).toString(worldModel)<<"\n";
-		//comprobamos el id del simbolo para evitar los arcos que le llegan y seguir solo los que salen del nodo
-		if ((*edge_itr)->getLabel() == linkType && (*edge_itr)->getSymbolPair().first==symbolID )
+		if ((*edge_itr)->getLabel()==linkType and (*edge_itr)->getSymbolPair().first==symbolID )
 		{
 			int second = (*edge_itr)->getSymbolPair().second;
-// 			qDebug()<<symbolID<<"--"<<QString::fromStdString(linkType)<<"-->"<<second;
-// 			qDebug()<<"\tvisited"<<visited;
-			checkLoop(worldModel, second,visited, linkType,loop);
+			if (loopRecursive(worldModel, second, visited, linkType))
+				return true;
 		}
 	}
 
+	return false;
 }
 
 // QList<int> AGMInner::getLinkedID (int symbolID, string linkType)
