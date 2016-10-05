@@ -154,7 +154,6 @@ class PlannerCaller(threading.Thread):
 						cacheResult = None
 				if cacheResult:
 					print 'Got plan from cache'
-					print type(cacheResult[1]), len(cacheResult[1])
 					print '<<<'
 					print cacheResult[1]
 					print '>>>'
@@ -182,8 +181,9 @@ class PlannerCaller(threading.Thread):
 						print "Can't open plan. We assume a new context was forced"
 						continue
 					try:
-						self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
 						lines = self.ignoreCommentsInPlan(ofile.readlines())
+						if len(''.join(lines).strip()) > 0:
+                                                    self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
 						ofile.close()
 					except:
 						print 'Weird error xx'
