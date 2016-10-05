@@ -887,7 +887,8 @@ void AGMInner::updateAgmWithInnerModel(AGMModel::SPtr &worldModel, InnerModel* i
 			}
 			catch (...)
 			{
-				qDebug()<<"EXCEPTION,RT label connect to a symbol without imName";
+				qDebug()<<"EXCEPTION,RT label connect to a symbol without imName\n";
+				printf("\n");
 				std::cout<<(worldModel->getSymbol( (*it)->getSymbolPair().second))->toString(true);
 			}
 		}
@@ -936,7 +937,8 @@ void AGMInner::updateAgmWithInnerModelAndPublish(AGMModel::SPtr &worldModel, Inn
 			}
 			catch (...)
 			{
-				qDebug()<<"EXCEPTION,RT label connect to a symbol without imName";
+				qDebug()<<"EXCEPTION,RT label connect to a symbol without imName\n";
+				printf("\n");
 				std::cout<<(worldModel->getSymbol( (*it)->getSymbolPair().second))->toString(true);
 			}
 		}
@@ -1604,7 +1606,8 @@ void AGMInner::updateImNodeFromEdge(AGMModel::SPtr &worldModel,AGMModelEdge edge
 			}
 			catch (...)
 			{
-				qDebug()<<"EXCEPTION,RT label connect to a symbol without imName";
+				qDebug()<<"EXCEPTION,RT label connect to a symbol without imName\n";
+				printf("\n");
 				std::cout<<(worldModel->getSymbol( edge->getSymbolPair().second))->toString(true);
 			}
 		}
