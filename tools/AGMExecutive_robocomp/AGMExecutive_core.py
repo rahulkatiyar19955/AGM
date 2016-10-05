@@ -144,11 +144,11 @@ class PlannerCaller(threading.Thread):
 				# CALL
 				argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
 				print 'Ask cache'
-				#try:
-					#cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
-				#except:
-					#cacheResult = False
-				cacheResult = False
+				try:
+					cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
+				except:
+					cacheResult = False
+				#cacheResult = False
 				if cacheResult:
 					print 'Got plan from cache'
 					print '<<<'
