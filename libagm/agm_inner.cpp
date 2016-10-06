@@ -66,7 +66,8 @@ InnerModel* AGMInner::extractInnerModel(AGMModel::SPtr &worldModel, QString imNo
 	int symbolID = findSymbolIDWithInnerModelName(worldModel,imNodeName);
 	if (symbolID < 0)
 	{
-		qFatal("ERROR: Couldn't find symbol %s in initial model!", imNodeName.toStdString().c_str());
+		std::string s = "ERROR: Couldn't find symbol" + imNodeName.toStdString() + "in initial model!";
+		throw s;
 	}
 
 	// Check RT loops
@@ -152,12 +153,12 @@ void AGMInner::edgeToInnerModel(AGMModel::SPtr &worldModel, AGMModelEdge edge, I
 		string defaultName = symbolA->symbolType +"_"+int2str(symbolA->identifier);
 		printf("Couldn't find attribute imName for %s . Creating a default name: %s \n", nameA.toStdString().c_str(), defaultName.c_str());
 		symbolA->setAttribute("imName", defaultName);
-		symbolA->setAttribute("imType", "transform");		
+		symbolA->setAttribute("imType", "transform");
 	}
 	try
 	{
 // 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
-		nameB = QString::fromStdString(symbolB->getAttribute("imName"));		
+		nameB = QString::fromStdString(symbolB->getAttribute("imName"));
 // 	printf("      %s: %d\n", __FUNCTION__, __LINE__);
 	}
 	catch(...)
@@ -789,7 +790,6 @@ void AGMInner::insertSymbolToInnerModelNode(AGMModel::SPtr &worldModel, InnerMod
 			InnerModelTransform* tf = imNew->newTransform (QString::fromStdString(s->toString()), "static",parentNode);
 			parentNode->addChild(tf);
 		}
-
 		else
 		{
 			string err;

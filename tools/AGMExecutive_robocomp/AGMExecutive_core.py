@@ -149,7 +149,7 @@ class PlannerCaller(threading.Thread):
 					cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
 				except:
 					cacheResult = False
-				#cacheResult = False
+				cacheResult = False
 				if cacheResult:
 					if len(cacheResult[1].strip()) == 0:
 						cacheResult = None
@@ -170,7 +170,6 @@ class PlannerCaller(threading.Thread):
 					except:
 						print 'Can\'t get plan from monitoring'
 						pass
-					stored = False
 					print 'Running the planner?', stored==False
 
 					if stored == False:
@@ -311,7 +310,9 @@ class Executive(object):
 		self.backModelICE  = None
 		self.setAndBroadcastModel(xmlModelParser.graphFromXML(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
+		print '--- setMission ---------------------------------------------'
 		self.setMission(initialMissionPath, avoidUpdate=True)
+		print '--- setMission ---------------------------------------------'
 
 	#######################################################################
 	#                                                                     #

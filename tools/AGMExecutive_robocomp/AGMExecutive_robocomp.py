@@ -195,7 +195,9 @@ class Server (Ice.Application):
 			print '-------------------------------------------------------------'
 			print '----     R u n     A G M E x e c u t i v e,     r u n   -----'
 			print '-------------------------------------------------------------'
+			print '---- updatePlan ------------------------------------------------'
 			executive.updatePlan()
+			print '---- updatePlan ------------------------------------------------'
 			self.shutdownOnInterrupt()
 			self.communicator().waitForShutdown()
 		except:
