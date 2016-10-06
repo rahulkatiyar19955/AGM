@@ -93,6 +93,7 @@ class PlannerCaller(threading.Thread):
 		self.agmData = AGMFileDataParsing.fromFile(self.agglPath)
 		self.agmData.generateAGGLPlannerCode("/tmp/domainActive.py", skipPassiveRules=False)
 		self.agmData.generateAGGLPlannerCode("/tmp/domainPasive.py", skipPassiveRules=True)
+
 	def setWork(self, currentModel):
 		print 'PlannerCaller::setWork 0'
 		# Kill any previous planning process
@@ -113,8 +114,8 @@ class PlannerCaller(threading.Thread):
 		self.plannerCallerMutex.release()
 
 	def run(self):
+		print '::run0'
 		while True:
-			#print '::run'
 			# Continue if we can't acquire the mutex
 			if self.plannerCallerMutex.acquire(False)==False:
 				#print '::run: mutex acquire'
@@ -150,7 +151,7 @@ class PlannerCaller(threading.Thread):
 					cacheResult = False
 				#cacheResult = False
 				if cacheResult:
-					if len(cacheResult[1]) == 0:
+					if len(cacheResult[1].strip()) == 0:
 						cacheResult = None
 				if cacheResult:
 					print 'Got plan from cache'
@@ -161,19 +162,28 @@ class PlannerCaller(threading.Thread):
 					cachePlan = cacheResult[1]
 					lines = cacheResult[1].split('\n')
 				else:
-					print 'Running the planner...'
+					stored = False
 					try:
-						print argsss
-						print 'call', argsss
-						subprocess.call(argsss)
-						print 'done calling', argsss
+						print 'Not found in cache, checking monitoring...'
+						stored, stepsFwd = self.callMonitoring(peid)
+						print stored, stepsFwd
 					except:
-						traceback.print_exc()
-					#POST Check if the planner was killed
-					print 'pkm2'
-					#CONTINUE?                       Probably it's better just to try to open the file and consider it was killed if there's no result file...
-					end = time.time()
-					print 'It took', end - start, 'seconds'
+						print 'Can\'t get plan from monitoring'
+						pass
+					stored = False
+					print 'Running the planner?', stored==False
+
+					if stored == False:
+						try:
+							print argsss
+							print 'call', argsss
+							subprocess.call(argsss)
+							print 'done calling', argsss
+						except:
+							traceback.print_exc()
+						#CONTINUE?                       Probably it's better just to try to open the file and consider it was killed if there's no result file...
+						end = time.time()
+						print 'It took', end - start, 'seconds'
 					print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
 					try:
 						ofile = open("/tmp/result"+peid+".txt", 'r')
@@ -183,7 +193,7 @@ class PlannerCaller(threading.Thread):
 					try:
 						lines = self.ignoreCommentsInPlan(ofile.readlines())
 						if len(''.join(lines).strip()) > 0:
-                                                    self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
+							self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
 						ofile.close()
 					except:
 						print 'Weird error xx'
@@ -242,7 +252,11 @@ class PlannerCaller(threading.Thread):
 			#except:
 				#pass
 
-			ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan))
+			try:
+				ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan))
+			except:
+				print 'There\'s no previous plan yet. It doesn\'t make any sense to use monitoring yet'
+				return False, 0, None
 			#print 'bb'
 			#print ret, stepsFwd, planMonitoring
 			if ret:
@@ -498,23 +512,6 @@ class Executive(object):
 
 	def updatePlan(self):
 		self.plannerCaller.setWork(self.currentModel)
-		# MONITORING DEACTIVATED WARNING TODO FIXME
-				#stored = False
-				#if self.plan != None and False:
-					#self.pypyKillMutex.acquire()
-					#try:
-						#peid = '_'+str(self.plannerExecutionID)
-					#except:
-						#print 'There was some problem broadcasting the model'
-						#sys.exit(1)
-					#self.pypyKillMutex.release()
-					#stored, stepsFwd = self.callMonitoring(peid)
-					#print stored, stepsFwd
-				#else:
-					#print 'There was no previous plan'
-
-				#print 'Running the planner?', stored==False
-				#if stored == False:
 
 	def gotPlan(self, plan):
 		self.plan = plan
