@@ -1173,9 +1173,20 @@ void AGMInner::include_im(AGMModel::SPtr &worldModel, QHash<QString, int32_t> ma
 
 
 
-void AGMInner::includeInnerModel(AGMModel::SPtr &worldModel, int symbolID, InnerModel *im)
+void AGMInner::includeInnerModel(AGMModel::SPtr &worldModel, int symbolID, InnerModel *im, std::string &msgs, std::string path)
 {
-	AGMModelSymbol::SPtr symbol = worldModel->getSymbol(symbolID);
+	// Get target symbol
+	AGMModelSymbol::SPtr symbol;
+	try
+	{
+		symbol = worldModel->getSymbol(symbolID);
+	}
+	catch (...)
+	{
+		std::cout << "Can\'t get symbol " << symbolID << "\n";
+	}
+
+	// Make sure that the target symbol has an 'imType' attribute
 	try
 	{
 		symbol->getAttribute("imType");
@@ -1186,6 +1197,7 @@ void AGMInner::includeInnerModel(AGMModel::SPtr &worldModel, int symbolID, Inner
 		symbol->setAttribute("imType", "transform");
 	}
 
+	// Make sure that the target symbol has an 'imName' attribute
 	try
 	{
 		symbol->getAttribute("imName");
@@ -1196,6 +1208,34 @@ void AGMInner::includeInnerModel(AGMModel::SPtr &worldModel, int symbolID, Inner
 		std::cout<<"AGMSymbol: "<< symbol->toString()<<" does not has imName attribute. Adding imName: "<<imName<<"\n";		
 		symbol->setAttribute("imName",imName);
 	}
+
+	// Warn if the target symbol doesn't have a RT-parent symbol
+	bool found = false;
+	for (AGMModelSymbol::iterator edge_itr=symbol->edgesBegin(worldModel); edge_itr!=symbol->edgesEnd(worldModel); edge_itr++)
+	{
+		if ((*edge_itr)->getLabel() == "RT" && (*edge_itr)->getSymbolPair().second==symbolID )
+		{
+			found = true;
+			break;
+		}
+	}
+	if (not found)
+	{
+		if (path == "")
+		{
+			path = "<no xml path given>";
+		}
+
+		std::ostringstream ostr;
+		ostr.imbue(std::locale("C"));
+		ostr << symbolID;
+
+		std::string m = "Warning: including an innermodel tree (" + im->getRoot()->id.toStdString() + ") in a node " +  ostr.str() + " without a RT-parent: " + path + "\n";
+		printf("%s\n", m.c_str());
+		msgs += m;
+	}
+
+	// Call the actual insertion procedure
 	recursiveInsertion(worldModel, im->getRoot(), symbolID);
 }
 

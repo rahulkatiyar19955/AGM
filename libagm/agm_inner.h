@@ -103,7 +103,12 @@ public:
 
 	//incluye innermodel desde el símbolo symbolID
 	//si el símbolo no tiene el atributo imType se crea. Con la unión del type + _ + symbolID
-	static void includeInnerModel(AGMModel::SPtr &worldModel, int symbolID, InnerModel *im);
+	static void includeInnerModel(AGMModel::SPtr &worldModel, int symbolID, InnerModel *im, std::string path = "")
+	{
+		std::string msgs;
+		includeInnerModel(worldModel, symbolID, im, msgs, path);
+	}
+	static void includeInnerModel(AGMModel::SPtr &worldModel, int symbolID, InnerModel *im, std::string &msgs, std::string path = "");
 
 	//Dado un innerModel (impTmp) elimina de AGM todos los symbolos que lo forman.
 	//Para borrar subgrafos, como la persona por ejemplo.

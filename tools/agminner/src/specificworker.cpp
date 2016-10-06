@@ -369,6 +369,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	printf("***************************************************\n");
 	printf("***************************************************\n");
 	AGMModel::SPtr newModel;
+	std::string msgs;
 	try
 	{
 		newModel = AGMModel::SPtr(new AGMModel(worldModel));
@@ -381,7 +382,7 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 				printf("reading innermodel file %s\n", sstr.c_str());
 				InnerModel *innerModel = new InnerModel(sstr);
 				printf("Include %s in %d\n", sstr.c_str(), v[1].toInt());
-				AGMInner::includeInnerModel(newModel, v[1].toInt(), innerModel);
+				AGMInner::includeInnerModel(newModel, v[1].toInt(), innerModel, msgs, sstr);
 			}
 			else
 			{
@@ -445,6 +446,9 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 	printf("The job was done. Exiting...\n");
 	printf("***************************************************\n");
 	printf("***************************************************\n");
+	
+	
+	printf("\n%s\n", msgs.c_str());
 		
 	exit(0);
 
