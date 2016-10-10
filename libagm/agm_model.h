@@ -253,7 +253,7 @@ public:
 
 
 	/// Returns the identifier of the symbol with <strong><em>"symbolType"</em></strong> type. If not found returns <em>-1</em>.
-	int32_t getIdentifierByType(std::string symbolType, int32_t i=0) const;
+	int32_t getIdentifierByType(std::string symbolType, uint32_t i=0) const;
 
 
 	/*! \brief <strong>DEPRECATED</STRONG>: DON'T USE THIS METHOD
