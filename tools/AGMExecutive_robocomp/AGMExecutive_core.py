@@ -56,7 +56,7 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 				traceback.print_exc()
 				ret2 = False
 		if ret2:
-			print 'ok', stepsFwd
+			print 'monitoring ok', stepsFwd
 			return ret2, stepsFwd2, planMonitoring2
 		else:
 			try:
@@ -114,7 +114,6 @@ class PlannerCaller(threading.Thread):
 		self.plannerCallerMutex.release()
 
 	def run(self):
-		print '::run0'
 		while True:
 			# Continue if we can't acquire the mutex
 			if self.plannerCallerMutex.acquire(False)==False:
@@ -166,7 +165,7 @@ class PlannerCaller(threading.Thread):
 					try:
 						print 'Not found in cache, checking monitoring...'
 						stored, stepsFwd = self.callMonitoring(peid)
-						print stored, stepsFwd
+						print 'callMonitoring', stored, stepsFwd
 					except:
 						print 'Can\'t get plan from monitoring'
 						pass
@@ -174,7 +173,7 @@ class PlannerCaller(threading.Thread):
 
 					if stored == False:
 						try:
-							print argsss
+							print 'argss', argsss
 							print 'call', argsss
 							subprocess.call(argsss)
 							print 'done calling', argsss
@@ -183,24 +182,24 @@ class PlannerCaller(threading.Thread):
 						#CONTINUE?                       Probably it's better just to try to open the file and consider it was killed if there's no result file...
 						end = time.time()
 						print 'It took', end - start, 'seconds'
-					print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
-					try:
-						ofile = open("/tmp/result"+peid+".txt", 'r')
-					except:
-						print "Can't open plan. We assume a new context was forced"
-						continue
-					try:
-						lines = self.ignoreCommentsInPlan(ofile.readlines())
-						if len(''.join(lines).strip()) > 0:
-							self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
-						ofile.close()
-					except:
-						print 'Weird error xx'
-						pass
+						print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
+						try:
+							ofile = open("/tmp/result"+peid+".txt", 'r')
+						except:
+							print "Can't open plan. We assume a new context was forced"
+							continue
+						try:
+							lines = self.ignoreCommentsInPlan(ofile.readlines())
+							if len(''.join(lines).strip()) > 0:
+								self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
+							ofile.close()
+						except:
+							print 'Weird error xx'
+							pass
 				# Get the output
 				try:
 					self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
-					print self.plan
+					print 'self.plan', self.plan
 					stored, stepsFwd = self.callMonitoring(peid)
 				except: # The planner was probably killed
 					traceback.print_exc()
@@ -220,37 +219,6 @@ class PlannerCaller(threading.Thread):
 		init   = '/tmp/lastWorld'+peid+'.xml'
 		target = '/tmp/target.py'
 		try:
-			#print '<<<Call Monitoring'
-			#print '<<<Call Monitoring'
-			#print self.plan
-			#print '   Call Monitoring>>>'
-			#print '   Call Monitoring>>>'
-			#print 'aa', type(self.plan), self.plan
-			#try:
-				#os.system("rm -rf " + peid)
-				#os.system("mkdir " + peid)
-				#h = open(peid+'/agmData.pckl', 'w')
-				#print type(h)
-				#pickle.dump(self.agmData,      h)
-
-				#h = open(peid+'/domainPath.pckl', 'w')
-				#print type(h)
-				#pickle.dump(domainPath,        h)
-
-				#h = open(peid+'/domainPath.pckl', 'w')
-				#print type(h)
-				#pickle.dump(init,              h)
-
-				#h = open(peid+'/currentModel.pckl', 'w')
-				#print type(h)
-				#pickle.dump(self.currentModel, h)
-
-				#h = open(peid+'/plan.pckl', 'w')
-				#print type(h)
-				#pickle.dump(self.plan,         h)
-			#except:
-				#pass
-
 			try:
 				ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan))
 			except:
