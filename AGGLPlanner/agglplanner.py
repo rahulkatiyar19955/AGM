@@ -790,8 +790,8 @@ class PyPlan(object):
 					"""ANIADIDO DE MERCEDES:
 					Creamos estado intermedio, primero lo creamos en fichero .xml para poder quitarle los nuevos nodos creados
 					al aplicar la regla jerarquica"""
-					for estadoIntermedio in ruleMap[ac.name](initWorld): 1+1 # FIXME: this shouldn't be a loop 
-					estadoIntermedio.graph.toXML("/tmp/estadoIntermedio.xml")
+					#for estadoIntermedio in ruleMap[ac.name](initWorld): 1+1 # FIXME: this shouldn't be a loop 
+					#estadoIntermedio.graph.toXML("/tmp/estadoIntermedio.xml")
 					"""Quitamos los nodos constantes creados por la regla jerarquica: los volvemos variables para evitar
 					errores cuando se genere el codigo target en python."""
 					quitar_Constantes_Creadas(init)
@@ -825,7 +825,7 @@ class PyPlan(object):
 						else:
 							resultFile.write(str(action)+'\n')			
 				if descomponiendo == False and planConDescomposicion == True:
-					print 'FINAL PLAN WITH: ',len(total),' ACTIONS:'
+					print 'FINAL PLAN WITH: ', len(total), ' ACTIONS:'
 					for action in total:
 						print '    ',action
 			
