@@ -535,6 +535,17 @@ class LockableList():
 	##@brief This method unlock the mutex (it releases him)
 	def unlock(self):
 		self.mutex.release()
+		
+	##@brief This returns a copy
+	def getList(self):
+		self.mutex.acquire()
+		r = copy.deepcopy(self.thelist)
+		self.mutex.release()
+		return r
+	def __delitem__(self, index):
+		self.mutex.acquire()
+		del self.thelist[index]
+		self.mutex.release()
 
 ##@brief This class defines an integer that can be locked and unlocked.
 class LockableInteger(object):
@@ -605,8 +616,11 @@ class PyPlan(object):
 		# Get graph rewriting rules
 		domain = imp.load_source('domain', domainPath).RuleSet() # activeRules.py
 		ruleMap = copy.deepcopy(domain.getRules()) #get all the active rules of the grammar
-		for e in excludeList: 
-			del ruleMap[e]  # delete the rules in excludeList from ruleMap
+		for e in excludeList:
+			try:
+				del ruleMap[e]  # delete the rules in excludeList from ruleMap
+			except:
+				pass
 		#for r in ruleMap:
 			#print 'Using', r
 
@@ -700,16 +714,17 @@ class PyPlan(object):
 			print 'UNKNOWN ERROR'
 			print self.end_condition.get()
 
-		if len(self.results)==0: # If the length of the list is zero, it means that we have not found a plan.
-			if verbose > 0: print 'No plan found.'
-		else: # But, if the length is greater than zero, it means that we have found a plan.
+##
+##
+##
+		if len(self.results)>0: # If there are plans, proceed
 			min_idx = 0
 			for i in range(len(self.results)): # We go over all the actions of the plan, and we look for the best solution (the minimun cost).
 				if self.results[i].cost < self.results[min_idx].cost:
 					min_idx = i
 			i = min_idx
 			
-			if self.indent=='' and verbose > 0: print 'Got', len(self.results),' plans!'
+			if self.indent=='' and verbose > 0: print 'Got', len(self.results), 'plans!'
 				
 		
 			try:
@@ -775,7 +790,7 @@ class PyPlan(object):
 					"""ANIADIDO DE MERCEDES:
 					Creamos estado intermedio, primero lo creamos en fichero .xml para poder quitarle los nuevos nodos creados
 					al aplicar la regla jerarquica"""
-					for estadoIntermedio in ruleMap[ac.name](initWorld): print ''
+					for estadoIntermedio in ruleMap[ac.name](initWorld): 1+1 # FIXME: this shouldn't be a loop 
 					estadoIntermedio.graph.toXML("/tmp/estadoIntermedio.xml")
 					"""Quitamos los nodos constantes creados por la regla jerarquica: los volvemos variables para evitar
 					errores cuando se genere el codigo target en python."""
@@ -789,28 +804,43 @@ class PyPlan(object):
 					"""Ponemos una bandera para pintar despues el plan completa una vez descompuesta la primera regla jerarquica"""
 					planConDescomposicion = True
 					aaa = PyPlan(      domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, rList, True, "/tmp/estadoIntermedio.py", copy.deepcopy(self.results[i].awakenRules|awakenRules))
-					#if type(resultFile) == type([]):
-						#resultFile = rList + resultFile[1:]
-					#print self.indent
-					self.results[i].history = self.results[i].history[1:]
+					print 'aqui :', aaa.results.getList()
+					if len(aaa.results.getList()) == 0:
+						#del self.results[i]
+						#continue
+						del self.results[:]
+					else:
+						self.results[i].history = self.results[i].history[1:]
+					
 				else:
 					planConDescomposicion = False
-				
-			#printResult(self.results[i]) #the best solution
-			total = rList + self.results[i].history
-			if resultFile != None:
-				for action in total:
-					if type(resultFile) == type([]):
-						resultFile.append(action)
-					else:
-						resultFile.write(str(action)+'\n')			
-			if descomponiendo == False and planConDescomposicion == True:
-				print 'FINAL PLAN WITH: ',len(total),' ACTIONS:'
-				for action in total:
-					print '    ',action
+			
+			if len(self.results)>0: # If there are plans, proceed
+				#printResult(self.results[i]) #the best solution
+				total = rList + self.results[i].history
+				if resultFile != None:
+					for action in total:
+						if type(resultFile) == type([]):
+							resultFile.append(action)
+						else:
+							resultFile.write(str(action)+'\n')			
+				if descomponiendo == False and planConDescomposicion == True:
+					print 'FINAL PLAN WITH: ',len(total),' ACTIONS:'
+					for action in total:
+						print '    ',action
 			
 			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
+
+		if len(self.results)==0: # If the length of the list is zero, it means that we have not found a plan.
+			if verbose > 0: print 'No plan found.'
+##
+##
+##
+
 		
+		
+		
+				
 	##@brief This method starts the execution of program threads
 	# @param ruleMap all the actives rules of the grammar
 	# @param lock this is the clench of the each thread.
