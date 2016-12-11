@@ -121,6 +121,18 @@ catch(const Ice::Exception &e) { cout << e << endl; }
 
 
 
+\subsection iterEdge Iterating over the edges related to a specific symbol
+Given a symbol <em>thisSymbol</em>, you can use a for loop like the following:
+\code{.cpp}
+	for (auto edge = thisSymbol->edgesBegin(worldModel); thisSymbol != robot->edgesEnd(worldModel); thisSymbol++)
+	{
+		const std::pair<int32_t, int32_t> symbolPair = edge->getSymbolPair();
+	}
+\endcode
+
+
+
+
 **/
 
 

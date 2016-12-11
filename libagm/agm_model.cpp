@@ -919,6 +919,13 @@ bool AGMModel::removeEdgesRelatedToSymbol(int32_t id)
 }
 
 
+void AGMModel::removeEdge(AGMModelEdge &edge)
+{
+	const auto pair = edge.getSymbolPair();
+	removeEdgeByIdentifiers(pair.first, pair.second, edge.getLabel());
+}
+
+	
 void AGMModel::setSymbols(std::vector<AGMModelSymbol::SPtr> s)
 {
 	symbols = s;
