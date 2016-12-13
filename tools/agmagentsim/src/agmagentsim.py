@@ -133,9 +133,12 @@ if __name__ == '__main__':
 		print 'Cannot get AGMExecutiveProxy property.'
 		status = 1
 
-	if status == 0:
-		worker = SpecificWorker(mprx)
-		worker.setParams(parameters)
+	if status != 0:
+		print 'Fatal error'
+		
+	
+	worker = SpecificWorker(mprx)
+	worker.setParams(parameters)
 
 	adapter = ic.createObjectAdapter('AGMCommonBehavior')
 	adapter.add(AGMCommonBehaviorI(worker), ic.stringToIdentity('agmcommonbehavior'))

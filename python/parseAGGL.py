@@ -136,13 +136,13 @@ class AGMRuleParsing:
 		for activatedRule in i.activates:
 			activates.append(str(activatedRule))
 
-		if len(i.activates)>0 or dormant:
-			print i.name,
-			if len(i.activates)>0:
-				print 'ACTIVATES('+str(i.activates)+')',
-			if dormant:
-				print 'ISDORMANT',
-			print ''
+		#if len(i.activates)>0 or dormant:
+			#print i.name,
+			#if len(i.activates)>0:
+				#print 'ACTIVATES('+str(i.activates)+')',
+			#if dormant:
+				#print 'ISDORMANT',
+			#print ''
 
 		#print i.name+'('+i.hierarchical+')'
 		if len(i.hierarchical)>0:
@@ -234,7 +234,7 @@ class AGMFileDataParsing:
 					doneInclude = False
 					for includePath in paths:
 						if os.path.exists(includePath + '/' + i.includefile):
-							print 'Including', i.includefile, 'from', includePath
+							#print 'Including', i.includefile, 'from', includePath
 							inc = AGMFileDataParsing.fromFile(includePath + '/' +  i.includefile)
 							for incr in inc.agm.rules:
 								agmFD.addRule(incr)

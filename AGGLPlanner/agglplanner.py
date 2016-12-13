@@ -1024,6 +1024,6 @@ if __name__ == '__main__': # program domain problem result
 			hierarchicalInputPlan = None
 			if len(sys.argv)>=7: hierarchicalInputPlan = open(sys.argv[6], 'r')
 
-			p = PyPlan(domainAGM, domainPath, init, targetPath, '', dict(), [], resultFile, hierarchicalInputPlan=hierarchicalInputPlan)
+			p = PyPlan(domainAGM, domainPath, init, targetPath, '', dict(), [], resultFile)
 		print 'Total time: ', (time.time()-t0).__str__()
 

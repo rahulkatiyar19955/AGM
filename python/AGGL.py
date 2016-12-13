@@ -655,7 +655,7 @@ class AGMFileData(object):
 	# @param filename The path of the file where the python version of the grammar is written
 	# @param skipPassiveRules Flag used to generate only active rules (false by default)
 	def generateAGGLPlannerCode(self, filename, skipPassiveRules=False):
-		print 'generateAGGLPlannerCode'
+		#print 'generateAGGLPlannerCode'
 		w = open(filename, 'w')
 		a = copy.deepcopy(self.agm)
 		import generateAGGLPlannerCode

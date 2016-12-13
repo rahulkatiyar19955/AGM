@@ -23,40 +23,93 @@ sys.path.append('/usr/local/bin/agmagentsim_py/')
 from PySide import *
 from genericworker import *
 
+
+# AGM
+sys.path.append('/usr/local/share/agm')
+
+from parseAGGL import *
+from generateAGGLPlannerCode import *
+from agglplanner import *
+from agglplanchecker import *
+
+import xmlModelParser
+import AGMModelConversion
+
 class SpecificWorker(GenericWorker):
 	def __init__(self, proxy_map):
 		super(SpecificWorker, self).__init__(proxy_map)
 		self.timer.timeout.connect(self.compute)
-		self.Period = 2000
+		self.Period = 100
 		self.timer.start(self.Period)
 
 	def commitAction(self):
-		print 'commit'
+		try:
+			plan = self.plan
+		except:
+			print 'No plan yet'
+			return
+		try:
+			model = self.internalModel
+		except:
+			print 'No model yet'
+			return
+		try:
+			action = plan.data[0]
+		except IndexError:
+			print 'No action to execute'
+			return
+
+
+		print 'Action:   ', action.name
+		print 'Paramters:', action.parameters
+		result = self.triggers[action.name](WorldStateHistory([model, self.triggers.keys()]), action.parameters).graph
+		print 'type(result)', type(result)
+		resultIce = AGMModelConversion.fromInternalToIce(result)
+		self.agmexecutive_proxy.structuralChangeProposal(resultIce, 'agmagentsim', action.name)
+
 
 	def requestPlan(self):
-		print 'requestPlan'
+		self.agmexecutive_proxy.broadcastPlan()
 
 	def setParams(self, params):
 		self.ui.commitButton.clicked.connect(self.commitAction)
 		self.ui.planButton.clicked.connect(self.requestPlan)
-		#try:
-		#	par = params["InnerModelPath"]
-		#	innermodel_path=par.value
-		#	innermodel = InnerModel(innermodel_path)
-		#except:
-		#	traceback.print_exc()
-		#	print "Error reading config params"
+
+		agmData = AGMFileDataParsing.fromFile(params['DomainPath'])
+		agmData.generateAGGLPlannerCode("/tmp/agmagentsimdomain.py", skipPassiveRules=True)
+		self.domain = imp.load_source('domain', "/tmp/agmagentsimdomain.py").RuleSet() # activeRules.py
+		self.triggers = copy.deepcopy(self.domain.getTriggers()) #get all the active rules of the grammar
+		print 'Read actions:', self.triggers.keys()
 		return True
+
+
+	#
+	# activateAgent
+	def activateAgent(self, prs):
+		self.planText = prs['plan'].value.strip()
+		self.firstActionText = self.planText.split('\n')[0]
+		self.plan = AGGLPlannerPlan(self.planText, planFromText=True)
+		print '\nNew plan:'
+		print self.planText
+		print '\nFirst action:'
+		print self.firstActionText
+		return True
+
 
 	@QtCore.Slot()
 	def compute(self):
-		print 'SpecificWorker.compute...'
-		#computeCODE
-		#try:
-		#	self.differentialrobot_proxy.setSpeedBase(100, 0)
-		#except Ice.Exception, e:
-		#	traceback.print_exc()
-		#	print e
+		try:
+			plan = self.plan
+		except:
+			print 'No plan yet'
+			self.requestPlan()
+			return
+		try:
+			model = self.internalModel
+		except:
+			print 'No model yet'
+			self.agmexecutive_proxy.broadcastModel()
+			return
 		return True
 
 
@@ -64,137 +117,98 @@ class SpecificWorker(GenericWorker):
 	# structuralChange
 	#
 	def structuralChange(self, w):
-		#
-		#subscribesToCODE
-		#
-		pass
-
+		self.mutex.lock()
+		self.internalModel = AGMModelConversion.fromIceToInternal_model(w, ignoreInvalidEdges=True)
+		self.mutex.unlock()
 
 	#
 	# edgesUpdated
 	#
-	def edgesUpdated(self, modifications):
-		#
-		#subscribesToCODE
-		#
-		pass
-
-
-	#
-	# edgeUpdated
 	#
 	def edgeUpdated(self, modification):
-		#
-		#subscribesToCODE
-		#
-		pass
+		self.edgesUpdate([modification])
+	def edgesUpdated(self, modifications):
+		try:
+			self.mutex.lock()
+			self.executiveTopic.edgesUpdated(edges)
+			for edge in edges:
+				found = False
+				for i in xrange(len(self.currentModel.links)):
+					if str(self.currentModel.links[i].a) == str(edge.a):
+						if str(self.currentModel.links[i].b) == str(edge.b):
+							if str(self.currentModel.links[i].linkType) == str(edge.edgeType):
+								self.currentModel.links[i].attributes = copy.deepcopy(edge.attributes)
+								found = True
+				if not found:
+					print 'couldn\'t update edge because no match was found'
+					print 'edge', edge.a, edge.b, edge.edgeType
+		finally:
+			self.mutex.unlock()
 
 
-	#
-	# symbolUpdated
-	#
-	def symbolUpdated(self, modification):
-		#
-		#subscribesToCODE
-		#
-		pass
 
 
 	#
 	# symbolsUpdated
 	#
+	def symbolUpdated(self, modification):
+		self.symbolsUpdate([modification])
 	def symbolsUpdated(self, modifications):
-		#
-		#subscribesToCODE
-		#
-		pass
+		try:
+			self.mutex.acquire()
+			try:
+				for symbol in symbols:
+					internal = AGMModelConversion.fromIceToInternal_node(symbol)
+					self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
+			except:
+				print traceback.print_exc()
+				print 'There was some problem with update node'
+				sys.exit(1)
+			self.executiveTopic.symbolsUpdated(symbols)
+		finally:
+			self.mutex.release()
 
 
 	#
 	# reloadConfigAgent
-	#
 	def reloadConfigAgent(self):
-		ret = bool()
-		#
-		#implementCODE
-		#
-		return ret
-
-
-	#
-	# activateAgent
-	#
-	def activateAgent(self, prs):
-		ret = bool()
-		#
-		#implementCODE
-		#
-		return ret
-
+		return True
 
 	#
 	# setAgentParameters
-	#
 	def setAgentParameters(self, prs):
-		ret = bool()
-		#
-		#implementCODE
-		#
-		return ret
+		return True
 
 
 	#
 	# getAgentParameters
-	#
 	def getAgentParameters(self):
 		ret = ParameterMap()
-		#
-		#implementCODE
-		#
 		return ret
 
 
 	#
 	# killAgent
-	#
 	def killAgent(self):
-		#
-		#implementCODE
-		#
 		pass
 
 
 	#
 	# uptimeAgent
-	#
 	def uptimeAgent(self):
-		ret = int()
-		#
-		#implementCODE
-		#
-		return ret
+		return 1.0
 
 
 	#
 	# deactivateAgent
-	#
 	def deactivateAgent(self):
-		ret = bool()
-		#
-		#implementCODE
-		#
-		return ret
+		return True
 
 
 	#
 	# getAgentState
-	#
 	def getAgentState(self):
-		ret = StateStruct()
-		#
-		#implementCODE
-		#
-		return ret
+		return True
 
 
 

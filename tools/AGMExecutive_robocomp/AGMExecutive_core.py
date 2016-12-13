@@ -132,31 +132,31 @@ class PlannerCaller(threading.Thread):
 
 			self.plannerExecutionID+=1
 
-			print 'w'
-			try:
-				callM = True
-				try:
-					print 'MONITOREANDO??', self.plannerExecutionID
-					print self.plan
-				except AttributeError:
-					callM = False
-				if callM:
-					print 'MONITOREANDO??'
-					peid = '_'+str(self.plannerExecutionID)
-					print 'MONITOREANDO??', peid
-					stored, stepsFwd = self.callMonitoring(peid)
-					if stored:
-						self.working = False
-						self.executive.gotPlan(self.plan)
-						print 'done aqui'
-						self.plannerCallerMutex.release()
-						time.sleep(0.05)
-						continue
-				else:
-					print 'NO MONITOREANDO, NO PLAN PREVIO'
-			except: # The planner was probably killed
-				traceback.print_exc()
-				return
+			#print 'w'
+			#try:
+				#callM = True
+				#try:
+					#print 'MONITOREANDO??', self.plannerExecutionID
+					#print self.plan
+				#except AttributeError:
+					#callM = False
+				#if callM:
+					#print 'MONITOREANDO??'
+					#peid = '_'+str(self.plannerExecutionID)
+					#print 'MONITOREANDO??', peid
+					#stored, stepsFwd = self.callMonitoring(peid)
+					#if stored:
+						#self.working = False
+						#self.executive.gotPlan(self.plan)
+						#print 'done aqui'
+						#self.plannerCallerMutex.release()
+						#time.sleep(0.05)
+						#continue
+				#else:
+					#print 'NO MONITOREANDO, NO PLAN PREVIO'
+			#except: # The planner was probably killed
+				#traceback.print_exc()
+				#return
 
 
 			print 'PlannerCaller::run 2'
@@ -263,7 +263,7 @@ class PlannerCaller(threading.Thread):
 			print ret, stepsFwd, planMonitoring
 			if ret:
 				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
-				XXX
+				#XXX
 				stored = True
 				self.plan = planMonitoring
 			else:
