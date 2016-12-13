@@ -18,7 +18,7 @@ class PlanningCache:
 		self.availableId = 0
 		try:
 			while True:
-				print 'Try including', self.availableId
+				#print 'Try including', self.availableId
 				D    = open('cache_D'+str(self.availableId)+'.py', 'r').read()
 				I    = open('cache_I'+str(self.availableId)+'.xml', 'r').read()
 				G    = open('cache_G'+str(self.availableId)+'.py', 'r').read()
@@ -63,7 +63,7 @@ class PlanningCache:
 		md = md5.new()
 		md.update(domain+initialstate+goalstate)
 		checksum = md.hexdigest()
-		print 'Including planning context with checksum', checksum
+		#print 'Including planning context with checksum', checksum
 		try:
 			self.data[checksum].append((domain, initialstate, goalstate, plan, success))
 		except:
@@ -92,7 +92,7 @@ class PlanningCache:
 			print 'No exact cache match'
 			return None
 		else:
-			print self.data.keys()
+			#print self.data.keys()
 			print 'No cache for the checksum'
 			return None
 

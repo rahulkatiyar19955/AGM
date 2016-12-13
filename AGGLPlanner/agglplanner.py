@@ -790,8 +790,8 @@ class PyPlan(object):
 					"""ANIADIDO DE MERCEDES:
 					Creamos estado intermedio, primero lo creamos en fichero .xml para poder quitarle los nuevos nodos creados
 					al aplicar la regla jerarquica"""
-					#for estadoIntermedio in ruleMap[ac.name](initWorld): 1+1 # FIXME: this shouldn't be a loop 
-					#estadoIntermedio.graph.toXML("/tmp/estadoIntermedio.xml")
+					for estadoIntermedio in ruleMap[ac.name](initWorld): 1+1 # FIXME: this shouldn't be a loop 
+					estadoIntermedio.graph.toXML("/tmp/estadoIntermedio.xml")
 					"""Quitamos los nodos constantes creados por la regla jerarquica: los volvemos variables para evitar
 					errores cuando se genere el codigo target en python."""
 					quitar_Constantes_Creadas(init)
@@ -804,7 +804,6 @@ class PyPlan(object):
 					"""Ponemos una bandera para pintar despues el plan completa una vez descompuesta la primera regla jerarquica"""
 					planConDescomposicion = True
 					aaa = PyPlan(      domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, rList, True, "/tmp/estadoIntermedio.py", copy.deepcopy(self.results[i].awakenRules|awakenRules))
-					print 'aqui :', aaa.results.getList()
 					if len(aaa.results.getList()) == 0:
 						#del self.results[i]
 						#continue

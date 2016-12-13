@@ -44,12 +44,12 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 		traceback.print_exc()
 		sys.exit(134)
 
+	print 'AGMExecutiveMonitoring', len(plan)
 	try:
 		ret2 = False
 		if len(currentPlan)>0:
 			try:
-				#print 'Trying one step ahead...', stepsFwd
-				newPlan = currentPlan.removeFirstAction(currentModel)
+				newPlan = copy.deepcopy(currentPlan.removeFirstAction(currentModel))
 				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, newPlan, stepsFwd+1)
 			except:
 				print steps, 'steps ahead did not work'
@@ -59,16 +59,17 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 			print 'monitoring ok', stepsFwd
 			return ret2, stepsFwd2, planMonitoring2
 		else:
+			print 'Trying one step ahead...', stepsFwd
 			try:
-				#print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
-				#print plan
+				print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
+				print plan
 				p = PyPlanChecker(domainClass, domainPath, init, currentPlan, target, '', verbose=False)
 				if p.valid:
-					#print 'GOT PLAN FROM MONITORING!!!'
-					#print currentPlan
+					print 'GOT PLAN FROM MONITORING!!!'
+					print currentPlan
 					return True, stepsFwd, currentPlan
 				else:
-					#print 'doesn\'t work'
+					print 'doesn\'t work'
 					return False, 0, None
 			except:
 				traceback.print_exc()
@@ -128,6 +129,34 @@ class PlannerCaller(threading.Thread):
 				#time.sleep(1)
 				time.sleep(0.05)
 				continue
+
+			print 'w'
+			try:
+				callM = True
+				try:
+					print 'MONITOREANDO??', self.plannerExecutionID+1
+					print self.plan
+				except AttributeError:
+					callM = False	
+				if callM:
+					print 'MONITOREANDO??'
+					peid = '_'+str(self.plannerExecutionID+1)
+					print 'MONITOREANDO??', peid
+					stored, stepsFwd = self.callMonitoring(peid)
+					if stored:
+						self.working = False
+						self.executive.gotPlan(self.plan)
+						print 'done aqui'
+						self.plannerCallerMutex.release()
+						time.sleep(0.05)
+						continue
+				else:
+					print 'NO MONITOREANDO, NO PLAN PREVIO'
+			except: # The planner was probably killed
+				traceback.print_exc()
+				return
+
+
 			print 'PlannerCaller::run 2'
 			try:
 				# Run planner
@@ -171,6 +200,8 @@ class PlannerCaller(threading.Thread):
 						pass
 					print 'Running the planner?', stored==False
 
+
+					stored = False
 					if stored == False:
 						try:
 							print 'argss', argsss
@@ -206,6 +237,7 @@ class PlannerCaller(threading.Thread):
 					return
 				self.working = False
 				self.executive.gotPlan(self.plan)
+				print 'done aca'
 			finally:
 				self.plannerCallerMutex.release()
 
@@ -215,6 +247,9 @@ class PlannerCaller(threading.Thread):
 		stored = False
 		stepsFwd = 0
 		print 'Trying with the last steps of the current plan...'
+		print '(( CURRENT PLAN'
+		print self.plan
+		print ')) CURRENT PLAN'
 		domainPath = '/tmp/domainActive.py'
 		init   = '/tmp/lastWorld'+peid+'.xml'
 		target = '/tmp/target.py'
@@ -223,9 +258,9 @@ class PlannerCaller(threading.Thread):
 				ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan))
 			except:
 				print 'There\'s no previous plan yet. It doesn\'t make any sense to use monitoring yet'
-				return False, 0, None
-			#print 'bb'
-			#print ret, stepsFwd, planMonitoring
+				return False, None
+			print 'bb'
+			print ret, stepsFwd, planMonitoring
 			if ret:
 				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
 				stored = True
