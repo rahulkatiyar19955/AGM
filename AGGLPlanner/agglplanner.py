@@ -8,7 +8,7 @@
 #
 #  A free/libre open source AI planner.
 #
-#  Copyright (C) 2013 - 2014 by Luis J. Manso
+#  Copyright (C) 2013 - 2016 by Luis J. Manso
 #
 #  AGGLPlanner is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
     @ingroup PyAPI
     This file loads the grammar, the initial state of the world and the GOAL status without changing the files extensions of the grammar and the goal.
 
-    MODE USE:	agglplanner gramatica.aggl init.xml target.py
+    MODE USE:	agglplanner grammar.aggl init.xml target.py
 
     Also, we can keep the results in a file with: agglplanner gramatica.aggl init.xml target.py result.plan
 """
@@ -1012,16 +1012,18 @@ if __name__ == '__main__': # program domain problem result
 		t0 = time.time()
 
 		if len(sys.argv)<5:
-			print 'Usage\n\t', sys.argv[0], ' domain.aggl activeRules.py init.xml target.xml.py [result.plan]'
+			print 'Usage\n\t', sys.argv[0], ' domain.aggl activeRules.py init.xml target.xml.py [result.plan] [input_hierarchical.plan]'
 
 		else:
 			domainAGM = AGMFileDataParsing.fromFile(sys.argv[1]) #From domain.aggl
 			domainPath = sys.argv[2] # Get the activeRules.py path
 			init = sys.argv[3]       # Get the inital model or world.
 			targetPath = sys.argv[4] # Get the target model or world.
-			resultFile = None        
+			resultFile = None
 			if len(sys.argv)>=6: resultFile = open(sys.argv[5], 'w')
+			hierarchicalInputPlan = None
+			if len(sys.argv)>=7: hierarchicalInputPlan = open(sys.argv[6], 'r')
 
-			p = PyPlan(domainAGM, domainPath, init, targetPath, '', dict(), [], resultFile)
-		print 'Tiempo Total: ', (time.time()-t0).__str__()
+			p = PyPlan(domainAGM, domainPath, init, targetPath, '', dict(), [], resultFile, hierarchicalInputPlan=hierarchicalInputPlan)
+		print 'Total time: ', (time.time()-t0).__str__()
 

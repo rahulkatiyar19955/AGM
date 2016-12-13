@@ -137,7 +137,7 @@ class PlannerCaller(threading.Thread):
 					print 'MONITOREANDO??', self.plannerExecutionID+1
 					print self.plan
 				except AttributeError:
-					callM = False	
+					callM = False
 				if callM:
 					print 'MONITOREANDO??'
 					peid = '_'+str(self.plannerExecutionID+1)
@@ -263,6 +263,7 @@ class PlannerCaller(threading.Thread):
 			print ret, stepsFwd, planMonitoring
 			if ret:
 				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
+				XXX
 				stored = True
 				self.plan = planMonitoring
 			else:

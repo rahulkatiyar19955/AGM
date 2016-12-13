@@ -100,7 +100,7 @@ if (ROBOCOMP_SUPPORT)
 	SET(ICE_LIBS -lIce)
 	ROBOCOMP_WRAP_ICE( AGMWorldModel AGMExecutive Planning AGMCommonBehavior )
 	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
-	SUBDIRS (${CMAKE_SOURCE_DIR}/tools/agmmission tools/agminner)
+	SUBDIRS (${CMAKE_SOURCE_DIR}/tools/agmmission tools/agminner tools/agmagentsim) 
 endif (ROBOCOMP_SUPPORT)
 
 # LibXML
