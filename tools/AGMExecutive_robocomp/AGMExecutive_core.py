@@ -130,17 +130,19 @@ class PlannerCaller(threading.Thread):
 				time.sleep(0.05)
 				continue
 
+			self.plannerExecutionID+=1
+
 			print 'w'
 			try:
 				callM = True
 				try:
-					print 'MONITOREANDO??', self.plannerExecutionID+1
+					print 'MONITOREANDO??', self.plannerExecutionID
 					print self.plan
 				except AttributeError:
 					callM = False
 				if callM:
 					print 'MONITOREANDO??'
-					peid = '_'+str(self.plannerExecutionID+1)
+					peid = '_'+str(self.plannerExecutionID)
 					print 'MONITOREANDO??', peid
 					stored, stepsFwd = self.callMonitoring(peid)
 					if stored:
@@ -163,7 +165,6 @@ class PlannerCaller(threading.Thread):
 				start = time.time()
 				#PRE
 				try:
-					self.plannerExecutionID+=1
 					peid = '_'+str(self.plannerExecutionID)
 					self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
 				except:
@@ -201,7 +202,6 @@ class PlannerCaller(threading.Thread):
 					print 'Running the planner?', stored==False
 
 
-					stored = False
 					if stored == False:
 						try:
 							print 'argss', argsss
