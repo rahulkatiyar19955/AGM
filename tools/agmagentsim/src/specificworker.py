@@ -46,6 +46,7 @@ class SpecificWorker(GenericWorker):
 		try:
 			plan = self.plan
 		except:
+			self.ui.currentLabel.setText('no plan yet')
 			print 'No plan yet'
 			return
 		try:
@@ -61,6 +62,7 @@ class SpecificWorker(GenericWorker):
 
 
 		print 'Action:   ', action.name
+		self.ui.currentLabel.setText(action.name)
 		print 'Paramters:', action.parameters
 		result = self.triggers[action.name](WorldStateHistory([model, self.triggers.keys()]), action.parameters).graph
 		print 'type(result)', type(result)
@@ -110,6 +112,10 @@ class SpecificWorker(GenericWorker):
 			print 'No model yet'
 			self.agmexecutive_proxy.broadcastModel()
 			return
+		print 'update plan'
+		self.ui.fullPlanText.setText(self.planText)
+		if len(self.plan.data) > 0:
+			self.ui.currentLabel.setText(self.plan.data[0].name)
 		return True
 
 

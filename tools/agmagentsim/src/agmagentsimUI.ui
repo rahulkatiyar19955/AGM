@@ -80,7 +80,7 @@
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_2">
            <item>
-            <widget class="QTextBrowser" name="fullPlanText"/>
+            <widget class="QTextEdit" name="fullPlanText"/>
            </item>
           </layout>
          </widget>
