@@ -35,7 +35,6 @@ import RoboCompPlanning
 
 import AGMModelConversion
 
-
 #ret, stepsFwd, planMonitoring =
 def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, plan, stepsFwd=0):
 	try:
@@ -44,9 +43,9 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 		traceback.print_exc()
 		sys.exit(134)
 
-	print 'AGMExecutiveMonitoring', len(plan)
 	try:
 		ret2 = False
+		# Perform recursive call
 		if len(currentPlan)>0:
 			try:
 				newPlan = copy.deepcopy(currentPlan.removeFirstAction(currentModel))
@@ -55,15 +54,16 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 				print steps, 'steps ahead did not work'
 				traceback.print_exc()
 				ret2 = False
+		# If a plan without the last action works, great, return such plan
 		if ret2:
 			print 'monitoring ok', stepsFwd
-			return ret2, stepsFwd2, planMonitoring2
+			return True, stepsFwd2, planMonitoring2
+		# Otherwise, check with the plan at hand
 		else:
-			print 'Trying one step ahead...', stepsFwd
 			try:
 				print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
-				print plan
-				p = PyPlanChecker(domainClass, domainPath, init, currentPlan, target, '', verbose=False)
+				print '(\n' + str(plan).strip() + '\n)'
+				p = PyPlanChecker(domainClass, domainPath, init, currentPlan, target, '', verbose=True)
 				if p.valid:
 					print 'GOT PLAN FROM MONITORING!!!'
 					print currentPlan
@@ -131,46 +131,48 @@ class PlannerCaller(threading.Thread):
 				continue
 
 			self.plannerExecutionID+=1
+			try:
+				peid = '_'+str(self.plannerExecutionID)
+				self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
+			except:
+				print traceback.print_exc()
+				print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
+				sys.exit(1)
 
-			#print 'w'
-			#try:
-				#callM = True
-				#try:
-					#print 'MONITOREANDO??', self.plannerExecutionID
-					#print self.plan
-				#except AttributeError:
-					#callM = False
-				#if callM:
-					#print 'MONITOREANDO??'
-					#peid = '_'+str(self.plannerExecutionID)
-					#print 'MONITOREANDO??', peid
-					#stored, stepsFwd = self.callMonitoring(peid)
-					#if stored:
-						#self.working = False
-						#self.executive.gotPlan(self.plan)
-						#print 'done aqui'
-						#self.plannerCallerMutex.release()
-						#time.sleep(0.05)
-						#continue
-				#else:
-					#print 'NO MONITOREANDO, NO PLAN PREVIO'
-			#except: # The planner was probably killed
-				#traceback.print_exc()
-				#return
 
+			print 'w'
+			try:
+				callM = True
+				try:
+					print 'MONITOREANDO??', self.plannerExecutionID
+					print self.plan
+				except AttributeError:
+					callM = False
+				print 'should we call monitoring to solve the plan at the begining?', callM
+				if callM:
+					print 'about to call self.callMonitoring', peid
+					stored, stepsFwd = self.callMonitoring(peid)
+					print 'self.callMonitoring results', stored, stepsFwd
+					if stored:
+						print 'got plan from monitoring'
+						self.working = False
+						self.executive.gotPlan(self.plan)
+						self.plannerCallerMutex.release()
+						time.sleep(0.05)
+						continue
+					else:
+						print 'didn\'t get plan from monitoring'
+				else:
+					print 'NO MONITOREANDO, NO PLAN PREVIO'
+			except: # The planner was probably killed
+				traceback.print_exc()
+				return
 
 			print 'PlannerCaller::run 2'
 			try:
 				# Run planner
 				start = time.time()
 				#PRE
-				try:
-					peid = '_'+str(self.plannerExecutionID)
-					self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
-				except:
-					print traceback.print_exc()
-					print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
-					sys.exit(1)
 				# CALL
 				argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
 				print 'Ask cache'
@@ -178,6 +180,11 @@ class PlannerCaller(threading.Thread):
 					cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
 				except:
 					cacheResult = False
+					
+				print 'IGNORING CACHE!!!!'
+				print 'IGNORING CACHE!!!!'
+				print 'IGNORING CACHE!!!!'
+				print 'IGNORING CACHE!!!!'
 				cacheResult = False
 				if cacheResult:
 					if len(cacheResult[1].strip()) == 0:
@@ -253,6 +260,10 @@ class PlannerCaller(threading.Thread):
 		domainPath = '/tmp/domainActive.py'
 		init   = '/tmp/lastWorld'+peid+'.xml'
 		target = '/tmp/target.py'
+		print 'PERFORMING MONITORING WITH:'
+		print 'domain', domainPath
+		print 'init  ', init
+		print 'target', target
 		try:
 			try:
 				ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan))

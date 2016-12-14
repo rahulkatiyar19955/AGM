@@ -44,34 +44,39 @@ class SpecificWorker(GenericWorker):
 
 	def commitAction(self):
 		try:
-			plan = self.plan
-		except:
-			self.ui.currentLabel.setText('no plan yet')
-			print 'No plan yet'
-			return
-		try:
-			model = self.internalModel
-		except:
-			print 'No model yet'
-			return
-		try:
-			action = plan.data[0]
-		except IndexError:
-			print 'No action to execute'
-			return
+			self.mutex.lock()
+			try:
+				plan = self.plan
+			except:
+				self.ui.currentLabel.setText('no plan yet')
+				print 'No plan yet'
+				return
+			try:
+				model = self.internalModel
+			except:
+				print 'No model yet'
+				return
+			try:
+				action = plan.data[0]
+			except IndexError:
+				print 'No action to execute'
+				return
 
 
-		print 'Action:   ', action.name
-		self.ui.currentLabel.setText(action.name)
-		print 'Paramters:', action.parameters
-		result = self.triggers[action.name](WorldStateHistory([model, self.triggers.keys()]), action.parameters).graph
-		print 'type(result)', type(result)
-		resultIce = AGMModelConversion.fromInternalToIce(result)
-		self.agmexecutive_proxy.structuralChangeProposal(resultIce, 'agmagentsim', action.name)
+			print 'Action:   ', action.name
+			self.ui.currentLabel.setText(action.name)
+			print 'Paramters:', action.parameters
+			result = self.triggers[action.name](WorldStateHistory([model, self.triggers.keys()]), action.parameters).graph
+			print 'type(result)', type(result)
+			resultIce = AGMModelConversion.fromInternalToIce(result)
+			self.agmexecutive_proxy.structuralChangeProposal(resultIce, 'agmagentsim', action.name)
+		finally:
+			self.mutex.unlock()
 
 
 	def requestPlan(self):
-		self.agmexecutive_proxy.broadcastPlan()
+		r = self.agmexecutive_proxy.broadcastPlan()
+		print 'request plan:', r
 
 	def setParams(self, params):
 		self.ui.commitButton.clicked.connect(self.commitAction)
@@ -104,15 +109,21 @@ class SpecificWorker(GenericWorker):
 			plan = self.plan
 		except:
 			print 'No plan yet'
+			self.ui.fullPlanText.setText('')
+			self.ui.currentLabel.setText('')
 			self.requestPlan()
 			return
 		try:
+			self.mutex.lock()
 			model = self.internalModel
 		except:
 			print 'No model yet'
-			self.agmexecutive_proxy.broadcastModel()
+			w = self.agmexecutive_proxy.getModel()
+			self.internalModel = AGMModelConversion.fromIceToInternal_model(w, ignoreInvalidEdges=True)
 			return
-		print 'update plan'
+		finally:
+			self.mutex.unlock()
+
 		self.ui.fullPlanText.setText(self.planText)
 		if len(self.plan.data) > 0:
 			self.ui.currentLabel.setText(self.plan.data[0].name)
@@ -139,11 +150,11 @@ class SpecificWorker(GenericWorker):
 			self.executiveTopic.edgesUpdated(edges)
 			for edge in edges:
 				found = False
-				for i in xrange(len(self.currentModel.links)):
-					if str(self.currentModel.links[i].a) == str(edge.a):
-						if str(self.currentModel.links[i].b) == str(edge.b):
-							if str(self.currentModel.links[i].linkType) == str(edge.edgeType):
-								self.currentModel.links[i].attributes = copy.deepcopy(edge.attributes)
+				for i in xrange(len(self.internalModel.links)):
+					if str(self.internalModel.links[i].a) == str(edge.a):
+						if str(self.internalModel.links[i].b) == str(edge.b):
+							if str(self.internalModel.links[i].linkType) == str(edge.edgeType):
+								self.internalModel.links[i].attributes = copy.deepcopy(edge.attributes)
 								found = True
 				if not found:
 					print 'couldn\'t update edge because no match was found'
@@ -165,7 +176,7 @@ class SpecificWorker(GenericWorker):
 			try:
 				for symbol in symbols:
 					internal = AGMModelConversion.fromIceToInternal_node(symbol)
-					self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
+					self.internalModel.nodes[internal.name] = copy.deepcopy(internal)
 			except:
 				print traceback.print_exc()
 				print 'There was some problem with update node'

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>516</width>
+    <width>896</width>
     <height>443</height>
    </rect>
   </property>
@@ -73,17 +73,17 @@
           </property>
          </widget>
         </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="groupBox">
+       <property name="title">
+        <string>full remaining plan</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
         <item>
-         <widget class="QGroupBox" name="groupBox">
-          <property name="title">
-           <string>Full remaining plan</string>
-          </property>
-          <layout class="QVBoxLayout" name="verticalLayout_2">
-           <item>
-            <widget class="QTextEdit" name="fullPlanText"/>
-           </item>
-          </layout>
-         </widget>
+         <widget class="QTextBrowser" name="fullPlanText"/>
         </item>
        </layout>
       </widget>
