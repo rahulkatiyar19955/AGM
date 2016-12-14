@@ -52,11 +52,12 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 			try:
 				newPlan = copy.deepcopy(currentPlan.removeFirstAction(currentModel))
 				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, newPlan, stepsFwd+1)
-				monitoringPlan = AGGLPlannerPlan(planMonitoring2)
-				if len(monitoringPlan.data) > 0:
-					if monitoringPlan.data[0].hierarchical:
-						print stepsFwd2, 'steps ahead did not work because first action was hierarchical'
-						ret2 = False
+				if ret2:
+					monitoringPlan = AGGLPlannerPlan(planMonitoring2)
+					if len(monitoringPlan.data) > 0:
+						if monitoringPlan.data[0].hierarchical:
+							print stepsFwd2, 'steps ahead did not work because first action was hierarchical'
+							ret2 = False
 			except:
 				print stepsFwd2, 'steps ahead did not work'
 				traceback.print_exc()
