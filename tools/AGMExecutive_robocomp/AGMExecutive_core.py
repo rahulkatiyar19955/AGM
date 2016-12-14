@@ -35,6 +35,8 @@ import RoboCompPlanning
 
 import AGMModelConversion
 
+
+
 #ret, stepsFwd, planMonitoring =
 def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, plan, stepsFwd=0):
 	try:
@@ -50,8 +52,13 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 			try:
 				newPlan = copy.deepcopy(currentPlan.removeFirstAction(currentModel))
 				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, newPlan, stepsFwd+1)
+				monitoringPlan = AGGLPlannerPlan(planMonitoring2)
+				if len(monitoringPlan.data) > 0:
+					if monitoringPlan.data[0].hierarchical:
+						print stepsFwd2, 'steps ahead did not work because first action was hierarchical'
+						ret2 = False
 			except:
-				print steps, 'steps ahead did not work'
+				print stepsFwd2, 'steps ahead did not work'
 				traceback.print_exc()
 				ret2 = False
 		# If a plan without the last action works, great, return such plan
@@ -270,11 +277,9 @@ class PlannerCaller(threading.Thread):
 			except:
 				print 'There\'s no previous plan yet. It doesn\'t make any sense to use monitoring yet'
 				return False, None
-			print 'bb'
-			print ret, stepsFwd, planMonitoring
+			print 'AGMExecutiveMonitoring() results:', ret, stepsFwd, planMonitoring
 			if ret:
 				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
-				#XXX
 				stored = True
 				self.plan = planMonitoring
 			else:
