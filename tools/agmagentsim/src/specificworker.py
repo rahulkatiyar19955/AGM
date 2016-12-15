@@ -36,11 +36,18 @@ import xmlModelParser
 import AGMModelConversion
 
 class SpecificWorker(GenericWorker):
+	events = {}
+	Period = 100
+
 	def __init__(self, proxy_map):
 		super(SpecificWorker, self).__init__(proxy_map)
 		self.timer.timeout.connect(self.compute)
-		self.Period = 100
 		self.timer.start(self.Period)
+		self.ui.historyWidgetList.itemClicked.connect(self.historyItemClicked)
+
+
+
+
 
 	def commitAction(self):
 		try:
@@ -100,6 +107,9 @@ class SpecificWorker(GenericWorker):
 		print self.planText
 		print '\nFirst action:'
 		print self.firstActionText
+		ev_ident = QtCore.QTime.currentTime().toString("hh:mm:ss.zzz") + " (plan)"
+		self.events[ev_ident] = self.planText
+		self.ui.historyWidgetList.addItem(ev_ident)
 		return True
 
 
@@ -130,12 +140,24 @@ class SpecificWorker(GenericWorker):
 		return True
 
 
+	def historyItemClicked(self, item):
+		print 'teta Clicked', item.text()
+		text = self.events[item.text()]
+		print 'text', text
+		self.ui.historyWidgetView.setText(text)
+
+
 	#
 	# structuralChange
 	#
 	def structuralChange(self, w):
 		self.mutex.lock()
 		self.internalModel = AGMModelConversion.fromIceToInternal_model(w, ignoreInvalidEdges=True)
+		ev_ident = QtCore.QTime.currentTime().toString("hh:mm:ss.zzz") + " (model)"
+		self.events[ev_ident] = self.internalModel.toXMLString()
+		self.ui.historyWidgetList.addItem(ev_ident)
+
+
 		self.mutex.unlock()
 
 	#

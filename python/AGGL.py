@@ -426,6 +426,22 @@ class AGMGraph(object):
 		f.write('</AGMModel>\n\n')
 		f.close()
 
+	def toXMLString(self):
+		f = ''
+		f += '<AGMModel>\n'
+		for n in self.nodes:
+			f += '\t<symbol id="'+str(self.nodes[n].name)+'" type="'+str(self.nodes[n].sType)+'">\n'
+			for attr in self.nodes[n].attributes.keys():
+				f += '\t\t<attribute key="'+attr+'" value="'+self.nodes[n].attributes[attr]+'" />\n'
+			f += '\t</symbol>\n'
+		for l in self.links:
+			f += '\t<link src="'+str(l.a)+'" dst="'+str(l.b)+'" label="'+str(l.linkType)+'" >\n'
+			for attr in l.attributes.keys():
+				f += '\t\t<linkAttribute key="'+attr+'" value="'+l.attributes[attr]+'" />\n'
+			f += '\t</link>\n'
+		f += '</AGMModel>\n\n'
+		return f
+
 
 ## AGM Rule
 # @ingroup PyAPI
