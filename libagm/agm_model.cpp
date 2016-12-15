@@ -1205,6 +1205,8 @@ std::map<std::string, AGMModelSymbol::SPtr> AGMModel::getSymbolsMap(::RoboCompAG
 	std::map<std::string, AGMModelSymbol::SPtr> ret;
 	for (auto v : params)
 	{
+		if(v.first == "modelversion")
+			continue;
 		int r = str2int(params[v.first].value);
 		if (r>0)
 		{
