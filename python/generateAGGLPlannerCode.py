@@ -929,7 +929,7 @@ def CheckTarget(graph):\n
 	else:
 		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping=dict()): # vm'
 		indent += "\t"
-		ret += indent + 'print "' + forHierarchicalRule + '_target"\n'
+		#ret += indent + 'print "' + forHierarchicalRule + '_target"\n'
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 		ret += indent+"available = copy.deepcopy(graph.nodes)"
 

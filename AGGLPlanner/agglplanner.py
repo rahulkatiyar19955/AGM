@@ -319,6 +319,11 @@ class AGGLPlannerPlan(object):
 						action.parameters[parameter] = n
 		return c
 
+	def removeFirstActions(self, currentModel, n):
+		c = copy.deepcopy(currentModel)
+		for i in xrange(n):
+			self.removeFirstAction(c)
+
 	def removeFirstActionDirect(self):
 		## @internal Create the copy without the first actions.
 		c = AGGLPlannerPlan()

@@ -45,8 +45,16 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 		traceback.print_exc()
 		sys.exit(134)
 
+	# If there is a hierarchical rule in the plan, just monitor the plan up to the goal of such action
 	for index, action in enumerate(currentPlan.data):
 		if action.name.startswith('#!'):
+			if index == 0:
+				plan.removeFirstActionDirect()
+				ret, stepsFwd2, currentPlan2 = AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, plan, stepsFwd)
+				stepsFwd2 += 1
+				currentPlan2 = AGGLPlannerPlan(str(currentPlan), planFromText=True)
+				del currentPlan2.data[:stepsFwd2]
+				return ret2, stepsFwd2, currentPlan2
 			actionName = action.name[2:]
 			partialPlan = copy.deepcopy(currentPlan)
 			partialPlan.data = partialPlan.data[:index]
@@ -59,10 +67,16 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 				except:
 					traceback.print_exc()
 					sys.exit(1)
-			ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domainClass, domainPath, init, copy.deepcopy(currentModel), partialTarget, partialPlan)
-			currentPlan2 = copy.deepcopy(currentPlan)
-			currentPlan2.data[stepsFwd2:]
+			ret2, stepsFwd2, planWhichIsIgnored = AGMExecutiveMonitoring(domainClass, domainPath, copy.deepcopy(init), copy.deepcopy(currentModel), partialTarget, copy.deepcopy(partialPlan))
+			currentPlan2 = AGGLPlannerPlan(str(currentPlan), planFromText=True)
+			del currentPlan2.data[:stepsFwd2]
+			if len(currentPlan2.data) > 0:
+				if currentPlan2.data[0].name.startswith('#!'):
+					del currentPlan2.data[:1]
+					stepsFwd2 += 1
 			return ret2, stepsFwd2, currentPlan2
+
+	# Otherwise, monitor the full plan
 	try:
 		ret2 = False
 		# Perform recursive call
@@ -79,11 +93,11 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 			except:
 				traceback.print_exc()
 				ret2 = False
-		# If a plan without the last action works, great, return such plan
-		if ret2:
+		if ret2: # If a plan without the last action works, great, return such plan
+
 			return True, stepsFwd2, planMonitoring2
-		# Otherwise, check with the plan at hand
-		else:
+		else:    # Otherwise, check with the plan at hand
+
 			try:
 				#print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
 				#print '(\n' + str(plan).strip() + '\n)'
@@ -93,7 +107,6 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 					print currentPlan
 					return True, stepsFwd, currentPlan
 				else:
-					print 'AGMExecutiveMonitoring:: DID\'NT GET PLAN FROM MONITORING!!!'
 					return False, 0, None
 			except:
 				traceback.print_exc()
@@ -290,7 +303,7 @@ class PlannerCaller(threading.Thread):
 					print traceback.print_exc()
 					print 'PlannerCaller::callMonitoring Error calling AGMExecutiveMonitoring'
 					return False, None
-			except NameError:
+			except (NameError, AttributeError) as e:
 				print 'PlannerCaller::callMonitoring There\'s no previous plan yet. It doesn\'t make any sense to use monitoring yet'
 				return False, None
 			#print 'AGMExecutiveMonitoring() results:', ret, stepsFwd, planMonitoring
