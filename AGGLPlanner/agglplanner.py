@@ -226,7 +226,7 @@ class AGGLPlannerAction(object):
 				self.hierarchical = True
 			else:
 				self.hierarchical = False
-			if self.name[0] != '#':
+			if not (self.name[0] == '#' and self.name[1] != '!'):
 				#print parts[1]
 				self.parameters = eval(parts[1])
 		else:
@@ -273,7 +273,7 @@ class AGGLPlannerPlan(object):
 						if line[-1]=='\n': line = line[:-1]
 						else: break
 					if len(line)>0:
-						if line[0] != '#':
+						if not (line[0] == '#' and line[1] != '!'):
 							try:
 								self.data.append(AGGLPlannerAction(line))
 							except:
@@ -285,7 +285,7 @@ class AGGLPlannerPlan(object):
 		elif type(init) == type([]):
 			# we take each element of the list and we save it as a grammar rule.
 			for action in init:
-				if action[0][0] != '#':
+				if not (action[0][0] == '#' and action[0][1] != '!'):
 					#print type(action), len(action), action
 					self.data.append(AGGLPlannerAction(action[0]+'@'+str(action[1])))
 		#IF INIT IS A COMPLETE PLAN
@@ -440,7 +440,7 @@ def printResult(result):
 		print 'Score', result.score
 		l = 0
 		for action in result.history:
-			if action[0] != '#':
+			if not (action[0] == '#' and action[1] != '!'):
 				l += 1
 		print 'Length', l
 		print 'Actions\n----------------'
@@ -770,6 +770,7 @@ class PyPlan(object):
 			planConDescomposicion = False
 			if len(self.results[i].history) > 0:
 				action = self.results[i].history[0]
+				print type(action)
 				ac = AGGLPlannerAction(action)
 				if ac.hierarchical:
 					self.excludeList.append(ac.name)
@@ -810,7 +811,9 @@ class PyPlan(object):
 						del self.results[:]
 					else:
 						self.results[i].history = self.results[i].history[1:]
-					
+					print 'AQUI', str(ac)
+					self.results[i].history.insert(0, '#!'+str(ac))
+					print 'AQUI', self.results[i].history
 				else:
 					planConDescomposicion = False
 			
@@ -822,7 +825,7 @@ class PyPlan(object):
 						if type(resultFile) == type([]):
 							resultFile.append(action)
 						else:
-							resultFile.write(str(action)+'\n')			
+							resultFile.write(str(action)+'\n')
 				if descomponiendo == False and planConDescomposicion == True:
 					print 'FINAL PLAN WITH: ', len(total), ' ACTIONS:'
 					for action in total:

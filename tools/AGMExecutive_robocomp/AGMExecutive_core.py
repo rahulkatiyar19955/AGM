@@ -45,6 +45,24 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 		traceback.print_exc()
 		sys.exit(134)
 
+	for index, action in enumerate(currentPlan.data):
+		if action.name.startswith('#!'):
+			actionName = action.name[2:]
+			partialPlan = copy.deepcopy(currentPlan)
+			partialPlan.data = partialPlan.data[:index]
+			domain = imp.load_source('domain', domainPath).RuleSet() # activeRules.py
+			def partialTarget(graph):
+				g = copy.deepcopy(graph)
+				aname = copy.deepcopy(actionName)
+				try:
+					return domain.getHierarchicalTargets()[aname](g, copy.deepcopy(action.parameters))
+				except:
+					traceback.print_exc()
+					sys.exit(1)
+			ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domainClass, domainPath, init, copy.deepcopy(currentModel), partialTarget, partialPlan)
+			currentPlan2 = copy.deepcopy(currentPlan)
+			currentPlan2.data[stepsFwd2:]
+			return ret2, stepsFwd2, currentPlan2
 	try:
 		ret2 = False
 		# Perform recursive call
@@ -59,25 +77,23 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 							print stepsFwd2, 'steps ahead did not work because first action was hierarchical'
 							ret2 = False
 			except:
-				print stepsFwd2, 'steps ahead did not work'
 				traceback.print_exc()
 				ret2 = False
 		# If a plan without the last action works, great, return such plan
 		if ret2:
-			print 'monitoring ok', stepsFwd
 			return True, stepsFwd2, planMonitoring2
 		# Otherwise, check with the plan at hand
 		else:
 			try:
-				print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
-				print '(\n' + str(plan).strip() + '\n)'
-				p = PyPlanChecker(domainClass, domainPath, init, currentPlan, target, '', verbose=True)
+				#print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
+				#print '(\n' + str(plan).strip() + '\n)'
+				p = PyPlanChecker(domainClass, domainPath, init, currentPlan, target, '', verbose=False)
 				if p.valid:
-					print 'GOT PLAN FROM MONITORING!!!'
+					print 'AGMExecutiveMonitoring:: GOT PLAN FROM MONITORING!!!'
 					print currentPlan
 					return True, stepsFwd, currentPlan
 				else:
-					print 'doesn\'t work'
+					print 'AGMExecutiveMonitoring:: DID\'NT GET PLAN FROM MONITORING!!!'
 					return False, 0, None
 			except:
 				traceback.print_exc()
@@ -104,10 +120,10 @@ class PlannerCaller(threading.Thread):
 		self.agmData.generateAGGLPlannerCode("/tmp/domainPasive.py", skipPassiveRules=True)
 
 	def setWork(self, currentModel):
-		print 'PlannerCaller::setWork 0'
+		#print 'PlannerCaller::setWork 0'
 		# Kill any previous planning process
 		while self.plannerCallerMutex.acquire(0)==False:
-			print 'PlannerCaller::setWork 0.5'
+			#print 'PlannerCaller::setWork 0.5'
 			now = time.time()
 			elap = (now - self.lastPypyKill)
 			if elap > 2.:
@@ -116,7 +132,7 @@ class PlannerCaller(threading.Thread):
 				self.lastPypyKill = now
 			time.sleep(0.1)
 		# Set work
-		print 'PlannerCaller::setWork 1'
+		#print 'PlannerCaller::setWork 1'
 		self.working = True
 		self.currentModel = currentModel
 		# End
@@ -148,57 +164,50 @@ class PlannerCaller(threading.Thread):
 				sys.exit(1)
 
 
-			print 'w'
 			try:
 				callM = True
 				try:
-					print 'MONITOREANDO??', self.plannerExecutionID
-					print self.plan
+					#print 'MONITOREANDO??', self.plannerExecutionID
+					self.plan
 				except AttributeError:
 					callM = False
-				print 'should we call monitoring to solve the plan at the begining?', callM
 				if callM:
-					print 'about to call self.callMonitoring', peid
 					stored, stepsFwd = self.callMonitoring(peid)
-					print 'self.callMonitoring results', stored, stepsFwd
 					if stored:
-						print 'got plan from monitoring'
+						print 'PlannerCaller::run: got plan from monitoring'
 						self.working = False
 						self.executive.gotPlan(self.plan)
 						self.plannerCallerMutex.release()
 						time.sleep(0.05)
 						continue
 					else:
-						print 'didn\'t get plan from monitoring'
-				else:
-					print 'NO MONITOREANDO, NO PLAN PREVIO'
+						print 'PlannerCaller::run didn\'t get plan from monitoring'
 			except: # The planner was probably killed
 				traceback.print_exc()
 				return
 
-			print 'PlannerCaller::run 2'
+			#print 'PlannerCaller::run 2'
 			try:
 				# Run planner
 				start = time.time()
 				#PRE
 				# CALL
 				argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
-				print 'Ask cache'
+				print 'PlannerCaller::run Ask cache'
 				try:
 					cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
 				except:
 					cacheResult = False
-					
-				print 'IGNORING CACHE!!!!'
-				print 'IGNORING CACHE!!!!'
-				print 'IGNORING CACHE!!!!'
-				print 'IGNORING CACHE!!!!'
+
+				print 'PlannerCaller::run IGNORING CACHE!!!!'
+				print 'PlannerCaller::run IGNORING CACHE!!!!'
+				print 'PlannerCaller::run IGNORING CACHE!!!!'
 				cacheResult = False
 				if cacheResult:
 					if len(cacheResult[1].strip()) == 0:
 						cacheResult = None
 				if cacheResult:
-					print 'Got plan from cache'
+					print 'PlannerCaller::run Got plan from cache'
 					print '<<<'
 					print cacheResult[1]
 					print '>>>'
@@ -208,51 +217,51 @@ class PlannerCaller(threading.Thread):
 				else:
 					stored = False
 					try:
-						print 'Not found in cache, checking monitoring...'
+						print 'PlannerCaller::run  Not found in cache, checking monitoring...'
 						stored, stepsFwd = self.callMonitoring(peid)
-						print 'callMonitoring', stored, stepsFwd
+						print 'PlannerCaller::run callMonitoring', stored, stepsFwd
 					except:
-						print 'Can\'t get plan from monitoring'
+						print 'PlannerCaller::run Can\'t get plan from monitoring'
 						pass
-					print 'Running the planner?', stored==False
+					print 'PlannerCaller::run Running the planner?', stored==False
 
 
 					if stored == False:
 						try:
-							print 'argss', argsss
-							print 'call', argsss
+							#print 'argss', argsss
+							#print 'call', argsss
 							subprocess.call(argsss)
-							print 'done calling', argsss
+							print 'PlannerCaller::run done calling', argsss
 						except:
 							traceback.print_exc()
 						#CONTINUE?                       Probably it's better just to try to open the file and consider it was killed if there's no result file...
 						end = time.time()
-						print 'It took', end - start, 'seconds'
-						print 'includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
+						print 'PlannerCaller::run It took', end - start, 'seconds'
+						print 'PlannerCaller::run includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
 						try:
 							ofile = open("/tmp/result"+peid+".txt", 'r')
 						except:
-							print "Can't open plan. We assume a new context was forced"
+							print "PlannerCaller::run Can't open plan. We assume a new context was forced"
 							continue
 						try:
-							lines = self.ignoreCommentsInPlan(ofile.readlines())
+							lines = ofile.readlines()
 							if len(''.join(lines).strip()) > 0:
 								self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
 							ofile.close()
+							
 						except:
-							print 'Weird error xx'
+							print 'PlannerCaller::run Weird error xx'
 							pass
 				# Get the output
 				try:
 					self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
-					print 'self.plan', self.plan
+					#print 'self.plan', self.plan
 					stored, stepsFwd = self.callMonitoring(peid)
 				except: # The planner was probably killed
 					traceback.print_exc()
 					return
 				self.working = False
 				self.executive.gotPlan(self.plan)
-				print 'done aca'
 			finally:
 				self.plannerCallerMutex.release()
 
@@ -261,43 +270,49 @@ class PlannerCaller(threading.Thread):
 	def callMonitoring(self, peid):
 		stored = False
 		stepsFwd = 0
-		print 'Trying with the last steps of the current plan...'
-		print '(( CURRENT PLAN'
-		print self.plan
-		print ')) CURRENT PLAN'
+		#print 'Trying with the last steps of the current plan...'
+		#print '(( CURRENT PLAN'
+		#print self.plan
+		#print ')) CURRENT PLAN'
 		domainPath = '/tmp/domainActive.py'
 		init   = '/tmp/lastWorld'+peid+'.xml'
 		target = '/tmp/target.py'
-		print 'PERFORMING MONITORING WITH:'
-		print 'domain', domainPath
-		print 'init  ', init
-		print 'target', target
+		#print 'PERFORMING MONITORING WITH:'
+		#print 'domain', domainPath
+		#print 'init  ', init
+		#print 'target', target
 		try:
 			try:
-				ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan))
-			except:
-				print 'There\'s no previous plan yet. It doesn\'t make any sense to use monitoring yet'
+				self.plan
+				try:
+					ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan))
+				except:
+					print traceback.print_exc()
+					print 'PlannerCaller::callMonitoring Error calling AGMExecutiveMonitoring'
+					return False, None
+			except NameError:
+				print 'PlannerCaller::callMonitoring There\'s no previous plan yet. It doesn\'t make any sense to use monitoring yet'
 				return False, None
-			print 'AGMExecutiveMonitoring() results:', ret, stepsFwd, planMonitoring
+			#print 'AGMExecutiveMonitoring() results:', ret, stepsFwd, planMonitoring
 			if ret:
-				print 'Using a ', stepsFwd, 'step forwarded version of the previous plan'
+				print 'PlannerCaller::callMonitoring Using a ', stepsFwd, 'step forwarded version of the previous plan'
 				stored = True
 				self.plan = planMonitoring
 			else:
-				print 'No modified version of the current plan satisfies the goal. Replanning is necessary.'
+				print 'PlannerCaller::callMonitoring No modified version of the current plan satisfies the goal. Replanning is necessary.'
 				stored = False
 		except:
 			print traceback.print_exc()
-			print 'It didn\'t seem to work.'
+			print 'PlannerCaller::callMonitoring: It didn\'t seem to work.'
 			stored = False
-		print 'done callMonitoring', stored, stepsFwd
+		#print 'done callMonitoring', stored, stepsFwd
 		return stored, stepsFwd
 
 	def ignoreCommentsInPlan(self, plan):
 		ret = []
 		for i in plan:
-			if len(i) > 0:
-				if i[0] != '#':
+			if len(i) > 2:
+				if not (i[0] == '#' and i[1] != '!'):
 					ret.append(i)
 		return ret
 
@@ -352,27 +367,25 @@ class Executive(object):
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
-		print 'structuralChangeProposal', sender, log
+		print 'Executive::structuralChangeProposal:', sender, log
 		# Get structuralChange mutex
-		print 'structuralChangeProposal acquire() a'
+		print 'Executive::structuralChangeProposal: structuralChangeProposal acquire() a'
 		for iixi in xrange(5):
 			gotMutex = self.mutex.acquire(blocking=False)
 			if gotMutex == True:
 				break
 			else:
 				if iixi == 4:
-					print 'structuralChangeProposal acquire() IT WAS LOCKED'
+					print 'Executive::structuralChangeProposal: structuralChangeProposal acquire() IT WAS LOCKED'
 					raise RoboCompAGMExecutive.Locked()
 				else:
 					time.sleep(0.03)
-		print 'CURRENT VERSION', self.lastModification.version
+		print 'Executive::structuralChangeProposal:CURRENT VERSION', self.lastModification.version
 		try:
-			print 'structuralChangeProposal acquire() z'
 			# Ignore outdated modifications
 			if worldModelICE.version != self.lastModification.version:
-				print 'outdated!??!  self='+str(self.lastModification.version)+'   ice='+str(worldModelICE.version)
+				print 'Executive::structuralChangeProposal: outdated!??!  self='+str(self.lastModification.version)+'   ice='+str(worldModelICE.version)
 				raise RoboCompAGMExecutive.OldModel()
-			print 'inside'
 			# Here we're OK with the modification, accept it, but first check if replanning is necessary
 			worldModelICE.version += 1
 			internalModel = AGMModelConversion.fromIceToInternal_model(worldModelICE, ignoreInvalidEdges=True) # set internal model
@@ -396,7 +409,7 @@ class Executive(object):
 				self.setAndBroadcastModel(internalModel)
 			except:
 				print traceback.print_exc()
-				print 'There was some problem broadcasting the model'
+				print 'Executive::structuralChangeProposal: There was some problem broadcasting the model'
 				sys.exit(-1)
 			# Force replanning
 			try:
@@ -404,7 +417,7 @@ class Executive(object):
 					self.updatePlan()
 			except:
 				print traceback.print_exc()
-				print 'There was some problem updating internal model to xml'
+				print 'Executive::structuralChangeProposal: There was some problem updating internal model to xml'
 		finally:
 			self.mutex.release()
 		return
@@ -421,7 +434,7 @@ class Executive(object):
 					self.currentModel.nodes[internal.name] = copy.deepcopy(internal)
 			except:
 				print traceback.print_exc()
-				print 'There was some problem with update node'
+				print 'Executive::symbolsUpdate: There was some problem with update node'
 				sys.exit(1)
 			self.executiveTopic.symbolsUpdated(symbols)
 		finally:
@@ -447,8 +460,8 @@ class Executive(object):
 								self.currentModel.links[i].attributes = copy.deepcopy(edge.attributes)
 								found = True
 				if not found:
-					print 'couldn\'t update edge because no match was found'
-					print 'edge', edge.a, edge.b, edge.edgeType
+					print 'Executive::edgesUpdate: couldn\'t update edge because no match was found'
+					print 'Executive::edgesUpdate: edge', edge.a, edge.b, edge.edgeType
 		finally:
 			self.mutex.release()
 
@@ -462,11 +475,11 @@ class Executive(object):
 			ofile.write(self.target)
 			ofile.close()
 			if not avoidUpdate:
-				print 'do update plan'
+				print 'Executive::setMission: do update plan'
 				self.updatePlan()
 		except:
 			print traceback.print_exc()
-			print 'There was some problem setting the mission'
+			print 'Executive::setMission: There was some problem setting the mission'
 			sys.exit(1)
 		self.mutex.release()
 
@@ -496,20 +509,20 @@ class Executive(object):
 			self.sendParams()
 		except:
 			print traceback.print_exc()
-			print 'There was some problem broadcasting the plan'
+			print 'Executive::broadcastPlan: was some problem broadcasting the plan'
 			sys.exit(1)
 		self.mutex.release()
 
 	def broadcastModel(self):
 		self.mutex.acquire( )
 		try:
-			print '<<<broadcastinnn'
+			print 'Executive::broadcastModel: <<<broadcastinnn'
 			print self.currentModel.filterGeometricSymbols()
 			self.executiveTopic.structuralChange(AGMModelConversion.fromInternalToIce(self.currentModel))
-			print 'broadcastinnn>>>'
+			print 'Executive::broadcastModel: broadcastinnn>>>'
 		except:
 			print traceback.print_exc()
-			print 'There was some problem broadcasting the model'
+			print 'Executive::broadcastModel:There was some problem broadcasting the model'
 			sys.exit(1)
 		self.mutex.release()
 	#########################################################################
@@ -544,7 +557,7 @@ class Executive(object):
 			action = self.plan.data[0].name
 			parameterMap = self.plan.data[0].parameters
 
-		print 'action: <'+action+'>  parameters:  <'+str(parameterMap)+'>'
+		print 'Executive::gotPlan: action: <'+action+'>  parameters:  <'+str(parameterMap)+'>'
 		# Prepare parameters
 		params = dict()
 		params['action'] = RoboCompAGMCommonBehavior.Parameter()
@@ -565,13 +578,12 @@ class Executive(object):
 		self.sendParams()
 		# Publish new information using the executiveVisualizationTopic
 		self.publishExecutiveVisualizationTopic()
-		print 'done'
+		print 'Executive::gotPlan: done'
 
 	#
 	#
 	def publishExecutiveVisualizationTopic(self):
 		try:
-			print self.plan
 			planPDDL = RoboCompPlanning.Plan() # Generate a PDDL-like version of the current plan for visualization
 			planPDDL.cost = -2.
 			try:
@@ -584,16 +596,16 @@ class Executive(object):
 					planPDDL.actions.append(action)
 			except:
 				traceback.print_exc()
-				print 'Error generating PDDL-like version of the current plan'
+				print 'Executive::publishExecutiveVisualizationTopic: Error generating PDDL-like version of the current plan'
 			self.executiveVisualizationTopic.update(self.worldModelICE, ''.join(open(self.targetStr, "r").readlines()), planPDDL)
 		except:
 			traceback.print_exc()
-			print "can't publish executiveVisualizationTopic.update"
+			print "Executive::publishExecutiveVisualizationTopic: can't publish executiveVisualizationTopic.update"
 
 	#
 	#
 	def sendParams(self):
-		print 'Send plan to'
+		print 'Executive::sendParams: Send plan to'
 		for agent in self.agents:
 			print '\t', agent,
 			try:
