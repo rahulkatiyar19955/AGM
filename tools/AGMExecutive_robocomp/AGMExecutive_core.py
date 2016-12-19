@@ -581,6 +581,10 @@ class Executive(object):
 		params['plan'].editable = False
 		params['plan'].value = str(self.plan)
 		params['plan'].type = 'string'
+		params['modelversion'] = RoboCompAGMCommonBehavior.Parameter()
+		params['modelversion'].editable = False
+		params['modelversion'].value = str(self.currentModel.version)
+		params['modelversion'].type = 'string'
 		for p in parameterMap.keys():
 			params[p] = RoboCompAGMCommonBehavior.Parameter()
 			params[p].editable = False
