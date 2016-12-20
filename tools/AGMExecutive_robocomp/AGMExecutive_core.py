@@ -40,10 +40,11 @@ import AGMModelConversion
 #ret, stepsFwd, planMonitoring =
 def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, plan, stepsFwd=0):
 	try:
-		currentPlan = AGGLPlannerPlan(plan)
+		currentPlan = AGGLPlannerPlan(plan, planFromText=True)
 	except:
 		traceback.print_exc()
 		sys.exit(134)
+
 
 	# If there is a hierarchical rule in the plan, just monitor the plan up to the goal of such action
 	for index, action in enumerate(currentPlan.data):
@@ -63,6 +64,8 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 				g = copy.deepcopy(graph)
 				aname = copy.deepcopy(actionName)
 				try:
+					if aname.startswith('*'):
+						aname = aname[1:]
 					return domain.getHierarchicalTargets()[aname](g, copy.deepcopy(action.parameters))
 				except:
 					traceback.print_exc()
@@ -85,7 +88,7 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 				newPlan = copy.deepcopy(currentPlan.removeFirstAction(currentModel))
 				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, newPlan, stepsFwd+1)
 				if ret2:
-					monitoringPlan = AGGLPlannerPlan(planMonitoring2)
+					monitoringPlan = AGGLPlannerPlan(planMonitoring2, planFromText=True)
 					if len(monitoringPlan.data) > 0:
 						if monitoringPlan.data[0].hierarchical:
 							print stepsFwd2, 'steps ahead did not work because first action was hierarchical'
@@ -287,6 +290,33 @@ class PlannerCaller(threading.Thread):
 		#print '(( CURRENT PLAN'
 		#print self.plan
 		#print ')) CURRENT PLAN'
+
+
+
+		#print 'PLAN TYPE:', type(self.plan)
+		for a in self.plan.data:
+			print a.name
+		#print 'LENGTH:', len(self.plan.data)
+		if len(self.plan.data)>0:
+			print self.plan.data[0].name, self.plan.data[0].hierarchical
+			if self.plan.data[0].name.startswith('#'):
+				print 'AGMExecutive::callMonitoring: first action is a comment? Replanning is necessary'
+				return False, None
+			if self.plan.data[0].hierarchical:
+				print 'AGMExecutive::callMonitoring: first action is hierarchical. Replanning is necessary'
+				return False, None
+		if len(self.plan.data)>1:
+			print self.plan.data[1].name, self.plan.data[1].hierarchical
+			if self.plan.data[1].name.startswith('#'):
+				print 'AGMExecutive::callMonitoring: first action is a comment? Replanning is necessary'
+				return False, None
+			if self.plan.data[1].hierarchical:
+				print 'AGMExecutive::callMonitoring: first action is hierarchical. Replanning is necessary'
+				return False, None
+
+
+
+
 		domainPath = '/tmp/domainActive.py'
 		init   = '/tmp/lastWorld'+peid+'.xml'
 		target = '/tmp/target.py'
@@ -298,7 +328,7 @@ class PlannerCaller(threading.Thread):
 			try:
 				self.plan
 				try:
-					ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan))
+					ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan, planFromText=True))
 				except:
 					print traceback.print_exc()
 					print 'PlannerCaller::callMonitoring Error calling AGMExecutiveMonitoring'

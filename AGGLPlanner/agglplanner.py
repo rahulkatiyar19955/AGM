@@ -218,7 +218,6 @@ class AGGLPlannerAction(object):
 			#we save the the list of all the words in the string, using @ as the separator
 			parts = init.split('@')
 			self.name = parts[0]
-			#print self.name
 			#print self.name[0], self.name[0] == '*'
 			if self.name[0] == '*':
 				#print 'hierarchical'
@@ -235,7 +234,11 @@ class AGGLPlannerAction(object):
 	##@brief This method returns the name and the parameters of the action in a string.
 	# @retval string with the name of the action and the parameters
 	def __str__(self):
-		return self.name+'@'+str(self.parameters)
+		if self.hierarchical:
+			h = '*'
+		else:
+			h = ''
+		return h+self.name+'@'+str(self.parameters)
 
 ## @brief AGGLPlannerPlan is used as a plan container.
 class AGGLPlannerPlan(object):
@@ -275,7 +278,8 @@ class AGGLPlannerPlan(object):
 					if len(line)>0:
 						if not (line[0] == '#' and line[1] != '!'):
 							try:
-								self.data.append(AGGLPlannerAction(line))
+								a = AGGLPlannerAction(line)
+								self.data.append(a)
 							except:
 								print 'Error reading plan file', init+". Line", str(line_i)+": <<"+line+">>"
 			# If the string hasnt got anything, we dont apply any rule:
@@ -834,7 +838,7 @@ class PyPlan(object):
 				if descomponiendo == False and planConDescomposicion == True:
 					print 'FINAL PLAN WITH: ', len(total), ' ACTIONS:'
 					for action in total:
-						print '    ',action
+						print '    ', action
 			
 			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 
