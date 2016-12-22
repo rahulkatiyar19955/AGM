@@ -129,6 +129,7 @@ class PlannerCaller(threading.Thread):
 		self.plannerExecutionID = 0
 		self.executive = executive
 		self.working = False
+		self.plan = AGGLPlannerPlan('', planFromText=True)
 		self.plannerCallerMutex = threading.RLock()
 		self.agglPath = agglPath
 		self.agmData = AGMFileDataParsing.fromFile(self.agglPath)
@@ -155,131 +156,139 @@ class PlannerCaller(threading.Thread):
 		self.plannerCallerMutex.release()
 
 	def run(self):
+		#print 'run'
 		while True:
-			# Continue if we can't acquire the mutex
+			#print 'whilie'
+			# return if we can't acquire the mutex
 			if self.plannerCallerMutex.acquire(False)==False:
 				#print '::run: mutex acquire'
-				#time.sleep(1)
+				time.sleep(1)
 				time.sleep(0.05)
 				continue
-			# Continue if there's no work to do
+			# return if there's no work to do
 			if not self.working:
 				self.plannerCallerMutex.release()
 				#print '::run: no self.working'
-				#time.sleep(1)
+				time.sleep(1)
 				time.sleep(0.05)
 				continue
-
-			self.plannerExecutionID+=1
 			try:
-				peid = '_'+str(self.plannerExecutionID)
-				self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
-			except:
-				print traceback.print_exc()
-				print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
-				sys.exit(1)
-
-
-			try:
-				callM = True
-				try:
-					#print 'MONITOREANDO??', self.plannerExecutionID
-					self.plan
-				except AttributeError:
-					callM = False
-				if callM:
-					stored, stepsFwd = self.callMonitoring(peid)
-					if stored:
-						print 'PlannerCaller::run: got plan from monitoring'
-						self.working = False
-						self.executive.gotPlan(self.plan)
-						self.plannerCallerMutex.release()
-						time.sleep(0.05)
-						continue
-					else:
-						print 'PlannerCaller::run didn\'t get plan from monitoring'
-			except: # The planner was probably killed
-				traceback.print_exc()
-				return
-
-			#print 'PlannerCaller::run 2'
-			try:
-				# Run planner
-				start = time.time()
-				#PRE
-				# CALL
-				argsss = ["agglplanner", self.agglPath, "/tmp/domainActive.py", "/tmp/lastWorld"+peid+".xml", "/tmp/target.py", "/tmp/result"+peid+".txt"]
-				print 'PlannerCaller::run Ask cache'
-				try:
-					cacheResult = self.cache.getPlanFromFiles(argsss[2], argsss[3], argsss[4])
-				except:
-					cacheResult = False
-
-				print 'PlannerCaller::run IGNORING CACHE!!!!'
-				print 'PlannerCaller::run IGNORING CACHE!!!!'
-				print 'PlannerCaller::run IGNORING CACHE!!!!'
-				cacheResult = False
-				if cacheResult:
-					if len(cacheResult[1].strip()) == 0:
-						cacheResult = None
-				if cacheResult:
-					print 'PlannerCaller::run Got plan from cache'
-					print '<<<'
-					print cacheResult[1]
-					print '>>>'
-					cacheSuccess = cacheResult[0]
-					cachePlan = cacheResult[1]
-					lines = cacheResult[1].split('\n')
-				else:
-					stored = False
-					try:
-						print 'PlannerCaller::run  Not found in cache, checking monitoring...'
-						stored, stepsFwd = self.callMonitoring(peid)
-						print 'PlannerCaller::run callMonitoring', stored, stepsFwd
-					except:
-						print 'PlannerCaller::run Can\'t get plan from monitoring'
-						pass
-					print 'PlannerCaller::run Running the planner?', stored==False
-
-
-					if stored == False:
-						try:
-							#print 'argss', argsss
-							#print 'call', argsss
-							subprocess.call(argsss)
-							print 'PlannerCaller::run done calling', argsss
-						except:
-							traceback.print_exc()
-						#CONTINUE?                       Probably it's better just to try to open the file and consider it was killed if there's no result file...
-						end = time.time()
-						print 'PlannerCaller::run It took', end - start, 'seconds'
-						print 'PlannerCaller::run includeFromFiles: ', argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True
-						try:
-							ofile = open("/tmp/result"+peid+".txt", 'r')
-						except:
-							print "PlannerCaller::run Can't open plan. We assume a new context was forced"
-							continue
-						try:
-							lines = ofile.readlines()
-							if len(''.join(lines).strip()) > 0:
-								self.cache.includeFromFiles(argsss[2], argsss[3], argsss[4], "/tmp/result"+peid+".txt", True)
-							ofile.close()
-							
-						except:
-							print 'PlannerCaller::run Weird error xx'
-							pass
-				# Get the output
-				try:
-					self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
-					#print 'self.plan', self.plan
-					stored, stepsFwd = self.callMonitoring(peid)
-				except: # The planner was probably killed
-					traceback.print_exc()
-					return
-				self.working = False
-				self.executive.gotPlan(self.plan)
+				self.executiveLoopFunction()
 			finally:
 				self.plannerCallerMutex.release()
+
+	def executiveLoopFunction(self):
+		print 'executiveLoopFunction'
+		###
+		### Set variables and write files that are of use later
+		###
+		self.plannerExecutionID+=1
+		try: #
+			peid = '_'+str(self.plannerExecutionID)
+			self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
+		except:
+			print traceback.print_exc()
+			print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
+			sys.exit(1)
+		domainPY = "/tmp/domainActive.py"
+		worldXML = "/tmp/lastWorld"+peid+".xml"
+		targetPY = "/tmp/target.py"
+
+		###
+		### Try monitoring
+		###
+		try:
+			#print 'MONITORING??', self.plannerExecutionID
+			stored, stepsFwd = self.callMonitoring(peid)
+			if stored:
+				print 'PlannerCaller::run: got plan from monitoring'
+				self.working = False
+				self.executive.gotPlan(self.plan)
+				time.sleep(0.05)
+				return
+			else:
+				print 'PlannerCaller::run didn\'t get plan from monitoring'
+		except:
+			traceback.print_exc()
+			return
+
+		###
+		### Try the cache
+		###
+		print 'PlannerCaller::run Ask cache'
+		try:
+			cacheResult = self.cache.getPlanFromFiles(domainPY, worldXML, targetPY)
+		except:
+			cacheResult = False
+		print 'PlannerCaller::run IGNORING CACHE!!!!'
+		print 'PlannerCaller::run IGNORING CACHE!!!!'
+		cacheResult = False
+		print 'PlannerCaller::run IGNORING CACHE!!!!'
+		print 'PlannerCaller::run IGNORING CACHE!!!!'
+		if cacheResult:
+			if len(cacheResult[1].strip()) == 0:
+				cacheResult = None
+		if cacheResult:
+			print 'PlannerCaller::run Got plan from cache'
+			print '<<<'
+			print cacheResult[1]
+			print '>>>'
+			cacheSuccess = cacheResult[0]
+			cachePlan = cacheResult[1]
+			lines = cacheResult[1].split('\n')
+			if len(''.join(lines).strip()) > 0:
+				self.cache.includeFromFiles(domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True)
+			ofile.close()
+			# Get the output
+			try:
+				self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
+				stored, stepsFwd = self.callMonitoring(peid)
+			except:
+				traceback.print_exc()
+				sys.exit(-1)
+			self.working = False
+			self.executive.gotPlan(self.plan)
+			return
+
+		###
+		### Run the planner
+		###
+		# CALL
+		argsss = ["agglplanner", self.agglPath, domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt"]
+		try:
+			#print 'argss', argsss
+			start = time.time()
+			subprocess.call(argsss)
+			print 'PlannerCaller::run done calling', argsss
+		except:
+			traceback.print_exc()
+			sys.exit(-1)
+		end = time.time()
+		print 'PlannerCaller::run It took', end - start, 'seconds'
+		print 'PlannerCaller::run includeFromFiles: ', domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True
+		try:
+			ofile = open("/tmp/result"+peid+".txt", 'r')
+		except:
+			print "PlannerCaller::run Can't open plan. We assume a new context was forced"
+			return
+		try:
+			lines = ofile.readlines()
+			if len(''.join(lines).strip()) > 0:
+				self.cache.includeFromFiles(domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True)
+			ofile.close()
+		except:
+			print 'PlannerCaller::run Weird error xx'
+			return
+		# Get the output
+		try:
+			self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
+			#print 'self.plan', self.plan
+			stored, stepsFwd = self.callMonitoring(peid)
+		except: # The planner was probably killed
+			traceback.print_exc()
+			return
+		self.working = False
+		self.executive.gotPlan(self.plan)
 
 
 
@@ -308,10 +317,10 @@ class PlannerCaller(threading.Thread):
 		if len(self.plan.data)>1:
 			print self.plan.data[1].name, self.plan.data[1].hierarchical
 			if self.plan.data[1].name.startswith('#'):
-				print 'AGMExecutive::callMonitoring: first action is a comment? Replanning is necessary'
+				print 'AGMExecutive::callMonitoring: second action is a comment? Can\'t skip first action'
 				return False, None
 			if self.plan.data[1].hierarchical:
-				print 'AGMExecutive::callMonitoring: first action is hierarchical. Replanning is necessary'
+				print 'AGMExecutive::callMonitoring: second action is hierarchical. Can\'t skip first action'
 				return False, None
 
 
@@ -365,7 +374,7 @@ class Executive(object):
 		self.doNotPlan = doNotPlan
 		self.mutex = threading.RLock()
 		self.agents = dict()
-		self.plan = None
+		self.plan = AGGLPlannerPlan('', planFromText=True)
 		self.modifications = 0
 		self.plannerCaller = PlannerCaller(self, agglPath)
 		self.plannerCaller.start()
@@ -549,6 +558,7 @@ class Executive(object):
 		self.mutex.acquire( )
 		try:
 			self.publishExecutiveVisualizationTopic()
+			print 'broadcastPlan'
 			self.sendParams()
 		except:
 			print traceback.print_exc()
@@ -622,6 +632,7 @@ class Executive(object):
 			params[p].type = 'string'
 		# Send plan
 		self.lastParamsSent = copy.deepcopy(params)
+		print 'aaaaaaaaaaa'
 		self.sendParams()
 		# Publish new information using the executiveVisualizationTopic
 		self.publishExecutiveVisualizationTopic()
