@@ -10,6 +10,7 @@ from agglplanner import *
 from agglplanchecker import *
 from agglplanningcache import *
 
+from AGMExecutive_monitoring import *
 import xmlModelParser
 
 import pickle
@@ -37,88 +38,18 @@ import AGMModelConversion
 
 
 
-#ret, stepsFwd, planMonitoring =
-def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, plan, stepsFwd=0):
-	try:
-		currentPlan = AGGLPlannerPlan(plan, planFromText=True)
-	except:
-		traceback.print_exc()
-		sys.exit(134)
+#
+# WARNING: Design issues to take into consideration in the future:
+#
+# - To properly use hierarchical rules, the monitoring process should properly account for the hierarchical actions that we are currently solving
+# - The number of times the domain is parsed, and the times the state-space-expansion code is generated and imported should be reduced to the minimum
+#
+#
+#
+#
 
 
-	# If there is a hierarchical rule in the plan, just monitor the plan up to the goal of such action
-	for index, action in enumerate(currentPlan.data):
-		if action.name.startswith('#!'):
-			if index == 0:
-				plan.removeFirstActionDirect()
-				ret, stepsFwd2, currentPlan2 = AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, plan, stepsFwd)
-				stepsFwd2 += 1
-				currentPlan2 = AGGLPlannerPlan(str(currentPlan), planFromText=True)
-				del currentPlan2.data[:stepsFwd2]
-				return ret2, stepsFwd2, currentPlan2
-			actionName = action.name[2:]
-			partialPlan = copy.deepcopy(currentPlan)
-			partialPlan.data = partialPlan.data[:index]
-			domain = imp.load_source('domain', domainPath).RuleSet() # activeRules.py
-			def partialTarget(graph):
-				g = copy.deepcopy(graph)
-				aname = copy.deepcopy(actionName)
-				try:
-					if aname.startswith('*'):
-						aname = aname[1:]
-					return domain.getHierarchicalTargets()[aname](g, copy.deepcopy(action.parameters))
-				except:
-					traceback.print_exc()
-					sys.exit(1)
-			ret2, stepsFwd2, planWhichIsIgnored = AGMExecutiveMonitoring(domainClass, domainPath, copy.deepcopy(init), copy.deepcopy(currentModel), partialTarget, copy.deepcopy(partialPlan))
-			currentPlan2 = AGGLPlannerPlan(str(currentPlan), planFromText=True)
-			del currentPlan2.data[:stepsFwd2]
-			if len(currentPlan2.data) > 0:
-				if currentPlan2.data[0].name.startswith('#!'):
-					del currentPlan2.data[:1]
-					stepsFwd2 += 1
-			return ret2, stepsFwd2, currentPlan2
 
-	# Otherwise, monitor the full plan
-	try:
-		ret2 = False
-		# Perform recursive call
-		if len(currentPlan)>0:
-			try:
-				newPlan = copy.deepcopy(currentPlan.removeFirstAction(currentModel))
-				ret2, stepsFwd2, planMonitoring2 = AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, newPlan, stepsFwd+1)
-				if ret2:
-					monitoringPlan = AGGLPlannerPlan(planMonitoring2, planFromText=True)
-					if len(monitoringPlan.data) > 0:
-						if monitoringPlan.data[0].hierarchical:
-							print stepsFwd2, 'steps ahead did not work because first action was hierarchical'
-							ret2 = False
-			except:
-				traceback.print_exc()
-				ret2 = False
-		if ret2: # If a plan without the last action works, great, return such plan
-
-			return True, stepsFwd2, planMonitoring2
-		else:    # Otherwise, check with the plan at hand
-
-			try:
-				#print 'CHECK with a plan of', len(plan), 'steps,', stepsFwd, 'forward'
-				#print '(\n' + str(plan).strip() + '\n)'
-				p = PyPlanChecker(domainClass, domainPath, init, currentPlan, target, '', verbose=False)
-				if p.valid:
-					print 'AGMExecutiveMonitoring:: GOT PLAN FROM MONITORING!!!'
-					print currentPlan
-					return True, stepsFwd, currentPlan
-				else:
-					return False, 0, None
-			except:
-				traceback.print_exc()
-				return False, 0, None
-	except:
-		traceback.print_exc()
-		sys.exit(4991)
-	traceback.print_exc()
-	sys.exit(692)
 
 
 class PlannerCaller(threading.Thread):
@@ -199,8 +130,8 @@ class PlannerCaller(threading.Thread):
 		###
 		try:
 			#print 'MONITORING??', self.plannerExecutionID
-			stored, stepsFwd = self.callMonitoring(peid)
-			if stored:
+			monitoringResult = self.callMonitoring(peid)
+			if monitoringResult:
 				print 'PlannerCaller::run: got plan from monitoring'
 				self.working = False
 				self.executive.gotPlan(self.plan)
@@ -215,40 +146,41 @@ class PlannerCaller(threading.Thread):
 		###
 		### Try the cache
 		###
-		print 'PlannerCaller::run Ask cache'
-		try:
-			cacheResult = self.cache.getPlanFromFiles(domainPY, worldXML, targetPY)
-		except:
-			cacheResult = False
-		print 'PlannerCaller::run IGNORING CACHE!!!!'
-		print 'PlannerCaller::run IGNORING CACHE!!!!'
-		cacheResult = False
-		print 'PlannerCaller::run IGNORING CACHE!!!!'
-		print 'PlannerCaller::run IGNORING CACHE!!!!'
-		if cacheResult:
-			if len(cacheResult[1].strip()) == 0:
-				cacheResult = None
-		if cacheResult:
-			print 'PlannerCaller::run Got plan from cache'
-			print '<<<'
-			print cacheResult[1]
-			print '>>>'
-			cacheSuccess = cacheResult[0]
-			cachePlan = cacheResult[1]
-			lines = cacheResult[1].split('\n')
-			if len(''.join(lines).strip()) > 0:
-				self.cache.includeFromFiles(domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True)
-			ofile.close()
-			# Get the output
+		if False:
+			print 'PlannerCaller::run Ask cache'
 			try:
-				self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
-				stored, stepsFwd = self.callMonitoring(peid)
+				cacheResult = self.cache.getPlanFromFiles(domainPY, worldXML, targetPY)
 			except:
-				traceback.print_exc()
-				sys.exit(-1)
-			self.working = False
-			self.executive.gotPlan(self.plan)
-			return
+				cacheResult = False
+			print 'PlannerCaller::run IGNORING CACHE!!!!'
+			print 'PlannerCaller::run IGNORING CACHE!!!!'
+			cacheResult = False
+			print 'PlannerCaller::run IGNORING CACHE!!!!'
+			print 'PlannerCaller::run IGNORING CACHE!!!!'
+			if cacheResult:
+				if len(cacheResult[1].strip()) == 0:
+					cacheResult = None
+			if cacheResult:
+				print 'PlannerCaller::run Got plan from cache'
+				print '<<<'
+				print cacheResult[1]
+				print '>>>'
+				cacheSuccess = cacheResult[0]
+				cachePlan = cacheResult[1]
+				lines = cacheResult[1].split('\n')
+				if len(''.join(lines).strip()) > 0:
+					self.cache.includeFromFiles(domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True)
+				ofile.close()
+				# Get the output
+				try:
+					self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
+					monitoringResult = self.callMonitoring(peid)
+				except:
+					traceback.print_exc()
+					sys.exit(-1)
+				self.working = False
+				self.executive.gotPlan(self.plan)
+				return
 
 		###
 		### Run the planner
@@ -282,8 +214,8 @@ class PlannerCaller(threading.Thread):
 		# Get the output
 		try:
 			self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
-			#print 'self.plan', self.plan
-			stored, stepsFwd = self.callMonitoring(peid)
+			print 'DIRECT FROM AGGLPlanner\nself.plan:\n', self.plan
+			self.callMonitoring(peid)
 		except: # The planner was probably killed
 			traceback.print_exc()
 			return
@@ -293,39 +225,6 @@ class PlannerCaller(threading.Thread):
 
 
 	def callMonitoring(self, peid):
-		stored = False
-		stepsFwd = 0
-		#print 'Trying with the last steps of the current plan...'
-		#print '(( CURRENT PLAN'
-		#print self.plan
-		#print ')) CURRENT PLAN'
-
-
-
-		#print 'PLAN TYPE:', type(self.plan)
-		for a in self.plan.data:
-			print a.name
-		#print 'LENGTH:', len(self.plan.data)
-		if len(self.plan.data)>0:
-			print self.plan.data[0].name, self.plan.data[0].hierarchical
-			if self.plan.data[0].name.startswith('#'):
-				print 'AGMExecutive::callMonitoring: first action is a comment? Replanning is necessary'
-				return False, None
-			if self.plan.data[0].hierarchical:
-				print 'AGMExecutive::callMonitoring: first action is hierarchical. Replanning is necessary'
-				return False, None
-		if len(self.plan.data)>1:
-			print self.plan.data[1].name, self.plan.data[1].hierarchical
-			if self.plan.data[1].name.startswith('#'):
-				print 'AGMExecutive::callMonitoring: second action is a comment? Can\'t skip first action'
-				return False, None
-			if self.plan.data[1].hierarchical:
-				print 'AGMExecutive::callMonitoring: second action is hierarchical. Can\'t skip first action'
-				return False, None
-
-
-
-
 		domainPath = '/tmp/domainActive.py'
 		init   = '/tmp/lastWorld'+peid+'.xml'
 		target = '/tmp/target.py'
@@ -335,30 +234,27 @@ class PlannerCaller(threading.Thread):
 		#print 'target', target
 		try:
 			try:
-				self.plan
 				try:
-					ret, stepsFwd, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan, planFromText=True))
+					ret, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan, planFromText=True))
 				except:
 					print traceback.print_exc()
 					print 'PlannerCaller::callMonitoring Error calling AGMExecutiveMonitoring'
-					return False, None
+					return False
 			except (NameError, AttributeError) as e:
 				print 'PlannerCaller::callMonitoring There\'s no previous plan yet. It doesn\'t make any sense to use monitoring yet'
-				return False, None
-			#print 'AGMExecutiveMonitoring() results:', ret, stepsFwd, planMonitoring
+				return False
+			#print 'AGMExecutiveMonitoring() results:', ret, planMonitoring
 			if ret:
-				print 'PlannerCaller::callMonitoring Using a ', stepsFwd, 'step forwarded version of the previous plan'
-				stored = True
+				print 'PlannerCaller::callMonitoring Using a forwarded version of the previous plan'
 				self.plan = planMonitoring
+				return True
 			else:
 				print 'PlannerCaller::callMonitoring No modified version of the current plan satisfies the goal. Replanning is necessary.'
-				stored = False
+				return False
 		except:
 			print traceback.print_exc()
 			print 'PlannerCaller::callMonitoring: It didn\'t seem to work.'
-			stored = False
-		#print 'done callMonitoring', stored, stepsFwd
-		return stored, stepsFwd
+			return False
 
 	def ignoreCommentsInPlan(self, plan):
 		ret = []
@@ -570,7 +466,6 @@ class Executive(object):
 		self.mutex.acquire( )
 		try:
 			print 'Executive::broadcastModel: <<<broadcastinnn'
-			print self.currentModel.filterGeometricSymbols()
 			self.executiveTopic.structuralChange(AGMModelConversion.fromInternalToIce(self.currentModel))
 			print 'Executive::broadcastModel: broadcastinnn>>>'
 		except:
@@ -632,7 +527,7 @@ class Executive(object):
 			params[p].type = 'string'
 		# Send plan
 		self.lastParamsSent = copy.deepcopy(params)
-		print 'aaaaaaaaaaa'
+		print 'CURRENT PLAN\n', self.plan
 		self.sendParams()
 		# Publish new information using the executiveVisualizationTopic
 		self.publishExecutiveVisualizationTopic()

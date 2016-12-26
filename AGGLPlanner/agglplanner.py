@@ -31,9 +31,9 @@
     @ingroup PyAPI
     This file loads the grammar, the initial state of the world and the GOAL status without changing the files extensions of the grammar and the goal.
 
-    MODE USE:	agglplanner grammar.aggl init.xml target.py
+    Usage: agglplanner grammar.aggl init.xml target.py
 
-    Also, we can keep the results in a file with: agglplanner gramatica.aggl init.xml target.py result.plan
+    Also, we can keep the results in a file with: agglplanner grammar.aggl init.xml target.py result.plan
 """
 
 import time
@@ -83,15 +83,13 @@ def computePlanCost(node):
 def quitar_Constantes_Creadas(ficheroMundo):
 	constantes = []
 	constante = []
-	"""Abrimos el fichero del mundo origen y sacamos todos los numeros enteros (variables constantes) del fichero.  Para ello solo nos quedaremos con
-	las declaraciones del tipo: <symbol id="1" type="object">"""
+
+	"""Abrimos el fichero del mundo origen y sacamos todos los numeros enteros (variables constantes) del fichero.  Para ello solo nos quedaremos con las declaraciones del tipo: <symbol id="1" """
 	init = open(ficheroMundo)
 	linea = init.readline()
 	while linea != "":
 		if linea.find('<symbol') != -1:
-			"""Sacamos la parte id="1" que define el nodo como constante o variable. Minimo, esta parte mide 6
-			de longitud. El identificador numerico empieza en la posicion 4.
-			Su longitud depende del numero que tenga dentro de las comillas"""
+			"""Sacamos la parte id="1" que define el nodo como constante o variable. Minimo, esta parte mide 6 de longitud. El identificador numerico empieza en la posicion 4. Su longitud depende del numero que tenga dentro de las comillas"""
 			vector = linea.split()
 			for partI in xrange(len(vector)):
 				if vector[partI] == '<symbol':
@@ -99,8 +97,7 @@ def quitar_Constantes_Creadas(ficheroMundo):
 					while i<int(len(vector[partI+1])-1):
 						constante.append(vector[partI+1][i])
 						i=i+1
-			"""Pasamos a entero la cadena con el id del nodo, lo guardamos en el vector de constantes
-			y limpiamos las variables usadas."""
+			"""Pasamos a entero la cadena con el id del nodo, lo guardamos en el vector de constantes y limpiamos las variables usadas."""
 			T2 = int(''.join(constante)) 
 			constantes.append(T2)
 			constante = []
@@ -117,14 +114,11 @@ def quitar_Constantes_Creadas(ficheroMundo):
 	linea = target.readline()
 	while linea !="":
 		if linea.find('<symbol')!=-1:
-			"""Si hemos encontrado una linea que define un nuevo nodo, comparamos el identificador
-			del nodo con todas las constantes originales """
+			"""Si hemos encontrado una linea que define un nuevo nodo, comparamos el identificador del nodo con todas las constantes originales """
 			for const in constantes:
 				if linea.find('id="'+const.__str__()+'"')!=-1:
 					correspondencia = True
-			"""Si no hemos encontrado correspondencia ninguna, es que es un nuevo nodo creado a partir
-			de la ejecucion de la regla jerarquica. Guardamos su identificador para despues cambiarlo por
-			otro valor (lo pasaremos de constante a variable)"""
+			"""Si no hemos encontrado correspondencia ninguna, es que es un nuevo nodo creado a partir de la ejecucion de la regla jerarquica. Guardamos su identificador para despues cambiarlo por otro valor (lo pasaremos de constante a variable)"""
 			if correspondencia==False:
 				vector = linea.split()
 				i = 4
@@ -625,9 +619,14 @@ class PyPlan(object):
 		# Get graph rewriting rules
 		domain = imp.load_source('domain', domainPath).RuleSet() # activeRules.py
 		ruleMap = copy.deepcopy(domain.getRules()) #get all the active rules of the grammar
+		triggerMap = copy.deepcopy(domain.getTriggers()) #get all the active rules of the grammar
 		for e in excludeList:
 			try:
 				del ruleMap[e]  # delete the rules in excludeList from ruleMap
+			except:
+				pass
+			try:
+				del triggerMap[e]  # delete the rules in excludeList from triggerMap
 			except:
 				pass
 		#for r in ruleMap:
@@ -690,14 +689,14 @@ class PyPlan(object):
 				lock.acquire()
 				threadStatus.append(True)
 				self.thread_locks.append(lock)
-				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), lock, i, threadStatus))
+				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), copy.deepcopy(triggerMap), lock, i, threadStatus))
 			# Wait for the threads to stop
 			for lock in self.thread_locks:
 				lock.acquire()
 		else:
 			# If the solution is not achieved and there arent any thread to execute the programm
 			# we stop it and show an error message.
-			self.startThreadedWork(ruleMap)
+			self.startThreadedWork(ruleMap, triggerMap)
 
 		# We make others checks over the end_condition:
 		#	-- If the end condition is wrong.
@@ -797,13 +796,10 @@ class PyPlan(object):
 							#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
 					#print paramsWithoutNew
 					print '\nDecomposing hierarchical rule ', ac.name, paramsWithoutNew
-					"""ANIADIDO DE MERCEDES:
-					Creamos estado intermedio, primero lo creamos en fichero .xml para poder quitarle los nuevos nodos creados
-					al aplicar la regla jerarquica"""
-					for estadoIntermedio in ruleMap[ac.name](initWorld): 1+1 # FIXME: this shouldn't be a loop 
+					""" Creamos estado intermedio, primero lo creamos en fichero .xml para poder quitarle los nuevos nodos creados al aplicar la regla jerarquica"""
+					estadoIntermedio = triggerMap[ac.name](initWorld, ac.parameters)
 					estadoIntermedio.graph.toXML("/tmp/estadoIntermedio.xml")
-					"""Quitamos los nodos constantes creados por la regla jerarquica: los volvemos variables para evitar
-					errores cuando se genere el codigo target en python."""
+					"""Quitamos los nodos constantes creados por la regla jerarquica: los volvemos variables para evitar errores cuando se genere el codigo target en python."""
 					quitar_Constantes_Creadas(init)
 					"""Generamos el codigo en python para pasarselo directamente al PyPlan"""
 					graph = graphFromXML("/tmp/estadoIntermedio.xml")
@@ -813,16 +809,16 @@ class PyPlan(object):
 					ofile.close()
 					"""Ponemos una bandera para pintar despues el plan completa una vez descompuesta la primera regla jerarquica"""
 					planConDescomposicion = True
-					aaa = PyPlan(      domainAGM, domainPath, init, domain.getHierarchicalTargets()[ac.name], indent+'\t', paramsWithoutNew, self.excludeList, rList, True, "/tmp/estadoIntermedio.py", copy.deepcopy(self.results[i].awakenRules|awakenRules))
+					hierarchicalTarget = domain.getHierarchicalTargets()[ac.name]
+					#           (self, domainAGM, domainPath, init, targetPath,         indent,      symbol_mapping,   excludeList,      resultFile, descomp=False, estadoInt='',               awakenRules=set())
+					aaa = PyPlan(      domainAGM, domainPath, init, hierarchicalTarget, indent+'\t', paramsWithoutNew, self.excludeList, rList,      True,          "/tmp/estadoIntermedio.py", copy.deepcopy(self.results[i].awakenRules|awakenRules))
 					if len(aaa.results.getList()) == 0:
 						#del self.results[i]
 						#continue
 						del self.results[:]
 					else:
 						self.results[i].history = self.results[i].history[1:]
-					print 'AQUI', str(ac)
 					self.results[i].history.insert(0, '#!'+str(ac))
-					print 'AQUI', self.results[i].history
 				else:
 					planConDescomposicion = False
 			
@@ -860,7 +856,7 @@ class PyPlan(object):
 	#	1) On hold because they are waiting for another thread finishes his execution.
 	#	2) Active. They are expanding a node.
 	#	3) All the threads are idle because all of them have finished his executions.
-	def startThreadedWork(self, ruleMap, lock=None, i=0, threadPoolStatus=None):
+	def startThreadedWork(self, ruleMap, triggerMap, lock=None, i=0, threadPoolStatus=None):
 		if lock == None:
 			# If there isnt any lock, we create one and we give it to the thread.
 			lock = thread.allocate_lock()
