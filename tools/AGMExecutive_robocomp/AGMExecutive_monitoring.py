@@ -54,7 +54,7 @@ def macroscopicPlanCheck(domainClass, domainPath, init, plan, target):
 	try:
 		p = PyPlanChecker(domainClass, domainPath, init, macroscopicPlan, target, '', verbose=False)
 		if not p.valid:
-			print 'AGMExecutiveMonitoring:: ESTE NO FUNCIONA, HAY QUE REPLANIFICAR!!!'
+			print 'macroscopicPlanCheck:: ESTE NO FUNCIONA, HAY QUE REPLANIFICAR!!!'
 			return False
 	except:
 		traceback.print_exc()
@@ -94,13 +94,13 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 			# If the action is the first one, remove the action and return the result of a recursive call
 			# to the function, as if such action was not there in the first place
 			if index == 0:
-				print 'Barrera en primera linea, quitamos la barrera y retornamos lo que devuelva una llamada recursiva'
+				#print 'Barrera en primera linea, quitamos la barrera y retornamos lo que devuelva una llamada recursiva'
 				currentPlan.removeFirstActionDirect()
 				return AGMExecutiveMonitoring_recursive(domainClass, domain, domainPath, init, currentModel, target, currentPlan)
 			# Otherwise, if the first action starting with '#!' is not the first action, perform the monitorization only with the actions before '#!'
 			# and use the execution of the '#!' action as the target
 			else:
-				print 'Barrera en medio, tenemos en cuenta un plan parcial y luego le pegamos el viejo'
+				#print 'Barrera en medio, tenemos en cuenta un plan parcial y luego le pegamos el viejo'
 				# Get the action's name: remove the first two '#!' characters
 				actionName = action.name[2:]
 				# Remove the actions after the #! barrier
@@ -136,7 +136,7 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 					if not currentPlan3.data[0].name.startswith('#!'):
 						break
 					currentPlan3.data.pop(0)
-				print 'Deberiamos nuevamente hacer una monitorizacion a este plan, pero bueno.... (1)'
+				#print 'Deberiamos nuevamente hacer una monitorizacion a este plan, pero bueno.... (1)'
 				if len(currentPlan3)>0:
 					if currentPlan3.data[0].hierarchical:
 						return AGMExecutiveMonitoring_recursive(domainClass, domainPath, copy.deepcopy(init), copy.deepcopy(currentModel), target, copy.deepcopy(currentPlan3))
@@ -168,19 +168,19 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 	try:
 		p = PyPlanChecker(domainClass, domainPath, init, currentPlan, target, '', verbose=False)
 		if not p.valid:
-			print 'AGMExecutiveMonitoring_recursive:: ESTE NO FUNCIONA!!!'
-			print currentPlan
+			#print 'AGMExecutiveMonitoring_recursive:: ESTE NO FUNCIONA!!!'
+			#print currentPlan
 			return False, None
 	except:
 		traceback.print_exc()
 		return False, None
 
 
-	print 'AGMExecutiveMonitoring_recursive<<'
-	print 'AGMExecutiveMonitoring_recursive<<'
-	print str(currentPlan).strip()
-	print 'AGMExecutiveMonitoring_recursive<<'
-	print 'AGMExecutiveMonitoring_recursive<<'
+	#print 'AGMExecutiveMonitoring_recursive<<'
+	#print 'AGMExecutiveMonitoring_recursive<<'
+	#print str(currentPlan).strip()
+	#print 'AGMExecutiveMonitoring_recursive<<'
+	#print 'AGMExecutiveMonitoring_recursive<<'
 
 	###
 	### We get to this poing only when all the following conditions are met:
