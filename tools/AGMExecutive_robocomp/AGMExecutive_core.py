@@ -152,11 +152,11 @@ class PlannerCaller(threading.Thread):
 				cacheResult = self.cache.getPlanFromFiles(domainPY, worldXML, targetPY)
 			except:
 				cacheResult = False
-			print 'PlannerCaller::run IGNORING CACHE!!!!'
-			print 'PlannerCaller::run IGNORING CACHE!!!!'
-			cacheResult = False
-			print 'PlannerCaller::run IGNORING CACHE!!!!'
-			print 'PlannerCaller::run IGNORING CACHE!!!!'
+			#print 'PlannerCaller::run IGNORING CACHE!!!!'
+			#print 'PlannerCaller::run IGNORING CACHE!!!!'
+			#cacheResult = False
+			#print 'PlannerCaller::run IGNORING CACHE!!!!'
+			#print 'PlannerCaller::run IGNORING CACHE!!!!'
 			if cacheResult:
 				if len(cacheResult[1].strip()) == 0:
 					cacheResult = None
@@ -312,6 +312,7 @@ class Executive(object):
 		return True
 
 	def structuralChangeProposal(self, worldModelICE, sender, log):
+		print '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#

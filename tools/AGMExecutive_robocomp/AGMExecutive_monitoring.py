@@ -5,7 +5,7 @@ from agglplanner import *
 from agglplanchecker import *
 
 def askPlannerToSolveHierarchicalRule(domainObj, domainModule, domainPath, initWorld, actionName, parameters, excludeList):
-	init_path = "/tmp/estadoIntermedio1.xml"
+	init_path = "/tmp/estadoIntermedio.xml"
 	temp_path = "/tmp/estadoIntermedio2.xml"
 	initWorld.toXML(init_path)
 	estadoIntermedio = domainModule.getTriggers()[actionName](WorldStateHistory([initWorld, set()]), parameters)
@@ -36,9 +36,41 @@ def askPlannerToSolveHierarchicalRule(domainObj, domainModule, domainPath, initW
 		os._exit(-1)
 	return rList
 
+def macroscopicPlanCheck(domainClass, domainPath, init, plan, target):
+	currentPlan = AGGLPlannerPlan(str(plan), planFromText=True)
+	macroscopicPlan = AGGLPlannerPlan('', planFromText=True)
+	
+	#
+	#
+	for action in reversed(currentPlan.data):
+		if action.name.startswith('#!'):
+			a = copy.deepcopy(action)
+			a.name = a.name[2:]
+			macroscopicPlan.data.insert(0, AGGLPlannerAction(str(a)))
+		else:
+			macroscopicPlan.data.insert(0, AGGLPlannerAction(str(action)))
+	#
+	#
+	try:
+		p = PyPlanChecker(domainClass, domainPath, init, macroscopicPlan, target, '', verbose=False)
+		if not p.valid:
+			print 'AGMExecutiveMonitoring:: ESTE NO FUNCIONA, HAY QUE REPLANIFICAR!!!'
+			return False
+	except:
+		traceback.print_exc()
+		return False
+	
+	return True
 
-#ret, planMonitoring =
 def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, plan):
+	ret, plan = AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel, target, plan)
+	if not macroscopicPlanCheck(domainClass, domainPath, init, plan, target):
+		return False, None
+	return ret, plan
+	
+	
+
+def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel, target, plan):
 	try:
 		currentPlan = AGGLPlannerPlan(plan, planFromText=True)
 	except:
@@ -49,7 +81,7 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 	if len(currentPlan.data)>0:
 		if currentPlan.data[0].name.startswith('#!'):
 			currentPlan.removeFirstActionDirect()
-			return AGMExecutiveMonitoring(domainClass, domain, domainPath, init, currentModel, target, currentPlan)
+			return AGMExecutiveMonitoring_recursive(domainClass, domain, domainPath, init, currentModel, target, currentPlan)
 
 
 	domain = imp.load_source('domain', domainPath).RuleSet() # activeRules.py
@@ -64,7 +96,7 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 			if index == 0:
 				print 'Barrera en primera linea, quitamos la barrera y retornamos lo que devuelva una llamada recursiva'
 				currentPlan.removeFirstActionDirect()
-				return AGMExecutiveMonitoring(domainClass, domain, domainPath, init, currentModel, target, currentPlan)
+				return AGMExecutiveMonitoring_recursive(domainClass, domain, domainPath, init, currentModel, target, currentPlan)
 			# Otherwise, if the first action starting with '#!' is not the first action, perform the monitorization only with the actions before '#!'
 			# and use the execution of the '#!' action as the target
 			else:
@@ -86,18 +118,18 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 					except:
 						traceback.print_exc()
 						sys.exit(1)
-				ret2, currentPlan2 = AGMExecutiveMonitoring(domainClass, domainPath, copy.deepcopy(init), copy.deepcopy(currentModel), partialTarget, copy.deepcopy(partialPlan))
-				print 'La parte A del plan es'
-				print currentPlan2
-				print 'Si le uno la parte B'
-				print planToAppend
+				ret2, currentPlan2 = AGMExecutiveMonitoring_recursive(domainClass, domainPath, copy.deepcopy(init), copy.deepcopy(currentModel), partialTarget, copy.deepcopy(partialPlan))
+				#print 'La parte A del plan es'
+				#print currentPlan2
+				#print 'Si le uno la parte B'
+				#print planToAppend
 				currentPlan3 = AGGLPlannerPlan()
 				currentPlan3.data = currentPlan2.data + planToAppend.data
 				if len(currentPlan3.data) > 0:
 					if currentPlan3.data[0].name.startswith('#!'):
 						del currentPlan3.data[:1]
-				print 'Queda'
-				print currentPlan3
+				#print 'Queda'
+				#print currentPlan3
 				while True:
 					if len(currentPlan3) == 0:
 						break
@@ -107,7 +139,7 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 				print 'Deberiamos nuevamente hacer una monitorizacion a este plan, pero bueno.... (1)'
 				if len(currentPlan3)>0:
 					if currentPlan3.data[0].hierarchical:
-						return AGMExecutiveMonitoring(domainClass, domainPath, copy.deepcopy(init), copy.deepcopy(currentModel), target, copy.deepcopy(currentPlan3))
+						return AGMExecutiveMonitoring_recursive(domainClass, domainPath, copy.deepcopy(init), copy.deepcopy(currentModel), target, copy.deepcopy(currentPlan3))
 				return ret2, currentPlan3
 
 	###
@@ -119,7 +151,7 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 	if len(currentPlan)>0:
 		try:
 			newPlan = copy.deepcopy(currentPlan.removeFirstAction(currentModel))
-			ret2, planMonitoring2 = AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, newPlan)
+			ret2, planMonitoring2 = AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel, target, newPlan)
 			if ret2:
 				return ret2, planMonitoring2
 		except:
@@ -136,7 +168,7 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 	try:
 		p = PyPlanChecker(domainClass, domainPath, init, currentPlan, target, '', verbose=False)
 		if not p.valid:
-			print 'AGMExecutiveMonitoring:: ESTE NO FUNCIONA!!!'
+			print 'AGMExecutiveMonitoring_recursive:: ESTE NO FUNCIONA!!!'
 			print currentPlan
 			return False, None
 	except:
@@ -144,11 +176,11 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 		return False, None
 
 
-	print 'AGMExecutiveMonitoring<<'
-	print 'AGMExecutiveMonitoring<<'
+	print 'AGMExecutiveMonitoring_recursive<<'
+	print 'AGMExecutiveMonitoring_recursive<<'
 	print str(currentPlan).strip()
-	print 'AGMExecutiveMonitoring>>'
-	print 'AGMExecutiveMonitoring>>'
+	print 'AGMExecutiveMonitoring_recursive<<'
+	print 'AGMExecutiveMonitoring_recursive<<'
 
 	###
 	### We get to this poing only when all the following conditions are met:
