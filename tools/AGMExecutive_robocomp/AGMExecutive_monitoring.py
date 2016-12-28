@@ -33,7 +33,8 @@ def askPlannerToSolveHierarchicalRule(domainObj, domainModule, domainPath, initW
 	aaa = PyPlan(domainObj, domainPath, init_path, domainModule.getHierarchicalTargets()[actionName], '\t', paramsWithoutNew, excludeList, rList, True, temp_path+'.py', copy.deepcopy(domainObj.getInitiallyAwakeRules()))
 	if len(aaa.results.getList()) == 0:
 		print 'NOOOOOOOOOOOOOOOOOOO'
-		shutil.copyfile(init_path, "doesntwork.xml")
+		gg = graphFromXML(init_path)
+		gg.filterGeometricSymbols().toXML("doesntwork.xml")
 		shutil.copyfile(temp_path, "doesntwork.py")
 		print 'getInitiallyAwakeRules', domainObj.getInitiallyAwakeRules()
 		print 'exclude', excludeList
