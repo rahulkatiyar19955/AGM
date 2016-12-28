@@ -1,4 +1,4 @@
-import copy, sys, traceback, imp
+import copy, sys, traceback, imp, shutil
 
 
 from agglplanner import *
@@ -33,6 +33,10 @@ def askPlannerToSolveHierarchicalRule(domainObj, domainModule, domainPath, initW
 	aaa = PyPlan(domainObj, domainPath, init_path, domainModule.getHierarchicalTargets()[actionName], '\t', paramsWithoutNew, excludeList, rList, True, temp_path+'.py', copy.deepcopy(domainObj.getInitiallyAwakeRules()))
 	if len(aaa.results.getList()) == 0:
 		print 'NOOOOOOOOOOOOOOOOOOO'
+		shutil.copyfile(init_path, "doesntwork.xml")
+		shutil.copyfile(temp_path, "doesntwork.py")
+		print 'getInitiallyAwakeRules', domainObj.getInitiallyAwakeRules()
+		print 'exclude', excludeList
 		os._exit(-1)
 	return rList
 
@@ -47,6 +51,7 @@ def macroscopicPlanCheck(domainClass, domainPath, init, plan, target):
 			a = copy.deepcopy(action)
 			a.name = a.name[2:]
 			macroscopicPlan.data.insert(0, AGGLPlannerAction(str(a)))
+			break
 		else:
 			macroscopicPlan.data.insert(0, AGGLPlannerAction(str(action)))
 	#
@@ -55,12 +60,27 @@ def macroscopicPlanCheck(domainClass, domainPath, init, plan, target):
 		p = PyPlanChecker(domainClass, domainPath, init, macroscopicPlan, target, '', verbose=False)
 		if not p.valid:
 			print 'macroscopicPlanCheck:: ESTE NO FUNCIONA, HAY QUE REPLANIFICAR!!!'
+			print macroscopicPlan
+			print 'macroscopicPlanCheck:: ESTE NO FUNCIONA, HAY QUE REPLANIFICAR!!!'
+			PyPlanChecker(domainClass, domainPath, init, macroscopicPlan, target, '', verbose=True)
+			print 'macroscopicPlanCheck:: ESTE NO FUNCIONA, HAY QUE REPLANIFICAR!!!'
+			number = 1
+			while True:
+				planName = 'plan'+str(number).zfill(4)+'.plan'
+				with open(planName, "w") as text_file:
+					text_file.write(str(macroscopicPlan))
+				worldName = 'world'+str(number).zfill(4)+'.xml'
+				shutil.copyfile(init, worldName)
+				print '-------------------------------------------------------------- Stored in', planName, worldName
+				break
 			return False
 	except:
 		traceback.print_exc()
 		return False
 	
 	return True
+
+
 
 def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, plan):
 	ret, plan = AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel, target, plan)
@@ -70,7 +90,10 @@ def AGMExecutiveMonitoring(domainClass, domainPath, init, currentModel, target, 
 	
 	
 
-def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel, target, plan):
+def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel, target, plan, rulesToExcludeInSearch=None):
+	if rulesToExcludeInSearch == None:
+		rulesToExcludeInSearch = set()
+
 	try:
 		currentPlan = AGGLPlannerPlan(plan, planFromText=True)
 	except:
@@ -81,7 +104,7 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 	if len(currentPlan.data)>0:
 		if currentPlan.data[0].name.startswith('#!'):
 			currentPlan.removeFirstActionDirect()
-			return AGMExecutiveMonitoring_recursive(domainClass, domain, domainPath, init, currentModel, target, currentPlan)
+			return AGMExecutiveMonitoring_recursive(domainClass, domain, domainPath, init, currentModel, target, currentPlan, rulesToExcludeInSearch)
 
 
 	domain = imp.load_source('domain', domainPath).RuleSet() # activeRules.py
@@ -96,13 +119,14 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 			if index == 0:
 				#print 'Barrera en primera linea, quitamos la barrera y retornamos lo que devuelva una llamada recursiva'
 				currentPlan.removeFirstActionDirect()
-				return AGMExecutiveMonitoring_recursive(domainClass, domain, domainPath, init, currentModel, target, currentPlan)
+				return AGMExecutiveMonitoring_recursive(domainClass, domain, domainPath, init, currentModel, target, currentPlan, rulesToExcludeInSearch)
 			# Otherwise, if the first action starting with '#!' is not the first action, perform the monitorization only with the actions before '#!'
 			# and use the execution of the '#!' action as the target
 			else:
 				#print 'Barrera en medio, tenemos en cuenta un plan parcial y luego le pegamos el viejo'
 				# Get the action's name: remove the first two '#!' characters
 				actionName = action.name[2:]
+				rulesToExcludeInSearch.add(actionName.strip('#!*'))
 				# Remove the actions after the #! barrier
 				partialPlan = copy.deepcopy(currentPlan)
 				partialPlan.data = partialPlan.data[:index]
@@ -110,15 +134,12 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 				planToAppend.data = planToAppend.data[index:]
 				def partialTarget(graph):
 					g = copy.deepcopy(graph)
-					aname = copy.deepcopy(actionName)
 					try:
-						if aname.startswith('*'):
-							aname = aname[1:]
-						return domain.getHierarchicalTargets()[aname](g, copy.deepcopy(action.parameters))
+						return domain.getHierarchicalTargets()[actionName.strip('#!*')](g, copy.deepcopy(action.parameters))
 					except:
 						traceback.print_exc()
 						sys.exit(1)
-				ret2, currentPlan2 = AGMExecutiveMonitoring_recursive(domainClass, domainPath, copy.deepcopy(init), copy.deepcopy(currentModel), partialTarget, copy.deepcopy(partialPlan))
+				ret2, currentPlan2 = AGMExecutiveMonitoring_recursive(domainClass, domainPath, copy.deepcopy(init), copy.deepcopy(currentModel), partialTarget, copy.deepcopy(partialPlan), rulesToExcludeInSearch)
 				#print 'La parte A del plan es'
 				#print currentPlan2
 				#print 'Si le uno la parte B'
@@ -139,7 +160,7 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 				#print 'Deberiamos nuevamente hacer una monitorizacion a este plan, pero bueno.... (1)'
 				if len(currentPlan3)>0:
 					if currentPlan3.data[0].hierarchical:
-						return AGMExecutiveMonitoring_recursive(domainClass, domainPath, copy.deepcopy(init), copy.deepcopy(currentModel), target, copy.deepcopy(currentPlan3))
+						return AGMExecutiveMonitoring_recursive(domainClass, domainPath, copy.deepcopy(init), copy.deepcopy(currentModel), target, copy.deepcopy(currentPlan3), rulesToExcludeInSearch)
 				return ret2, currentPlan3
 
 	###
@@ -151,7 +172,7 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 	if len(currentPlan)>0:
 		try:
 			newPlan = copy.deepcopy(currentPlan.removeFirstAction(currentModel))
-			ret2, planMonitoring2 = AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel, target, newPlan)
+			ret2, planMonitoring2 = AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel, target, newPlan, rulesToExcludeInSearch)
 			if ret2:
 				return ret2, planMonitoring2
 		except:
@@ -195,9 +216,10 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 		return True, currentPlan
 	else:
 		actionName = currentPlan.data[0].name
-		excludeList = [actionName] # this shouldn't *almost* be empty   WARNING
+		rulesToExcludeInSearch.add(actionName.strip('#!*'))
 		parameters = currentPlan.data[0].parameters
 		print 'Monitoring this plan did not work because the first action ('+actionName+') was hierarchical'
+		print 'Not using', rulesToExcludeInSearch
 		print '[ [ ['
 		print '['
 		print '['
@@ -207,7 +229,7 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 		print '['
 		print '[ [ ['
 		#skPlannerToSolveHierarchicalRule(domainObj,   domainModule, domainPath  initWorld,                   actionName, parameters, excludeList):
-		actions = askPlannerToSolveHierarchicalRule(domainClass, domain, domainPath, copy.deepcopy(currentModel), actionName, parameters, excludeList)
+		actions = askPlannerToSolveHierarchicalRule(domainClass, domain, domainPath, copy.deepcopy(currentModel), actionName, parameters, list(rulesToExcludeInSearch))
 		resultingPlan = AGGLPlannerPlan(str(currentPlan), planFromText=True)
 		resultingPlan.data.pop(0)
 		hierarchicalActionStr = '#!'+str(actionName)+'@'+str(parameters)

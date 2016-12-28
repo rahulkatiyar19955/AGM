@@ -295,6 +295,18 @@ class AGGLPlannerPlan(object):
 				print 'Unknown plan type ('+str(type(init))+')! (internal error)'
 				sys.exit(-321)
 
+	def getAlreadyDecomposedHierarchicalActionNamesList(self):
+		ret = []
+		for action in self.data:
+			n = action.name
+			if n.startswith('#!'):
+				n = n[2:]
+			if n.startswith('*'):
+				n = n[1:]
+			if not n in ret:
+				ret += [n]
+		return ret
+
 	## @brief Returns a copy of the plan without the first action assuming the action was executed. It's used for monitorization purposes.
 	# @param currentModel Model associated to the current state of the world
 	# @retval The resulting version of the plan
@@ -675,7 +687,6 @@ class PyPlan(object):
 			self.cheapestSolutionCost.set(self.results.getFirstElement().cost)
 			if self.indent == '':
 				self.end_condition.set("GoalAchieved")
-
 		elif number_of_threads>0:
 			# But, if the goal is not achieved and there are more than 0 thread running (1, 2...)
 			# we creates a list where we will save the status of all the threads, take all
@@ -717,7 +728,7 @@ class PyPlan(object):
 		elif self.end_condition.get() == "TimeLimit":
 			if verbose > 0: print 'End: TimeLimit'
 		elif self.end_condition.get() == None:
-			if verbose > 0: print 'NDD:DD:D:EWJRI'
+			if verbose > 0: print 'NDD:DD:D:EWJRI', self.end_condition, self
 		else:
 			print 'UNKNOWN ERROR'
 			print self.end_condition.get()
@@ -818,7 +829,7 @@ class PyPlan(object):
 						del self.results[:]
 					else:
 						self.results[i].history = self.results[i].history[1:]
-					self.results[i].history.insert(0, '#!'+str(ac))
+						self.results[i].history.insert(0, '#!'+str(ac))
 				else:
 					planConDescomposicion = False
 			
@@ -884,6 +895,7 @@ class PyPlan(object):
 				else:
 					self.end_condition.set("TimeLimit")
 				lock.release()
+				print 'X1'
 				return
 			# Else, proceed...
 			# Try to pop a node from the queue
@@ -900,6 +912,7 @@ class PyPlan(object):
 				if not threadPoolStatus:
 					self.end_condition.set("IndexError")
 					lock.release()
+					print 'X2'
 					return
 				time.sleep(0.001)
 				threadPoolStatus.lock()
@@ -907,6 +920,7 @@ class PyPlan(object):
 				if not True in threadPoolStatus:
 					self.end_condition.set("IndexError")
 					lock.release()
+					print 'X3'
 					return
 				threadPoolStatus.unlock()
 				continue
@@ -917,10 +931,12 @@ class PyPlan(object):
 			if head.cost > maxCost:
 				self.end_condition.set("MaxCostReached")
 				lock.release()
+				print 'X4'
 				return
 			elif self.results.size()>0 and head.cost>self.cheapestSolutionCost.value and stopWithFirstPlan:
 				self.end_condition.set("GoalAchieved")
 				lock.release()
+				print 'X5'
 				return
 			if verbose>5: print 'Expanding'.ljust(5), head
 			for k in ruleMap:
@@ -937,6 +953,7 @@ class PyPlan(object):
 							if stopWithFirstPlan:
 								self.end_condition.set("GoalAchieved")
 								lock.release()
+								print 'X6'
 								return
 							# Compute cheapest solution
 							self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
