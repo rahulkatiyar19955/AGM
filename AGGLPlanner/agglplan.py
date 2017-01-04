@@ -44,6 +44,7 @@ from AGGL import *
 from parseAGGL import *
 from generateAGGLPlannerCode import *
 from agglplanner import *
+from agglplanchecker import *
 
 if __name__ == '__main__': # program domain problem result
 	# We check if the program was run with all necessary arguments.

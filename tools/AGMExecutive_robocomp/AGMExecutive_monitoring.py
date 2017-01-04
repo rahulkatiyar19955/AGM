@@ -12,7 +12,7 @@ def askPlannerToSolveHierarchicalRule(domainObj, domainModule, domainPath, initW
 	estadoIntermedio.graph.toXML(temp_path)
 	quitar_Constantes_Creadas(temp_path)
 	"""Generamos el codigo en python para pasarselo directamente al PyPlan"""
-	graph = graphFromXML(temp_path)
+	graph = graphFromXMLFile(temp_path)
 	outputText = generateTarget(graph)
 	ofile = open(temp_path+'.py', 'w')
 	ofile.write(outputText)
@@ -33,7 +33,7 @@ def askPlannerToSolveHierarchicalRule(domainObj, domainModule, domainPath, initW
 	aaa = PyPlan(domainObj, domainPath, init_path, domainModule.getHierarchicalTargets()[actionName], '\t', paramsWithoutNew, excludeList, rList, True, temp_path+'.py', copy.deepcopy(domainObj.getInitiallyAwakeRules()))
 	if len(aaa.results.getList()) == 0:
 		print 'NOOOOOOOOOOOOOOOOOOO'
-		gg = graphFromXML(init_path)
+		gg = graphFromXMLFile(init_path)
 		gg.filterGeometricSymbols().toXML("doesntwork.xml")
 		shutil.copyfile(temp_path, "doesntwork.py")
 		print 'getInitiallyAwakeRules', domainObj.getInitiallyAwakeRules()

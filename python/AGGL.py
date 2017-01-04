@@ -679,3 +679,7 @@ class AGMFileData(object):
 		w.write(text)
 		w.close()
 
+	def getAGGLPlannerCode(self, skipPassiveRules=False):
+		a = copy.deepcopy(self.agm)
+		import generateAGGLPlannerCode
+		return generateAGGLPlannerCode.generate(a, skipPassiveRules)

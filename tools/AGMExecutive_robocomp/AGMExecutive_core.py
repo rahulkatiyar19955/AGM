@@ -282,17 +282,17 @@ class Executive(object):
 		self.agglPath = agglPath
 		self.initialModelPath = initialModelPath
 		try:
-			self.initialModel = xmlModelParser.graphFromXML(initialModelPath)
+			self.initialModel = xmlModelParser.graphFromXMLFile(initialModelPath)
 		except Exception, e:
 			print 'Can\'t open ' + initialModelPath + '.'
-			sys.exit(-1)
+			os._exit(-1)
 
 
 		print 'INITIAL MODEL: ', self.initialModel
 		self.lastModification = self.initialModel
 		print 'initial model version', self.lastModification.version
 		self.backModelICE  = None
-		self.setAndBroadcastModel(xmlModelParser.graphFromXML(initialModelPath))
+		self.setAndBroadcastModel(xmlModelParser.graphFromXMLFile(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 		print '--- setMission ---------------------------------------------'
 		self.setMission(initialMissionPath, avoidUpdate=True)

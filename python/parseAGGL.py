@@ -182,6 +182,15 @@ class AGMFileDataParsing:
 	# It returns agmFD, a variable with the grammar file, the properties, symbols and rules of the grammar.
 	@staticmethod
 	def fromFile(filename, verbose=False, includeIncludes=True):
+		print filename
+		with open(filename, 'r') as thefile:
+			text = thefile.read()
+			return AGMFileDataParsing.fromText(text, verbose, includeIncludes)
+
+	## This method makes the analysis of the .aggl file where is stored the grammar that we will use.
+	# It returns agmFD, a variable with the grammar file, the properties, symbols and rules of the grammar.
+	@staticmethod
+	def fromText(input_text, verbose=False, includeIncludes=True):
 		if verbose: print 'Verbose:', verbose
 		# Clear previous data
 		agmFD = AGMFileData()
@@ -193,7 +202,7 @@ class AGMFileDataParsing:
 		agglMetaModels = getAGGLMetaModels()
 
 		# Parse input file
-		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('#')])
+		inputText = "\n".join([line for line in input_text.split("\n") if not line.lstrip(" \t").startswith('#')])
 		result = agglMetaModels['aggl'].parseWithTabs().parseString(inputText)
 		if verbose: print "Result:\n",result
 
@@ -398,11 +407,16 @@ class AGMFileDataParsing:
 	## This method makes the analysis of the .aggt file representing a robot's target
 	@staticmethod
 	def targetFromFile(filename, verbose=False, includeIncludes=True):
+		return AGMFileDataParsing.targetFromText(open(filename, 'r').read(), verbose, includeIncludes)
+
+	## This method makes the analysis of the .aggt file representing a robot's target
+	@staticmethod
+	def targetFromText(text, verbose=False, includeIncludes=True):
 		# Define AGM's DSL meta-model
 		agglMetaModels = getAGGLMetaModels()
 
 		# Parse input file
-		inputText = "\n".join([line for line in open(filename, 'r').read().split("\n") if not line.lstrip(" \t").startswith('#')])
+		inputText = "\n".join([line for line in text.split("\n") if not line.lstrip(" \t").startswith('#')])
 		result = agglMetaModels['aggt'].parseWithTabs().parseString(inputText)
 
 		preconditionAST = None

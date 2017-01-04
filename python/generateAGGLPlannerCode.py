@@ -1355,12 +1355,12 @@ def CheckTarget(graph):\n
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
 
-	print realCond
+	#print realCond
 	totalCond = realCond
 	if target['precondition'] != None:
 		ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
 		preconditionCode, totalCond = generateTargetPreconditionCode(target['precondition'], realCond, indent+'\t')
-		print totalCond
+		#print totalCond
 		ret += preconditionCode
 		ret += indent+"\t\t\treturn maxScore, True # there were preconditions and were met"
 	else:
