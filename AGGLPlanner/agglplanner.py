@@ -261,16 +261,14 @@ class LockableList():
 			self.mutex.release()
 		return ret
 
-	##@brief This method insert a value at the top of the list. It needs to acquire the mutex
-	# in order to lock all the process.
+	##@brief This method insert a value at the top of the list. It needs to acquire the mutex in order to lock all the process. 
 	# @param value the element to insert.
 	def heapqPush(self, value):
 		self.mutex.acquire()
 		heapq.heappush(self.thelist, value)
 		self.mutex.release()
 
-	##@brief The method returns the first element of the list. It needs to acquire the mutex
-	# in order to lock all the process. It doesnt remove the element of the list.
+	##@brief The method returns the first element of the list. It needs to acquire the mutex in order to lock all the process. It doesnt remove the element of the list.
 	# @retval the first element of the list
 	def getFirstElement(self):
 		self.mutex.acquire()
@@ -278,13 +276,20 @@ class LockableList():
 		self.mutex.release()
 		return ret
 
-	##@brief This method introduces an element at the end of the list. It needs to acquire the
-	# mutex in order to lock all the process.
+	##@brief This method introduces an element at the end of the list. It needs to acquire the mutex in order to lock all the process.
 	# @param v is the new element.
 	def append(self, v):
 		self.mutex.acquire()
 		self.thelist.append(v)
 		self.mutex.release()
+
+	##@brief This method pops an element from the list. It needs to acquire the mutex in order to lock all the process.
+	# @param v is the new element.
+	def pop(self):
+		self.mutex.acquire()
+		ret = self.thelist.pop()
+		self.mutex.release()
+		return ret
 
 	##@brief This method lock the mutex (it acquires him)
 	def lock(self):
@@ -454,7 +459,6 @@ class PyPlan(object):
 			# If the solution is not achieved and there arent any thread to execute the programm
 			# we stop it and show an error message.
 			self.startThreadedWork(ruleMap, triggerMap)
-
 		# We make others checks over the end_condition:
 		#	-- If the end condition is wrong.
 		#	-- or the end condition exceeded the maximum cost
@@ -1124,6 +1128,13 @@ class AGGLPlanner(object):
 		self.decomposing = decomposing
 		# result file
 		self.resultFile = resultFile
+		
+		# set stop flat
+		self.externalStopFlag = LockableInteger(0)
+
+	def setStopFlag(self):
+		print 'got setStopFlag (internal class)'
+		self.externalStopFlag.set(1)
 
 	def run(self):
 		# Search initialization
@@ -1201,6 +1212,10 @@ class AGGLPlanner(object):
 			if self.indent == '' and verbose > 0: print 'End: goal achieved'
 		elif self.end_condition.get() == "TimeLimit":
 			if verbose > 0: print 'End: TimeLimit'
+		elif self.end_condition.get() == 'ExternalFlag':
+			if verbose > 0: print 'End: External stop flag set'
+			return AGGLPlannerPlan("__stopped__@{}\n", planFromText=True)
+
 		elif self.end_condition.get() == None:
 			if verbose > 0: print 'NDD:DD:D:EWJRI', self.end_condition, self
 		else:
@@ -1361,6 +1376,10 @@ class AGGLPlanner(object):
 		timeA = datetime.datetime.now()
 		
 		while True:
+			if self.externalStopFlag.get() != 0:
+				print 'WE STOP BECAUSE WE GOT A ZERO'
+				self.end_condition.set('ExternalFlag')
+				break
 			# Again, we take the time and we calculated the elapsed time
 			timeB = datetime.datetime.now()
 			timeElapsed = float((timeB-timeA).seconds) + float((timeB-timeA).microseconds)/1e6

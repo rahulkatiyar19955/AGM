@@ -37,6 +37,10 @@ import RoboCompPlanning
 import AGMModelConversion
 
 
+import thriftpy
+agglplanner_thrift = thriftpy.load("agglplanner.thrift", module_name="agglplanner_thrift")
+from thriftpy.rpc import make_client
+
 
 #
 # WARNING: Design issues to take into consideration in the future:
@@ -50,22 +54,27 @@ import AGMModelConversion
 
 
 
+	
 
 
 class PlannerCaller(threading.Thread):
+	lastPypyKill = time.time()
+	cache = PlanningCache()
+	working = False
+	plannerExecutionID = 0
+	plan = AGGLPlannerPlan('', planFromText=True)
+	plannerCallerMutex = threading.RLock()
+	pendingJobs = LockableList()
+
+
 	def __init__(self, executive, agglPath):
 		threading.Thread.__init__(self)
-		self.lastPypyKill = time.time()
-		self.cache = PlanningCache()
-		self.plannerExecutionID = 0
 		self.executive = executive
-		self.working = False
-		self.plan = AGGLPlannerPlan('', planFromText=True)
-		self.plannerCallerMutex = threading.RLock()
 		self.agglPath = agglPath
 		self.agmData = AGMFileDataParsing.fromFile(self.agglPath)
 		self.agmData.generateAGGLPlannerCode("/tmp/domainActive.py", skipPassiveRules=False)
 		self.agmData.generateAGGLPlannerCode("/tmp/domainPasive.py", skipPassiveRules=True)
+		self.agglplannerclient = make_client(agglplanner_thrift.AGGLPlanner, '127.0.0.1', 6000)
 
 	def setWork(self, currentModel):
 		#print 'PlannerCaller::setWork 0'
@@ -75,8 +84,14 @@ class PlannerCaller(threading.Thread):
 			now = time.time()
 			elap = (now - self.lastPypyKill)
 			if elap > 2.:
-				try: subprocess.call(["killall", "-9", "pypy"])
-				except: pass
+				try:
+					self.pendingJobs.acquire()
+					while True:
+						pend = self.pendingJobs.pop()
+						self.agglplannerclient.forceStopPlanning(pend)
+					self.pendingJobs.release()
+				except:
+					pass
 				self.lastPypyKill = now
 			time.sleep(0.1)
 		# Set work
@@ -190,14 +205,16 @@ class PlannerCaller(threading.Thread):
 		try:
 			#print 'argss', argsss
 			start = time.time()
-			subprocess.call(argsss)
+			jobId = self.agglplannerclient.startPlanning(self.domainId, initWorld, self.targetId, [], [])
+			self.pendingJobs.append(jobId)
+			result = self.agglplannerclient.getPlanningResults(jobId)
 			print 'PlannerCaller::run done calling', argsss
 		except:
 			traceback.print_exc()
 			sys.exit(-1)
 		end = time.time()
 		print 'PlannerCaller::run It took', end - start, 'seconds'
-		print 'PlannerCaller::run includeFromFiles: ', domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True
+		#print 'PlannerCaller::run includeFromFiles: ', domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True
 		try:
 			ofile = open("/tmp/result"+peid+".txt", 'r')
 		except:

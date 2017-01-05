@@ -25,14 +25,33 @@ targetText = open('/home/robocomp/robocomp/components/robocomp-shelly/etc/target
 targetId = client.getTargetIdentifier(targetText)
 print targetId
 
+print 'Get target id...'
+targetText = open('/home/robocomp/robocomp/components/robocomp-shelly/etc/targetReachTableD.aggt', 'r').read()
+targetId = client.getTargetIdentifier(targetText)
+print targetId
+
 print 'Reading init world...'
 initWorld = open('/home/robocomp/robocomp/components/robocomp-shelly/etcSim/initialModel_hybrid.xml', 'r').read()
 
 print 'Calling planner...'
-result = client.planAGGT(domainId, initWorld, targetId, [], [])
+jobIdentifier = client.startPlanning(domainId, initWorld, targetId, [], [])
+print 'got job identifier', jobIdentifier
+result = client.getPlanningResults(jobIdentifier)
 print result
+
 print 'Calling planner...'
-result = client.planAGGT(domainId, initWorld, targetId, [], [])
+jobIdentifier = client.startPlanning(domainId, initWorld, targetId, [], [])
+print 'got job identifier', jobIdentifier
+print 'stopping job'
+client.forceStopPlanning(jobIdentifier)
+result = client.getPlanningResults(jobIdentifier)
+print result
+
+
+print 'Calling planner...'
+jobIdentifier = client.startPlanning(domainId, initWorld, targetId, [], [])
+print 'got job identifier', jobIdentifier
+result = client.getPlanningResults(jobIdentifier)
 print result
 
 
