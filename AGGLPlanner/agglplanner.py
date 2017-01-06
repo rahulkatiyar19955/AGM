@@ -77,79 +77,23 @@ def sumActionCosts(node, last):
 def computePlanCost(node):
 	ret = 0
 	iters = 0
-	
 	for xcost, xsuccess, xname in node.costData:
-		print 'x', xcost, xsuccess, xname
 		iters += 1
 		ret += xcost + (1-xsuccess)*sumActionCosts(node, iters)
 	return ret
-	
 
-def quitar_Constantes_Creadas(ficheroMundo):
-	constantes = []
-	constante = []
 
-	"""Abrimos el fichero del mundo origen y sacamos todos los numeros enteros (variables constantes) del fichero.  Para ello solo nos quedaremos con las declaraciones del tipo: <symbol id="1" """
-	init = open(ficheroMundo)
-	linea = init.readline()
-	while linea != "":
-		if linea.find('<symbol') != -1:
-			"""Sacamos la parte id="1" que define el nodo como constante o variable. Minimo, esta parte mide 6 de longitud. El identificador numerico empieza en la posicion 4. Su longitud depende del numero que tenga dentro de las comillas"""
-			vector = linea.split()
-			for partI in xrange(len(vector)):
-				if vector[partI] == '<symbol':
-					i = 4
-					while i<int(len(vector[partI+1])-1):
-						constante.append(vector[partI+1][i])
-						i=i+1
-			"""Pasamos a entero la cadena con el id del nodo, lo guardamos en el vector de constantes y limpiamos las variables usadas."""
-			T2 = int(''.join(constante)) 
-			constantes.append(T2)
-			constante = []
-		linea = init.readline()
-	init.close()
-	
-	eliminar = []
-	correspondencia = False
-	contenido=""
-	"""Abrimos el fichero target y vamos comparando todas las lineas  <symbol id="1" type="object">
-	con el vector de constantes que hemos sacado antes. Si hay una constante que no esta recogida en el
-	vector de constantes es que es nueva y debemos cambiar su nombre para hacerla variable."""
-	target = open("/tmp/estadoIntermedio.xml")
-	linea = target.readline()
-	while linea !="":
-		if linea.find('<symbol')!=-1:
-			"""Si hemos encontrado una linea que define un nuevo nodo, comparamos el identificador del nodo con todas las constantes originales """
-			for const in constantes:
-				if linea.find('id="'+const.__str__()+'"')!=-1:
-					correspondencia = True
-			"""Si no hemos encontrado correspondencia ninguna, es que es un nuevo nodo creado a partir de la ejecucion de la regla jerarquica. Guardamos su identificador para despues cambiarlo por otro valor (lo pasaremos de constante a variable)"""
-			if correspondencia==False:
-				vector = linea.split()
-				i = 4
-				while i<int(len(vector[1])-1):
-					constante.append(vector[1][i])
-					i=i+1
-				T2 = int(''.join(constante)) 
-				eliminar.append(T2)
-				constante = []
-		contenido = contenido+linea
-		linea = target.readline()
-	target.close()
 
-	if len(eliminar)>0:
-		"""Si hay elementos a eliminar/cambiar, buscamos sus apariciones y las modificamos"""
-		cadenaLimpia=[contenido]
-		import re
-		target = open("/tmp/estadoIntermedio.xml",'w')    #abrimos el fichero con permisos de escritura
-		i=0
-		for el in eliminar:
-			patter = re.compile('"'+el.__str__()+'"', re.I | re.S)
-			cadenaLimpia.append(patter.sub('"AA'+el.__str__()+'"', cadenaLimpia[i]))
-			i = i+1
-		target.write(cadenaLimpia[len(cadenaLimpia)-1])    #escribimos la cadena ya actualizada y sin la regla jerarquica
-		target.close() 
-
+def setNewConstantsAsVariables(originalGraph, secondGraph):
+	# Create a copy of the secondGraph
+	outputGraph = copy.deepcopy(secondGraph)
+	# Generate a list of node names
+	existingNodes = [node.name for node in originalGraph.nodes]
+	# 
+	for node in outputGraph:
+		if not node.name in existingNodes:
+			node.name = 'makeitavariable'+node.name
+	return outputGraph
 
 ## @brief Method heapsort. This method receives an iterable thing. It stores the iterable thing
 # in a list and sorts the list.
@@ -355,254 +299,6 @@ class LockableInteger(object):
 
 
 
-## @brief This is the main class. This makes all the process in order to create, check and execute the plan.
-class PyPlan(object):
-	## @brief The constructor method. This initializes all the attributes of the class and makes the first check of the plan.
-	# @param domainAGM  is the file name where is saved the grammar rules.
-	# @param domainPath is the file name where is saved the grammar rules.
-	# @param init is the XML file where is saved the inital status of the world
-	# @param targetPath is the python file where is daved the target status of the world.
-	# @param indent The intentation for the output plan
-	# @param symbol_mapping mapping that should be used while planning (mainly used internally in recursive rules)
-	# @param excludeList grammar rule black list  (those which can't be used for planning)
-	# @param resultFile is the optional name of the file where the plan result will be stored.
-	# @param descomponiendo: added whe we are descomposing a jerarchical rule
-	# @param estadoIntermedio: python file with the intermediate status of the world, after whe apply the jerarchical rule
-	# @param awakenRules: the set of rules that are currently available for the planner to find a solution
-	def __init__(self, domainAGM, domainPath, init, targetPath, indent, symbol_mapping, excludeList, resultFile, descomponiendo=False, estadoIntermedio='', awakenRules=set()):
-		object.__init__(self)
-		# Get initial world mdoel
-		initWorld = WorldStateHistory([xmlModelParser.graphFromXMLFile(init), domainAGM.getInitiallyAwakeRules()|awakenRules])
-		initWorld.nodeId = 0 
-
-		self.symbol_mapping = copy.deepcopy(symbol_mapping) 
-		self.excludeList = copy.deepcopy(excludeList)
-		self.indent = copy.deepcopy(indent)
-
-		# Get graph rewriting rules
-		domain = imp.load_source('domain', domainPath).RuleSet() # activeRules.py
-		ruleMap = copy.deepcopy(domain.getRules()) #get all the active rules of the grammar
-		triggerMap = copy.deepcopy(domain.getTriggers()) #get all the active rules of the grammar
-		for e in excludeList:
-			try:
-				del ruleMap[e]  # delete the rules in excludeList from ruleMap
-			except:
-				pass
-			try:
-				del triggerMap[e]  # delete the rules in excludeList from triggerMap
-			except:
-				pass
-		#for r in ruleMap:
-			#print 'Using', r
-
-		# Get goal-checking code
-		if type(targetPath)== type(''):  # type str
-			target = imp.load_source('target', targetPath)
-			## This attribute stores the code of the goal status world.
-			self.targetCode = target.CheckTarget
-		else:
-			self.targetCode = targetPath
-
-		# Search initialization
-		## This attribute indicates the maximum size that can reach the graph
-		self.maxWorldSize = maxWorldIncrement+len(initWorld.graph.nodes.keys())
-		## This attribute indicates the minimun cost of the open nodes of the graph
-		self.minCostOnOpenNodes = LockableInteger(0)
-		## This is the lockable list of all the open nodes.
-		self.openNodes = LockableList()
-		## This is the lockable list of all the know nodes of the graph.
-		self.knownNodes = LockableList()
-		## This is the lockable list of all the calculated results.
-		self.results = LockableList()
-		## This is the lockable integer of all the explored nodes
-		self.explored = LockableInteger(0)
-		## This is the LockableInteger that stores the better cost of the solution
-		self.cheapestSolutionCost = LockableInteger(-1)
-		## This is the condition to stop.
-		self.end_condition = EndCondition()
-		# We save in the list of the open nodes, the initial status of the world
-		self.openNodes.heapqPush((0, copy.deepcopy(initWorld)))
-		if verbose>1 and indent=='': print 'INIT'.ljust(20), initWorld
-
-		# Create initial state
-		if self.symbol_mapping:
-			initWorld.score, achieved = self.targetCode(initWorld.graph, self.symbol_mapping)
-		else:
-			initWorld.score, achieved = self.targetCode(initWorld.graph)
-
-		if achieved:
-			# If the goal is achieved, we save the solution in the result list, the
-			# solution cost in the cheapest solution cost and we put the end_condition
-			# as goal achieved in order to stop the execution.
-			self.results.append(initWorld)
-			self.cheapestSolutionCost.set(self.results.getFirstElement().cost)
-			if self.indent == '':
-				self.end_condition.set("GoalAchieved")
-		elif number_of_threads>0:
-			# But, if the goal is not achieved and there are more than 0 thread running (1, 2...)
-			# we creates a list where we will save the status of all the threads, take all
-			# the threads (with their locks) and save it in the thread_locks list.
-			# Run working threads
-			## This attributes is a list where we save all the thread that are running.
-			self.thread_locks = []
-			threadStatus = LockableList()
-			for i in xrange(number_of_threads):
-				lock = thread.allocate_lock()
-				lock.acquire()
-				threadStatus.append(True)
-				self.thread_locks.append(lock)
-				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), copy.deepcopy(triggerMap), lock, i, threadStatus))
-			# Wait for the threads to stop
-			for lock in self.thread_locks:
-				lock.acquire()
-		else:
-			# If the solution is not achieved and there arent any thread to execute the programm
-			# we stop it and show an error message.
-			self.startThreadedWork(ruleMap, triggerMap)
-		# We make others checks over the end_condition:
-		#	-- If the end condition is wrong.
-		#	-- or the end condition exceeded the maximum cost
-		#	-- or we have found the best overcome.
-		#	-- or we have achieved the goal
-		#	-- or we have exceeded the maximum time limit
-		#	-- or the end condition doesnt have any message
-		# we print the correspond message
-		if self.end_condition.get() == "IndexError":
-			if verbose > 0: print 'End: state space exhausted'
-		elif self.end_condition.get() == "MaxCostReached":
-			if verbose > 0: print 'End: max cost reached'
-		elif self.end_condition.get() == "BestSolutionFound":
-			if verbose > 0: print 'End: best solution found'
-		elif self.end_condition.get() == "GoalAchieved":
-			if self.indent == '' and verbose > 0: print 'End: goal achieved'
-		elif self.end_condition.get() == "TimeLimit":
-			if verbose > 0: print 'End: TimeLimit'
-		elif self.end_condition.get() == None:
-			if verbose > 0: print 'NDD:DD:D:EWJRI', self.end_condition, self
-		else:
-			print 'UNKNOWN ERROR'
-			print self.end_condition.get()
-
-##
-##
-##
-		if len(self.results)>0: # If there are plans, proceed
-			min_idx = 0
-			for i in range(len(self.results)): # We go over all the actions of the plan, and we look for the best solution (the minimun cost).
-				if self.results[i].cost < self.results[min_idx].cost:
-					min_idx = i
-			i = min_idx
-			
-			if self.indent=='' and verbose > 0: print 'Got', len(self.results), 'plans!'
-				
-		
-			try:
-				plann = AGGLPlannerPlan([xx.split('@') for xx in self.results[i].history])
-				n = copy.deepcopy(plann)
-				while len(self.results[i].history)>0:
-					n = n.removeFirstAction(initWorld.graph)
-					#n = n.removeFirstActionDirect()
-					try:
-						#print 'QUITADA REGLA: ', self.results[i].history[0], '\nRESTO DEL PLAN: ', n
-						"""ANIADIDO DE MERCEDES, YEAH!
-						Si estamos descomponiendo una regla jerarquica (estamos buscando un plan para
-						llegar al estado que nos indica la regla jerarquica) debemos crear el estado intermedio
-						generado por la regla jerarquica y llamar con el al PyPlanChecker"""
-						if descomponiendo==True:
-							#print 'Hay que crear estado intermedio'
-							from agglplanchecker import PyPlanChecker
-							check = PyPlanChecker(domainAGM, domainPath, init, n, estadoIntermedio,symbol_mapping, verbose=False)
-							
-						else:
-							#print 'No hay que crear estado intermedio'
-							from agglplanchecker import PyPlanChecker
-							check = PyPlanChecker(domainAGM, domainPath, init, n, targetPath,symbol_mapping, verbose=False)
-					except:
-						print 'Excepction!!'
-						traceback.print_exc()
-						break
-					if check.achieved:
-						print  '  (removed)', self.results[i].history[0]
-						self.results[i].history = self.results[i].history[1:]
-						plann = copy.deepcopy(n)
-					else:
-						print  '  (not removed)', self.results[i].history[0]
-						break
-				if descomponiendo==False:
-					print 'ORIGINAL PLAN: ', self.results[i].cost
-					for action in self.results[i].history:
-						print '    ', action
-			except:
-				traceback.print_exc()
-				pass
-			rList = []
-			planConDescomposicion = False
-			if len(self.results[i].history) > 0:
-				action = self.results[i].history[0]
-				ac = AGGLPlannerAction(action)
-				if ac.hierarchical:
-					self.excludeList.append(ac.name)
-					paramsWithoutNew = copy.deepcopy(ac.parameters)
-					for param in ac.parameters:
-						found = False
-						for arule in domainAGM.agm.rules:
-							if arule.name == ac.name:
-								if param in arule.lhs.nodes:
-									found = True
-									break
-						if not found:
-							#print 'removing fixed goal symbol', param
-							del paramsWithoutNew[param]
-							#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
-					#print paramsWithoutNew
-					print '\nDecomposing hierarchical rule ', ac.name, paramsWithoutNew
-					""" Creamos estado intermedio, primero lo creamos en fichero .xml para poder quitarle los nuevos nodos creados al aplicar la regla jerarquica"""
-					estadoIntermedio = triggerMap[ac.name](initWorld, ac.parameters)
-					estadoIntermedio.graph.toXML("/tmp/estadoIntermedio.xml")
-					"""Quitamos los nodos constantes creados por la regla jerarquica: los volvemos variables para evitar errores cuando se genere el codigo target en python."""
-					quitar_Constantes_Creadas(init)
-					"""Generamos el codigo en python para pasarselo directamente al PyPlan"""
-					graph = graphFromXMLFile("/tmp/estadoIntermedio.xml")
-					outputText = generateTarget(graph)
-					ofile = open("/tmp/estadoIntermedio.py", 'w')
-					ofile.write(outputText)
-					ofile.close()
-					"""Ponemos una bandera para pintar despues el plan completa una vez descompuesta la primera regla jerarquica"""
-					planConDescomposicion = True
-					hierarchicalTarget = domain.getHierarchicalTargets()[ac.name]
-					#           (self, domainAGM, domainPath, init, targetPath,         indent,      symbol_mapping,   excludeList,      resultFile, descomp=False, estadoInt='',               awakenRules=set())
-					aaa = PyPlan(      domainAGM, domainPath, init, hierarchicalTarget, indent+'\t', paramsWithoutNew, self.excludeList, rList,      True,          "/tmp/estadoIntermedio.py", copy.deepcopy(self.results[i].awakenRules|awakenRules))
-					if len(aaa.results.getList()) == 0:
-						#del self.results[i]
-						#continue
-						del self.results[:]
-					else:
-						self.results[i].history = self.results[i].history[1:]
-						self.results[i].history.insert(0, '#!'+str(ac))
-				else:
-					planConDescomposicion = False
-			
-			if len(self.results)>0: # If there are plans, proceed
-				#printResult(self.results[i]) #the best solution
-				total = rList + self.results[i].history
-				if resultFile != None:
-					for action in total:
-						if type(resultFile) == type([]):
-							resultFile.append(action)
-						else:
-							resultFile.write(str(action)+'\n')
-				if descomponiendo == False and planConDescomposicion == True:
-					print 'FINAL PLAN WITH: ', len(total), ' ACTIONS:'
-					for action in total:
-						print '    ', action
-			
-			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
-
-		if len(self.results)==0: # If the length of the list is zero, it means that we have not found a plan.
-			if verbose > 0: print 'No plan found.'
-##
-##
-##
 
 		
 		
@@ -1312,11 +1008,8 @@ class AGGLPlanner(object):
 					print '\nDecomposing hierarchical rule ', ac.name, paramsWithoutNew
 					""" Creamos estado intermedio, primero lo creamos en fichero .xml para poder quitarle los nuevos nodos creados al aplicar la regla jerarquica"""
 					estadoIntermedio = self.triggerMap[ac.name](self.initWorld, ac.parameters)
-					estadoIntermedio.graph.toXML("/tmp/estadoIntermedio.xml")
 					"""Quitamos los nodos constantes creados por la regla jerarquica: los volvemos variables para evitar errores cuando se genere el codigo target en python."""
-					quitar_Constantes_Creadas(initPath)
-					"""Generamos el codigo en python para pasarselo directamente al PyPlan"""
-					graph = graphFromXMLFile("/tmp/estadoIntermedio.xml")
+					graph = setNewConstantsAsVariables(init, estadoIntermedio.graph)
 					outputText = generateTarget(graph)
 					ofile = open("/tmp/estadoIntermedio.py", 'w')
 					ofile.write(outputText)
