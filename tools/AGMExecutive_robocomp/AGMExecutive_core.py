@@ -13,6 +13,8 @@ from agglplanningcache import *
 from AGMExecutive_monitoring import *
 import xmlModelParser
 
+import unicodedata
+
 import pickle
 
 # Check that RoboComp has been correctly detected
@@ -38,7 +40,7 @@ import AGMModelConversion
 
 
 import thriftpy
-agglplanner_thrift = thriftpy.load("agglplanner.thrift", module_name="agglplanner_thrift")
+agglplanner_thrift = thriftpy.load("/usr/local/share/agm/agglplanner.thrift", module_name="agglplanner_thrift")
 from thriftpy.rpc import make_client
 
 
@@ -51,10 +53,6 @@ from thriftpy.rpc import make_client
 #
 #
 #
-
-
-
-	
 
 
 class PlannerCaller(threading.Thread):
@@ -71,10 +69,18 @@ class PlannerCaller(threading.Thread):
 		threading.Thread.__init__(self)
 		self.executive = executive
 		self.agglPath = agglPath
-		self.agmData = AGMFileDataParsing.fromFile(self.agglPath)
-		self.agmData.generateAGGLPlannerCode("/tmp/domainActive.py", skipPassiveRules=False)
-		self.agmData.generateAGGLPlannerCode("/tmp/domainPasive.py", skipPassiveRules=True)
-		self.agglplannerclient = make_client(agglplanner_thrift.AGGLPlanner, '127.0.0.1', 6000)
+		self.agglplannerclient = executive.agglplannerclient
+		self.domainText = open(self.agglPath, 'r').read()
+		tempStr = self.domainText
+		try: tempStr = unicodedata.normalize('NFKD', tempStr)
+		except: pass
+		self.domainId = self.agglplannerclient.getDomainIdentifier(tempStr)
+
+	def setMission(self, targetStr):
+		tempStr = targetStr
+		try: tempStr = unicodedata.normalize('NFKD', tempStr)
+		except: pass
+		self.targetId = self.agglplannerclient.getTargetIdentifier(open(tempStr, 'r').read())
 
 	def setWork(self, currentModel):
 		#print 'PlannerCaller::setWork 0'
@@ -131,14 +137,10 @@ class PlannerCaller(threading.Thread):
 		self.plannerExecutionID+=1
 		try: #
 			peid = '_'+str(self.plannerExecutionID)
-			self.currentModel.filterGeometricSymbols().toXML("/tmp/lastWorld"+peid+".xml")
 		except:
 			print traceback.print_exc()
 			print 'There was some problem writing the model to an XML:', "/tmp/lastWorld"+peid+".xml"
 			sys.exit(1)
-		domainPY = "/tmp/domainActive.py"
-		worldXML = "/tmp/lastWorld"+peid+".xml"
-		targetPY = "/tmp/target.py"
 
 		###
 		### Try monitoring
@@ -201,36 +203,38 @@ class PlannerCaller(threading.Thread):
 		### Run the planner
 		###
 		# CALL
-		argsss = ["agglplanner", self.agglPath, domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt"]
 		try:
-			#print 'argss', argsss
 			start = time.time()
-			jobId = self.agglplannerclient.startPlanning(self.domainId, initWorld, self.targetId, [], [])
+			
+			print 'PlannerCaller::run calling planner start'
+			tempStr = self.currentModel.filterGeometricSymbols().toXMLString()
+			try:
+				print 'X1', type(tempStr)
+				tempStr = str(unicodedata.normalize('NFKD', tempStr))
+				print 'X2', type(tempStr)
+			except:
+				print 'X3', type(tempStr)
+				pass
+			jobId = self.agglplannerclient.startPlanning(self.domainId, tempStr, self.targetId, [], [])
+			print 'PlannerCaller::run got job identifier', jobId
 			self.pendingJobs.append(jobId)
+			print 'PlannerCaller::run waiting for results...'
 			result = self.agglplannerclient.getPlanningResults(jobId)
-			print 'PlannerCaller::run done calling', argsss
+			print 'PlannerCaller::run done calling got', result.plan
+			#if len(''.join(lines).strip()) > 0:  # WARNING TODO BUG ERROR FIXME                                 THIS SHOULD BE FIXED TO ENABLE PLAN CACHING
+				#self.cache.includeFromFiles(domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True)
 		except:
 			traceback.print_exc()
-			sys.exit(-1)
-		end = time.time()
-		print 'PlannerCaller::run It took', end - start, 'seconds'
-		#print 'PlannerCaller::run includeFromFiles: ', domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True
-		try:
-			ofile = open("/tmp/result"+peid+".txt", 'r')
-		except:
 			print "PlannerCaller::run Can't open plan. We assume a new context was forced"
 			return
-		try:
-			lines = ofile.readlines()
-			if len(''.join(lines).strip()) > 0:
-				self.cache.includeFromFiles(domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True)
-			ofile.close()
-		except:
-			print 'PlannerCaller::run Weird error xx'
-			return
+		end = time.time()
+		print 'PlannerCaller::run It took', end - start, 'seconds'
+
 		# Get the output
 		try:
-			self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
+			print 'A'
+			self.plan = AGGLPlannerPlan(str(result.plan), planFromText=True)
+			print 'B'
 			print 'DIRECT FROM AGGLPlanner\nself.plan:\n', self.plan
 			self.callMonitoring(peid)
 		except: # The planner was probably killed
@@ -242,6 +246,8 @@ class PlannerCaller(threading.Thread):
 
 
 	def callMonitoring(self, peid):
+		return False
+		
 		domainPath = '/tmp/domainActive.py'
 		init   = '/tmp/lastWorld'+peid+'.xml'
 		target = '/tmp/target.py'
@@ -289,8 +295,12 @@ class Executive(object):
 		self.agents = dict()
 		self.plan = AGGLPlannerPlan('', planFromText=True)
 		self.modifications = 0
+		self.agglplannerclient = make_client(agglplanner_thrift.AGGLPlanner, '127.0.0.1', 6000)
 		self.plannerCaller = PlannerCaller(self, agglPath)
 		self.plannerCaller.start()
+		print '--- setMission ---------------------------------------------'
+		self.setMission(initialMissionPath, avoidUpdate=True)
+		print '--- setMission ---------------------------------------------'
 
 		# Set proxies
 		self.executiveTopic = executiveTopic
@@ -311,9 +321,6 @@ class Executive(object):
 		self.backModelICE  = None
 		self.setAndBroadcastModel(xmlModelParser.graphFromXMLFile(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
-		print '--- setMission ---------------------------------------------'
-		self.setMission(initialMissionPath, avoidUpdate=True)
-		print '--- setMission ---------------------------------------------'
 
 	#######################################################################
 	#                                                                     #
@@ -434,19 +441,7 @@ class Executive(object):
 	def setMission(self, target, avoidUpdate=False):
 		self.mutex.acquire()
 		self.targetStr = target
-		try:
-			temp = AGMFileDataParsing.targetFromFile(target)
-			self.target = generateTarget_AGGT(temp)
-			ofile = open("/tmp/target.py", 'w')
-			ofile.write(self.target)
-			ofile.close()
-			if not avoidUpdate:
-				print 'Executive::setMission: do update plan'
-				self.updatePlan()
-		except:
-			print traceback.print_exc()
-			print 'Executive::setMission: There was some problem setting the mission'
-			sys.exit(1)
+		self.plannerCaller.setMission(self.targetStr)
 		self.mutex.release()
 
 

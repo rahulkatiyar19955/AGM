@@ -1,4 +1,4 @@
-import copy
+import copy, sys
 
 
 ##@brief This class manages the exception of a wrong rule execution.

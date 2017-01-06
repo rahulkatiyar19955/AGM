@@ -1,3 +1,7 @@
+#!/usr/bin/env pypy
+
+
+
 #sudo apt-get install pypy pypy-setuptools
 #git clone https://github.com/eleme/thriftpy.git
 #cd thriftpy
@@ -8,7 +12,7 @@
 #from thriftpy.transport.framed import TFramedTransportFactory
 
 import thriftpy
-agglplanner_thrift = thriftpy.load("agglplanner.thrift", module_name="agglplanner_thrift")
+agglplanner_thrift = thriftpy.load("/usr/local/share/agm/agglplanner.thrift", module_name="agglplanner_thrift")
 
 from thriftpy.rpc import make_server
 
@@ -37,6 +41,7 @@ class Worker(object):
 	jobMap = {}
 	
 	def getDomainIdentifier(self, domainText):
+		print 'getDomainIdentifier domainText(', type(domainText), ')'
 		try:
 			self.mapsLock.acquire()
 			ret = self.lastUsedDomainKey + 1
@@ -50,20 +55,24 @@ class Worker(object):
 			self.mapsLock.release()
 
 	def getTargetIdentifier(self, targetText):
+		print 'getTargetIdentifier targetText(', type(targetText), ')'
 		try:
 			self.mapsLock.acquire()
 			ret = self.lastUsedTargetKey + 1
 			self.targetMap[ret] = agglplanner.TargetInformation(ret, targetText)
+			open("targetText.txt", 'w').write(targetText)
+			open("targetCode.py", 'w').write(self.targetMap[ret].code)
 			self.lastUsedTargetKey += 1
 			return ret
 		except:
-			open("roro", 'w').write(self.targetMap[targetId].code)
+			open("roro", 'w').write(self.targetMap[ret].code)
 			traceback.print_exc()
 			return -1
 		finally:
 			self.mapsLock.release()
 
 	def startPlanning(self, domainId, initWorld, targetId, excludeList, awakenRules):
+		print 'startPlanning', domainId, '(', type(domainId), ')', 'initWorld(', type(initWorld), ')', targetId, '(', type(targetId), ')', excludeList, '(', type(excludeList), ')', awakenRules, '(', type(awakenRules), ')'
 		try:
 			self.mapsLock.acquire()
 			ret = self.lastUsedJobKey + 1
@@ -81,6 +90,7 @@ class Worker(object):
 			self.mapsLock.release()
 
 	def forceStopPlanning(self, jobIdentifier):
+		print 'forceStopPlanning', jobIdentifier, '(', type(jobIdentifier), ')'
 		ret = 0
 		try:
 			self.mapsLock.acquire()
@@ -94,6 +104,7 @@ class Worker(object):
 		return 0
 
 	def getPlanningResults(self, jobIdentifier):
+		print 'getPlanningResults', jobIdentifier, '(', type(jobIdentifier), ')'
 		ret = agglplanner_thrift.PlanningResults()
 		try:
 			self.mapsLock.acquire()

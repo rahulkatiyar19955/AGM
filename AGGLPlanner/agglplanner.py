@@ -1070,7 +1070,12 @@ class TargetInformation(object):
 	def __init__(self, identifier, text):
 		self.identifier = identifier
 		self.text = text
+		print '---------------------------------------------------------------------------'
+		print text
+		print '---------------------------------------------------------------------------'
 		self.code = generateTarget_AGGT(AGMFileDataParsing.targetFromText(text))
+		print self.code
+		print '---------------------------------------------------------------------------'
 		self.module = self.getModuleFromText(self.code).CheckTarget
 	def getModuleFromText(self, moduleText):
 		if len(moduleText) < 10:
@@ -1151,7 +1156,7 @@ class AGGLPlanner(object):
 		## This is the lockable integer of all the explored nodes
 		self.explored = LockableInteger(0)
 		## This is the LockableInteger that stores the better cost of the solution
-		self.cheapestSolutionCost = LockableInteger(-1)
+		self.cheapestSolutionCost = LockableInteger(-1) 
 		## This is the condition to stop.
 		self.end_condition = EndCondition()
 		# We save in the list of the open nodes, the initial status of the world
@@ -1160,19 +1165,27 @@ class AGGLPlanner(object):
 
 		# Create initial state
 		if self.symbol_mapping:
+			print 'eo 1'
 			self.initWorld.score, achieved = self.targetCode(self.initWorld.graph, self.symbol_mapping)
+			print 'eo 11'
 		else:
+			print 'eo 21'
 			self.initWorld.score, achieved = self.targetCode(self.initWorld.graph)
+			print 'eo 2'
 
 		if achieved:
+			print 'AQUI 2'
 			# If the goal is achieved, we save the solution in the result list, the
 			# solution cost in the cheapest solution cost and we put the end_condition
 			# as goal achieved in order to stop the execution.
 			self.results.append(self.initWorld)
+			print 'AQUI 2.1'
 			self.cheapestSolutionCost.set(self.results.getFirstElement().cost)
+			print 'AQUI 2.2'
 			if self.indent == '':
 				self.end_condition.set("GoalAchieved")
 		elif number_of_threads>0:
+			print 'AQUI 3'
 			# But, if the goal is not achieved and there are more than 0 thread running (1, 2...)
 			# we creates a list where we will save the status of all the threads, take all
 			# the threads (with their locks) and save it in the thread_locks list.
@@ -1180,19 +1193,24 @@ class AGGLPlanner(object):
 			## This attributes is a list where we save all the thread that are running.
 			self.thread_locks = []
 			threadStatus = LockableList()
+			print 'AQUI 3.1'
 			for i in xrange(number_of_threads):
+				print 'AQUI 3.2'
 				lock = thread.allocate_lock()
 				lock.acquire()
 				threadStatus.append(True)
 				self.thread_locks.append(lock)
-				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), copy.deepcopy(triggerMap), lock, i, threadStatus))
+				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), copy.deepcopy(self.triggerMap), lock, i, threadStatus))
+				print 'AQUI 3.3'
 			# Wait for the threads to stop
 			for lock in self.thread_locks:
 				lock.acquire()
 		else:
 			# If the solution is not achieved and there arent any thread to execute the programm
 			# we stop it and show an error message.
+			print 'AQUI 4.2'
 			self.startThreadedWork(self.ruleMap, self.triggerMap)
+			print 'AQUI 4.3'
 
 		# We make others checks over the end_condition:
 		#	-- If the end condition is wrong.
@@ -1215,7 +1233,6 @@ class AGGLPlanner(object):
 		elif self.end_condition.get() == 'ExternalFlag':
 			if verbose > 0: print 'End: External stop flag set'
 			return AGGLPlannerPlan("__stopped__@{}\n", planFromText=True)
-
 		elif self.end_condition.get() == None:
 			if verbose > 0: print 'NDD:DD:D:EWJRI', self.end_condition, self
 		else:
@@ -1282,7 +1299,7 @@ class AGGLPlanner(object):
 					paramsWithoutNew = copy.deepcopy(ac.parameters)
 					for param in ac.parameters:
 						found = False
-						for arule in domainParsed.agm.rules:
+						for arule in self.domainParsed.agm.rules:
 							if arule.name == ac.name:
 								if param in arule.lhs.nodes:
 									found = True
@@ -1294,7 +1311,7 @@ class AGGLPlanner(object):
 					#print paramsWithoutNew
 					print '\nDecomposing hierarchical rule ', ac.name, paramsWithoutNew
 					""" Creamos estado intermedio, primero lo creamos en fichero .xml para poder quitarle los nuevos nodos creados al aplicar la regla jerarquica"""
-					estadoIntermedio = triggerMap[ac.name](self.initWorld, ac.parameters)
+					estadoIntermedio = self.triggerMap[ac.name](self.initWorld, ac.parameters)
 					estadoIntermedio.graph.toXML("/tmp/estadoIntermedio.xml")
 					"""Quitamos los nodos constantes creados por la regla jerarquica: los volvemos variables para evitar errores cuando se genere el codigo target en python."""
 					quitar_Constantes_Creadas(initPath)
@@ -1308,7 +1325,7 @@ class AGGLPlanner(object):
 					planConDescomposicion = True
 					hierarchicalTarget = domainModule.getHierarchicalTargets()[ac.name]
 					#           (self, domainParsed, domainPath, initPath, targetPath,         indent,      symbol_mapping,   excludeList,      resultFile, descomp=False, estadoInt='',               awakenRules=set())
-					aaa = PyPlan(      domainParsed, domainPath, initPath, hierarchicalTarget, indent+'\t', paramsWithoutNew, self.excludeList, rList,      True,          "/tmp/estadoIntermedio.py", copy.deepcopy(self.results[i].awakenRules|awakenRules))
+					aaa = AGGLPlanner(self.domainParsed, domainPath, initPath, hierarchicalTarget, indent+'\t', paramsWithoutNew, self.excludeList, rList,      True,          "/tmp/estadoIntermedio.py", copy.deepcopy(self.results[i].awakenRules|awakenRules))
 					if len(aaa.results.getList()) == 0:
 						#del self.results[i]
 						#continue
