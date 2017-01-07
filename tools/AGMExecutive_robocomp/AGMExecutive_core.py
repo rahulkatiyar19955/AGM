@@ -226,6 +226,8 @@ class PlannerCaller(threading.Thread):
 		except:
 			traceback.print_exc()
 			print "PlannerCaller::run Can't open plan. We assume a new context was forced"
+			print "Quitar el exit"
+			sys.exit(-1)
 			return
 		end = time.time()
 		print 'PlannerCaller::run It took', end - start, 'seconds'

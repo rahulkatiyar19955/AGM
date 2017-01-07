@@ -88,9 +88,10 @@ def setNewConstantsAsVariables(originalGraph, secondGraph):
 	# Create a copy of the secondGraph
 	outputGraph = copy.deepcopy(secondGraph)
 	# Generate a list of node names
-	existingNodes = [node.name for node in originalGraph.nodes]
+	existingNodes = [nodename for nodename in originalGraph.nodes]
 	# 
-	for node in outputGraph:
+	AQUI QUIZAS TENERMOS QUE HACER EL GRAFO DE CERO PORQUE CAMBIA EL NOMBRE Y LA CLAVE QUIZAS
+	for node in outputGraph.nodes:
 		if not node.name in existingNodes:
 			node.name = 'makeitavariable'+node.name
 	return outputGraph
@@ -498,251 +499,6 @@ if __name__ == '__main__': # program domain problem result
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 class DomainInformation(object):
 	def __init__(self, identifier, text):
 		self.identifier = identifier
@@ -766,12 +522,7 @@ class TargetInformation(object):
 	def __init__(self, identifier, text):
 		self.identifier = identifier
 		self.text = text
-		print '---------------------------------------------------------------------------'
-		print text
-		print '---------------------------------------------------------------------------'
 		self.code = generateTarget_AGGT(AGMFileDataParsing.targetFromText(text))
-		print self.code
-		print '---------------------------------------------------------------------------'
 		self.module = self.getModuleFromText(self.code).CheckTarget
 	def getModuleFromText(self, moduleText):
 		if len(moduleText) < 10:
@@ -798,9 +549,8 @@ class AGGLPlanner(object):
 	# @param excludeList grammar rule black list  (those which can't be used for planning)
 	# @param resultFile is the optional name of the file where the plan result will be stored.
 	# @param decomposing: added whe we are decomposing a jerarchical rule
-	# @param estadoIntermedio: python file with the intermediate status of the world, after whe apply the jerarchical rule
 	# @param awakenRules: the set of rules that are currently available for the planner to find a solution
-	def __init__(self, domainParsed, domainModule, initWorld, target, indent=None, symbol_mapping=None, excludeList=None, resultFile=None, decomposing=False, estadoIntermedio='', awakenRules=set()):
+	def __init__(self, domainParsed, domainModule, initWorld, target, indent=None, symbol_mapping=None, excludeList=None, resultFile=None, decomposing=False, awakenRules=set()):
 		object.__init__(self)
 		self.symbol_mapping = copy.deepcopy(symbol_mapping)
 		if excludeList == None: excludeList = []
@@ -1009,16 +759,13 @@ class AGGLPlanner(object):
 					""" Creamos estado intermedio, primero lo creamos en fichero .xml para poder quitarle los nuevos nodos creados al aplicar la regla jerarquica"""
 					estadoIntermedio = self.triggerMap[ac.name](self.initWorld, ac.parameters)
 					"""Quitamos los nodos constantes creados por la regla jerarquica: los volvemos variables para evitar errores cuando se genere el codigo target en python."""
-					graph = setNewConstantsAsVariables(init, estadoIntermedio.graph)
+					graph = setNewConstantsAsVariables(self.initWorld.graph, estadoIntermedio.graph)
 					outputText = generateTarget(graph)
-					ofile = open("/tmp/estadoIntermedio.py", 'w')
-					ofile.write(outputText)
-					ofile.close()
 					"""Ponemos una bandera para pintar despues el plan completa una vez descompuesta la primera regla jerarquica"""
 					planConDescomposicion = True
 					hierarchicalTarget = domainModule.getHierarchicalTargets()[ac.name]
-					#           (self, domainParsed, domainPath, initPath, targetPath,         indent,      symbol_mapping,   excludeList,      resultFile, descomp=False, estadoInt='',               awakenRules=set())
-					aaa = AGGLPlanner(self.domainParsed, domainPath, initPath, hierarchicalTarget, indent+'\t', paramsWithoutNew, self.excludeList, rList,      True,          "/tmp/estadoIntermedio.py", copy.deepcopy(self.results[i].awakenRules|awakenRules))
+					#                      domainParsed,      domainModule  initWorld,             target,       indent   symbol_mapping       excludeList decomposing,          estadoIntermedio awakenRules
+					aaa = AGGLPlanner(self.domainParsed, self.domainModule, initWorld, hierarchicalTarget, indent+'\t', paramsWithoutNew, self.excludeList,  True,  "/tmp/estadoIntermedio.py", copy.deepcopy(self.results[i].awakenRules|awakenRules))
 					if len(aaa.results.getList()) == 0:
 						#del self.results[i]
 						#continue
