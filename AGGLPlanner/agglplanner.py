@@ -90,10 +90,12 @@ def setNewConstantsAsVariables(originalGraph, secondGraph):
 	# Generate a list of node names
 	existingNodes = [nodename for nodename in originalGraph.nodes]
 	# 
-	AQUI QUIZAS TENERMOS QUE HACER EL GRAFO DE CERO PORQUE CAMBIA EL NOMBRE Y LA CLAVE QUIZAS
-	for node in outputGraph.nodes:
-		if not node.name in existingNodes:
-			node.name = 'makeitavariable'+node.name
+	outputGraph.nodes.clear()
+	for nodename in secondGraph.nodes:
+		if not nodename in existingNodes:
+			nname = 'makeitavariable'+nodename
+			outputGraph[nname] = secondGraph.nodes[nodename]
+			outputGraph[nname].name = nname
 	return outputGraph
 
 ## @brief Method heapsort. This method receives an iterable thing. It stores the iterable thing
@@ -556,12 +558,23 @@ class AGGLPlanner(object):
 		if excludeList == None: excludeList = []
 		self.excludeList = copy.deepcopy(excludeList)
 		self.indent = copy.deepcopy(indent)
+		if self.indent == None: self.indent = ''
 		# Get initial world mdoel
-		self.initWorld = WorldStateHistory([xmlModelParser.graphFromXMLText(initWorld), domainParsed.getInitiallyAwakeRules()|awakenRules])
+		
+		if isinstance(initWorld,unicode) or isinstance(initWorld,str):
+			self.initWorld = WorldStateHistory([xmlModelParser.graphFromXMLText(initWorld), domainParsed.getInitiallyAwakeRules()|awakenRules])
+		elif isinstance(initWorld,AGMGraph):
+			self.initWorld = WorldStateHistory([                                initWorld,  domainParsed.getInitiallyAwakeRules()|awakenRules])
+		elif isinstance(initWorld,WorldStateHistory):
+			self.initWorld = copy.deepcopy(initWorld)
+		else:
+			print type(initWorld)
+			os._exit(1)
 		self.initWorld.nodeId = 0 
 		# Set rule and trigger maps
 		self.domainParsed = domainParsed
 		self.domainModule = domainModule
+		self.awakenRules = awakenRules
 		self.ruleMap = copy.deepcopy(domainModule.getRules()) #get all the active rules of the grammar
 		self.triggerMap = copy.deepcopy(domainModule.getTriggers()) #get all the active rules of the grammar
 		for e in excludeList:
@@ -763,9 +776,20 @@ class AGGLPlanner(object):
 					outputText = generateTarget(graph)
 					"""Ponemos una bandera para pintar despues el plan completa una vez descompuesta la primera regla jerarquica"""
 					planConDescomposicion = True
-					hierarchicalTarget = domainModule.getHierarchicalTargets()[ac.name]
-					#                      domainParsed,      domainModule  initWorld,             target,       indent   symbol_mapping       excludeList decomposing,          estadoIntermedio awakenRules
-					aaa = AGGLPlanner(self.domainParsed, self.domainModule, initWorld, hierarchicalTarget, indent+'\t', paramsWithoutNew, self.excludeList,  True,  "/tmp/estadoIntermedio.py", copy.deepcopy(self.results[i].awakenRules|awakenRules))
+					hierarchicalTarget = self.domainModule.getHierarchicalTargets()[ac.name]
+					aaa = AGGLPlanner(
+						self.domainParsed,
+					   self.domainModule,
+					   self.initWorld,
+					   hierarchicalTarget,
+					   self.indent+'\t',
+					   paramsWithoutNew,
+					   self.excludeList,
+					   True,
+					   "/tmp/estadoIntermedio.py",
+					   copy.deepcopy(self.results[i].awakenRules|self.awakenRules)
+					)
+					aaa.run()
 					if len(aaa.results.getList()) == 0:
 						#del self.results[i]
 						#continue
