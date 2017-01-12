@@ -590,8 +590,6 @@ class AGGLPlanner(object):
 		self.targetCode = target
 		# Descomp
 		self.decomposing = decomposing
-		# result file
-		self.resultFile = resultFile
 		
 		# set stop flat
 		self.externalStopFlag = LockableInteger(0)
@@ -748,11 +746,11 @@ class AGGLPlanner(object):
 			except:
 				traceback.print_exc()
 				pass
-			rList = []
 			planConDescomposicion = False
 			if len(self.results[i].history) > 0:
 				action = self.results[i].history[0]
 				ac = AGGLPlannerAction(action)
+				hierarchicalText = ''
 				if ac.hierarchical:
 					self.excludeList.append(ac.name)
 					paramsWithoutNew = copy.deepcopy(ac.parameters)
@@ -778,7 +776,7 @@ class AGGLPlanner(object):
 					planConDescomposicion = True
 					hierarchicalTarget = self.domainModule.getHierarchicalTargets()[ac.name]
 					aaa = AGGLPlanner(
-						self.domainParsed,
+					   self.domainParsed,
 					   self.domainModule,
 					   self.initWorld,
 					   hierarchicalTarget,
@@ -790,37 +788,38 @@ class AGGLPlanner(object):
 					   copy.deepcopy(self.results[i].awakenRules|self.awakenRules)
 					)
 					aaa.run()
+
+					self.results[i].history = self.results[i].history[1:] # The following two lines append a '#!' string to the first action (which is the hierarchical action thas has been decomposed)
+					self.results[i].history.insert(0, '#!'+str(ac))
+
 					if len(aaa.results.getList()) == 0:
-						#del self.results[i]
-						#continue
 						del self.results[:]
 					else:
-						self.results[i].history = self.results[i].history[1:]
-						self.results[i].history.insert(0, '#!'+str(ac))
+						h_min_idx = 0
+						h_retText = ''
+						for h_i in range(len(aaa.results)): # We go over all the actions of the plan, and we look for the best solution (the minimun cost).
+							if aaa.results[h_i].cost < aaa.results[h_min_idx].cost:
+								h_min_idx = h_i
+						for action in aaa.results[h_min_idx].history:
+							h_retText += str(action)+'\n'
 				else:
 					planConDescomposicion = False
 			
 			print 'len results:', len(self.results)
 			if len(self.results)>0: # If there are plans, proceed
-				#printResult(self.results[i]) #the best solution
-				total = rList + self.results[i].history
-				if self.resultFile != None:
-					for action in total:
-						if type(self.resultFile) == type([]):
-							self.resultFile.append(action)
-						else:
-							self.resultFile.write(str(action)+'\n')
-				if self.decomposing == False and planConDescomposicion == True:
-					print 'FINAL PLAN WITH: ', len(total), ' ACTIONS:'
-					for action in total:
-						print '    ', action
+				printResult(self.results[i]) #the best solution
 				retText = ''
-				for action in total:
+				for action in self.results[i].history:
 					retText += str(action)+'\n'
-				return AGGLPlannerPlan(retText, planFromText=True)
-				
-				
-			
+				try:
+					finalPlan = AGGLPlannerPlan(h_retText + retText, planFromText=True)
+				except:
+					finalPlan = AGGLPlannerPlan(retText, planFromText=True)
+				if self.decomposing == False and planConDescomposicion == True:
+					print 'FINAL PLAN WITH: ', len(finalPlan), ' ACTIONS:'
+				for action in finalPlan:
+					print '    ', action
+				return finalPlan
 			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 
 		if len(self.results)==0: # If the length of the list is zero, it means that we have not found a plan.
@@ -830,9 +829,8 @@ class AGGLPlanner(object):
 ##
 
 
-		
-		
-				
+
+
 	##@brief This method starts the execution of program threads
 	# @param ruleMap all the actives rules of the grammar
 	# @param lock this is the clench of the each thread.

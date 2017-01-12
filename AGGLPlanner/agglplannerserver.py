@@ -2,10 +2,12 @@
 
 
 
-#sudo apt-get install pypy pypy-setuptools
+#sudo apt-get install pypy pypy-setuptools cython
 #git clone https://github.com/eleme/thriftpy.git
 #cd thriftpy
 #sudo pypy setup.py install
+#sudo make clean
+#sudo python setup.py install
 
 #from thriftpy.protocol.binary import TBinaryProtocolFactory
 #from thriftpy.transport.buffered import TBufferedTransportFactory
