@@ -43,6 +43,7 @@ class Worker(object):
 	jobMap = {}
 	
 	def getDomainIdentifier(self, domainText):
+		print '------------------------------------------------------------------------'
 		print 'getDomainIdentifier domainText(', type(domainText), ')'
 		try:
 			self.mapsLock.acquire()
@@ -57,6 +58,7 @@ class Worker(object):
 			self.mapsLock.release()
 
 	def getTargetIdentifier(self, targetText):
+		print '------------------------------------------------------------------------'
 		print 'getTargetIdentifier targetText(', type(targetText), ')'
 		try:
 			self.mapsLock.acquire()
@@ -74,6 +76,7 @@ class Worker(object):
 			self.mapsLock.release()
 
 	def startPlanning(self, domainId, initWorld, targetId, excludeList, awakenRules):
+		print '------------------------------------------------------------------------'
 		print 'startPlanning', domainId, '(', type(domainId), ')', 'initWorld(', type(initWorld), ')', targetId, '(', type(targetId), ')', excludeList, '(', type(excludeList), ')', awakenRules, '(', type(awakenRules), ')'
 		try:
 			self.mapsLock.acquire()
@@ -92,6 +95,7 @@ class Worker(object):
 			self.mapsLock.release()
 
 	def forceStopPlanning(self, jobIdentifier):
+		print '------------------------------------------------------------------------'
 		print 'forceStopPlanning', jobIdentifier, '(', type(jobIdentifier), ')'
 		ret = 0
 		try:
@@ -106,6 +110,7 @@ class Worker(object):
 		return 0
 
 	def getPlanningResults(self, jobIdentifier):
+		print '------------------------------------------------------------------------'
 		print 'getPlanningResults', jobIdentifier, '(', type(jobIdentifier), ')'
 		ret = agglplanner_thrift.PlanningResults()
 		try:

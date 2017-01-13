@@ -74,12 +74,14 @@ class PlannerCaller(threading.Thread):
 		tempStr = self.domainText
 		try: tempStr = unicodedata.normalize('NFKD', tempStr)
 		except: pass
+		print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX getDomainIdentifier'
 		self.domainId = self.agglplannerclient.getDomainIdentifier(tempStr)
 
 	def setMission(self, targetStr):
 		tempStr = targetStr
 		try: tempStr = unicodedata.normalize('NFKD', tempStr)
 		except: pass
+		print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX getTargetIdentifier'
 		self.targetId = self.agglplannerclient.getTargetIdentifier(open(tempStr, 'r').read())
 
 	def setWork(self, currentModel):
@@ -94,6 +96,7 @@ class PlannerCaller(threading.Thread):
 					self.pendingJobs.acquire()
 					while True:
 						pend = self.pendingJobs.pop()
+						print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX forceStopPlanning'
 						self.agglplannerclient.forceStopPlanning(pend)
 					self.pendingJobs.release()
 				except:
@@ -215,10 +218,12 @@ class PlannerCaller(threading.Thread):
 			except:
 				print 'X3', type(tempStr)
 				pass
+			print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX startPlanning'
 			jobId = self.agglplannerclient.startPlanning(self.domainId, tempStr, self.targetId, [], [])
 			print 'PlannerCaller::run got job identifier', jobId
 			self.pendingJobs.append(jobId)
 			print 'PlannerCaller::run waiting for results...'
+			print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX getPlanningResults'
 			result = self.agglplannerclient.getPlanningResults(jobId)
 			print 'PlannerCaller::run done calling got', result.plan
 			#if len(''.join(lines).strip()) > 0:  # WARNING TODO BUG ERROR FIXME                                 THIS SHOULD BE FIXED TO ENABLE PLAN CACHING
