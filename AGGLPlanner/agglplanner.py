@@ -491,7 +491,7 @@ if __name__ == '__main__': # program domain problem result
 			hierarchicalInputPlan = None
 			if len(sys.argv)>=7: hierarchicalInputPlan = open(sys.argv[6], 'r')
 
-			p = PyPlan(domainAGM, domainPath, initPath, targetPath, '', dict(), [], resultFile)
+			p = AGGLPlanner(domainAGM, domainPath, initPath, targetPath, '', dict(), [], resultFile)
 		print 'Total time: ', (time.time()-t0).__str__()
 
 
@@ -562,7 +562,7 @@ class AGGLPlanner(object):
 		# Get initial world mdoel
 		
 		if isinstance(initWorld,unicode) or isinstance(initWorld,str):
-			self.initWorld = WorldStateHistory([xmlModelParser.graphFromXMLText(initWorld), domainParsed.getInitiallyAwakeRules()|awakenRules])
+			self.initWorld = WorldStateHistory([xmlModelParser.graphFromXMLFile(initWorld), domainParsed.getInitiallyAwakeRules()|awakenRules])
 		elif isinstance(initWorld,AGMGraph):
 			self.initWorld = WorldStateHistory([                                initWorld,  domainParsed.getInitiallyAwakeRules()|awakenRules])
 		elif isinstance(initWorld,WorldStateHistory):
