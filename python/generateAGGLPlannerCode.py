@@ -1426,15 +1426,17 @@ def targetPreconditionImplementation(precondition, indent, modifier='', stuff=No
 	elif preconditionType == "and":
 		ret += indent+'precondition'+str(formulaId)+' = True # AND initialization as true'
 		first = True
+		indentC = copy.deepcopy(indent)
 		for part in preconditionBody[0]:
-			if first: first = False
+			if first:
+				first = False
 			else:
-				ret += indent+'if precondition'+str(formulaId)+': # if still true'
-				indent += '\t'
-			text, indent, formulaIdRet, stuff = targetPreconditionImplementation(part, indent, 'and', stuff)
+				ret += indentC+'if precondition'+str(formulaId)+': # if still true'
+				indentC += '\t'
+			text, indentC, formulaIdRet, stuff = targetPreconditionImplementation(part, indentC, 'and', stuff)
 			ret += text
-			ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the AND is false'
-			ret += indent+'\tprecondition'+str(formulaId)+' = False # make the AND false'
+			ret += indentC+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the AND is false'
+			ret += indentC+'\tprecondition'+str(formulaId)+' = False # make the AND false'
 	elif preconditionType == "forall":
 		ret += indent+'precondition'+str(formulaId)+' = True # FORALL initialization as true'
 		indentA = indent

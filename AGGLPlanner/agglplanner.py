@@ -59,7 +59,7 @@ from agglplannerplan import *
 
 # C O N F I G U R A T I O N
 number_of_threads = 0 #4
-maxWorldIncrement = 32
+maxWorldIncrement = 6
 maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
@@ -491,7 +491,10 @@ if __name__ == '__main__': # program domain problem result
 			hierarchicalInputPlan = None
 			if len(sys.argv)>=7: hierarchicalInputPlan = open(sys.argv[6], 'r')
 
-			p = AGGLPlanner(domainAGM, domainPath, initPath, targetPath, '', dict(), [], resultFile)
+			domainRuleSet = imp.load_source('module__na_me', domainPath).RuleSet()
+			targetCode = imp.load_source('modeeeule__na_me', targetPath).CheckTarget
+			p = AGGLPlanner(domainAGM, domainRuleSet, initPath, targetCode, '', dict(), [], resultFile)
+			p.run()
 		print 'Total time: ', (time.time()-t0).__str__()
 
 
@@ -622,27 +625,27 @@ class AGGLPlanner(object):
 
 		# Create initial state
 		if self.symbol_mapping:
-			print 'eo 1'
+			#print 'eo 1'
 			self.initWorld.score, achieved = self.targetCode(self.initWorld.graph, self.symbol_mapping)
-			print 'eo 11'
+			#print 'eo 11'
 		else:
-			print 'eo 21'
+			#print 'eo 21'
 			self.initWorld.score, achieved = self.targetCode(self.initWorld.graph)
-			print 'eo 2'
+			#print 'eo 2'
 
 		if achieved:
-			print 'AQUI 2'
+			#print 'AQUI 2'
 			# If the goal is achieved, we save the solution in the result list, the
 			# solution cost in the cheapest solution cost and we put the end_condition
 			# as goal achieved in order to stop the execution.
 			self.results.append(self.initWorld)
-			print 'AQUI 2.1'
+			#print 'AQUI 2.1'
 			self.cheapestSolutionCost.set(self.results.getFirstElement().cost)
-			print 'AQUI 2.2'
+			#print 'AQUI 2.2'
 			if self.indent == '':
 				self.end_condition.set("GoalAchieved")
 		elif number_of_threads>0:
-			print 'AQUI 3'
+			#print 'AQUI 3'
 			# But, if the goal is not achieved and there are more than 0 thread running (1, 2...)
 			# we creates a list where we will save the status of all the threads, take all
 			# the threads (with their locks) and save it in the thread_locks list.
@@ -650,24 +653,24 @@ class AGGLPlanner(object):
 			## This attributes is a list where we save all the thread that are running.
 			self.thread_locks = []
 			threadStatus = LockableList()
-			print 'AQUI 3.1'
+			#print 'AQUI 3.1'
 			for i in xrange(number_of_threads):
-				print 'AQUI 3.2'
+				#print 'AQUI 3.2'
 				lock = thread.allocate_lock()
 				lock.acquire()
 				threadStatus.append(True)
 				self.thread_locks.append(lock)
 				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), copy.deepcopy(self.triggerMap), lock, i, threadStatus))
-				print 'AQUI 3.3'
+				#print 'AQUI 3.3'
 			# Wait for the threads to stop
 			for lock in self.thread_locks:
 				lock.acquire()
 		else:
 			# If the solution is not achieved and there arent any thread to execute the programm
 			# we stop it and show an error message.
-			print 'AQUI 4.2'
+			#print 'AQUI 4.2'
 			self.startThreadedWork(self.ruleMap, self.triggerMap)
-			print 'AQUI 4.3'
+			#print 'AQUI 4.3'
 
 		# We make others checks over the end_condition:
 		#	-- If the end condition is wrong.

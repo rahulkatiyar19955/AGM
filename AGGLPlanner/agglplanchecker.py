@@ -105,7 +105,7 @@ class PyPlanChecker(object):
 							# If the parameter doesnt exit in the world nor the RHS of the rule, we raise an exception.
 							# Just to warn we're receiving useless parameters
 							raise WrongRuleExecution("Parameter '"+action.parameters[p]+"' (variable '"+p+"') doesn't exist in the current world model.")
-				world = self.domain.getTriggers()[action.name](world, action.parameters, checked=False)
+				world = self.domain.getTriggers()[action.name](world, action.parameters, checked=False, verbose=verbose)
 				if verbose:
 					print 'result:'
 					print world
@@ -191,7 +191,7 @@ class AGGLPlanChecker(object):
 							# If the parameter doesnt exit in the world nor the RHS of the rule, we raise an exception.
 							# Just to warn we're receiving useless parameters
 							raise WrongRuleExecution("Parameter '"+action.parameters[p]+"' (variable '"+p+"') doesn't exist in the current world model.")
-				world = self.domain.getTriggers()[action.name](world, action.parameters, checked=False)
+				world = self.domain.getTriggers()[action.name](world, action.parameters, checked=False, verbose=verbose)
 				if self.verbose:
 					print 'result:'
 					print world
