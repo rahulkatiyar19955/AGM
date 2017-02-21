@@ -101,8 +101,10 @@ class SpecificWorker(GenericWorker):
 	# activateAgent
 	def activateAgent(self, prs):
 		self.planText = prs['plan'].value.strip()
-		self.firstActionText = self.planText.split('\n')[0]
-		self.plan = AGGLPlannerPlan(self.planText, planFromText=True)
+		s = [x for x in self.planText.split('\n') if not x.startswith('#') ]
+		print 'S', s
+		self.firstActionText = s[0]
+		self.plan = AGGLPlannerPlan('\n'.join(s), planFromText=True)
 		print '\nNew plan:'
 		print self.planText
 		print '\nFirst action:'

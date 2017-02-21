@@ -312,7 +312,7 @@ class Executive(object):
 		return True
 
 	def structuralChangeProposal(self, worldModelICE, sender, log):
-		print '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'
+		print '\n\n'
 		#
 		#  H E R E     W E     S H O U L D     C H E C K     T H E     M O D I F I C A T I O N     I S     V A L I D
 		#
@@ -466,7 +466,7 @@ class Executive(object):
 	def broadcastModel(self):
 		self.mutex.acquire( )
 		try:
-			print 'Executive::broadcastModel: <<<broadcastinnn'
+			print 'Executive::broadcastModel: <<<broadcastinnn   version', self.currentModel.version
 			self.executiveTopic.structuralChange(AGMModelConversion.fromInternalToIce(self.currentModel))
 			print 'Executive::broadcastModel: broadcastinnn>>>'
 		except:

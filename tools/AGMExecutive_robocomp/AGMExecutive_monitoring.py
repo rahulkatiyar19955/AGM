@@ -105,7 +105,7 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 	if len(currentPlan.data)>0:
 		if currentPlan.data[0].name.startswith('#!'):
 			currentPlan.removeFirstActionDirect()
-			return AGMExecutiveMonitoring_recursive(domainClass, domain, domainPath, init, currentModel, target, currentPlan, rulesToExcludeInSearch)
+			return AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel, target, currentPlan, rulesToExcludeInSearch)
 
 
 	domain = imp.load_source('domain', domainPath).RuleSet() # activeRules.py

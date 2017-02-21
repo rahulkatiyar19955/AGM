@@ -59,7 +59,7 @@ from agglplannerplan import *
 
 # C O N F I G U R A T I O N
 number_of_threads = 0 #4
-maxWorldIncrement = 32
+maxWorldIncrement = 8
 maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
