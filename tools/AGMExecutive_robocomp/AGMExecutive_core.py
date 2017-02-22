@@ -14,6 +14,7 @@ from AGMExecutive_monitoring import *
 import xmlModelParser
 
 import pickle
+import tempfile
 
 # Check that RoboComp has been correctly detected
 ROBOCOMP = ''
@@ -235,7 +236,14 @@ class PlannerCaller(threading.Thread):
 		try:
 			try:
 				try:
-					ret, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, AGGLPlannerPlan(self.plan, planFromText=True))
+					#f = tempfile.NamedTemporaryFile(delete=False)
+					#strp = str(self.plan)
+					#print 'current plan string', strp
+					#f.write(strp)
+					#f.close()
+					#print open(f.name, 'r').readlines()
+					print 'AGMExecutive_monitoring: plan', type(self.plan), self.plan
+					ret, planMonitoring = AGMExecutiveMonitoring(self.agmData, domainPath, init, self.currentModel.filterGeometricSymbols(), target, self.plan)
 				except:
 					print traceback.print_exc()
 					print 'PlannerCaller::callMonitoring Error calling AGMExecutiveMonitoring'

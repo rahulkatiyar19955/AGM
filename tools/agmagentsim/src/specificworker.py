@@ -76,6 +76,7 @@ class SpecificWorker(GenericWorker):
 			result = self.triggers[action.name](WorldStateHistory([model, self.triggers.keys()]), action.parameters).graph
 			print 'type(result)', type(result)
 			resultIce = AGMModelConversion.fromInternalToIce(result)
+			print 'about to publish a modified version', resultIce.version
 			self.agmexecutive_proxy.structuralChangeProposal(resultIce, 'agmagentsim', action.name)
 		finally:
 			self.mutex.unlock()
@@ -153,6 +154,7 @@ class SpecificWorker(GenericWorker):
 	# structuralChange
 	#
 	def structuralChange(self, w):
+		print '::structuralChange', w.version
 		self.mutex.lock()
 		self.internalModel = AGMModelConversion.fromIceToInternal_model(w, ignoreInvalidEdges=True)
 		ev_ident = QtCore.QTime.currentTime().toString("hh:mm:ss.zzz") + " (model)"

@@ -70,23 +70,24 @@ class AGGLPlannerPlan(object):
 		## Data of the plan file
 		self.data = []
 		# IF INIT IS A STRING....
-		if type(init) == type(''): # Read plan from file (assuming we've got a file path)
+		if type(init) == type(''): # Read plan from file or text
 			# If init is a string, we check its length. If there are something in the string, we check
 			# what it is:
 			if len(init)>0:
-				 # If the string is all the plan code, we separate in lines with \n, but,
-				 # if the string is the name of the file where is stored all the plan code, we read and save
-				 # the file content in a local variable.
+				# If the string is all the plan code, we separate in lines with \n, but,
+				# if the string is the name of the file where is stored all the plan code, we read and save
+				# the file content in a local variable.
+				#print planFromText, init
 				if planFromText:
 					lines = init.split("\n") #newline
 				else:
 					lines = open(init, 'r').readlines() # take the content of a file
-
+				#print lines
 				# Now, we check the text to find possible errors.
 				# First, we delete the white spaces at the start and the end of each text line.
 				# Second, we check if there are any line with only the character \n.
 				# Finally, is the line have something that is not a commentary, we save it like a grammar rule
-				for line_i in range(len(lines)):
+				for line_i in xrange(len(lines)):
 					line = lines[line_i].strip() # take a line of the file content
 					while len(line)>0:
 						if line[-1]=='\n': line = line[:-1]

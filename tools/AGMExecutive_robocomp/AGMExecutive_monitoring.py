@@ -96,7 +96,7 @@ def AGMExecutiveMonitoring_recursive(domainClass, domainPath, init, currentModel
 		rulesToExcludeInSearch = set()
 
 	try:
-		currentPlan = AGGLPlannerPlan(plan, planFromText=True)
+		currentPlan = AGGLPlannerPlan(str(plan), planFromText=True)
 	except:
 		traceback.print_exc()
 		sys.exit(134)
