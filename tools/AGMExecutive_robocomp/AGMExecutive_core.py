@@ -329,7 +329,7 @@ class Executive(object):
 					raise RoboCompAGMExecutive.Locked()
 				else:
 					time.sleep(0.03)
-		print 'Executive::structuralChangeProposal:CURRENT VERSION', self.lastModification.version
+		print 'Executive::structuralChangeProposal: LAST_MODIFICATION(', self.lastModification.version, ')   CURRENT(', self.currentModel.version, ')   RECEIVED(', worldModelICE.version, ')'
 		try:
 			# Ignore outdated modifications
 			if worldModelICE.version != self.lastModification.version:
