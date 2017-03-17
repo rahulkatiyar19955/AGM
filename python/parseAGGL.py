@@ -35,9 +35,9 @@ def getAGGLMetaModels():
 	pt = Suppress(".")
 	pc = Suppress(")")
 	no = Suppress("!")
-	
+
 	dormant =        (Optional(CaselessLiteral("dormant"))).setResultsName("dormant")
-	activatesRules = (Optional(Suppress(CaselessLiteral("activates")) + po + ids + ZeroOrMore(co + ids) + pc)).setResultsName("activates") 
+	activatesRules = (Optional(Suppress(CaselessLiteral("activates")) + po + ids + ZeroOrMore(co + ids) + pc)).setResultsName("activates")
 
 
 	# LINK
@@ -70,7 +70,7 @@ def getAGGLMetaModels():
 
 	# WHOLE AGGL FILE
 	aggl  = OneOrMore(prop).setResultsName("props") + sep + OneOrMore(rule).setResultsName("rules") + StringEnd()
-	
+
 	# WHOLE AGGT FILE
 	aggt  = Optional(graph.setResultsName("graph")) + Optional(Cnd)
 
@@ -182,7 +182,6 @@ class AGMFileDataParsing:
 	# It returns agmFD, a variable with the grammar file, the properties, symbols and rules of the grammar.
 	@staticmethod
 	def fromFile(filename, verbose=False, includeIncludes=True):
-		print filename
 		with open(filename, 'r') as thefile:
 			text = thefile.read()
 			return AGMFileDataParsing.fromText(text, verbose, includeIncludes)
@@ -427,11 +426,11 @@ class AGMFileDataParsing:
 					preconditionTree = AGGLCodeParsing.parseFormula(preconditionStr)
 					if len(preconditionTree)>0: preconditionTree = preconditionTree[0]
 					preconditionAST = AGMFileDataParsing.interpretPrecondition(preconditionTree)
-			
+
 		graph = AGMGraphParsing.parseGraphFromAST(result.graph)
 		precondition = preconditionAST
-		
+
 		#print 'graph:\n', graph
 		#print 'precondition:\n', precondition
-		
+
 		return { 'graph':graph, 'precondition':precondition}
