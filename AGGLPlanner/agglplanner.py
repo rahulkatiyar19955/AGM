@@ -60,12 +60,12 @@ from agglplannerplan import *
 
 # C O N F I G U R A T I O N
 number_of_threads = 0 #4
-maxWorldIncrement = 6
+maxWorldIncrement = 5
 maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 5.
-maxTimeWaitLimit = 5000.#1000.
+maxTimeWaitLimit = 1000.
 
 
 
@@ -412,7 +412,7 @@ class LockableInteger(object):
 				nowNow = datetime.datetime.now()
 				try:
 					elap = (nowNow-self.lastTime).seconds + (nowNow-self.lastTime).microseconds/1e6
-					doIt = elap > 3
+					doIt = elap > 10
 				except:
 					self.lastTime = datetime.datetime.now()
 					doIt = True
@@ -808,7 +808,7 @@ class AGGLPlanner(object):
 					finalPlan = AGGLPlannerPlan(h_retText + retText, planFromText=True)
 				except:
 					finalPlan = AGGLPlannerPlan(retText, planFromText=True)
-				if self.decomposing == False and planConDescomposicion == True:
+				if self.decomposing == False and planConDescomposicion == False:
 					print 'FINAL PLAN WITH: ', len(finalPlan), ' ACTIONS:'
 					for action in finalPlan:
 						print '    ', action
