@@ -65,7 +65,7 @@ maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 5.
-maxTimeWaitLimit = 1000.
+maxTimeWaitLimit = 850.
 
 
 
@@ -784,7 +784,7 @@ class AGGLPlanner(object):
 
 					self.results[i].history = self.results[i].history[1:] # The following two lines append a '#!' string to the first action (which is the hierarchical action thas has been decomposed)
 					self.results[i].history.insert(0, '#!'+str(ac))
-
+					print self.results[i].history
 					if len(aaa.results.getList()) == 0:
 						del self.results[:]
 					else:
@@ -795,10 +795,11 @@ class AGGLPlanner(object):
 								h_min_idx = h_i
 						for action in aaa.results[h_min_idx].history:
 							h_retText += str(action)+'\n'
+
 				else:
 					planConDescomposicion = False
 
-			if self.decomposing == False and planConDescomposicion == True: print 'len results:', len(self.results)
+			# if self.decomposing == False and planConDescomposicion == True: print 'len results:', len(self.results)
 			if len(self.results)>0: # If there are plans, proceed
 				#printResult(self.results[i]) #the best solution
 				retText = ''
@@ -808,7 +809,7 @@ class AGGLPlanner(object):
 					finalPlan = AGGLPlannerPlan(h_retText + retText, planFromText=True)
 				except:
 					finalPlan = AGGLPlannerPlan(retText, planFromText=True)
-				if self.decomposing == False and planConDescomposicion == False:
+				if self.decomposing == False:
 					print 'FINAL PLAN WITH: ', len(finalPlan), ' ACTIONS:'
 					for action in finalPlan:
 						print '    ', action
