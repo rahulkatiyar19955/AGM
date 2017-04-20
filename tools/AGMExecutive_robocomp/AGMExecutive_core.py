@@ -147,7 +147,7 @@ class PlannerCaller(threading.Thread):
 		###
 		### Try the cache
 		###
-		if False:
+		if True:
 			print 'PlannerCaller::run Ask cache'
 			try:
 				cacheResult = self.cache.getPlanFromFiles(domainPY, worldXML, targetPY)
@@ -171,7 +171,7 @@ class PlannerCaller(threading.Thread):
 				lines = cacheResult[1].split('\n')
 				if len(''.join(lines).strip()) > 0:
 					self.cache.includeFromFiles(domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True)
-				ofile.close()
+				#ofile.close()
 				# Get the output
 				try:
 					self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
