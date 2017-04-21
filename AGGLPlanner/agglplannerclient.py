@@ -20,38 +20,16 @@ domainText = open('/home/robocomp/robocomp/components/robocomp-shelly/files/plan
 domainId = client.getDomainIdentifier(domainText)
 print domainId
 
-print 'Get target id...'
-targetText = open('/home/robocomp/robocomp/components/robocomp-shelly/etc/targetReachTableD.aggt', 'r').read()
-targetId = client.getTargetIdentifier(targetText)
-print targetId
-
-print 'Get target id...'
-targetText = open('/home/robocomp/robocomp/components/robocomp-shelly/etc/targetReachTableD.aggt', 'r').read()
-targetId = client.getTargetIdentifier(targetText)
-print targetId
-
 print 'Reading init world...'
-initWorld = open('/home/robocomp/robocomp/components/robocomp-shelly/etcSim/initialModel_hybrid.xml', 'r').read()
+initWorld = open('/home/robocomp/robocomp/components/robocomp-shelly/etc/initialModel_hybrid.xml', 'r').read()
 
+print 'Get target id...'
+targetText = open('/home/robocomp/robocomp/components/robocomp-shelly/etc/targetReachTableD.aggt', 'r').read()
+targetId = client.getTargetIdentifier(targetText)
+print targetId
 print 'Calling planner...'
 jobIdentifier = client.startPlanning(domainId, initWorld, targetId, [], [])
 print 'got job identifier', jobIdentifier
+print 'Asking for results...'
 result = client.getPlanningResults(jobIdentifier)
-print result
-
-print 'Calling planner...'
-jobIdentifier = client.startPlanning(domainId, initWorld, targetId, [], [])
-print 'got job identifier', jobIdentifier
-print 'stopping job'
-client.forceStopPlanning(jobIdentifier)
-result = client.getPlanningResults(jobIdentifier)
-print result
-
-
-print 'Calling planner...'
-jobIdentifier = client.startPlanning(domainId, initWorld, targetId, [], [])
-print 'got job identifier', jobIdentifier
-result = client.getPlanningResults(jobIdentifier)
-print result
-
-
+print result.plan

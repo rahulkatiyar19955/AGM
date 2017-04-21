@@ -190,7 +190,6 @@ class PlannerCaller(threading.Thread):
 				lines = cacheResult[1].split('\n')
 				if len(''.join(lines).strip()) > 0:
 					self.cache.includeFromFiles(domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True)
-				ofile.close()
 				# Get the output
 				try:
 					self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
@@ -208,7 +207,7 @@ class PlannerCaller(threading.Thread):
 		# CALL
 		try:
 			start = time.time()
-			
+
 			print 'PlannerCaller::run calling planner start'
 			tempStr = self.currentModel.filterGeometricSymbols().toXMLString()
 			try:
@@ -254,7 +253,7 @@ class PlannerCaller(threading.Thread):
 
 	def callMonitoring(self, peid):
 		return False
-		
+
 		domainPath = '/tmp/domainActive.py'
 		init   = '/tmp/lastWorld'+peid+'.xml'
 		target = '/tmp/target.py'
@@ -370,7 +369,7 @@ class Executive(object):
 			worldModelICE.version += 1
 			internalModel = AGMModelConversion.fromIceToInternal_model(worldModelICE, ignoreInvalidEdges=True) # set internal model
 			avoidReplanning = False
-			# UNCOMMENT THIS!!! WARNING TODO ERROR CUIDADO 
+			# UNCOMMENT THIS!!! WARNING TODO ERROR CUIDADO
 			#try:                                                                                               # is replanning necessary?
 				#if internalModel.equivalent(self.lastModification):
 					#avoidReplanning = True
@@ -586,5 +585,3 @@ class Executive(object):
 			except:
 				print '     (can\'t connect to', agent, '!!!)',
 			print ''
-
-

@@ -24,13 +24,15 @@ import sys, imp, traceback, thread
 
 sys.path.append('/usr/local/share/agm/')
 import agglplanner
-
+from agglplanningcache import *
 
 class JobObject(object):
-	def __init__(self, identifier, jobInstance):
+	def __init__(self, identifier, jobInstance, domainId, targetId):
 		self.lock = thread.allocate_lock()
 		self.identifier = identifier
 		self.jobInstance = jobInstance
+		self.domainId = domainId
+		self.targetId = targetId
 
 
 class Worker(object):
@@ -41,7 +43,8 @@ class Worker(object):
 	targetMap = {}
 	lastUsedJobKey = 0
 	jobMap = {}
-	
+	cache = PlanningCache()
+
 	def getDomainIdentifier(self, domainText):
 		print '------------------------------------------------------------------------'
 		print 'getDomainIdentifier domainText(', type(domainText), ')'
@@ -84,7 +87,7 @@ class Worker(object):
 			dI = self.domainMap[domainId]
 			tI = self.targetMap[targetId]
 			planningObject = agglplanner.AGGLPlanner(dI.parsed, dI.module, initWorld, tI.module)
-			self.jobMap[ret] = JobObject(ret, planningObject)
+			self.jobMap[ret] = JobObject(ret, planningObject, domainId, targetId)
 			self.lastUsedJobKey += 1
 			return ret
 		except:
@@ -112,12 +115,54 @@ class Worker(object):
 	def getPlanningResults(self, jobIdentifier):
 		print '------------------------------------------------------------------------'
 		print 'getPlanningResults', jobIdentifier, '(', type(jobIdentifier), ')'
+		print 'a'
 		ret = agglplanner_thrift.PlanningResults()
+		print 'b'
 		try:
+			print 'c'
 			self.mapsLock.acquire()
 			job = self.jobMap[jobIdentifier]
+			dI = self.domainMap[job.domainId]
+			tI = self.targetMap[job.targetId]
+			print 'd'
+		except:
+			traceback.print_exc()
+			raise
+		finally:
 			self.mapsLock.release()
+		#
+		# First: try with the cache
+		#
+		try:
+			print 'e'
+			cacheResult = self.cache.getPlanFromFiles(dI.text, job.initWorld.graph.toXMLString(), tI.code)
+			print 'f', cacheResult
+			if len(cacheResult[1].strip()) == 0:
+				print 'f2'
+				cacheResult = False
+			print 'g'
+		except:
+			print 'h'
+			cacheResult = False
+		if cacheResult:
+			print 'PlannerCaller::run Got plan from cache'
+			print '<<<'
+			print cacheResult[1]
+			print '>>>'
+			cacheSuccess = cacheResult[0]
+			cachePlan = cacheResult[1]
+			# lines = cacheResult[1].split('\n')
+			ret.plan = str(cacheResult[1])
+			ret.cost = 1
+			return ret
+		#
+		# Second: try planning
+		#
+		try:
+			print 'i'
 			plan = job.jobInstance.run()
+			print 'j'
+			self.cache.includeFromFiles(dI.text, job.jobInstance.initWorld.graph.toXMLString(), tI.code, str(plan), True)
 			print plan
 			ret.plan = str(plan)
 			ret.cost = 1
@@ -129,8 +174,7 @@ class Worker(object):
 #PlanResult planHierarchical(1: i32 domainId, 2: string initWorld, 3:i32 targetId, 4: list<string> excludeList, 5: list<string> awakenRules, 6: map<string,string> symbolMapping) throws (1: string theError),
 
 
-	
+
 
 server = make_server(agglplanner_thrift.AGGLPlanner, Worker(), '127.0.0.1', 6000)
 server.serve()
-
