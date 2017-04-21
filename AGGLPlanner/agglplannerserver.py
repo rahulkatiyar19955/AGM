@@ -13,6 +13,9 @@
 #from thriftpy.transport.buffered import TBufferedTransportFactory
 #from thriftpy.transport.framed import TFramedTransportFactory
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
+
 import thriftpy
 agglplanner_thrift = thriftpy.load("/usr/local/share/agm/agglplanner.thrift", module_name="agglplanner_thrift")
 
@@ -59,6 +62,7 @@ class Worker(object):
 			return -1
 		finally:
 			self.mapsLock.release()
+			print '------------------------------------------------------------------------'
 
 	def getTargetIdentifier(self, targetText):
 		print '------------------------------------------------------------------------'
@@ -77,6 +81,7 @@ class Worker(object):
 			return -1
 		finally:
 			self.mapsLock.release()
+			print '------------------------------------------------------------------------'
 
 	def startPlanning(self, domainId, initWorld, targetId, excludeList, awakenRules):
 		print '------------------------------------------------------------------------'
@@ -96,21 +101,23 @@ class Worker(object):
 			return -1
 		finally:
 			self.mapsLock.release()
+			print '------------------------------------------------------------------------'
+
 
 	def forceStopPlanning(self, jobIdentifier):
 		print '------------------------------------------------------------------------'
 		print 'forceStopPlanning', jobIdentifier, '(', type(jobIdentifier), ')'
-		ret = 0
 		try:
 			self.mapsLock.acquire()
 			job = self.jobMap[jobIdentifier]
 			job.jobInstance.setStopFlag()
+			return 0
 		except:
 			traceback.print_exc()
 			return 1
 		finally:
 			self.mapsLock.release()
-		return 0
+			print '------------------------------------------------------------------------'
 
 	def getPlanningResults(self, jobIdentifier):
 		print '------------------------------------------------------------------------'
@@ -126,6 +133,7 @@ class Worker(object):
 			tI = self.targetMap[job.targetId]
 			print 'd'
 		except:
+			print 'ERROR AQUI 1'
 			traceback.print_exc()
 			raise
 		finally:
@@ -137,25 +145,31 @@ class Worker(object):
 			print 'e'
 			cacheResult = self.cache.getPlanFromFiles(dI.text, job.jobInstance.initWorld.graph.toXMLString(), tI.code)
 			print 'f', cacheResult
-			if len(cacheResult[1].strip()) == 0:
-				print 'f2'
-				cacheResult = False
+			if cacheResult:
+				if len(cacheResult[1].strip()) == 0:
+					print 'f2'
+					cacheResult = False
 			print 'g'
 		except:
 			traceback.print_exc()
 			print 'h'
+			print 'ERROR AQUI 2'
 			cacheResult = False
-		if cacheResult:
-			print 'PlannerCaller::run Got plan from cache'
-			print '<<<'
-			print cacheResult[1]
-			print '>>>'
-			cacheSuccess = cacheResult[0]
-			cachePlan = cacheResult[1]
-			# lines = cacheResult[1].split('\n')
-			ret.plan = str(cacheResult[1])
-			ret.cost = 1
-			return ret
+		try:
+			if cacheResult:
+				print 'Got plan from cache'
+				print '<<<'
+				print cacheResult[1]
+				print '>>>'
+				cacheSuccess = cacheResult[0]
+				cachePlan = cacheResult[1]
+				# lines = cacheResult[1].split('\n')
+				ret.plan = str(cacheResult[1])
+				ret.cost = 1
+				print 'salimos por cache'
+				return ret
+		except:
+			print 'ERROR AQUI 234534'
 		#
 		# Second: try planning
 		#
@@ -164,18 +178,26 @@ class Worker(object):
 			plan = job.jobInstance.run()
 			print 'j'
 			self.cache.includeFromFiles(dI.text, job.jobInstance.initWorld.graph.toXMLString(), tI.code, str(plan), True)
-			print plan
+			print 'k'
 			ret.plan = str(plan)
 			ret.cost = 1
+			print 'PLAN:', ret.plan
+			return ret
 		except:
+			print 'ERROR AQUI 3'
 			traceback.print_exc()
-			raise
-		return ret
-
+			print 'ERROR AQUI 3'
+			ret.plan = 'errrorr'
+			ret.cost = 100
+			return ret
+		finally:
+			print '--------------------------------------------------'
+		print 'WE SHOULD NOT GET HERE'
+		sys.exit(-1)
 #PlanResult planHierarchical(1: i32 domainId, 2: string initWorld, 3:i32 targetId, 4: list<string> excludeList, 5: list<string> awakenRules, 6: map<string,string> symbolMapping) throws (1: string theError),
 
 
 
 
-server = make_server(agglplanner_thrift.AGGLPlanner, Worker(), '127.0.0.1', 6000)
+server = make_server(agglplanner_thrift.AGGLPlanner, Worker(), '127.0.0.1', 6000, client_timeout=1000000)
 server.serve()

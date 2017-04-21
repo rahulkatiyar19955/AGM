@@ -8,8 +8,7 @@
 #from thriftpy.transport.framed import TFramedTransportFactory
 
 import thriftpy
-agglplanner_thrift = thriftpy.load("agglplanner.thrift", module_name="agglplanner_thrift")
-
+agglplanner_thrift = thriftpy.load("/usr/local/share/agm/agglplanner.thrift", module_name="agglplanner_thrift")
 from thriftpy.rpc import make_client
 
 client = make_client(agglplanner_thrift.AGGLPlanner, '127.0.0.1', 6000)
@@ -24,7 +23,9 @@ print 'Reading init world...'
 initWorld = open('/home/robocomp/robocomp/components/robocomp-shelly/etc/initialModel_hybrid.xml', 'r').read()
 
 print 'Get target id...'
-targetText = open('/home/robocomp/robocomp/components/robocomp-shelly/etc/targetReachTableD.aggt', 'r').read()
+targetText = open('/home/robocomp/robocomp/components/robocomp-shelly/etc/targetRestPosition.aggt', 'r').read()
+print type(targetText), targetText
+
 targetId = client.getTargetIdentifier(targetText)
 print targetId
 print 'Calling planner...'

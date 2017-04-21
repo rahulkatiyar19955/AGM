@@ -38,10 +38,14 @@ import RoboCompPlanning
 
 import AGMModelConversion
 
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 import thriftpy
 agglplanner_thrift = thriftpy.load("/usr/local/share/agm/agglplanner.thrift", module_name="agglplanner_thrift")
 from thriftpy.rpc import make_client
+
+
 
 
 #
@@ -69,20 +73,31 @@ class PlannerCaller(threading.Thread):
 		threading.Thread.__init__(self)
 		self.executive = executive
 		self.agglPath = agglPath
-		self.agglplannerclient = executive.agglplannerclient
+		print 'copiando cliente'
+		self.agglplannerclient = make_client(agglplanner_thrift.AGGLPlanner, '127.0.0.1', 6000, timeout=1000000)
+		print 'copiando cliente F'
+
 		self.domainText = open(self.agglPath, 'r').read()
 		tempStr = self.domainText
 		try: tempStr = unicodedata.normalize('NFKD', tempStr)
 		except: pass
 		print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX getDomainIdentifier'
+		print 'pidiendo dominio'
 		self.domainId = self.agglplannerclient.getDomainIdentifier(tempStr)
+		print 'pidiendo dominio F'
 
 	def setMission(self, targetStr):
 		tempStr = targetStr
 		try: tempStr = unicodedata.normalize('NFKD', tempStr)
 		except: pass
 		print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX getTargetIdentifier'
-		self.targetId = self.agglplannerclient.getTargetIdentifier(open(tempStr, 'r').read())
+		missionStr = open(tempStr, 'r').read()
+		print type(missionStr), missionStr
+		print 'pidiendo id mision'
+		self.targetId = self.agglplannerclient.getTargetIdentifier(missionStr)
+		print 'pidiendo id mision F'
+		self.setWork(self.executive.currentModel)
+
 
 	def setWork(self, currentModel):
 		#print 'PlannerCaller::setWork 0'
@@ -97,7 +112,9 @@ class PlannerCaller(threading.Thread):
 					while True:
 						pend = self.pendingJobs.pop()
 						print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX forceStopPlanning'
+						print 'forzando parada'
 						self.agglplannerclient.forceStopPlanning(pend)
+						print 'forzando parada F'
 					self.pendingJobs.release()
 				except:
 					pass
@@ -128,12 +145,12 @@ class PlannerCaller(threading.Thread):
 				time.sleep(0.05)
 				continue
 			try:
-				self.executiveLoopFunction()
+				self.callerLoopFunction()
 			finally:
 				self.plannerCallerMutex.release()
 
-	def executiveLoopFunction(self):
-		print 'executiveLoopFunction'
+	def callerLoopFunction(self):
+		print 'callerLoopFunction'
 		###
 		### Set variables and write files that are of use later
 		###
@@ -164,50 +181,11 @@ class PlannerCaller(threading.Thread):
 			return
 
 		###
-		### Try the cache
-		###
-		if False:
-			print 'PlannerCaller::run Ask cache'
-			try:
-				cacheResult = self.cache.getPlanFromFiles(domainPY, worldXML, targetPY)
-			except:
-				cacheResult = False
-			#print 'PlannerCaller::run IGNORING CACHE!!!!'
-			#print 'PlannerCaller::run IGNORING CACHE!!!!'
-			#cacheResult = False
-			#print 'PlannerCaller::run IGNORING CACHE!!!!'
-			#print 'PlannerCaller::run IGNORING CACHE!!!!'
-			if cacheResult:
-				if len(cacheResult[1].strip()) == 0:
-					cacheResult = None
-			if cacheResult:
-				print 'PlannerCaller::run Got plan from cache'
-				print '<<<'
-				print cacheResult[1]
-				print '>>>'
-				cacheSuccess = cacheResult[0]
-				cachePlan = cacheResult[1]
-				lines = cacheResult[1].split('\n')
-				if len(''.join(lines).strip()) > 0:
-					self.cache.includeFromFiles(domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True)
-				# Get the output
-				try:
-					self.plan = AGGLPlannerPlan('\n'.join(lines), planFromText=True)
-					monitoringResult = self.callMonitoring(peid)
-				except:
-					traceback.print_exc()
-					sys.exit(-1)
-				self.working = False
-				self.executive.gotPlan(self.plan)
-				return
-
-		###
-		### Run the planner
+		### Call the planner
 		###
 		# CALL
 		try:
 			start = time.time()
-
 			print 'PlannerCaller::run calling planner start'
 			tempStr = self.currentModel.filterGeometricSymbols().toXMLString()
 			try:
@@ -218,12 +196,16 @@ class PlannerCaller(threading.Thread):
 				print 'X3', type(tempStr)
 				pass
 			print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX startPlanning'
+			print 'startPlanning'
 			jobId = self.agglplannerclient.startPlanning(self.domainId, tempStr, self.targetId, [], [])
+			print 'startPlanning F'
 			print 'PlannerCaller::run got job identifier', jobId
 			self.pendingJobs.append(jobId)
 			print 'PlannerCaller::run waiting for results...'
 			print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX getPlanningResults'
+			print 'get planning'
 			result = self.agglplannerclient.getPlanningResults(jobId)
+			print 'get planning F'
 			print 'PlannerCaller::run done calling got', result.plan
 			#if len(''.join(lines).strip()) > 0:  # WARNING TODO BUG ERROR FIXME                                 THIS SHOULD BE FIXED TO ENABLE PLAN CACHING
 				#self.cache.includeFromFiles(domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True)
@@ -301,12 +283,7 @@ class Executive(object):
 		self.agents = dict()
 		self.plan = AGGLPlannerPlan('', planFromText=True)
 		self.modifications = 0
-		self.agglplannerclient = make_client(agglplanner_thrift.AGGLPlanner, '127.0.0.1', 6000)
-		self.plannerCaller = PlannerCaller(self, agglPath)
-		self.plannerCaller.start()
-		print '--- setMission ---------------------------------------------'
-		self.setMission(initialMissionPath, avoidUpdate=True)
-		print '--- setMission ---------------------------------------------'
+
 
 		# Set proxies
 		self.executiveTopic = executiveTopic
@@ -320,13 +297,18 @@ class Executive(object):
 			print 'Can\'t open ' + initialModelPath + '.'
 			os._exit(-1)
 
-
 		print 'INITIAL MODEL: ', self.initialModel
 		self.lastModification = self.initialModel
 		print 'initial model version', self.lastModification.version
 		self.backModelICE  = None
 		self.setAndBroadcastModel(xmlModelParser.graphFromXMLFile(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
+
+		self.plannerCaller = PlannerCaller(self, agglPath)
+		self.plannerCaller.start()
+		print '--- setMission ---------------------------------------------'
+		self.setMission(initialMissionPath, avoidUpdate=True)
+		print '--- setMission ---------------------------------------------'
 
 	#######################################################################
 	#                                                                     #
