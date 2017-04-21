@@ -96,7 +96,7 @@ class PlanningCache:
 			print 'No cache for the checksum'
 			return None
 
-	def getPlanFromFiles(self, domain, initialstateF, goalstateF):
+	def getPlanFromFiles(self, domain, initialstate, goalstate):
 		initialstate = re.sub('<attribute [^>]*>', '', initialstate)
 		goalstate    = re.sub('<attribute [^>]*>', '', goalstate)
 		return self.getPlan(domain, initialstate, goalstate)

@@ -135,13 +135,14 @@ class Worker(object):
 		#
 		try:
 			print 'e'
-			cacheResult = self.cache.getPlanFromFiles(dI.text, job.initWorld.graph.toXMLString(), tI.code)
+			cacheResult = self.cache.getPlanFromFiles(dI.text, job.jobInstance.initWorld.graph.toXMLString(), tI.code)
 			print 'f', cacheResult
 			if len(cacheResult[1].strip()) == 0:
 				print 'f2'
 				cacheResult = False
 			print 'g'
 		except:
+			traceback.print_exc()
 			print 'h'
 			cacheResult = False
 		if cacheResult:
