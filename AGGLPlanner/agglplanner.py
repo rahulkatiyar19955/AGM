@@ -65,7 +65,7 @@ maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 5.
-maxTimeWaitLimit = 1500.
+maxTimeWaitLimit = 2500.
 
 
 

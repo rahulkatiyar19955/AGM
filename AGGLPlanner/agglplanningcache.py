@@ -98,10 +98,14 @@ class PlanningCache:
 
 	def getPlanFromFiles(self, domain, initialstate, goalstate):
 		initialstate = re.sub('<attribute [^>]*>', '', initialstate)
+		initialstate = '\n'.join([ x for x in initialstate.split("\n") if len(x.strip())>0 ])
 		goalstate    = re.sub('<attribute [^>]*>', '', goalstate)
+		goalstate = '\n'.join([ x for x in goalstate.split("\n") if len(x.strip())>0 ])
 		return self.getPlan(domain, initialstate, goalstate)
 
 	def includeFromFiles(self, domain, initialstate, goalstate, plan, success, shouldIWrite=True):
 		initialstate = re.sub('<attribute [^>]*>', '', initialstate)
+		initialstate = '\n'.join([ x for x in initialstate.split("\n") if len(x.strip())>0 ])
 		goalstate    = re.sub('<attribute [^>]*>', '', goalstate)
+		goalstate = '\n'.join([ x for x in goalstate.split("\n") if len(x.strip())>0 ])
 		return self.include(domain, initialstate, goalstate, plan, success, shouldIWrite)

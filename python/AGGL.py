@@ -78,8 +78,8 @@ class AGMLink(object):
 			if not 'rx' in self.attributes: self.attributes['rx'] = '0'
 			if not 'ry' in self.attributes: self.attributes['ry'] = '0'
 			if not 'rz' in self.attributes: self.attributes['rz'] = '0'
-		
-			
+
+
 		self.color = 'white'
 		self.enabled = enabled
 	## Converts an AGMLink to a string
@@ -412,29 +412,27 @@ class AGMGraph(object):
 
 	def toXML(self, path):
 		f = open(path, 'w')
-		f.write('<AGMModel>\n')
-		for n in self.nodes:
-			f.write('\t<symbol id="'+str(self.nodes[n].name)+'" type="'+str(self.nodes[n].sType)+'">\n')
-			for attr in self.nodes[n].attributes.keys():
-				f.write('\t\t<attribute key="'+attr+'" value="'+self.nodes[n].attributes[attr]+'" />\n')
-			f.write('\t</symbol>\n')
-		for l in self.links:
-			f.write('\t<link src="'+str(l.a)+'" dst="'+str(l.b)+'" label="'+str(l.linkType)+'" >\n')
-			for attr in l.attributes.keys():
-				f.write('\t\t<linkAttribute key="'+attr+'" value="'+l.attributes[attr]+'" />\n')
-			f.write('\t</link>\n')
-		f.write('</AGMModel>\n\n')
+		f.write(self.toXMLString())
 		f.close()
 
 	def toXMLString(self):
 		f = ''
 		f += '<AGMModel>\n'
+
+		sortedList = []
 		for n in self.nodes:
-			f += '\t<symbol id="'+str(self.nodes[n].name)+'" type="'+str(self.nodes[n].sType)+'">\n'
-			for attr in self.nodes[n].attributes.keys():
-				f += '\t\t<attribute key="'+attr+'" value="'+self.nodes[n].attributes[attr]+'" />\n'
+			sortedList.append(self.nodes[n])
+		sortedList.sort(key=lambda x: int(x.name), reverse=False)
+		for n in sortedList:
+			f += '\t<symbol id="'+str(n.name)+'" type="'+str(n.sType)+'">\n'
+			for attr in n.attributes.keys():
+				f += '\t\t<attribute key="'+attr+'" value="'+n.attributes[attr]+'" />\n'
 			f += '\t</symbol>\n'
+		sortedList = []
 		for l in self.links:
+			sortedList.append(l)
+		sortedList.sort(key=lambda x: (int(x.a),int(x.b), x.linkType), reverse=False)
+		for l in sortedList:
 			f += '\t<link src="'+str(l.a)+'" dst="'+str(l.b)+'" label="'+str(l.linkType)+'" >\n'
 			for attr in l.attributes.keys():
 				f += '\t\t<linkAttribute key="'+attr+'" value="'+l.attributes[attr]+'" />\n'
