@@ -220,9 +220,7 @@ class PlannerCaller(threading.Thread):
 
 		# Get the output
 		try:
-			print 'A'
 			self.plan = AGGLPlannerPlan(str(result.plan), planFromText=True)
-			print 'B'
 			print 'DIRECT FROM AGGLPlanner\nself.plan:\n', self.plan
 			self.callMonitoring(peid)
 		except: # The planner was probably killed

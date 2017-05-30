@@ -51,7 +51,7 @@ def computePlanCost(node):
 		iters += 1
 		ret += cost + (1-success)*sumActionCosts(node, iters)
 	return ret
-	
+
 
 lastNodeId = 0
 
@@ -398,7 +398,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 		ret += indent+"if symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
-		conditions, number, ll = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
+		conditions, number, ll = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack+[n])
 		ret += conditions
 		ret += ":"
 		symbols_in_stack.append(n)
@@ -423,7 +423,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 	#ret += indent+"print 'Running rule "+rule.name+"'"
 	ret += indent+"stack2        = "+COPY_OPTION+"(stack)"
 	ret += indent+"equivalences2 = "+COPY_OPTION+"(equivalences)"
-	
+
 	ret += indent+"r1 = self."+rule.name+"_trigger(snode, n2id, stack2, inCombo, equivalences2, "+COPY_OPTION+"(finishesCombo))"
 	ret += indent+"c = "+COPY_OPTION+"(r1)"
 	ret += indent+"if 'fina' in locals():"
@@ -492,7 +492,7 @@ def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False
 			moreErrorInformation = "if verbose: print 'test_symbol_"+n+"(',"+"n2id['"+n+"'],').sType == "+nodesPlusParameters[n].sType+"' , test_symbol_"+n+".sType == '"+nodesPlusParameters[n].sType+"'"
 			for other in symbols_in_stack:
 				ret += " and test_symbol_"+n+".name!=test_symbol_" + str(other) + ".name"
-			conditions, number, linksInfo = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack)
+			conditions, number, linksInfo = extractNewLinkConditionsFromList(rule.lhs.links, n, symbols_in_stack+[n])
 			ret += conditions
 			ret += "):"
 			symbols_in_stack.append(n)
@@ -900,10 +900,6 @@ def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 #
 # @retval ret is the python code used to chek the target world state.
 def generateTarget(graph, forHierarchicalRule='', lgraph=None, verbose=False):
-	return generateTarget_VersionMERCEDES(graph, forHierarchicalRule, lgraph, verbose=verbose)
-
-def generateTarget_VersionMERCEDES(graph, forHierarchicalRule='', lgraph=None, verbose=False):
-	#print 'branched targets'
 	# Variables del programa
 	linkList = []   # vector de enlaces del grafo.
 
@@ -1007,7 +1003,7 @@ def CheckTarget(graph):\n
 				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 		ret += indent+"linksVal = 0"
 		#ret += indent+"print n2id"
-		for cond in newLinkScore(graph.links, n_n, symbols_in_stack):
+		for cond in newLinkScore(graph.links, n_n, symbols_in_stack+[n_n]):
 			ret += indent+cond
 		ret += indent+"scoreLinks.append(linksVal)"
 		pops.append(indent+'scoreLinks.pop()')
@@ -1015,7 +1011,7 @@ def CheckTarget(graph):\n
 		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n_n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
-		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack)
+		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack+[n_n])
 		conditions = conditions.replace("snode.graph", "graph")
 		conditionsListList.append( [conditions, number] )
 		ret += conditions
@@ -1325,7 +1321,7 @@ def CheckTarget(graph):\n
 				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 		ret += indent+"linksVal = 0"
 		#ret += indent+"print n2id"
-		for cond in newLinkScore(graph.links, n_n, symbols_in_stack):
+		for cond in newLinkScore(graph.links, n_n, symbols_in_stack+[n_n]):
 			ret += indent+cond
 		ret += indent+"scoreLinks.append(linksVal)"
 		pops.append(indent+'scoreLinks.pop()')
@@ -1333,7 +1329,7 @@ def CheckTarget(graph):\n
 		ret += indent+"if symbol_"+n+".sType == '"+graph.nodes[n_n].sType+"'"
 		for other in symbols_in_stack:
 			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
-		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack)
+		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack+[n_n])
 		conditions = conditions.replace("snode.graph", "graph")
 		conditionsListList.append( [conditions, number] )
 		ret += conditions
@@ -1355,7 +1351,6 @@ def CheckTarget(graph):\n
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
 
-	#print realCond
 	totalCond = realCond
 	if target['precondition'] != None:
 		ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
@@ -1488,7 +1483,3 @@ def targetPreconditionImplementation(precondition, indent, modifier='', stuff=No
 			print 'ERROR IN', preconditionBody
 			traceback.print_exc()
 	return ret, indent, formulaId, stuff
-
-
-
-
