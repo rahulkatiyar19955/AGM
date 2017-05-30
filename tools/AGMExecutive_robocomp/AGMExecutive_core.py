@@ -69,13 +69,32 @@ class PlannerCaller(threading.Thread):
 	pendingJobs = LockableList()
 
 
-	def __init__(self, executive, agglPath):
+	def __init__(self, executive, agglPath, startPlanServer):
 		threading.Thread.__init__(self)
+		self.startPlanServer = startPlanServer
 		self.executive = executive
 		self.agglPath = agglPath
-		print 'copiando cliente'
-		self.agglplannerclient = make_client(agglplanner_thrift.AGGLPlanner, '127.0.0.1', 6000, timeout=1000000)
-		print 'copiando cliente F'
+		try:
+			self.agglplannerclient = make_client(agglplanner_thrift.AGGLPlanner, '127.0.0.1', 6000, timeout=1000000)
+		except Exception, e:
+			if self.startPlanServer == 'local':
+				pass
+			elif self.startPlanServer == 'yakuake':
+				pass
+			elif self.startPlanServer == 'off':
+				print 'Cannot connect to agglplanner service'
+				print e.message
+				sys.exit(-1)
+			else:
+				print 'Cannot connect to agglplanner service. Unknown configuration parameter for variable "AutostarAGGLPlannerServer"'
+				print e.message
+				sys.exit(-1)
+
+# AutostarAGGLPlannerServer = rcremote:tcp -h localhost -p 4242
+# AutostarAGGLPlannerServer = local
+# AutostarAGGLPlannerServer = yakuake
+# AutostarAGGLPlannerServer = off
+
 
 		self.domainText = open(self.agglPath, 'r').read()
 		tempStr = self.domainText
@@ -275,8 +294,9 @@ class PlannerCaller(threading.Thread):
 
 
 class Executive(object):
-	def __init__(self, agglPath, initialModelPath, initialMissionPath, doNotPlan, executiveTopic, executiveVisualizationTopic):
+	def __init__(self, agglPath, initialModelPath, initialMissionPath, doNotPlan, executiveTopic, executiveVisualizationTopic, startPlanServer):
 		self.doNotPlan = doNotPlan
+		self.startPlanServer = startPlanServer
 		self.mutex = threading.RLock()
 		self.agents = dict()
 		self.plan = AGGLPlannerPlan('', planFromText=True)
@@ -302,7 +322,7 @@ class Executive(object):
 		self.setAndBroadcastModel(xmlModelParser.graphFromXMLFile(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 
-		self.plannerCaller = PlannerCaller(self, agglPath)
+		self.plannerCaller = PlannerCaller(self, agglPath, self.startPlanServer)
 		self.plannerCaller.start()
 		print '--- setMission ---------------------------------------------'
 		self.setMission(initialMissionPath, avoidUpdate=True)

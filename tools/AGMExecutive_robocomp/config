@@ -7,6 +7,19 @@ AGMAgentTopic.Endpoints=tcp -p 12198
 # R E M O T E    P R O X I E S
 IceStormProxy = IceStorm/TopicManager:tcp -h localhost -p 9999
 
+# AGMExecutive relies on agglplannerserver to compute plans. The following line is used to specify
+# how should this service be started, in case it should. There are many options:
+# a) 'rcremote*' (a string starting with 'rcremote'): it is interpreted as a proxy to rcremote
+# b) 'local': it is executed as a detached process, in the same terminal as AGMExecutive
+# c) 'yakuake': it is executed in a separate yakuake tab using its dbus interface
+# d) 'off': it is not executed
+# e) any other value: the program exits failing
+# AutostarAGGLPlannerServer = rcremote:tcp -h localhost -p 4242
+# AutostarAGGLPlannerServer = local
+# AutostarAGGLPlannerServer = yakuake
+# AutostarAGGLPlannerServer = off
+AutostarAGGLPlannerServer = rcremote:tcp -h localhost -p 4242
+
 # A G M   -   F i l e   p a t h s
 AGGLPath =           /home/robocomp/robocomp/components/prp/planningDomain/domain.aggl
 InitialModelPath =   /home/robocomp/robocomp/components/prp/etc/initialModel.xml
@@ -39,5 +52,3 @@ Ice.MessageSizeMax=2000480
 Ice.Override.ConnectTimeout=1000
 Ice.Override.CloseTimeout=1000
 Ice.Override.Timeout=1000
-
-
