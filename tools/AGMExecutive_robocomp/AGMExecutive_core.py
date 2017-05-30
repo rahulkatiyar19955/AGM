@@ -77,10 +77,11 @@ class PlannerCaller(threading.Thread):
 		try:
 			self.agglplannerclient = make_client(agglplanner_thrift.AGGLPlanner, '127.0.0.1', 6000, timeout=1000000)
 		except Exception, e:
+			if self.startPlanServer.startswith('rcremote'):
+				parts = self.startPlanServer.split(',')
+				subprocess.Popen(parts+['agglplannerserver'])
 			if self.startPlanServer == 'local':
-				pass
-			elif self.startPlanServer == 'yakuake':
-				pass
+				subprocess.Popen(['agglplannerserver'])
 			elif self.startPlanServer == 'off':
 				print 'Cannot connect to agglplanner service'
 				print e.message
@@ -89,6 +90,7 @@ class PlannerCaller(threading.Thread):
 				print 'Cannot connect to agglplanner service. Unknown configuration parameter for variable "AutostarAGGLPlannerServer"'
 				print e.message
 				sys.exit(-1)
+			time.sleep(1)
 
 # AutostarAGGLPlannerServer = rcremote:tcp -h localhost -p 4242
 # AutostarAGGLPlannerServer = local
@@ -100,21 +102,15 @@ class PlannerCaller(threading.Thread):
 		tempStr = self.domainText
 		try: tempStr = unicodedata.normalize('NFKD', tempStr)
 		except: pass
-		print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX getDomainIdentifier'
-		print 'pidiendo dominio'
 		self.domainId = self.agglplannerclient.getDomainIdentifier(tempStr)
-		print 'pidiendo dominio F'
 
 	def setMission(self, targetStr):
 		tempStr = targetStr
 		try: tempStr = unicodedata.normalize('NFKD', tempStr)
 		except: pass
-		print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX getTargetIdentifier'
 		missionStr = open(tempStr, 'r').read()
 		print type(missionStr), missionStr
-		print 'pidiendo id mision'
 		self.targetId = self.agglplannerclient.getTargetIdentifier(missionStr)
-		print 'pidiendo id mision F'
 		self.setWork(self.executive.currentModel)
 
 
@@ -214,17 +210,17 @@ class PlannerCaller(threading.Thread):
 			except:
 				print 'X3', type(tempStr)
 				pass
-			print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX startPlanning'
-			print 'startPlanning'
+			# print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX startPlanning'
+			# print 'startPlanning: domain', self.domainId, 'target', self.targetId
 			jobId = self.agglplannerclient.startPlanning(self.domainId, tempStr, self.targetId, [], [])
-			print 'startPlanning F'
+			# print 'startPlanning F', jobId
 			print 'PlannerCaller::run got job identifier', jobId
 			self.pendingJobs.append(jobId)
 			print 'PlannerCaller::run waiting for results...'
-			print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX getPlanningResults'
-			print 'get planning'
+			# print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX getPlanningResults'
+			# print 'get planning'
 			result = self.agglplannerclient.getPlanningResults(jobId)
-			print 'get planning F'
+			# print 'get planning F'
 			print 'PlannerCaller::run done calling got', result.plan
 			#if len(''.join(lines).strip()) > 0:  # WARNING TODO BUG ERROR FIXME                                 THIS SHOULD BE FIXED TO ENABLE PLAN CACHING
 				#self.cache.includeFromFiles(domainPY, worldXML, targetPY, "/tmp/result"+peid+".txt", True)
@@ -240,7 +236,7 @@ class PlannerCaller(threading.Thread):
 		# Get the output
 		try:
 			self.plan = AGGLPlannerPlan(str(result.plan), planFromText=True)
-			print 'DIRECT FROM AGGLPlanner\nself.plan:\n', self.plan
+			# print 'DIRECT FROM AGGLPlanner\nself.plan:\n', self.plan
 			self.callMonitoring(peid)
 		except: # The planner was probably killed
 			traceback.print_exc()

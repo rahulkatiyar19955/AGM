@@ -122,7 +122,7 @@ class Server (Ice.Application):
 			agglPath           = self.communicator().getProperties().getProperty( "AGGLPath" )
 			initialMissionPath = self.communicator().getProperties().getProperty( "InitialMissionPath" )
 			doNotPlan          = self.communicator().getProperties().getProperty( "DoNotPlan" )
-			startPlanServer    = self.communicator().getProperties().getProperty( "AutostarAGGLPlannerServer" )
+			startPlanServer    = self.communicator().getProperties().getProperty( "AutostartAGGLPlannerServer" )
 
 			# Proxy to publish AGMExecutiveTopic
 			proxy = self.communicator().getProperties().getProperty("IceStormProxy")
