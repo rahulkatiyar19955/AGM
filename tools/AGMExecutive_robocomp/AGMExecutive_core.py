@@ -80,7 +80,7 @@ class PlannerCaller(threading.Thread):
 			if self.startPlanServer.startswith('rcremote'):
 				parts = self.startPlanServer.split(',')
 				subprocess.Popen(parts+['agglplannerserver'])
-			if self.startPlanServer == 'local':
+			elif self.startPlanServer == 'local':
 				subprocess.Popen(['agglplannerserver'])
 			elif self.startPlanServer == 'off':
 				print 'Cannot connect to agglplanner service'
@@ -204,11 +204,11 @@ class PlannerCaller(threading.Thread):
 			print 'PlannerCaller::run calling planner start'
 			tempStr = self.currentModel.filterGeometricSymbols().toXMLString()
 			try:
-				print 'X1', type(tempStr)
+				# print 'X1', type(tempStr)
 				tempStr = str(unicodedata.normalize('NFKD', tempStr))
-				print 'X2', type(tempStr)
+				# print 'X2', type(tempStr)
 			except:
-				print 'X3', type(tempStr)
+				# print 'X3', type(tempStr)
 				pass
 			# print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX startPlanning'
 			# print 'startPlanning: domain', self.domainId, 'target', self.targetId
