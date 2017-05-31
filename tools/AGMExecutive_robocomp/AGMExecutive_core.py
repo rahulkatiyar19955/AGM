@@ -92,12 +92,6 @@ class PlannerCaller(threading.Thread):
 				sys.exit(-1)
 			time.sleep(1)
 
-# AutostarAGGLPlannerServer = rcremote:tcp -h localhost -p 4242
-# AutostarAGGLPlannerServer = local
-# AutostarAGGLPlannerServer = yakuake
-# AutostarAGGLPlannerServer = off
-
-
 		self.domainText = open(self.agglPath, 'r').read()
 		tempStr = self.domainText
 		try: tempStr = unicodedata.normalize('NFKD', tempStr)

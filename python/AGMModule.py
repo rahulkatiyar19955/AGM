@@ -61,7 +61,7 @@ class NodeNameReader(QLineEdit):
 			if self.parentW.graph.nodes[v].pos[0] == self.x:
 				if self.parentW.graph.nodes[v].pos[1] == self.y:
 					self.parentW.graph.nodes[v].name = newName
-		if oldName != '' and oldName != newName: 
+		if oldName != '' and oldName != newName:
 			self.parentW.graph.nodes[newName] = self.parentW.graph.nodes[oldName]
 			del self.parentW.graph.nodes[oldName]
 			for l in self.parentW.graph.links:
@@ -237,7 +237,7 @@ class GraphDraw(QWidget):
 			node = self.graph.nodes[n]
 			node.pos[0] += self.velocities[node.name][0]
 			node.pos[1] += self.velocities[node.name][1]
-		
+
 	def paintOnPainter(self, painter, w, h, drawlines=True):
 		global vertexDiameter
 		global nodeThickness
@@ -284,11 +284,7 @@ class GraphDraw(QWidget):
 		brush = QBrush(QLinearGradient())
 		painter.setBrush(brush)
 		font = self.main.fontDialog.currentFont()
-		#print 'XXX:'
-		#print 'a', font
 		font.setBold(False)
-		#print 'b', font
-		#print font.style()
 		painter.setFont(font)
 		for w in self.graph.nodes:
 			v = self.graph.nodes[w]
@@ -366,6 +362,7 @@ class GraphDraw(QWidget):
 				yend  = float(v2.pos[1])+math.sin(angleR)*0.700*(float(vertexDiameter)/2.+offsetDst)
 				aa = np.array([v2.pos[0]-xinit, v2.pos[1]-yinit])
 				bb = aa*(lengthPointer/np.linalg.norm(aa))
+				cc = aa/np.linalg.norm(aa)
 				xendLine = xend-bb[0]
 				yendLine = yend-bb[1]
 
@@ -378,20 +375,30 @@ class GraphDraw(QWidget):
 				pen.setWidth(lineThickness)
 				painter.setPen(pen)
 				painter.setBrush(QColor(0, 0, 0))
-				
-				if a:
-					painter.drawLine(xinit, yinit, xendLine, yendLine)
-					pen.setWidth(0.5)
-					painter.drawLine(xinit, yinit, xendLine, yendLine)
-					pen.setWidth(lineThickness)
 
-				lpos = [(xinit + xendLine)/2, (yinit + yendLine) / 2]
+				if a:
+					if e.a != e.b:
+						painter.drawLine(xinit, yinit, xendLine, yendLine)
+						pen.setWidth(0.5)
+						painter.drawLine(xinit, yinit, xendLine, yendLine)
+						pen.setWidth(lineThickness)
+					else:
+						pass
+						painter.setBrush(Qt.NoBrush)
+						painter.drawEllipse(xinit+2, yinit+vertexDiameter/4, vertexDiameter, vertexDiameter/6)
+				if e.a == e.b:
+					lpos = [v1.pos[0], v1.pos[1]+vertexDiameter*0.7001*0.5]
+				else:
+					lpos = [xendLine-cc[0]*2*lengthPointer, yendLine-cc[1]*2*lengthPointer]
 				langle = math.atan2(yend-yinit, xend-xinit)
 				align = Qt.AlignLeft
 				rect = painter.boundingRect(QRectF(float(lpos[0]), float(lpos[1]), 1, 1), align, str(e.linkType))
 				rect.translate(-rect.width()/2, -rect.height()/2) # Right now it will be centered on the link's center
 				linkHeight = rect.height()+3
-				linkGroupBase = (-linkGroupCount+1)*linkHeight/2
+				if e.a == e.b:
+					linkGroupBase = 0.
+				else:
+					linkGroupBase = (-linkGroupCount+1)*linkHeight/2
 				rect.translate(0, linkHeight*pos + linkGroupBase) # Right now it will be centered on the link's center
 
 				fill = QColor(155, 155, 155)
@@ -419,7 +426,7 @@ class GraphDraw(QWidget):
 				rect.translate(-2, 0)
 				painter.setBrush(QColor(0, 0, 0))
 				angleD = float(angleD)
-				if a:
+				if a and e.a != e.b:
 					an = angleD
 					painter.translate(xendLine, yendLine)
 					painter.rotate(an)
@@ -579,4 +586,3 @@ class Appearance(QWidget):
 		dashPattern.append(self.ui.spacePattern.value() * lineThickness)
 		dashPattern.append(self.ui.shortPattern.value() * lineThickness)
 		dashPattern.append(self.ui.spacePattern.value() * lineThickness)
-
