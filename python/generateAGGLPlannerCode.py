@@ -695,6 +695,14 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 	elif preconditionType == "retype":
 		print '\'retype\' statements are not allowed in preconditions'
 		sys.exit(1)
+	elif preconditionType == "eq":
+		print 'XXXXXXXXXXX'
+		try:
+			ret += indent + 'precondition'+str(formulaId) + ' = ' + preconditionBody[0] + " == " + preconditionBody[1] + ' # EQ 1'
+		except:
+			print 'ERROR IN', preconditionType
+			print 'ERROR IN', preconditionBody
+			traceback.print_exc()
 	else:
 		try:
 			ret += indent+'precondition'+str(formulaId) + ' = ['
@@ -798,6 +806,20 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 		ret += indent+"newNode.graph.removeDanglingEdges()"
 	elif effectType == "retype":
 		ret += indent+"newNode.graph.nodes[n2id['"+effectBody[0]+"']].sType = '"+effectBody[1]+"'"
+	elif effectType == "eq":
+		if effectBody[0] == '':
+			raise Exception('ERROR IN: '+str(effect))
+		try:
+			if stuff['mode'] == "condition":
+				ret += indent+'condition'+str(formulaId) + ' = '
+				ret += 'n2id["' + effectBody[0] + '"] == n2id["' + effectBody[1] + '"]  # EQ 2'
+			else:
+				print 'Effects can\'t contain eq operators'
+				sys.exit(-1)
+		except:
+			print 'ERROR IN', effectType
+			print 'ERROR IN', effectBody
+			traceback.print_exc()
 	else:
 		if effectBody[0] == '':
 			raise Exception('ERROR IN: '+str(effect))
