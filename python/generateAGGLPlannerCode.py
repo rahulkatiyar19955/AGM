@@ -696,7 +696,6 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 		print '\'retype\' statements are not allowed in preconditions'
 		sys.exit(1)
 	elif preconditionType == "eq":
-		print 'XXXXXXXXXXX'
 		try:
 			ret += indent + 'precondition'+str(formulaId) + ' = ' + preconditionBody[0] + " == " + preconditionBody[1] + ' # EQ 1'
 		except:
