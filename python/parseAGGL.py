@@ -68,8 +68,12 @@ def getAGGLMetaModels():
 	# PROPERTY
 	prop  = Group(an.setResultsName("prop") + eq + an.setResultsName("value"))
 
+	# TYPES
+	typeDefinition  = Suppress(po) + OneOrMore(ids).setResultsName("lhs") + Optional( Suppress(cn) + OneOrMore(ids).setResultsName("rhs")) + Suppress(pc)
+	typesDefinition = Suppress("types") + Suppress(op) + OneOrMore(typeDefinition).setResultsName("types") + Suppress(cl)
+
 	# WHOLE AGGL FILE
-	aggl  = OneOrMore(prop).setResultsName("props") + sep + OneOrMore(rule).setResultsName("rules") + StringEnd()
+	aggl  = OneOrMore(prop).setResultsName("props") + sep + typesDefinition.setResultsName("types") + sep + OneOrMore(rule).setResultsName("rules") + StringEnd()
 
 	# WHOLE AGGT FILE
 	aggt  = Optional(graph.setResultsName("graph")) + Optional(Cnd)
