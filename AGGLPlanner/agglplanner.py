@@ -566,10 +566,10 @@ class AGGLPlanner(object):
 		if self.indent == None: self.indent = ''
 		# Get initial world mdoel
 		if isinstance(initWorld,unicode) or isinstance(initWorld,str):
-			if initWorld.endswith('.xml'):
-				self.initWorld = WorldStateHistory([xmlModelParser.graphFromXMLFile(initWorld), domainParsed.getInitiallyAwakeRules()|awakenRules])
-			else:
+			if '<AGMModel>' in initWorld:
 				self.initWorld = WorldStateHistory([xmlModelParser.graphFromXMLText(initWorld), domainParsed.getInitiallyAwakeRules()|awakenRules])
+			else:
+				self.initWorld = WorldStateHistory([xmlModelParser.graphFromXMLFile(initWorld), domainParsed.getInitiallyAwakeRules()|awakenRules])
 		elif isinstance(initWorld,AGMGraph):
 			self.initWorld = WorldStateHistory([                                initWorld,  domainParsed.getInitiallyAwakeRules()|awakenRules])
 		elif isinstance(initWorld,WorldStateHistory):
