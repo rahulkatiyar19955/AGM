@@ -528,8 +528,8 @@ class TargetInformation(object):
 	def __init__(self, identifier, text):
 		self.identifier = identifier
 		self.text = text
-		self.code = generateTarget_AGGT(AGMFileDataParsing.targetFromText(text))
 		self.module = self.getModuleFromText(self.code).CheckTarget
+		self.code = generateTarget_AGGT(self.module, AGMFileDataParsing.targetFromText(text))
 	def getModuleFromText(self, moduleText):
 		if len(moduleText) < 10:
 			print 'len(moduleText) < 10'

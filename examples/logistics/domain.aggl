@@ -8,6 +8,16 @@ nodeThickness=2
 fontSize=14
 longPattern=3
 ===
+types
+{
+	(obj)
+	(lctn)
+	(trck)
+	(arpl)
+	(city)
+	(arpt)
+}
+===
 loadtruck : active(1)
 {
 	{
@@ -112,7 +122,7 @@ flyairplane : active(1)
 	{
 		lo2:lctn(160,0)
 		ap:arpl(0,-100)
-		airport:ARPT(0,100)
+		airport:arpt(0,100)
 		lo1:lctn(-160,0)
 		ap->lo1(at)
 		lo1->airport(has)
@@ -122,11 +132,10 @@ flyairplane : active(1)
 	{
 		lo2:lctn(160,0)
 		ap:arpl(0,-100)
-		airport:ARPT(0,100)
+		airport:arpt(0,100)
 		lo1:lctn(-160,0)
 		ap->lo2(at)
 		lo1->airport(has)
 		lo2->airport(has)
 	}
 }
-

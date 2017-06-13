@@ -69,7 +69,7 @@ def getAGGLMetaModels():
 	prop  = Group(an.setResultsName("prop") + eq + an.setResultsName("value"))
 
 	# TYPES
-	typeDefinition  = Suppress(po) + OneOrMore(ids).setResultsName("lhs") + Optional( Suppress(cn) + OneOrMore(ids).setResultsName("rhs")) + Suppress(pc)
+	typeDefinition  = Group(Suppress(po) + Group(OneOrMore(ids).setResultsName("lhs")) + Optional( Suppress(cn) + Group(OneOrMore(ids).setResultsName("rhs"))) + Suppress(pc))
 	typesDefinition = Suppress("types") + Suppress(op) + OneOrMore(typeDefinition).setResultsName("types") + Suppress(cl)
 
 	# WHOLE AGGL FILE
@@ -310,6 +310,24 @@ class AGMFileDataParsing:
 				#print i.precondition[0]
 				#print i.effect[0]
 				number = number + 1
+
+		# print 'type AST', result.types
+		for i in result.types:
+			# print '<-------------'
+			rhs = []
+			if len(i)>1:
+				for inherits in i[1]:
+					rhs.append(inherits)
+			# print 'rhs', rhs
+			for aType in i[0]:
+				lhs = aType
+				# print 'Llamada', lhs, rhs
+				agmFD.addType(lhs, copy.deepcopy(rhs))
+			# print '>-------------'
+		agmFD.computeInverseTypes()
+		# print 'inverseTypes', agmFD.getInverseTypes()
+		# sys.exit(-1)
+
 		return agmFD
 
 	@staticmethod

@@ -192,7 +192,7 @@ if __name__ == '__main__': # program domain problem result
 	# If the target file doesnt end with the cirrect extension, we will show an error message.
 	elif target.endswith('.aggt'):
 		temp = AGMFileDataParsing.targetFromFile(target)
-		outputText = generateTarget_AGGT(temp)
+		outputText = generateTarget_AGGT(agmData, temp)
 		ofile = open("/tmp/target.py", 'w')
 		ofile.write(outputText)
 		ofile.close()
