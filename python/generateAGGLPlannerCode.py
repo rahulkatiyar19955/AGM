@@ -200,7 +200,7 @@ def newLinkScore(linkList, newSymbol, alreadyThere):
 #
 # @retval the string with the code
 #
-def ruleImplementation(rule):
+def ruleImplementation(agm, rule):
 	# We dont work with passive rules.
 	if rule.passive: return ''
 	ret = ''
@@ -209,13 +209,13 @@ def ruleImplementation(rule):
 	# We distinguish between normal rules and combo rules.
 	if type(rule) == AGMRule:
 		#print rule.name, 'normal'
-		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
+		ret += normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMComboRule:
 		#print rule.name, 'combo'
-		ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
+		ret += comboRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMHierarchicalRule:
 		#print rule.name, 'hierarchical'
-		ret += normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
+		ret += normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=True)
 		ret += generateTarget(agm, rule.rhs, rule.name, rule.lhs)
 
 #ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
@@ -232,7 +232,7 @@ def ruleImplementation(rule):
 # @param indent
 #
 # @retval the string with the code
-def comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False):
+def comboRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=False):
 	ret = ''
 	ret += indent+"def " + rule.name + "(self, snode, stackP=None, equivalencesP=None):"
 	indent += "\t"
@@ -314,7 +314,7 @@ def comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False)
 # @param indent
 #
 # @retval the string with the code
-def normalRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=False):
+def normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=False):
 	ret = ''
 	# Quantifier-related code (PARAMETERS)
 	# <<<
@@ -793,7 +793,7 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 			indent += "\t"
 			ret += indent+"symbol_"+n+" = nodes[symbol_"+n+"_name]"
 			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
-			ret += indent+"if typeValid(symbol_"+n+".sType, '"+t+")':  # now the body of the FORALL"
+			ret += indent+"if typeValid(symbol_"+n+".sType, '"+t+"'):  # now the body of the FORALL"
 			indent += "\t"
 		text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody[1], indent, 'forall', stuff)
 		ret += text
@@ -869,7 +869,7 @@ def generate(agm, skipPassiveRules):
 	text += ruleTriggerDeclaration(agm)
 	text += hierarchicalTargetsDeclaration(agm)
 	for rule in agm.rules:
-		text += ruleImplementation(rule)
+		text += ruleImplementation(agm, rule)
 	return text
 
 
@@ -1273,6 +1273,7 @@ def computeMaxScore(a, b, maxScore):
 	for i in b: s+=i
 	if s > maxScore: return s
 	return maxScore\n
+""" + generateTypeCode(agm) + """
 def CheckTarget(graph):\n
 	n2id = dict()                             # diccionario
 	available = copy.deepcopy(graph.nodes)    # lista de nodos del grafo inicial.

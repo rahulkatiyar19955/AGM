@@ -27,9 +27,9 @@
 		<attribute key="alias" value="PGH-CENTRAL" />
 	</symbol>
 	<link src="6" dst="1" label="has" />
-	<link src="5" dst="2" label="incity" />
-	<link src="6" dst="2" label="incity" />
-	<link src="11" dst="2" label="incity" />
+	<link src="5" dst="2" label="inCity" />
+	<link src="6" dst="2" label="inCity" />
+	<link src="11" dst="2" label="inCity" />
 	<symbol id="14" type="arpl" x="-220" y="-150">>
 		<attribute key="alias" value="AIRPLANE1" />
 	</symbol>
@@ -70,9 +70,9 @@
 		<attribute key="alias" value="BOS-CENTRAL" />
 	</symbol>
 	<link src="8" dst="1" label="has" />
-	<link src="7" dst="3" label="incity" />
-	<link src="8" dst="3" label="incity" />
-	<link src="12" dst="3" label="incity" />
+	<link src="7" dst="3" label="inCity" />
+	<link src="8" dst="3" label="inCity" />
+	<link src="12" dst="3" label="inCity" />
 	<symbol id="17" type="trck" x="-80" y="-65">
 		<attribute key="alias" value="BOS-TRUCK" />
 	</symbol>
@@ -93,9 +93,9 @@
 		<attribute key="alias" value="LA-CENTRAL" />
 	</symbol>
 	<link src="10" dst="1" label="has" />
-	<link src="9"  dst="4" label="incity" />
-	<link src="10" dst="4" label="incity" />
-	<link src="13" dst="4" label="incity" />
+	<link src="9"  dst="4" label="inCity" />
+	<link src="10" dst="4" label="inCity" />
+	<link src="13" dst="4" label="inCity" />
 	<symbol id="18" type="trck" x="330" y="-65">
 		<attribute key="alias" value="LA-TRUCK" />
 	</symbol>

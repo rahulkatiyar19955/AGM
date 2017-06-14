@@ -685,7 +685,7 @@ class AGGLPlanner(object):
 		#	-- or the end condition doesnt have any message
 		# we print the correspond message
 		if self.end_condition.get() == "IndexError":
-			if verbose > 0: print 'End: state space exhausted'
+			if verbose > 0: print 'End: state space exhausted (known', len(self.knownNodes), ' (open', len(self.openNodes) 
 		elif self.end_condition.get() == "MaxCostReached":
 			if verbose > 0: print 'End: max cost reached'
 		elif self.end_condition.get() == "BestSolutionFound":
