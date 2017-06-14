@@ -655,9 +655,6 @@ class AGM(object):
 						self.inverseTypes[p].append(t)
 			if self.inverseTypes == c:
 				stop = True
-			else:
-				print 'c', c
-				print 'i', self.inverseTypes
 		for t in self.types:
 			self.inverseTypes[t].append(t)
 	def getInverseTypes(self):
