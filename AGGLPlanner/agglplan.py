@@ -75,12 +75,12 @@ if __name__ == '__main__': # program domain problem result
 
 		## Generate target Python file.
 		if targetFile.lower().endswith('.aggt'):
-			outputText = generateTarget_AGGT(AGMFileDataParsing.targetFromFile(targetFile))
+			outputText = generateTarget_AGGT(agmData, AGMFileDataParsing.targetFromFile(targetFile))
 		else:
 			# This sentence creates a graph based on the target world status
 			graph = graphFromXMLFile(targetFile)
 			## Generate the python code correspondig to the graph and
-			outputText = generateTarget(graph)
+			outputText = generateTarget(agmData, graph)
 		## Save the python code of the target world status in the file target.py.
 		ofile = open("/tmp/target.py", 'w')
 		ofile.write(outputText)
@@ -98,5 +98,3 @@ if __name__ == '__main__': # program domain problem result
 		## We store the final time of the planner to calculate the total duration of the program
 		end = time.time()
 		print 'It took', end - start, 'seconds'
-
-

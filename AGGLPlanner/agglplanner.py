@@ -528,8 +528,8 @@ class TargetInformation(object):
 	def __init__(self, identifier, text):
 		self.identifier = identifier
 		self.text = text
-		self.code = generateTarget_AGGT(AGMFileDataParsing.targetFromText(text))
 		self.module = self.getModuleFromText(self.code).CheckTarget
+		self.code = generateTarget_AGGT(self.module, AGMFileDataParsing.targetFromText(text))
 	def getModuleFromText(self, moduleText):
 		if len(moduleText) < 10:
 			print 'len(moduleText) < 10'
@@ -685,7 +685,7 @@ class AGGLPlanner(object):
 		#	-- or the end condition doesnt have any message
 		# we print the correspond message
 		if self.end_condition.get() == "IndexError":
-			if verbose > 0: print 'End: state space exhausted'
+			if verbose > 0: print 'End: state space exhausted (known', len(self.knownNodes), ' (open', len(self.openNodes) 
 		elif self.end_condition.get() == "MaxCostReached":
 			if verbose > 0: print 'End: max cost reached'
 		elif self.end_condition.get() == "BestSolutionFound":

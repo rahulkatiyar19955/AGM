@@ -618,8 +618,47 @@ class AGM(object):
 	def __init__(self):
 		object.__init__(self)
 		self.rules = []
+		self.types = {}
 	def addRule(self, rule):
 		self.rules.append(rule)
+	def addType(self, t, rhs):
+		if t in self.types.keys():
+			print "type", t, "already defined"
+		allRHSinDic = True
+		allParents = rhs
+		for parent in rhs:
+			if not parent in self.types.keys():
+				allRHSinDic = False
+				print "type", parent, "not defined"
+				break
+			else:
+				allParents += self.types[parent]
+		if allRHSinDic == False:
+			sys.exit()
+		self.types[t] = allParents
+	def computeInverseTypes(self):
+		self.inverseTypes = {}
+		for t in self.types.keys():
+			self.inverseTypes[t] = []
+		stop = False
+		# print '(((((((((((((((((((())))))))))))))))))))', self.inverseTypes
+		while not stop:
+			c = copy.deepcopy(self.inverseTypes)
+			for t in self.types:
+				# print 'inv', t
+				# print self.types[t]
+				for p in self.types[t]:
+					if t in self.inverseTypes[p]:
+						stop = True
+					else:
+						# print 'metemos', t, 'en', p
+						self.inverseTypes[p].append(t)
+			if self.inverseTypes == c:
+				stop = True
+		for t in self.types:
+			self.inverseTypes[t].append(t)
+	def getInverseTypes(self):
+		return self.inverseTypes
 	def getInitiallyAwakeRules(self):
 		ret = set()
 		for rule in self.rules:
@@ -638,7 +677,12 @@ class AGMFileData(object):
 
 	def addRule(self, rule):
 		self.agm.addRule(rule)
-
+	def addType(self, t, rhs):
+		self.agm.addType(t, rhs)
+	def computeInverseTypes(self):
+		self.agm.computeInverseTypes()
+	def getInverseTypes(self):
+		return self.agm.getInverseTypes()
 	def getInitiallyAwakeRules(self):
 		return self.agm.getInitiallyAwakeRules()
 
