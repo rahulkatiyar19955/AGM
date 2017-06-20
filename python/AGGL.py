@@ -670,7 +670,11 @@ class AGM(object):
 	def getDirectParentsFor(self, atype):
 		return self.getTypesDirect()[atype]
 	def getPossibleParentsFor(self, atype):
-		ret = [x for x in self.types.keys() if x != atype and not x in self.types[atype]]
+		ret = [x for x in self.types.keys() if x != atype and not x in self.types[atype] and not x in self.inverseTypes[atype]]
+		print 'getPossibleParentsFor', atype
+		print 'ret', ret
+		print 'types[',atype,']', self.types[atype]
+		print 'inverse', self.inverseTypes
 		return ret
 	def getInverseTypes(self):
 		return self.inverseTypes
