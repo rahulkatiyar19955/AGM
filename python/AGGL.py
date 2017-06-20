@@ -619,6 +619,7 @@ class AGM(object):
 		object.__init__(self)
 		self.rules = []
 		self.types = {}
+		self.typesDirect = {}
 	def addRule(self, rule):
 		self.rules.append(rule)
 	def addType(self, t, rhs):
@@ -626,6 +627,8 @@ class AGM(object):
 			print "type", t, "already defined"
 		allRHSinDic = True
 		allParents = rhs
+		# print 'lalala', t, rhs
+		self.typesDirect[t] = copy.deepcopy(rhs)
 		for parent in rhs:
 			if not parent in self.types.keys():
 				allRHSinDic = False
@@ -636,6 +639,7 @@ class AGM(object):
 		if allRHSinDic == False:
 			sys.exit()
 		self.types[t] = allParents
+		# print 'direct', self.typesDirect
 	def computeInverseTypes(self):
 		self.inverseTypes = {}
 		for t in self.types.keys():
@@ -657,6 +661,17 @@ class AGM(object):
 				stop = True
 		for t in self.types:
 			self.inverseTypes[t].append(t)
+	def getTypes(self):
+		return self.types
+	def getTypesDirect(self, t):
+		return self.typesDirect[t]
+	def getCurrentParentsFor(self, atype):
+		return self.getTypes()[atype]
+	def getDirectParentsFor(self, atype):
+		return self.getTypesDirect()[atype]
+	def getPossibleParentsFor(self, atype):
+		ret = [x for x in self.types.keys() if x != atype and not x in self.types[atype]]
+		return ret
 	def getInverseTypes(self):
 		return self.inverseTypes
 	def getInitiallyAwakeRules(self):
@@ -683,6 +698,15 @@ class AGMFileData(object):
 		self.agm.computeInverseTypes()
 	def getInverseTypes(self):
 		return self.agm.getInverseTypes()
+	def getTypes(self):
+		return self.agm.getTypes()
+	def getTypesDirect(self, t):
+		return self.agm.getTypesDirect(t)
+	def getCurrentParentsFor(self, atype):
+		return self.agm.getCurrentParentsFor(atype)
+	def getPossibleParentsFor(self, atype):
+		return self.agm.getPossibleParentsFor(atype)
+
 	def getInitiallyAwakeRules(self):
 		return self.agm.getInitiallyAwakeRules()
 

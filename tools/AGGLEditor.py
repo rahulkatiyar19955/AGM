@@ -39,6 +39,7 @@ from inspect import currentframe, getframeinfo
 
 sys.path.append('/usr/local/share/agm')
 from ui_guiAGGLEditor import Ui_MainWindow
+from ui_agglTypeEditor import Ui_TypeEditor
 from ui_appearance import Ui_Appearance
 from parseAGGL import *
 
@@ -64,6 +65,11 @@ fontSize = 14
 
 from AGMModule import *
 
+class TypeEditor(QWidget, Ui_TypeEditor):
+	def __init__(self):
+		QWidget.__init__(self)
+		self.setupUi(self)
+
 
 class AGMEditor(QMainWindow):
 	def __init__(self, filePath=''):
@@ -72,6 +78,9 @@ class AGMEditor(QMainWindow):
 		self.modified = False
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
+		# Type Hierarchy
+		self.typeHierarchyWidget = TypeEditor()
+
 		self.ui.toolsList.addItem('Node - Add')
 		self.ui.toolsList.addItem('Node - Remove')
 		self.ui.toolsList.addItem('Node - Rename')
@@ -91,6 +100,7 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),       self.selectTool)
 		self.connect(self.ui.rulesList,                        SIGNAL('currentRowChanged(int)'),       self.changeRule)
 		self.connect(self.ui.actionChangeAppearance,           SIGNAL("triggered(bool)"),              self.changeAppearance)
+		self.connect(self.ui.actionTypeHierarchy,              SIGNAL("triggered(bool)"),              self.showTypeHierarchy)
 		self.connect(self.ui.actionAddRule,                    SIGNAL("triggered(bool)"),              self.addRule)
 		self.connect(self.ui.actionRemoveCurrentRule,          SIGNAL("triggered(bool)"),              self.removeCurrentRule)
 		self.connect(self.ui.actionRenameCurrentRule,          SIGNAL("triggered(bool)"),              self.renameCurrentRule)
@@ -126,6 +136,8 @@ class AGMEditor(QMainWindow):
 		self.shortcutUp   = QShortcut(QKeySequence("PgUp"  ), self)
 		self.connect(self.shortcutDown, SIGNAL("activated()"), self.pgDown)
 		self.connect(self.shortcutUp,   SIGNAL("activated()"), self.pgUp)
+
+		self.connect(self.typeHierarchyWidget.typeList, SIGNAL("currentRowChanged(int)"), self.typeSelectedChanged)
 
 		# Get settings
 		settings = QSettings("AGM", "mainWindowGeometry")
@@ -183,6 +195,7 @@ class AGMEditor(QMainWindow):
 		self.appearance = Appearance()
 		self.appearance.ui.radius.setValue(vertexDiameter)
 
+
 		# Font
 		font = QFont(fontName, fontSize, weight=0, italic=False)
 		font.setStyle(QFont.StyleNormal)
@@ -190,6 +203,7 @@ class AGMEditor(QMainWindow):
 		self.fontDialog.setCurrentFont(font)
 		self.font = self.fontDialog.currentFont()
 		self.connect(self.ui.actionChangeFont, SIGNAL("triggered(bool)"), self.changeFont)
+
 		# Sizes
 		self.show()
 		sh = self.ui.centralwidget.height()
@@ -250,6 +264,8 @@ class AGMEditor(QMainWindow):
 		self.fontDialog.show()
 	def changeAppearance(self):
 		self.appearance.show()
+	def showTypeHierarchy(self):
+		self.typeHierarchyWidget.show()
 	def addRule(self):
 		ddd = 'rule' + str(len(self.agmData.agm.rules))
 		self.ui.rulesList.addItem(ddd)
@@ -423,6 +439,29 @@ class AGMEditor(QMainWindow):
 	def open(self):
 		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.aggl")[0])
 		self.openFromFile(path)
+	def reloadTypes(self):
+		self.typeHierarchyWidget.typeList.clear()
+		self.typeHierarchyWidget.availableList.clear()
+		self.typeHierarchyWidget.selectedList.clear()
+
+		for t in self.agmData.agm.types:
+			self.typeHierarchyWidget.typeList.addItem(t)
+			print '-----'
+			print 't', t
+			print 'current -->', self.agmData.getTypesDirect(t)
+			print 'possibl -->', self.agmData.getPossibleParentsFor(t)
+
+	def typeSelectedChanged(self, row):
+		t = self.typeHierarchyWidget.typeList.currentItem().text()
+		print t
+		# available
+		self.typeHierarchyWidget.availableList.clear()
+		for x in self.agmData.getPossibleParentsFor(t):
+			self.typeHierarchyWidget.availableList.addItem(x)
+		# selected
+		self.typeHierarchyWidget.selectedList.clear()
+		for x in self.agmData.getTypesDirect(t):
+			self.typeHierarchyWidget.selectedList.addItem(x)
 	def openFromFile(self, path):
 		if path[-5:] != '.aggl': path = path + '.aggl'
 		self.agmData = AGMFileDataParsing.fromFile(path, verbose=False, includeIncludes=False)
@@ -434,6 +473,8 @@ class AGMEditor(QMainWindow):
 			self.ui.rulesList.addItem(q)
 			if type(rule) == AGMRule:
 				pass
+
+		self.reloadTypes()
 
 	def saveAs(self):
 		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
