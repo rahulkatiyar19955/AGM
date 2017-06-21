@@ -28,9 +28,14 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 # Python distribution imports
 import sys, traceback, os, re, threading, time, string, math
 # Qt interface
+import PySide
 from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtSvg import *
+import pyqtgraph as pg
+
+# CustomGraphItem.py
+# GraphItem.py
 
 import Image, ImageOps
 import numpy as np
@@ -138,6 +143,10 @@ class AGMEditor(QMainWindow):
 		self.connect(self.shortcutUp,   SIGNAL("activated()"), self.pgUp)
 
 		self.connect(self.typeHierarchyWidget.typeList, SIGNAL("currentRowChanged(int)"), self.typeSelectedChanged)
+		self.connect(self.typeHierarchyWidget.newButton, SIGNAL("clicked()"), self.createType)
+		self.connect(self.typeHierarchyWidget.includeButton, SIGNAL("clicked()"), self.includeTypeInheritance)
+		self.connect(self.typeHierarchyWidget.removeButton, SIGNAL("clicked()"), self.removeTypeInheritance)
+		self.connect(self.typeHierarchyWidget.okButton, SIGNAL("clicked()"), self.typeHierarchyWidget.hide)
 
 		# Get settings
 		settings = QSettings("AGM", "mainWindowGeometry")
@@ -208,6 +217,10 @@ class AGMEditor(QMainWindow):
 		self.show()
 		sh = self.ui.centralwidget.height()
 		self.ui.splitter.setSizes([int(0.65*sh), int(0.35*sh)])
+		self.typeHierarchyWidget.show()
+
+	def printHola(self):
+		print 'hola'
 
 	def pgDown(self):
 		r = self.ui.rulesList.currentRow()+1
@@ -444,7 +457,7 @@ class AGMEditor(QMainWindow):
 		self.typeHierarchyWidget.availableList.clear()
 		self.typeHierarchyWidget.selectedList.clear()
 
-		for t in self.agmData.agm.types:
+		for t in sorted(self.agmData.agm.types.keys()):
 			self.typeHierarchyWidget.typeList.addItem(t)
 			print '-----'
 			print 't', t
@@ -456,12 +469,29 @@ class AGMEditor(QMainWindow):
 		print t
 		# available
 		self.typeHierarchyWidget.availableList.clear()
-		for x in self.agmData.getPossibleParentsFor(t):
+		for x in sorted(self.agmData.getPossibleParentsFor(t)):
 			self.typeHierarchyWidget.availableList.addItem(x)
 		# selected
 		self.typeHierarchyWidget.selectedList.clear()
-		for x in self.agmData.getTypesDirect(t):
+		for x in sorted(self.agmData.getTypesDirect(t)):
 			self.typeHierarchyWidget.selectedList.addItem(x)
+
+	def createType(self):
+		ty = 'newType'
+		self.agmData.addType(ty)
+		self.reloadTypes()
+		row = 0
+		while row < self.typeHierarchyWidget.typeList.count():
+			if self.typeHierarchyWidget.typeList.item(row).text() == ty:
+				break
+			else:
+				row += 1
+		self.typeHierarchyWidget.typeList.setCurrentRow(row)
+	def includeTypeInheritance(self):
+		dd
+	def removeTypeInheritance(self):
+		dd
+
 	def openFromFile(self, path):
 		if path[-5:] != '.aggl': path = path + '.aggl'
 		self.agmData = AGMFileDataParsing.fromFile(path, verbose=False, includeIncludes=False)
