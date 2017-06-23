@@ -143,6 +143,20 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
+      <widget class="QPushButton" name="newButton">
+       <property name="text">
+        <string>new type</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="renameButton">
+       <property name="text">
+        <string>rename type</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -154,13 +168,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QPushButton" name="newButton">
-       <property name="text">
-        <string>new type</string>
-       </property>
-      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="okButton">
