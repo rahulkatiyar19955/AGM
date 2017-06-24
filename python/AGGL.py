@@ -600,8 +600,9 @@ class AGMHierarchicalRule(object):
 		if self.passive: passiveStr = "passive"
 		ret = self.name + ' : ' + passiveStr + '('+ str(self.cost) +')\n{\n'
 
-		if len(self.text) > 0:
-			ret += self.text
+		if self.text:
+			if len(self.text) > 0:
+				ret += self.text
 		else:
 			ret += self.lhs.toString() + '\n'
 			ret += '\t=>\n'
@@ -748,6 +749,24 @@ class AGMFileData(object):
 		for k,v in self.properties.items():
 			writeString += str(k) + '=' + str(v) + '\n'
 		writeString += '===\n'
+		# Types
+		writeString += 'types\n{\n'
+		typesDone = []
+		typesRemaining = self.agm.typesDirect.keys()
+		while len(typesRemaining) != 0:
+			for i in typesRemaining:
+				lacking = [ x for x in self.agm.typesDirect[i] if not x in typesDone]
+				if len(lacking) == 0:
+					lhs = i
+					rhs = ''
+					if len(self.agm.typesDirect[i]) > 0:
+						rhs += ' :'
+						for dep in self.agm.typesDirect[i]:
+							rhs += ' ' + dep
+					writeString += '('+lhs + rhs +')\n'
+					typesDone.append(i)
+					typesRemaining.remove(i)
+		writeString += '}\n===\n'
 		# Rules
 		for r in self.agm.rules:
 			writeString = writeString + r.toString() + '\n\n'
