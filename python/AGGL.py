@@ -641,6 +641,23 @@ class AGM(object):
 		self.types[t] = allParents
 		self.computeInverseTypes()
 		# print 'direct', self.typesDirect
+	def renameInDict(self, dictionary, old, new):
+		newDict = {}
+		for k in dictionary:
+			l = [str(new) if x==old else str(x) for x in dictionary[k]]
+			if k == old:
+				newDict[new] = l
+			else:
+				newDict[k] = l
+		return newDict
+	def renameType(self, t, nt):
+		print 'types', self.types
+		print 'direct', self.typesDirect
+		self.types = self.renameInDict(self.types, t, nt)
+		self.typesDirect = self.renameInDict(self.typesDirect, t, nt)
+		print 'types', self.types
+		print 'direct', self.typesDirect
+		self.computeInverseTypes()
 	def modifyType(self, t, parents=[]):
 		allRHSinDic = True
 		allParents = copy.deepcopy(parents)

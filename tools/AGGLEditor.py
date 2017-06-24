@@ -462,7 +462,7 @@ class AGMEditor(QMainWindow):
 		if t:
 			text = t.text()
 		# list
-		print 'reloadTypes'
+		print 'reloadTypes', text
 		self.typeHierarchyWidget.typeList.clear()
 		for tp in sorted(self.agmData.agm.types.keys()):
 			it = QListWidgetItem()
@@ -474,6 +474,7 @@ class AGMEditor(QMainWindow):
 		if t:
 			# available
 			self.typeHierarchyWidget.availableList.clear()
+			print 'text', text
 			for x in sorted(self.agmData.getPossibleParentsFor(text)):
 				self.typeHierarchyWidget.availableList.addItem(x)
 			# selected
@@ -516,17 +517,24 @@ class AGMEditor(QMainWindow):
 
 	def renameTypeDone(self):
 		print 'renameTypeDone 1'
+		text = self.typeHierarchyWidget.edit.text()
 		self.avoidTypeReloading = True
 		self.typeHierarchyWidget.edit.hide()
 		self.avoidTypeReloading = False
-		print 'renameTypeDone 2'
+		print 'renameTypeDone 2', text
 		items = self.typeHierarchyWidget.typeList.selectedItems()
 		print items, len(items)
 		print 'renameTypeDone 3'
+		if text in self.agmData.agm.types.keys():
+			ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor warning"), self.tr("The type "+text+" already exists"))
+			return
+		print 'renameTypeDone 4'
 		if len(items) != 0:
 			for i in self.typeHierarchyWidget.typeList.findItems(items[0].text(), 0):
 				print 'gotcha!', items[0].text()
-			# self.agmData.agm.types.keys()
+				self.agmData.agm.renameType(items[0].text(), text)
+				i.setText(text)
+				self.reloadTypes()
 	def includeTypeInheritance(self):
 		# self.typeList[]
 		self.reloadTypes()
