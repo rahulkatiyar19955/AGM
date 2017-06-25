@@ -178,18 +178,8 @@
      </item>
     </layout>
    </item>
-   <item>
-    <widget class="PlotWidget" name="graphicsView"/>
-   </item>
   </layout>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>PlotWidget</class>
-   <extends>QGraphicsView</extends>
-   <header>pyqtgraph</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

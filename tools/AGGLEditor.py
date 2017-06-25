@@ -7,20 +7,20 @@
 #
 #    A free/libre open-source graph grammar drawing tool.
 #
-#    Copyright (C) 2012-2014 by Luis J. Manso
+#    Copyright (C) 2012-2017 by Luis J. Manso
 #
-#    Graphmar is free software: you can redistribute it and/or modify
+#    AGGLEditor is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 #
-#    Graphmar is distributed in the hope that it will be useful,
+#    AGGLEditor is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with Graphmar. If not, see <http://www.gnu.org/licenses/>.
+#    along with AGGLEditor. If not, see <http://www.gnu.org/licenses/>.
 
 # Ctrl+c handling
 import signal
@@ -32,10 +32,6 @@ import PySide
 from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtSvg import *
-import pyqtgraph as pg
-
-# CustomGraphItem.py
-# GraphItem.py
 
 import Image, ImageOps
 import numpy as np
@@ -70,11 +66,59 @@ fontSize = 14
 
 from AGMModule import *
 
+
+import networkx as nx
+
+import matplotlib
+matplotlib.use('Qt4Agg')
+matplotlib.rcParams['backend.qt4'] = 'PySide'
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt4agg import ( FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.figure import Figure
+from PySide import QtGui, QtCore
+import random
+
+from weakref import proxy
+
+
+class Plotter(FigureCanvas):
+	def __init__(self, parent):
+		''' plot some random stuff '''
+		self.parent = proxy(parent)
+		self.fig = Figure()
+		super(Plotter,self).__init__(self.fig)
+		# create an axis
+		self.axes = self.fig.add_subplot(111)
+		# discards the old graph
+		# self.axes.hold(False)
+		# plot data
+		# self.axes.plot(data, '*-')
+	def plot(self, data):
+		self.axes.clear()
+		g = nx.DiGraph()
+		for symbolType in data:
+			g.add_node(symbolType)
+			for d in data[symbolType]:
+				g.add_edge(symbolType, d, weight=1.0)
+		nodes = data.keys()
+		labels = {}
+		for n in nodes:
+			labels[n] = n
+		from networkx.drawing.nx_agraph import graphviz_layout
+		# nx.draw(g, ax=self.axes, node_size=311, node_color='w', font_weight='bold', linewidths=0, font_size=18, nodelist=nodes, labels=labels)
+		nx.draw(g, pos=graphviz_layout(g, prog='dot'), ax=self.axes, node_size=311, node_color='w', font_weight='bold', linewidths=0, font_size=18, nodelist=nodes, labels=labels)
+		self.fig.canvas.draw()
+	def binding_plotter_with_ui(self):
+		self.parent.verticalLayout.insertWidget(2, self)
+
 class TypeEditor(QWidget, Ui_TypeEditor):
 	def __init__(self):
 		QWidget.__init__(self)
 		self.setupUi(self)
-
+		self.plotter = Plotter(self)
+		self.plotter.binding_plotter_with_ui()
+	def plot(self, data):
+		self.plotter.plot(data)
 
 class AGMEditor(QMainWindow):
 	def __init__(self, filePath=''):
@@ -144,7 +188,7 @@ class AGMEditor(QMainWindow):
 		self.connect(self.shortcutDown, SIGNAL("activated()"), self.pgDown)
 		self.connect(self.shortcutUp,   SIGNAL("activated()"), self.pgUp)
 
-		self.connect(self.typeHierarchyWidget.typeList, SIGNAL("currentRowChanged(int)"), self.reloadTypes)
+		self.connect(self.typeHierarchyWidget.typeList, SIGNAL("currentRowChanged(int)"), self.currentTypeChanged)
 		self.connect(self.typeHierarchyWidget.newButton, SIGNAL("clicked()"), self.createType)
 		self.connect(self.typeHierarchyWidget.renameButton, SIGNAL("clicked()"), self.renameType)
 		self.connect(self.typeHierarchyWidget.includeButton, SIGNAL("clicked()"), self.includeTypeInheritance)
@@ -221,9 +265,6 @@ class AGMEditor(QMainWindow):
 		sh = self.ui.centralwidget.height()
 		self.ui.splitter.setSizes([int(0.65*sh), int(0.35*sh)])
 		self.typeHierarchyWidget.show()
-
-	def printHola(self):
-		print 'hola'
 
 	def pgDown(self):
 		r = self.ui.rulesList.currentRow()+1
@@ -455,6 +496,14 @@ class AGMEditor(QMainWindow):
 	def open(self):
 		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.aggl")[0])
 		self.openFromFile(path)
+	def currentTypeChanged(self):
+		try:
+			if self.typeHierarchyWidget.previousSelected != self.typeHierarchyWidget.typeList.selectedItems():
+				self.reloadTypes()
+		except:
+			pass
+		finally:
+			self.typeHierarchyWidget.previousSelected = self.typeHierarchyWidget.typeList.selectedItems()
 	def reloadTypes(self):
 		if self.avoidTypeReloading: return
 		t = self.typeHierarchyWidget.typeList.currentItem()
@@ -462,7 +511,6 @@ class AGMEditor(QMainWindow):
 		if t:
 			text = t.text()
 		# list
-		print 'reloadTypes', text
 		self.typeHierarchyWidget.typeList.clear()
 		for tp in sorted(self.agmData.agm.types.keys()):
 			it = QListWidgetItem()
@@ -474,16 +522,16 @@ class AGMEditor(QMainWindow):
 		if t:
 			# available
 			self.typeHierarchyWidget.availableList.clear()
-			print 'text', text
 			for x in sorted(self.agmData.getPossibleParentsFor(text)):
 				self.typeHierarchyWidget.availableList.addItem(x)
 			# selected
 			self.typeHierarchyWidget.selectedList.clear()
 			for x in sorted(self.agmData.getTypesDirect(text)):
 				self.typeHierarchyWidget.selectedList.addItem(x)
+		self.typeHierarchyWidget.plot(self.agmData.agm.typesDirect)
 
 	def createType(self):
-		ty = 'newType'
+		ty = 'newType createType'
 		self.agmData.addType(ty)
 		self.reloadTypes()
 		row = 0
@@ -496,47 +544,36 @@ class AGMEditor(QMainWindow):
 	def renameType(self):
 		self.avoidTypeReloading = True
 		try:
-			print 'renameType 1'
 			if len(self.typeHierarchyWidget.typeList.selectedItems()) == 0:
 				ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor warning"), self.tr("Please, select a type to modify"))
 				return
-			print 'renameType 2'
 			try:
-				print 'renameType 3.1'
 				self.typeHierarchyWidget.edit.show()
 			except:
-				print 'renameType 3.2'
 				self.typeHierarchyWidget.edit = QLineEdit(self.typeHierarchyWidget.renameButton)
 				self.connect(self.typeHierarchyWidget.edit, SIGNAL("returnPressed()"), self.renameTypeDone)
 				self.typeHierarchyWidget.edit.show()
 			finally:
-				print 'foc'
 				self.typeHierarchyWidget.edit.setFocus()
 		finally:
 			self.avoidTypeReloading = False
 
 	def renameTypeDone(self):
-		print 'renameTypeDone 1'
 		text = self.typeHierarchyWidget.edit.text()
 		self.avoidTypeReloading = True
 		self.typeHierarchyWidget.edit.hide()
 		self.avoidTypeReloading = False
-		print 'renameTypeDone 2', text
 		items = self.typeHierarchyWidget.typeList.selectedItems()
 		print items, len(items)
-		print 'renameTypeDone 3'
 		if text in self.agmData.agm.types.keys():
 			ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor warning"), self.tr("The type "+text+" already exists"))
 			return
-		print 'renameTypeDone 4'
 		if len(items) != 0:
 			for i in self.typeHierarchyWidget.typeList.findItems(items[0].text(), 0):
-				print 'gotcha!', items[0].text()
 				self.agmData.agm.renameType(items[0].text(), text)
 				i.setText(text)
 				self.reloadTypes()
 	def includeTypeInheritance(self):
-		# self.typeList[]
 		self.reloadTypes()
 	def removeTypeInheritance(self):
 		dd
