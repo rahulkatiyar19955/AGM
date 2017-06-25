@@ -685,7 +685,7 @@ class AGGLPlanner(object):
 		#	-- or the end condition doesnt have any message
 		# we print the correspond message
 		if self.end_condition.get() == "IndexError":
-			if verbose > 0: print 'End: state space exhausted (known', len(self.knownNodes), ' (open', len(self.openNodes) 
+			if verbose > 0: print 'End: state space exhausted (known', len(self.knownNodes), ' (open', len(self.openNodes)
 		elif self.end_condition.get() == "MaxCostReached":
 			if verbose > 0: print 'End: max cost reached'
 		elif self.end_condition.get() == "BestSolutionFound":
@@ -818,6 +818,9 @@ class AGGLPlanner(object):
 						print '    ', action
 						if self.resultFile != None:
 							self.resultFile.write(str(action)+'\n')
+					if self.resultFile != None:
+						self.resultFile.write("# time: " + str(self.timeElapsed) + "\n")
+
 				return finalPlan
 			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
 
@@ -852,6 +855,7 @@ class AGGLPlanner(object):
 			threadPoolStatus.unlock()
 		# We take the initial time.
 		timeA = datetime.datetime.now()
+		self.timeElapsed = -1.
 
 		while True:
 			if self.externalStopFlag.get() != 0:
@@ -861,6 +865,7 @@ class AGGLPlanner(object):
 			# Again, we take the time and we calculated the elapsed time
 			timeB = datetime.datetime.now()
 			timeElapsed = float((timeB-timeA).seconds) + float((timeB-timeA).microseconds)/1e6
+			self.timeElapsed = timeElapsed
 			# We take the length of the result list.
 			nResults = self.results.size()
 			# Check if we should give up because it already took too much time

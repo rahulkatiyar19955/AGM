@@ -285,7 +285,7 @@
      <x>0</x>
      <y>0</y>
      <width>1375</width>
-     <height>24</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -307,6 +307,7 @@
     <property name="title">
      <string>Edit</string>
     </property>
+    <addaction name="actionTypeHierarchy"/>
     <addaction name="actionChangeAppearance"/>
     <addaction name="actionChangeFont"/>
    </widget>
@@ -459,6 +460,11 @@
    </property>
    <property name="text">
     <string>show advanced mode</string>
+   </property>
+  </action>
+  <action name="actionTypeHierarchy">
+   <property name="text">
+    <string>Type hierarchy</string>
    </property>
   </action>
  </widget>
