@@ -662,7 +662,7 @@ class AGM(object):
 	def modifyType(self, t, parents=[]):
 		allRHSinDic = True
 		allParents = copy.deepcopy(parents)
-		self.typesDirect[t] = copy.deepcopy(rhs)
+		self.typesDirect[t] = copy.deepcopy(parents)
 		for parent in parents:
 			if not parent in self.types.keys():
 				allRHSinDic = False
@@ -674,6 +674,12 @@ class AGM(object):
 			sys.exit()
 		self.types[t] = allParents
 		self.computeInverseTypes()
+	def includeTypeInheritance(self, selectedType, selectedParent):
+		self.modifyType(selectedType, self.typesDirect[selectedType]+[selectedParent])
+	def removeTypeInheritance(self, selectedType, selectedParent):
+		parents = self.typesDirect[selectedType]
+		parents.remove(selectedParent)
+		self.modifyType(selectedType, parents)
 	def computeInverseTypes(self):
 		self.inverseTypes = {}
 		for t in self.types.keys():

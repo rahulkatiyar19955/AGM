@@ -1480,7 +1480,7 @@ def targetPreconditionImplementation(precondition, indent, modifier='', stuff=No
 			ret += indent+"if precondition"+str(formulaId)+"==False: break"
 			ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
 			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
-			ret += indent+"if typeValid(symbol_"+n+".sType, '"+t+")':  # now the body of the FORALL"
+			ret += indent+"if typeValid(symbol_"+n+".sType, '"+t+"'):  # now the body of the FORALL"
 			indent += "\t"
 		text, indento, formulaIdRet, stuff = targetPreconditionImplementation(preconditionBody[1], indent, 'forall', stuff)
 		ret += text

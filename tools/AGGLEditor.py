@@ -125,7 +125,6 @@ class AGMEditor(QMainWindow):
 		QMainWindow.__init__(self)
 		self.filePath = filePath
 		self.modified = False
-		self.avoidTypeReloading = False
 
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
@@ -189,6 +188,8 @@ class AGMEditor(QMainWindow):
 		self.connect(self.shortcutUp,   SIGNAL("activated()"), self.pgUp)
 
 		self.connect(self.typeHierarchyWidget.typeList, SIGNAL("currentRowChanged(int)"), self.currentTypeChanged)
+		# self.connect(self.typeHierarchyWidget.typeList, SIGNAL("currentItemChanged(QListWidgetItem)"), self.currentTypeChanged)
+		# self.connect(self.typeHierarchyWidget.typeList, SIGNAL("itemPressed(QWidgetItem)"), self.currentTypeChanged)
 		self.connect(self.typeHierarchyWidget.newButton, SIGNAL("clicked()"), self.createType)
 		self.connect(self.typeHierarchyWidget.renameButton, SIGNAL("clicked()"), self.renameType)
 		self.connect(self.typeHierarchyWidget.includeButton, SIGNAL("clicked()"), self.includeTypeInheritance)
@@ -497,37 +498,49 @@ class AGMEditor(QMainWindow):
 		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.aggl")[0])
 		self.openFromFile(path)
 	def currentTypeChanged(self):
+		print 'a'
 		try:
 			if self.typeHierarchyWidget.previousSelected != self.typeHierarchyWidget.typeList.selectedItems():
 				self.reloadTypes()
+			self.typeHierarchyWidget.previousSelected = self.typeHierarchyWidget.typeList.selectedItems()
 		except:
-			pass
-		finally:
+			self.reloadTypes()
 			self.typeHierarchyWidget.previousSelected = self.typeHierarchyWidget.typeList.selectedItems()
 	def reloadTypes(self):
-		if self.avoidTypeReloading: return
-		t = self.typeHierarchyWidget.typeList.currentItem()
-		text = None
-		if t:
-			text = t.text()
+		try:
+			selected = self.typeHierarchyWidget.typeList.currentItem().text()
+		except:
+			selected = None
 		# list
-		self.typeHierarchyWidget.typeList.clear()
-		for tp in sorted(self.agmData.agm.types.keys()):
-			it = QListWidgetItem()
-			it.setText(tp)
-			it.setFlags(it.flags() | PySide.QtCore.Qt.ItemIsEditable)
-			# it.setFlags(it.flags() | PySide.QtCore.Qt.ItemIsEditable)
-			self.typeHierarchyWidget.typeList.addItem(it)
+		prevlist = sorted([item.text().encode('latin1') for item in self.typeHierarchyWidget.typeList.findItems('', QtCore.Qt.MatchContains)])
+		currlist = sorted(self.agmData.agm.types.keys())
+		print 'P', prevlist
+		print 'C', currlist
+		if prevlist != currlist:
+			self.typeHierarchyWidget.typeList.clear()
+			for tp in sorted(self.agmData.agm.types.keys()):
+				self.typeHierarchyWidget.typeList.addItem(tp)
 
-		if t:
+		if selected:
 			# available
-			self.typeHierarchyWidget.availableList.clear()
-			for x in sorted(self.agmData.getPossibleParentsFor(text)):
-				self.typeHierarchyWidget.availableList.addItem(x)
+			print 'in parents'
+			prevlist = sorted([item.text().encode('latin1') for item in self.typeHierarchyWidget.availableList.findItems('', QtCore.Qt.MatchContains)])
+			currlist = sorted(self.agmData.getPossibleParentsFor(selected))
+			if prevlist != currlist:
+				self.typeHierarchyWidget.availableList.clear()
+				for x in sorted(self.agmData.getPossibleParentsFor(selected)):
+					self.typeHierarchyWidget.availableList.addItem(x)
 			# selected
+			prevlist = sorted([item.text().encode('latin1') for item in self.typeHierarchyWidget.selectedList.findItems('', QtCore.Qt.MatchContains)])
+			currlist = sorted(self.agmData.getTypesDirect(selected))
+			if prevlist != currlist:
+				self.typeHierarchyWidget.selectedList.clear()
+				for x in sorted(self.agmData.getTypesDirect(selected)):
+					self.typeHierarchyWidget.selectedList.addItem(x)
+		else:
+			self.typeHierarchyWidget.availableList.clear()
 			self.typeHierarchyWidget.selectedList.clear()
-			for x in sorted(self.agmData.getTypesDirect(text)):
-				self.typeHierarchyWidget.selectedList.addItem(x)
+
 		self.typeHierarchyWidget.plot(self.agmData.agm.typesDirect)
 
 	def createType(self):
@@ -542,7 +555,6 @@ class AGMEditor(QMainWindow):
 				row += 1
 		self.typeHierarchyWidget.typeList.setCurrentRow(row)
 	def renameType(self):
-		self.avoidTypeReloading = True
 		try:
 			if len(self.typeHierarchyWidget.typeList.selectedItems()) == 0:
 				ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor warning"), self.tr("Please, select a type to modify"))
@@ -556,13 +568,11 @@ class AGMEditor(QMainWindow):
 			finally:
 				self.typeHierarchyWidget.edit.setFocus()
 		finally:
-			self.avoidTypeReloading = False
+			pass
 
 	def renameTypeDone(self):
 		text = self.typeHierarchyWidget.edit.text()
-		self.avoidTypeReloading = True
 		self.typeHierarchyWidget.edit.hide()
-		self.avoidTypeReloading = False
 		items = self.typeHierarchyWidget.typeList.selectedItems()
 		print items, len(items)
 		if text in self.agmData.agm.types.keys():
@@ -574,10 +584,35 @@ class AGMEditor(QMainWindow):
 				i.setText(text)
 				self.reloadTypes()
 	def includeTypeInheritance(self):
+		try:
+			selectedType = self.typeHierarchyWidget.typeList.selectedItems()[0].text()
+		except:
+			ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor Warning"), self.tr("No type to modify was selected"))
+			return
+		try:
+			selectedParent = self.typeHierarchyWidget.availableList.selectedItems()[0].text()
+		except:
+			ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor Warning"), self.tr("No type to include as parent to "+selectedType+" was selected"))
+			return
+		print 'include', selectedType, selectedParent
+		self.agmData.agm.includeTypeInheritance(selectedType, selectedParent)
 		self.reloadTypes()
 	def removeTypeInheritance(self):
-		dd
-
+		try:
+			selectedType = self.typeHierarchyWidget.typeList.selectedItems()[0].text()
+		except:
+			traceback.print_exc()
+			ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor Warning"), self.tr("No type to modify was selected"))
+			return
+		try:
+			selectedParent = self.typeHierarchyWidget.selectedList.selectedItems()[0].text()
+		except:
+			traceback.print_exc()
+			ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor Warning"), self.tr("No type to remove from the parent list of "+selectedType+" was selected"))
+			return
+		print 'remove', selectedType, selectedParent
+		self.agmData.agm.removeTypeInheritance(selectedType, selectedParent)
+		self.reloadTypes()
 	def openFromFile(self, path):
 		if path[-5:] != '.aggl': path = path + '.aggl'
 		self.agmData = AGMFileDataParsing.fromFile(path, verbose=False, includeIncludes=False)
