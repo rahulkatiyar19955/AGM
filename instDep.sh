@@ -12,5 +12,3 @@ cd thriftpy
 sudo pypy setup.py install
 sudo make clean
 sudo python setup.py install
-
-
