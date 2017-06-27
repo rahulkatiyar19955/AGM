@@ -600,8 +600,9 @@ class AGMHierarchicalRule(object):
 		if self.passive: passiveStr = "passive"
 		ret = self.name + ' : ' + passiveStr + '('+ str(self.cost) +')\n{\n'
 
-		if len(self.text) > 0:
-			ret += self.text
+		if self.text:
+			if len(self.text) > 0:
+				ret += self.text
 		else:
 			ret += self.lhs.toString() + '\n'
 			ret += '\t=>\n'
@@ -618,8 +619,95 @@ class AGM(object):
 	def __init__(self):
 		object.__init__(self)
 		self.rules = []
+		self.types = {}
+		self.typesDirect = {}
 	def addRule(self, rule):
 		self.rules.append(rule)
+	def addType(self, t, rhs=[]):
+		if t in self.types.keys():
+			print "type", t, "already defined"
+		allRHSinDic = True
+		allParents = rhs
+		# print 'lalala', t, rhs
+		self.typesDirect[t] = copy.deepcopy(rhs)
+		for parent in rhs:
+			if not parent in self.types.keys():
+				allRHSinDic = False
+				print "type", parent, "not defined"
+				break
+			else:
+				allParents += self.types[parent]
+		if allRHSinDic == False:
+			sys.exit()
+		self.types[t] = allParents
+		self.computeInverseTypes()
+		# print 'direct', self.typesDirect
+	def renameInDict(self, dictionary, old, new):
+		newDict = {}
+		for k in dictionary:
+			l = [str(new) if x==old else str(x) for x in dictionary[k]]
+			if k == old:
+				newDict[new] = l
+			else:
+				newDict[k] = l
+		return newDict
+	def renameType(self, t, nt):
+		print 'types', self.types
+		print 'direct', self.typesDirect
+		self.types = self.renameInDict(self.types, t, nt)
+		self.typesDirect = self.renameInDict(self.typesDirect, t, nt)
+		print 'types', self.types
+		print 'direct', self.typesDirect
+		self.computeInverseTypes()
+	def modifyType(self, t, parents=[]):
+		allRHSinDic = True
+		allParents = copy.deepcopy(parents)
+		self.typesDirect[t] = copy.deepcopy(rhs)
+		for parent in parents:
+			if not parent in self.types.keys():
+				allRHSinDic = False
+				print "type", parent, "not defined"
+				break
+			else:
+				allParents += self.types[parent]
+		if allRHSinDic == False:
+			sys.exit()
+		self.types[t] = allParents
+		self.computeInverseTypes()
+	def computeInverseTypes(self):
+		self.inverseTypes = {}
+		for t in self.types.keys():
+			self.inverseTypes[t] = []
+		stop = False
+		# print '(((((((((((((((((((())))))))))))))))))))', self.inverseTypes
+		while not stop:
+			c = copy.deepcopy(self.inverseTypes)
+			for t in self.types:
+				# print 'inv', t
+				# print self.types[t]
+				for p in self.types[t]:
+					if t in self.inverseTypes[p]:
+						stop = True
+					else:
+						# print 'metemos', t, 'en', p
+						self.inverseTypes[p].append(t)
+			if self.inverseTypes == c:
+				stop = True
+		for t in self.types:
+			self.inverseTypes[t].append(t)
+	def getTypes(self):
+		return self.types
+	def getTypesDirect(self, t):
+		return self.typesDirect[t]
+	def getCurrentParentsFor(self, atype):
+		return self.getTypes()[atype]
+	def getDirectParentsFor(self, atype):
+		return self.getTypesDirect()[atype]
+	def getPossibleParentsFor(self, atype):
+		ret = [x for x in self.types.keys() if x != atype and not x in self.types[atype] and not x in self.inverseTypes[atype]]
+		return sorted(ret)
+	def getInverseTypes(self):
+		return self.inverseTypes
 	def getInitiallyAwakeRules(self):
 		ret = set()
 		for rule in self.rules:
@@ -638,6 +726,20 @@ class AGMFileData(object):
 
 	def addRule(self, rule):
 		self.agm.addRule(rule)
+	def addType(self, t, rhs=[]):
+		self.agm.addType(t, rhs)
+	def computeInverseTypes(self):
+		self.agm.computeInverseTypes()
+	def getInverseTypes(self):
+		return self.agm.getInverseTypes()
+	def getTypes(self):
+		return self.agm.getTypes()
+	def getTypesDirect(self, t):
+		return self.agm.getTypesDirect(t)
+	def getCurrentParentsFor(self, atype):
+		return self.agm.getCurrentParentsFor(atype)
+	def getPossibleParentsFor(self, atype):
+		return self.agm.getPossibleParentsFor(atype)
 
 	def getInitiallyAwakeRules(self):
 		return self.agm.getInitiallyAwakeRules()
@@ -647,6 +749,24 @@ class AGMFileData(object):
 		for k,v in self.properties.items():
 			writeString += str(k) + '=' + str(v) + '\n'
 		writeString += '===\n'
+		# Types
+		writeString += 'types\n{\n'
+		typesDone = []
+		typesRemaining = self.agm.typesDirect.keys()
+		while len(typesRemaining) != 0:
+			for i in typesRemaining:
+				lacking = [ x for x in self.agm.typesDirect[i] if not x in typesDone]
+				if len(lacking) == 0:
+					lhs = i
+					rhs = ''
+					if len(self.agm.typesDirect[i]) > 0:
+						rhs += ' :'
+						for dep in self.agm.typesDirect[i]:
+							rhs += ' ' + dep
+					writeString += '('+lhs + rhs +')\n'
+					typesDone.append(i)
+					typesRemaining.remove(i)
+		writeString += '}\n===\n'
 		# Rules
 		for r in self.agm.rules:
 			writeString = writeString + r.toString() + '\n\n'

@@ -7,20 +7,20 @@
 #
 #    A free/libre open-source graph grammar drawing tool.
 #
-#    Copyright (C) 2012-2014 by Luis J. Manso
+#    Copyright (C) 2012-2017 by Luis J. Manso
 #
-#    Graphmar is free software: you can redistribute it and/or modify
+#    AGGLEditor is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
 #    the Free Software Foundation, either version 3 of the License, or
 #    (at your option) any later version.
 #
-#    Graphmar is distributed in the hope that it will be useful,
+#    AGGLEditor is distributed in the hope that it will be useful,
 #    but WITHOUT ANY WARRANTY; without even the implied warranty of
 #    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #    GNU General Public License for more details.
 #
 #    You should have received a copy of the GNU General Public License
-#    along with Graphmar. If not, see <http://www.gnu.org/licenses/>.
+#    along with AGGLEditor. If not, see <http://www.gnu.org/licenses/>.
 
 # Ctrl+c handling
 import signal
@@ -28,6 +28,7 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 # Python distribution imports
 import sys, traceback, os, re, threading, time, string, math
 # Qt interface
+import PySide
 from PySide.QtCore import *
 from PySide.QtGui import *
 from PySide.QtSvg import *
@@ -39,6 +40,7 @@ from inspect import currentframe, getframeinfo
 
 sys.path.append('/usr/local/share/agm')
 from ui_guiAGGLEditor import Ui_MainWindow
+from ui_agglTypeEditor import Ui_TypeEditor
 from ui_appearance import Ui_Appearance
 from parseAGGL import *
 
@@ -65,13 +67,71 @@ fontSize = 14
 from AGMModule import *
 
 
+import networkx as nx
+
+import matplotlib
+matplotlib.use('Qt4Agg')
+matplotlib.rcParams['backend.qt4'] = 'PySide'
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_qt4agg import ( FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
+from matplotlib.figure import Figure
+from PySide import QtGui, QtCore
+import random
+
+from weakref import proxy
+
+
+class Plotter(FigureCanvas):
+	def __init__(self, parent):
+		''' plot some random stuff '''
+		self.parent = proxy(parent)
+		self.fig = Figure()
+		super(Plotter,self).__init__(self.fig)
+		# create an axis
+		self.axes = self.fig.add_subplot(111)
+		# discards the old graph
+		# self.axes.hold(False)
+		# plot data
+		# self.axes.plot(data, '*-')
+	def plot(self, data):
+		self.axes.clear()
+		g = nx.DiGraph()
+		for symbolType in data:
+			g.add_node(symbolType)
+			for d in data[symbolType]:
+				g.add_edge(symbolType, d, weight=1.0)
+		nodes = data.keys()
+		labels = {}
+		for n in nodes:
+			labels[n] = n
+		from networkx.drawing.nx_agraph import graphviz_layout
+		# nx.draw(g, ax=self.axes, node_size=311, node_color='w', font_weight='bold', linewidths=0, font_size=18, nodelist=nodes, labels=labels)
+		nx.draw(g, pos=graphviz_layout(g, prog='dot'), ax=self.axes, node_size=311, node_color='w', font_weight='bold', linewidths=0, font_size=18, nodelist=nodes, labels=labels)
+		self.fig.canvas.draw()
+	def binding_plotter_with_ui(self):
+		self.parent.verticalLayout.insertWidget(2, self)
+
+class TypeEditor(QWidget, Ui_TypeEditor):
+	def __init__(self):
+		QWidget.__init__(self)
+		self.setupUi(self)
+		self.plotter = Plotter(self)
+		self.plotter.binding_plotter_with_ui()
+	def plot(self, data):
+		self.plotter.plot(data)
+
 class AGMEditor(QMainWindow):
 	def __init__(self, filePath=''):
 		QMainWindow.__init__(self)
 		self.filePath = filePath
 		self.modified = False
+		self.avoidTypeReloading = False
+
 		self.ui = Ui_MainWindow()
 		self.ui.setupUi(self)
+		# Type Hierarchy
+		self.typeHierarchyWidget = TypeEditor()
+
 		self.ui.toolsList.addItem('Node - Add')
 		self.ui.toolsList.addItem('Node - Remove')
 		self.ui.toolsList.addItem('Node - Rename')
@@ -91,6 +151,7 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),       self.selectTool)
 		self.connect(self.ui.rulesList,                        SIGNAL('currentRowChanged(int)'),       self.changeRule)
 		self.connect(self.ui.actionChangeAppearance,           SIGNAL("triggered(bool)"),              self.changeAppearance)
+		self.connect(self.ui.actionTypeHierarchy,              SIGNAL("triggered(bool)"),              self.showTypeHierarchy)
 		self.connect(self.ui.actionAddRule,                    SIGNAL("triggered(bool)"),              self.addRule)
 		self.connect(self.ui.actionRemoveCurrentRule,          SIGNAL("triggered(bool)"),              self.removeCurrentRule)
 		self.connect(self.ui.actionRenameCurrentRule,          SIGNAL("triggered(bool)"),              self.renameCurrentRule)
@@ -126,6 +187,13 @@ class AGMEditor(QMainWindow):
 		self.shortcutUp   = QShortcut(QKeySequence("PgUp"  ), self)
 		self.connect(self.shortcutDown, SIGNAL("activated()"), self.pgDown)
 		self.connect(self.shortcutUp,   SIGNAL("activated()"), self.pgUp)
+
+		self.connect(self.typeHierarchyWidget.typeList, SIGNAL("currentRowChanged(int)"), self.currentTypeChanged)
+		self.connect(self.typeHierarchyWidget.newButton, SIGNAL("clicked()"), self.createType)
+		self.connect(self.typeHierarchyWidget.renameButton, SIGNAL("clicked()"), self.renameType)
+		self.connect(self.typeHierarchyWidget.includeButton, SIGNAL("clicked()"), self.includeTypeInheritance)
+		self.connect(self.typeHierarchyWidget.removeButton, SIGNAL("clicked()"), self.removeTypeInheritance)
+		self.connect(self.typeHierarchyWidget.okButton, SIGNAL("clicked()"), self.typeHierarchyWidget.hide)
 
 		# Get settings
 		settings = QSettings("AGM", "mainWindowGeometry")
@@ -183,6 +251,7 @@ class AGMEditor(QMainWindow):
 		self.appearance = Appearance()
 		self.appearance.ui.radius.setValue(vertexDiameter)
 
+
 		# Font
 		font = QFont(fontName, fontSize, weight=0, italic=False)
 		font.setStyle(QFont.StyleNormal)
@@ -190,10 +259,12 @@ class AGMEditor(QMainWindow):
 		self.fontDialog.setCurrentFont(font)
 		self.font = self.fontDialog.currentFont()
 		self.connect(self.ui.actionChangeFont, SIGNAL("triggered(bool)"), self.changeFont)
+
 		# Sizes
 		self.show()
 		sh = self.ui.centralwidget.height()
 		self.ui.splitter.setSizes([int(0.65*sh), int(0.35*sh)])
+		self.typeHierarchyWidget.show()
 
 	def pgDown(self):
 		r = self.ui.rulesList.currentRow()+1
@@ -250,6 +321,8 @@ class AGMEditor(QMainWindow):
 		self.fontDialog.show()
 	def changeAppearance(self):
 		self.appearance.show()
+	def showTypeHierarchy(self):
+		self.typeHierarchyWidget.show()
 	def addRule(self):
 		ddd = 'rule' + str(len(self.agmData.agm.rules))
 		self.ui.rulesList.addItem(ddd)
@@ -423,6 +496,88 @@ class AGMEditor(QMainWindow):
 	def open(self):
 		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.aggl")[0])
 		self.openFromFile(path)
+	def currentTypeChanged(self):
+		try:
+			if self.typeHierarchyWidget.previousSelected != self.typeHierarchyWidget.typeList.selectedItems():
+				self.reloadTypes()
+		except:
+			pass
+		finally:
+			self.typeHierarchyWidget.previousSelected = self.typeHierarchyWidget.typeList.selectedItems()
+	def reloadTypes(self):
+		if self.avoidTypeReloading: return
+		t = self.typeHierarchyWidget.typeList.currentItem()
+		text = None
+		if t:
+			text = t.text()
+		# list
+		self.typeHierarchyWidget.typeList.clear()
+		for tp in sorted(self.agmData.agm.types.keys()):
+			it = QListWidgetItem()
+			it.setText(tp)
+			it.setFlags(it.flags() | PySide.QtCore.Qt.ItemIsEditable)
+			# it.setFlags(it.flags() | PySide.QtCore.Qt.ItemIsEditable)
+			self.typeHierarchyWidget.typeList.addItem(it)
+
+		if t:
+			# available
+			self.typeHierarchyWidget.availableList.clear()
+			for x in sorted(self.agmData.getPossibleParentsFor(text)):
+				self.typeHierarchyWidget.availableList.addItem(x)
+			# selected
+			self.typeHierarchyWidget.selectedList.clear()
+			for x in sorted(self.agmData.getTypesDirect(text)):
+				self.typeHierarchyWidget.selectedList.addItem(x)
+		self.typeHierarchyWidget.plot(self.agmData.agm.typesDirect)
+
+	def createType(self):
+		ty = 'newType createType'
+		self.agmData.addType(ty)
+		self.reloadTypes()
+		row = 0
+		while row < self.typeHierarchyWidget.typeList.count():
+			if self.typeHierarchyWidget.typeList.item(row).text() == ty:
+				break
+			else:
+				row += 1
+		self.typeHierarchyWidget.typeList.setCurrentRow(row)
+	def renameType(self):
+		self.avoidTypeReloading = True
+		try:
+			if len(self.typeHierarchyWidget.typeList.selectedItems()) == 0:
+				ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor warning"), self.tr("Please, select a type to modify"))
+				return
+			try:
+				self.typeHierarchyWidget.edit.show()
+			except:
+				self.typeHierarchyWidget.edit = QLineEdit(self.typeHierarchyWidget.renameButton)
+				self.connect(self.typeHierarchyWidget.edit, SIGNAL("returnPressed()"), self.renameTypeDone)
+				self.typeHierarchyWidget.edit.show()
+			finally:
+				self.typeHierarchyWidget.edit.setFocus()
+		finally:
+			self.avoidTypeReloading = False
+
+	def renameTypeDone(self):
+		text = self.typeHierarchyWidget.edit.text()
+		self.avoidTypeReloading = True
+		self.typeHierarchyWidget.edit.hide()
+		self.avoidTypeReloading = False
+		items = self.typeHierarchyWidget.typeList.selectedItems()
+		print items, len(items)
+		if text in self.agmData.agm.types.keys():
+			ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor warning"), self.tr("The type "+text+" already exists"))
+			return
+		if len(items) != 0:
+			for i in self.typeHierarchyWidget.typeList.findItems(items[0].text(), 0):
+				self.agmData.agm.renameType(items[0].text(), text)
+				i.setText(text)
+				self.reloadTypes()
+	def includeTypeInheritance(self):
+		self.reloadTypes()
+	def removeTypeInheritance(self):
+		dd
+
 	def openFromFile(self, path):
 		if path[-5:] != '.aggl': path = path + '.aggl'
 		self.agmData = AGMFileDataParsing.fromFile(path, verbose=False, includeIncludes=False)
@@ -434,6 +589,8 @@ class AGMEditor(QMainWindow):
 			self.ui.rulesList.addItem(q)
 			if type(rule) == AGMRule:
 				pass
+
+		self.reloadTypes()
 
 	def saveAs(self):
 		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
