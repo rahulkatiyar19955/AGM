@@ -308,167 +308,6 @@ class LockableInteger(object):
 
 
 
-	##@brief This method starts the execution of program threads
-	# @param ruleMap all the actives rules of the grammar
-	# @param lock this is the clench of the each thread.
-	# @param i is the index of the thread
-	# @param threadPoolStatus this is the status of the thread. The threads have three possible status:
-	#	1) On hold because they are waiting for another thread finishes his execution.
-	#	2) Active. They are expanding a node.
-	#	3) All the threads are idle because all of them have finished his executions.
-	def startThreadedWork(self, ruleMap, triggerMap, lock=None, i=0, threadPoolStatus=None):
-		if lock == None:
-			# If there isnt any lock, we create one and we give it to the thread.
-			lock = thread.allocate_lock()
-			lock.acquire()
-
-		if threadPoolStatus != None:
-			# If the thread status is different of none, we lock the
-			# code and put the status of the i thread.
-			threadPoolStatus.lock()
-			threadPoolStatus[i] = True # el hilo esta en marcha.
-			threadPoolStatus.unlock()
-		# We take the initial time.
-		timeA = datetime.datetime.now()
-
-		while True:
-			# Again, we take the time and we calculated the elapsed time
-			timeB = datetime.datetime.now()
-			timeElapsed = float((timeB-timeA).seconds) + float((timeB-timeA).microseconds)/1e6
-			# We take the length of the result list.
-			nResults = self.results.size()
-			# Check if we should give up because it already took too much time
-			if timeElapsed > maxTimeWaitLimit or (timeElapsed > maxTimeWaitAchieved and nResults > 0):
-				if nResults>0:
-					self.end_condition.set("GoalAchieved")
-				else:
-					self.end_condition.set("TimeLimit")
-				lock.release()
-				return
-			# Else, proceed...
-			# Try to pop a node from the queue
-			try:
-				# We take the head of the openNodes list: the first open node.
-				head = self.openNodes.heapqPop()[1] # P O P   POP   p o p   pop
-				if threadPoolStatus:
-					threadPoolStatus.lock()
-					threadPoolStatus[i] = True # We say that the thread i is active.
-					threadPoolStatus.unlock()
-				self.knownNodes.append(head)
-			except:
-				#traceback.print_exc()
-				if not threadPoolStatus:
-					self.end_condition.set("IndexError")
-					lock.release()
-					return
-				time.sleep(0.001)
-				threadPoolStatus.lock()
-				threadPoolStatus[i] = False
-				if not True in threadPoolStatus:
-					self.end_condition.set("IndexError")
-					lock.release()
-					return
-				threadPoolStatus.unlock()
-				continue
-
-			# Update 'minCostOnOpenNodes', so we can stop when the minimum cost in the queue is bigger than one in the results
-			self.updateMinCostOnOpenNodes(head.cost)
-			# Check if we got to the maximum cost or the minimum solution
-			if head.cost > maxCost:
-				self.end_condition.set("MaxCostReached")
-				lock.release()
-				return
-			elif self.results.size()>0 and head.cost>self.cheapestSolutionCost.value and stopWithFirstPlan:
-				self.end_condition.set("GoalAchieved")
-				lock.release()
-				return
-			if verbose>5: print 'Expanding'.ljust(5), head
-			for k in ruleMap:
-				# Iterate over rules and generate derivates
-				if True:# k in head.awakenRules:
-					for deriv in ruleMap[k](head):
-						self.explored.increase()
-						if self.symbol_mapping:
-							deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
-						else:
-							deriv.score, achieved = self.targetCode(deriv.graph)
-						if achieved:
-							self.results.append(deriv)
-							if stopWithFirstPlan:
-								self.end_condition.set("GoalAchieved")
-								lock.release()
-								return
-							# Compute cheapest solution
-							self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
-						self.knownNodes.lock()
-						notDerivInKnownNodes = not self.computeDerivInKnownNodes(deriv)
-						self.knownNodes.unlock()
-						if notDerivInKnownNodes:
-							if deriv.stop == False:
-								if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
-									self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
-			if verbose > 0:
-				doIt=False
-				nowNow = datetime.datetime.now()
-				try:
-					elap = (nowNow-self.lastTime).seconds + (nowNow-self.lastTime).microseconds/1e6
-					doIt = elap > 10
-				except:
-					self.lastTime = datetime.datetime.now()
-					doIt = True
-				if doIt:
-					self.lastTime = nowNow
-					#try:
-						#if self.indent == '':
-					print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
-						#rrrr = heapsort(self.openNodes)
-						#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-						#if len(self.openNodes) > 0:
-							#print 'First['+str(rrrr[ 0][0])+'](cost:'+str(rrrr[ 0][1].cost)+', score:'+str(rrrr[ 0][1].score)+', depth:'+str(rrrr[ 0][1].depth)+')'
-							#print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
-						#else:
-							#print 'no open nodes'
-					#except:
-						#traceback.print_exc()
-
-	def updateCheapestSolutionCostAndCutOpenNodes(self, cost):
-		self.cheapestSolutionCost.lock()
-		if cost >= self.cheapestSolutionCost.get():
-			self.cheapestSolutionCost.unlock()
-		else:
-			self.openNodes.lock()
-			self.cheapestSolutionCost.set(cost)
-
-			newOpenNodes = LockableList()
-			for node in self.openNodes:
-				if node[1].cost < cost:
-					newOpenNodes.heapqPush(node)
-			self.openNodes.thelist = newOpenNodes.thelist
-
-			self.openNodes.unlock()
-			self.cheapestSolutionCost.unlock()
-
-	def updateMinCostOnOpenNodes(self, cost):
-		self.minCostOnOpenNodes.lock()
-		self.openNodes.lock()
-		if cost < self.minCostOnOpenNodes.value:
-			if self.getNumberOfOpenNodes()==0:
-				self.minCostOnOpenNodes.value = 0
-			else:
-				self.minCostOnOpenNodes.value = self.firstOpenNode()[1].cost
-				for n in self.openNodes:
-					if n[1].cost < self.minCostOnOpenNodes.value:
-						self.minCostOnOpenNodes.value = n[1].cost
-		self.openNodes.unlock()
-		self.minCostOnOpenNodes.unlock()
-
-	def  computeDerivInKnownNodes(self, deriv):
-		for other in self.knownNodes:
-			if deriv == other:
-				if other.cost <= deriv.cost:
-					return True
-		return False
-
 if __name__ == '__main__': # program domain problem result
 	#from pycallgraph import *
 	#from pycallgraph.output import GraphvizOutput
@@ -558,6 +397,7 @@ class AGGLPlanner(object):
 	# @param awakenRules: the set of rules that are currently available for the planner to find a solution
 	def __init__(self, domainParsed, domainModule, initWorld, target, indent=None, symbol_mapping=None, excludeList=None, resultFile=None, decomposing=False, awakenRules=set()):
 		object.__init__(self)
+		self.timeElapsed = 0.
 		self.symbol_mapping = copy.deepcopy(symbol_mapping)
 		if excludeList == None: excludeList = []
 		self.excludeList = copy.deepcopy(excludeList)
@@ -951,7 +791,7 @@ class AGGLPlanner(object):
 					self.lastTime = nowNow
 					#try:
 						#if self.indent == '':
-					print str(int(timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
+					print str(int(self.timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
 						#rrrr = heapsort(self.openNodes)
 						#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
 						#if len(self.openNodes) > 0:
