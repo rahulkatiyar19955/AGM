@@ -258,5 +258,14 @@ INSTALL(PROGRAMS ${CMAKE_BINARY_DIR}/resource_rc.py DESTINATION ${INST_SHARE_PAT
 
 INSTALL(PROGRAMS tools/aggl_completion.bash DESTINATION /etc/bash_completion.d/ RENAME AGGLEditor)
 
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/share/icons/linkadd.png" DESTINATION ${INST_SHARE_PATH}/icons/ )
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/share/icons/linknegate.png" DESTINATION ${INST_SHARE_PATH}/icons/ )
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/share/icons/linkremove.png" DESTINATION ${INST_SHARE_PATH}/icons/ )
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/share/icons/linktype.png" DESTINATION ${INST_SHARE_PATH}/icons/ )
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/share/icons/nodeadd.png" DESTINATION ${INST_SHARE_PATH}/icons/ )
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/share/icons/nodemove.png" DESTINATION ${INST_SHARE_PATH}/icons/ )
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/share/icons/noderemove.png" DESTINATION ${INST_SHARE_PATH}/icons/ )
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/share/icons/noderename.png" DESTINATION ${INST_SHARE_PATH}/icons/ )
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/share/icons/noderetype.png" DESTINATION ${INST_SHARE_PATH}/icons/ )
 
 ADD_DEFINITIONS( -std=c++11 )

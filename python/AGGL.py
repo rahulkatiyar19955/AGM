@@ -383,10 +383,10 @@ class AGMGraph(object):
 				i += 1
 	def toString(self):
 		ret = '\t{\n'
-		for v in self.nodes.keys():
+		for v in sorted(self.nodes.keys()):
 			ret += '\t\t' +str(self.nodes[v].name) + ':'+self.nodes[v].sType + '(' + str(int(self.nodes[v].pos[0])) + ','+ str(int(self.nodes[v].pos[1])) + ')\n'
-		for l in self.links:
-			ret += l.toString() + '\n'
+		for l in sorted([ x.toString() for x in self.links]):
+			ret += l + '\n'
 		return ret+'\t}'
 
 	def nodeTypes(self):
@@ -477,11 +477,11 @@ class AGMRule(object):
 		ret += '\t=>\n'
 		ret += self.rhs.toString() + '\n'
 		if len(self.parameters) > 0:
-			ret += '\tparameters\n\t{' + self.parameter + '}\n'
+			ret += '\tparameters'   + '\n\t{\n\t\t' + self.parameters.strip()   + '\n\t}\n'
 		if len(self.precondition) > 0:
-			ret += '\tprecondition\n\t{' + self.precondition + '}\n'
+			ret += '\tprecondition' + '\n\t{\n\t\t' + self.precondition.strip() + '\n\t}\n'
 		if len(self.effect) > 0:
-			ret += '\teffect\n\t{' + self.effect + '}\n'
+			ret += '\teffect'       + '\n\t{\n\t\t' + self.effect.strip()       + '\n\t}\n'
 		ret += '}'
 		return ret
 	def forgetNodesList(self):
@@ -752,15 +752,15 @@ class AGMFileData(object):
 
 	def toFile(self, filename):
 		writeString = ''
-		for k,v in self.properties.items():
-			writeString += str(k) + '=' + str(v) + '\n'
+		for k in sorted(self.properties.keys()):
+			writeString += str(k) + '=' + str(self.properties[k]) + '\n'
 		writeString += '===\n'
 		# Types
 		writeString += 'types\n{\n'
 		typesDone = []
 		typesRemaining = self.agm.typesDirect.keys()
 		while len(typesRemaining) != 0:
-			for i in typesRemaining:
+			for i in sorted(typesRemaining):
 				lacking = [ x for x in self.agm.typesDirect[i] if not x in typesDone]
 				if len(lacking) == 0:
 					lhs = i
@@ -774,7 +774,9 @@ class AGMFileData(object):
 					typesRemaining.remove(i)
 		writeString += '}\n===\n'
 		# Rules
-		for r in self.agm.rules:
+		somelist = copy.deepcopy(self.agm.rules)
+		somelist.sort(key = lambda x: x.name)
+		for r in somelist:
 			writeString = writeString + r.toString() + '\n\n'
 		w = open(filename, 'w')
 		w.write(writeString)

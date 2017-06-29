@@ -72,22 +72,26 @@ class NodeNameReader(QLineEdit):
 		self.hide()
 		self.close()
 
-class NodeTypeReader(QLineEdit):
-	def __init__(self, x, y, widx, widy, parent):
-		QLineEdit.__init__(self, parent)
+class NodeTypeReader(QComboBox):
+	def __init__(self, x, y, widx, widy, parent, types):
+		QComboBox.__init__(self, parent)
 		self.resize(100, 32)
-		self.move(widx-50, widy-16)
+		self.move(widx-50, widy+5)
 		self.show()
 		self.x = x
 		self.y = y
+		self.addItem('select one')
+		for i in sorted(types):
+			self.addItem(i)
 		self.parentW = parent
-		self.connect(self, SIGNAL('returnPressed()'), self.got)
-	def got(self):
+		self.connect(self, SIGNAL('currentIndexChanged(QString)'), self.got)
+	def got(self, text):
+		if text == 'select one': return
 		for v in self.parentW.graph.nodes.keys():
 			try:
 				if self.parentW.graph.nodes[v].pos[0] == self.x:
 					if self.parentW.graph.nodes[v].pos[1] == self.y:
-						self.parentW.graph.nodes[v].sType = str(self.text())
+						self.parentW.graph.nodes[v].sType = str(text)
 			except:
 				pass
 		self.hide()
@@ -444,11 +448,11 @@ class GraphDraw(QWidget):
 		tool = self.main.tool
 		self.pressed = True
 		if self.readOnly == True:
-			tool = 'Node - Move'
+			tool = 'move node'
 		eX = e.x()-self.sumaX
 		eY = e.y()-self.sumaY
 		global vertexDiameter
-		if tool == 'Node - Add':
+		if tool == 'add node':
 			try:
 				self.lastNumber
 			except:
@@ -456,13 +460,13 @@ class GraphDraw(QWidget):
 			self.graph.addNode(eX, eY, 'newid'+str(self.lastNumber)+self.name, 'type')
 			self.lastNumber +=1
 
-		elif tool == 'Node - Remove':
+		elif tool == 'remove node':
 			try:
 				x, y = self.graph.getName(eX, eY, vertexDiameter)
 				self.graph.removeNode(eX, eY, vertexDiameter)
 			except:
 				pass
-		elif tool == 'Node - Rename':
+		elif tool == 'rename node':
 			try:
 				x, y = self.graph.getCenter(eX, eY, vertexDiameter)
 				r = NodeNameReader(x, y, self.sumaX+x, self.sumaY+y-4, self)
@@ -470,35 +474,36 @@ class GraphDraw(QWidget):
 				r.setFocus(Qt.OtherFocusReason)
 			except:
 				print 'no node to rename in these coordinates'
-		elif tool == 'Node - Change type':
+		elif tool == 'change type':
 			try:
 				x, y = self.graph.getCenter(eX, eY, vertexDiameter)
-				r = NodeTypeReader(x, y, self.sumaX+x, self.sumaY+y-4, self)
+				types = self.main.agmData.agm.types.keys()
+				r = NodeTypeReader(x, y, self.sumaX+x, self.sumaY+y-4, self, types)
 				r.show()
 				r.setFocus(Qt.OtherFocusReason)
 			except:
 				pass
-		elif tool == 'Node - Move':
+		elif tool == 'move node':
 			try:
 				self.pressName, found = self.graph.getName(eX, eY, 100)
 			except:
 				self.pressName = ''
-		elif tool == 'Edge - Add':
+		elif tool == 'add edge':
 			try:
 				self.pressName, found = self.graph.getName(eX, eY, vertexDiameter)
 			except:
 				self.pressName = ''
-		elif tool == 'Edge - Remove':
+		elif tool == 'remove edge':
 			for linkindex in range(len(self.graph.links)):
 				if self.linkPositionMap[linkindex].contains(eX, eY):
 					del self.graph.links[linkindex]
-		elif tool == 'Edge - Change label':
+		elif tool == 'change label':
 			for linkindex in range(len(self.graph.links)):
 				if self.linkPositionMap[linkindex].contains(eX, eY):
 					r = EdgeReader(self.sumaX+eX, self.sumaY+eY, linkindex, self)
 					r.show()
 					r.setFocus(Qt.OtherFocusReason)
-		elif tool == 'Edge - Negate':
+		elif tool == 'negate edge':
 			for linkindex in range(len(self.graph.links)):
 				if self.linkPositionMap[linkindex].contains(eX, eY):
 					self.graph.links[linkindex].enabled = not self.graph.links[linkindex].enabled
@@ -508,39 +513,38 @@ class GraphDraw(QWidget):
 		eX = e.x()-self.sumaX
 		eY = e.y()-self.sumaY
 		if self.readOnly == True:
-			tool = 'Node - Move'
-
-		if tool == 'Node - Add':
+			tool = 'move node'
+		if tool == 'add ndoe':
 			pass
-		elif tool == 'Node - Remove':
+		elif tool == 'remove node':
 			pass
-		elif tool == 'Node - Rename':
+		elif tool == 'rename node':
 			pass
-		elif tool == 'Node - Change type':
+		elif tool == 'change type':
 			pass
-		elif tool == 'Node - Move':
+		elif tool == 'move node':
 			global vertexDiameter
 			self.graph.moveNode(self.pressName, eX, eY, vertexDiameter)
-		elif tool == 'Edge - Add':
+		elif tool == 'add edge':
 			self.releaseName, found = self.graph.getName(eX, eY, vertexDiameter)
 			if not found: self.releaseName = ''
 			if self.pressName != '' and self.releaseName != '':
 				self.graph.addEdge(self.pressName, self.releaseName)
-		elif tool == 'Edge - Remove':
+		elif tool == 'remove edge':
 			pass
-		elif tool == 'Edge - Change label':
+		elif tool == 'change label':
 			pass
-		elif tool == 'Edge - Negate':
+		elif tool == 'negate edge':
 			pass
 	def mouseMoveEvent(self, e):
 		tool = self.main.tool
 		eX = e.x()-self.sumaX
 		eY = e.y()-self.sumaY
 		if self.readOnly == True:
-			tool = 'Node - Move'
+			tool = 'move node'
 
 		global vertexDiameter
-		if tool == 'Node - Move':
+		if tool == 'move node':
 			self.graph.moveNode(self.pressName, eX, eY, vertexDiameter)
 
 

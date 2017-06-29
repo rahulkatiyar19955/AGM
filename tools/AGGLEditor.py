@@ -131,15 +131,6 @@ class AGMEditor(QMainWindow):
 		# Type Hierarchy
 		self.typeHierarchyWidget = TypeEditor()
 
-		self.ui.toolsList.addItem('Node - Add')
-		self.ui.toolsList.addItem('Node - Remove')
-		self.ui.toolsList.addItem('Node - Rename')
-		self.ui.toolsList.addItem('Node - Change type')
-		self.ui.toolsList.addItem('Node - Move')
-		self.ui.toolsList.addItem('Edge - Add')
-		self.ui.toolsList.addItem('Edge - Remove')
-		self.ui.toolsList.addItem('Edge - Change label')
-		self.ui.toolsList.addItem('Edge - Negate')
 		# Graph painters
 		self.lhsPainter = GraphDraw(self.ui.lhsParentWidget, self, "LHS")
 		self.rhsPainter = GraphDraw(self.ui.rhsParentWidget, self, "RHS")
@@ -147,7 +138,7 @@ class AGMEditor(QMainWindow):
 		self.tool = ''
 		self.statusBar().hide()
 		self.connect(self.timer,                               SIGNAL('timeout()'),                    self.draw)
-		self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),       self.selectTool)
+		# self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),       self.selectTool)
 		self.connect(self.ui.rulesList,                        SIGNAL('currentRowChanged(int)'),       self.changeRule)
 		self.connect(self.ui.actionChangeAppearance,           SIGNAL("triggered(bool)"),              self.changeAppearance)
 		self.connect(self.ui.actionTypeHierarchy,              SIGNAL("triggered(bool)"),              self.showTypeHierarchy)
@@ -164,9 +155,13 @@ class AGMEditor(QMainWindow):
 		self.connect(self.ui.actionOpen,                       SIGNAL("triggered(bool)"),              self.open)
 		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),              self.appClose)
 		self.connect(self.ui.actionGraphmar,                   SIGNAL("triggered(bool)"),              self.about)
+		self.connect(self.ui.actionHideToolNames,              SIGNAL("triggered(bool)"),              self.hideToolNames)
 		self.connect(self.ui.passiveCheckBox,                  SIGNAL("stateChanged(int)"),            self.changePassive)
 		self.connect(self.ui.hierarchicalCheckBox,             SIGNAL("stateChanged(int)"),            self.changeHierarchical)
 		self.connect(self.ui.cost,                             SIGNAL("valueChanged(int)"),            self.changeCost)
+
+
+
 		self.ui.actionSaveAs.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_S + Qt.Key_Shift))
 		self.ui.actionSave.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_S))
 		self.ui.actionOpen.setShortcut(QKeySequence( Qt.CTRL + Qt.Key_O))
@@ -176,16 +171,28 @@ class AGMEditor(QMainWindow):
 
 		#self.ui.splitter.setStyleSheet("QSplitter::handle { background-color: gray }");
 
-		self.connect(self.ui.textParameters,    SIGNAL("textChanged(int)"), self.textParametersChanged)
-		self.connect(self.ui.textPrecondition,  SIGNAL("textChanged(int)"), self.textPreconditionChanged)
-		self.connect(self.ui.textEffect,        SIGNAL("textChanged(int)"), self.textEffectChanged)
-		self.connect(self.ui.comboRuleTextEdit, SIGNAL("textChanged()"),    self.comboTextChanged)
+		self.connect(self.ui.textParameters,    SIGNAL("textChanged()"), self.textParametersChanged)
+		self.connect(self.ui.textPrecondition,  SIGNAL("textChanged()"), self.textPreconditionChanged)
+		self.connect(self.ui.textEffect,        SIGNAL("textChanged()"), self.textEffectChanged)
+		# self.connect(self.ui.comboRuleTextEdit, SIGNAL("textChanged()"),    self.comboTextChanged)
 
 
 		self.shortcutDown = QShortcut(QKeySequence("PgDown"), self)
 		self.shortcutUp   = QShortcut(QKeySequence("PgUp"  ), self)
 		self.connect(self.shortcutDown, SIGNAL("activated()"), self.pgDown)
 		self.connect(self.shortcutUp,   SIGNAL("activated()"), self.pgUp)
+
+
+		self.connect(self.ui.addnodebutton, SIGNAL('toggled(bool)'), self.on_addnodebutton)
+		self.connect(self.ui.removenodebutton, SIGNAL('toggled(bool)'), self.on_removenodebutton)
+		self.connect(self.ui.renamenodebutton, SIGNAL('toggled(bool)'), self.on_renamenodebutton)
+		self.connect(self.ui.changenodetypebutton, SIGNAL('toggled(bool)'), self.on_changenodetypebutton)
+		self.connect(self.ui.nodemovebutton, SIGNAL('toggled(bool)'), self.on_nodemovebutton)
+		self.connect(self.ui.addedgebutton, SIGNAL('toggled(bool)'), self.on_addedgebutton)
+		self.connect(self.ui.removeedgebutton, SIGNAL('toggled(bool)'), self.on_removeedgebutton)
+		self.connect(self.ui.changeedgelabelbutton, SIGNAL('toggled(bool)'), self.on_changeedgelabelbutton)
+		self.connect(self.ui.negateedgebutton, SIGNAL('toggled(bool)'), self.on_negateedgebutton)
+
 
 		self.connect(self.typeHierarchyWidget.typeList, SIGNAL("currentRowChanged(int)"), self.currentTypeChanged)
 		# self.connect(self.typeHierarchyWidget.typeList, SIGNAL("currentItemChanged(QListWidgetItem)"), self.currentTypeChanged)
@@ -196,6 +203,8 @@ class AGMEditor(QMainWindow):
 		self.connect(self.typeHierarchyWidget.removeButton, SIGNAL("clicked()"), self.removeTypeInheritance)
 		self.connect(self.typeHierarchyWidget.okButton, SIGNAL("clicked()"), self.typeHierarchyWidget.hide)
 
+		self.hideToolNames(False)
+
 		# Get settings
 		settings = QSettings("AGM", "mainWindowGeometry")
 		value = settings.value("geometry")
@@ -203,10 +212,10 @@ class AGMEditor(QMainWindow):
 			self.restoreGeometry(value)
 
 		self.timer.start(150)
-		self.ui.toolsList.setCurrentRow(4)
-		self.selectTool(4)
-		self.ui.toolsList.setCurrentRow(4)
-		self.selectTool(4)
+		# self.ui.toolsList.setCurrentRow(4)
+		# self.selectTool(4)
+		# self.ui.toolsList.setCurrentRow(4)
+		# self.selectTool(4)
 
 		global vertexDiameter
 		global fontName
@@ -265,7 +274,10 @@ class AGMEditor(QMainWindow):
 		self.show()
 		sh = self.ui.centralwidget.height()
 		self.ui.splitter.setSizes([int(0.65*sh), int(0.35*sh)])
-		self.typeHierarchyWidget.show()
+
+
+		self.tool = 'move node'
+		self.uncheckOtherTools(self.tool)
 
 	def pgDown(self):
 		r = self.ui.rulesList.currentRow()+1
@@ -276,10 +288,95 @@ class AGMEditor(QMainWindow):
 		if r>=0 and r<self.ui.rulesList.count():
 			self.ui.rulesList.setCurrentRow(r)
 
-	def comboTextChanged(self):
-		ruleN = self.ui.rulesList.currentRow()
-		if type(self.agmData.agm.rules[ruleN]) != AGMRule:
-			self.agmData.agm.rules[ruleN].text = self.ui.comboRuleTextEdit.toPlainText()
+	def on_addnodebutton(self, v):
+		if v:
+			self.tool = 'add node'
+			self.uncheckOtherTools(self.tool)
+	def on_removenodebutton(self, v):
+		if v:
+			self.tool = 'remove node'
+			self.uncheckOtherTools(self.tool)
+	def on_renamenodebutton(self, v):
+		if v:
+			self.tool = 'rename node'
+			self.uncheckOtherTools(self.tool)
+	def on_changenodetypebutton(self, v):
+		if v:
+			self.tool = 'change type'
+			self.uncheckOtherTools(self.tool)
+	def on_nodemovebutton(self, v):
+		if v:
+			self.tool = 'move node'
+			self.uncheckOtherTools(self.tool)
+	def on_addedgebutton(self, v):
+		if v:
+			self.tool = 'add edge'
+			self.uncheckOtherTools(self.tool)
+	def on_removeedgebutton(self, v):
+		if v:
+			self.tool = 'remove edge'
+			self.uncheckOtherTools(self.tool)
+	def on_changeedgelabelbutton(self, v):
+		if v:
+			self.tool = 'change label'
+			self.uncheckOtherTools(self.tool)
+	def on_negateedgebutton(self, v):
+		if v:
+			self.tool = 'negate edge'
+			self.uncheckOtherTools(self.tool)
+
+	def uncheckOtherTools(self, tool):
+		if tool != 'add node':
+ 			self.ui.addnodebutton.setChecked(False)
+		if tool != 'remove node':
+ 			self.ui.removenodebutton.setChecked(False)
+		if tool != 'rename node':
+ 			self.ui.renamenodebutton.setChecked(False)
+		if tool != 'change type':
+ 			self.ui.changenodetypebutton.setChecked(False)
+		if tool != 'move node':
+ 			self.ui.nodemovebutton.setChecked(False)
+		if tool != 'add edge':
+ 			self.ui.addedgebutton.setChecked(False)
+		if tool != 'remove edge':
+ 			self.ui.removeedgebutton.setChecked(False)
+		if tool != 'change label':
+ 			self.ui.changeedgelabelbutton.setChecked(False)
+		if tool != 'negate edge':
+ 			self.ui.negateedgebutton.setChecked(False)
+		pass
+
+	def hideToolNames(self, value):
+		self.ui.addnodebutton.setIcon(QIcon('/usr/local/share/agm/icons/nodeadd.png'))
+		self.ui.removenodebutton.setIcon(QIcon('/usr/local/share/agm/icons/noderemove.png'))
+		self.ui.renamenodebutton.setIcon(QIcon('/usr/local/share/agm/icons/noderename.png'))
+		self.ui.changenodetypebutton.setIcon(QIcon('/usr/local/share/agm/icons/noderetype.png'))
+		self.ui.nodemovebutton.setIcon(QIcon('/usr/local/share/agm/icons/nodemove.png'))
+		self.ui.addedgebutton.setIcon(QIcon('/usr/local/share/agm/icons/linkadd.png'))
+		self.ui.removeedgebutton.setIcon(QIcon('/usr/local/share/agm/icons/linkremove.png'))
+		self.ui.changeedgelabelbutton.setIcon(QIcon('/usr/local/share/agm/icons/linktype.png'))
+		self.ui.negateedgebutton.setIcon(QIcon('/usr/local/share/agm/icons/linknegate.png'))
+
+		if value:
+			self.ui.addnodebutton.setText('')
+			self.ui.removenodebutton.setText('')
+			self.ui.renamenodebutton.setText('')
+			self.ui.changenodetypebutton.setText('')
+			self.ui.nodemovebutton.setText('')
+			self.ui.addedgebutton.setText('')
+			self.ui.removeedgebutton.setText('')
+			self.ui.changeedgelabelbutton.setText('')
+			self.ui.negateedgebutton.setText('')
+		else:
+			self.ui.addnodebutton.setText('add symbol')
+			self.ui.removenodebutton.setText('remove symbol')
+			self.ui.renamenodebutton.setText('rename symbol')
+			self.ui.changenodetypebutton.setText('change symbol type')
+			self.ui.nodemovebutton.setText('move symbol')
+			self.ui.addedgebutton.setText('add link')
+			self.ui.removeedgebutton.setText('remove link')
+			self.ui.changeedgelabelbutton.setText('change link label')
+			self.ui.negateedgebutton.setText('negate link')
 
 	# Manages close events
 	def appClose(self):
@@ -294,7 +391,7 @@ class AGMEditor(QMainWindow):
 		settings.setValue("geometry", g)
 
 	def about(self):
-		QMessageBox.information(self, "About", "Active Graph Grammar Language Editor (AGGLEditor):\nhttps://github.com/ljmanso/AGM/wiki")
+		QMessageBox.information(self, "About", "Active Graph Grammar Language Editor (AGGLEditor):\n https://github.com/ljmanso/AGM/wiki \n\n Icons by Alexander Madyankin and Roman Shamin\n(MIT license)")
 	def draw(self):
 		self.lhsPainter.graph.setColors(self.rhsPainter.graph, True)
 		self.rhsPainter.graph.setColors(self.lhsPainter.graph, False)
@@ -316,8 +413,6 @@ class AGMEditor(QMainWindow):
 		self.agmData.agm.rules[self.ui.rulesList.currentRow()].hierarchical = h
 	def changeCost(self, v):
 		self.agmData.agm.rules[self.ui.rulesList.currentRow()].cost = v
-	def selectTool(self, tool):
-		self.tool = str(self.ui.toolsList.item(tool).text())
 	def changeFont(self):
 		self.fontDialog.show()
 	def changeAppearance(self):
@@ -349,10 +444,10 @@ class AGMEditor(QMainWindow):
 			self.ui.label_3.show()
 			self.ui.passiveCheckBox.show()
 			self.ui.hierarchicalCheckBox.show()
-			self.ui.comboRuleTextEdit.hide()
-			self.ui.comboRuleLabel.hide()
-			self.ui.label_5.show()
-			self.ui.toolsList.show()
+			# self.ui.comboRuleTextEdit.hide()
+			# self.ui.comboRuleLabel.hide()
+			# self.ui.label_5.show()
+			# self.ui.toolsList.show()
 			self.lhsPainter.graph = self.agmData.agm.rules[ruleN].lhs
 			self.rhsPainter.graph = self.agmData.agm.rules[ruleN].rhs
 			try:
@@ -377,12 +472,12 @@ class AGMEditor(QMainWindow):
 			self.ui.label_3.hide()
 			self.ui.passiveCheckBox.hide()
 			self.ui.hierarchicalCheckBox.hide()
-			self.ui.comboRuleTextEdit.show()
-			self.ui.comboRuleLabel.show()
-			self.ui.label_5.hide()
-			self.ui.toolsList.hide()
+			# self.ui.comboRuleTextEdit.show()
+			# self.ui.comboRuleLabel.show()
+			# self.ui.label_5.hide()
+			# self.ui.toolsList.hide()
 			#self.ui.tabWidget.setTabEnabled(1, False)
-			self.ui.comboRuleTextEdit.setPlainText(self.agmData.agm.rules[ruleN].text)
+			# self.ui.comboRuleTextEdit.setPlainText(self.agmData.agm.rules[ruleN].text)
 		self.disconnect(self.ui.passiveCheckBox,      SIGNAL("stateChanged(int)"), self.changePassive)
 		self.disconnect(self.ui.hierarchicalCheckBox, SIGNAL("stateChanged(int)"), self.changeHierarchical)
 		self.disconnect(self.ui.cost,                 SIGNAL("valueChanged(int)"), self.changeCost)
@@ -659,17 +754,17 @@ class AGMEditor(QMainWindow):
 		self.modified = False
 
 	def textParametersChanged(self):
-		self.agmData.agm.rules[self.ui.rulesList.currentRow()].parameters = str(self.ui.textParameters)
+		self.agmData.agm.rules[self.ui.rulesList.currentRow()].parameters   = str(self.ui.textParameters.toPlainText().encode(  'latin1')).strip().replace("\n", "\n\t\t")
 	def textPreconditionChanged(self):
-		self.agmData.agm.rules[self.ui.rulesList.currentRow()].precondition = str(self.ui.textPrecondition)
+		self.agmData.agm.rules[self.ui.rulesList.currentRow()].precondition = str(self.ui.textPrecondition.toPlainText().encode('latin1')).strip().replace("\n", "\n\t\t")
 	def textEffectChanged(self):
-		self.agmData.agm.rules[self.ui.rulesList.currentRow()].effect = str(self.ui.textEffect)
+		self.agmData.agm.rules[self.ui.rulesList.currentRow()].effect       = str(self.ui.textEffect.toPlainText().encode(      'latin1')).strip().replace("\n", "\n\t\t")
 
 if __name__ == '__main__':
 	app = QApplication(sys.argv)
 	if len(sys.argv)>1:
 		if len(sys.argv)>5:
-			inputFile   = sys.argv[1]
+			inputFile    = sys.argv[1]
 			compileFlag1 = sys.argv[2]
 			outputFile1  = sys.argv[3]
 			compileFlag2 = sys.argv[4]
