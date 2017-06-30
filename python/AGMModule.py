@@ -173,7 +173,7 @@ class GraphDraw(QWidget):
 		painter = None
 
 	def setRandomly(self):
-		print 'setRandomly'
+		# print 'setRandomly'
 		import random
 		for n in self.graph.nodes:
 			node = self.graph.nodes[n]
@@ -445,6 +445,8 @@ class GraphDraw(QWidget):
 					pass
 				linkindex += 1
 	def mousePressEvent(self, e):
+		# print 'press', e.button()
+		if e.button() != Qt.LeftButton: return
 		tool = self.main.tool
 		self.pressed = True
 		if self.readOnly == True:
@@ -508,6 +510,8 @@ class GraphDraw(QWidget):
 				if self.linkPositionMap[linkindex].contains(eX, eY):
 					self.graph.links[linkindex].enabled = not self.graph.links[linkindex].enabled
 	def mouseReleaseEvent(self, e):
+		# print 'release', e.button()
+		if e.button() != Qt.LeftButton: return
 		tool = self.main.tool
 		self.pressed = False
 		eX = e.x()-self.sumaX
@@ -537,6 +541,8 @@ class GraphDraw(QWidget):
 		elif tool == 'negate edge':
 			pass
 	def mouseMoveEvent(self, e):
+		# print 'move', self.pressed
+		if not self.pressed: return
 		tool = self.main.tool
 		eX = e.x()-self.sumaX
 		eY = e.y()-self.sumaY

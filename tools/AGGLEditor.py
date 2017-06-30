@@ -131,6 +131,19 @@ class AGMEditor(QMainWindow):
 		# Type Hierarchy
 		self.typeHierarchyWidget = TypeEditor()
 
+		cursorSize = 25
+		self.cursor = {}
+		self.cursor['add node'] = QCursor(QPixmap('/usr/local/share/agm/icons/nodeadd.png').scaled(cursorSize,cursorSize))
+		self.cursor['remove node'] = QCursor(QPixmap('/usr/local/share/agm/icons/noderemove.png').scaled(cursorSize,cursorSize))
+		self.cursor['rename node'] = QCursor(QPixmap('/usr/local/share/agm/icons/noderename.png').scaled(cursorSize,cursorSize))
+		self.cursor['change type'] = QCursor(QPixmap('/usr/local/share/agm/icons/noderetype.png').scaled(cursorSize,cursorSize))
+		self.cursor['move node'] = QCursor(QPixmap('/usr/local/share/agm/icons/nodemove.png').scaled(cursorSize,cursorSize))
+		self.cursor['add edge'] = QCursor(QPixmap('/usr/local/share/agm/icons/linkadd.png').scaled(cursorSize,cursorSize))
+		self.cursor['remove edge'] = QCursor(QPixmap('/usr/local/share/agm/icons/linkremove.png').scaled(cursorSize,cursorSize))
+		self.cursor['change label'] = QCursor(QPixmap('/usr/local/share/agm/icons/linktype.png').scaled(cursorSize,cursorSize))
+		self.cursor['negate edge'] = QCursor(QPixmap('/usr/local/share/agm/icons/linknegate.png').scaled(cursorSize,cursorSize))
+
+
 		# Graph painters
 		self.lhsPainter = GraphDraw(self.ui.lhsParentWidget, self, "LHS")
 		self.rhsPainter = GraphDraw(self.ui.rhsParentWidget, self, "RHS")
@@ -169,7 +182,7 @@ class AGMEditor(QMainWindow):
 		#self.ui.actionNextRule.setShortcut(QKeySequence(Qt.Key_PageDown))
 		#self.ui.actionPrevRule.setShortcut(QKeySequence(Qt.Key_PageUp))
 
-		#self.ui.splitter.setStyleSheet("QSplitter::handle { background-color: gray }");
+		#self.ui.splitter.setStyleSheet("QSplitter::handle { background-color: gray }")
 
 		self.connect(self.ui.textParameters,    SIGNAL("textChanged()"), self.textParametersChanged)
 		self.connect(self.ui.textPrecondition,  SIGNAL("textChanged()"), self.textPreconditionChanged)
@@ -344,7 +357,9 @@ class AGMEditor(QMainWindow):
  			self.ui.changeedgelabelbutton.setChecked(False)
 		if tool != 'negate edge':
  			self.ui.negateedgebutton.setChecked(False)
-		pass
+		self.lhsPainter.setCursor(self.cursor[tool])
+		self.rhsPainter.setCursor(self.cursor[tool])
+
 
 	def hideToolNames(self, value):
 		self.ui.addnodebutton.setIcon(QIcon('/usr/local/share/agm/icons/nodeadd.png'))
@@ -386,7 +401,7 @@ class AGMEditor(QMainWindow):
 			self.close()
 		self.close()
 	def closeEvent(self, closeevent):
-		settings = QSettings("AGM", "mainWindowGeometry");
+		settings = QSettings("AGM", "mainWindowGeometry")
 		g = self.saveGeometry()
 		settings.setValue("geometry", g)
 
@@ -609,8 +624,8 @@ class AGMEditor(QMainWindow):
 		# list
 		prevlist = sorted([item.text().encode('latin1') for item in self.typeHierarchyWidget.typeList.findItems('', QtCore.Qt.MatchContains)])
 		currlist = sorted(self.agmData.agm.types.keys())
-		print 'P', prevlist
-		print 'C', currlist
+		# print 'P', prevlist
+		# print 'C', currlist
 		if prevlist != currlist:
 			self.typeHierarchyWidget.typeList.clear()
 			for tp in sorted(self.agmData.agm.types.keys()):
