@@ -312,8 +312,9 @@ class Executive(object):
 		self.setAndBroadcastModel(xmlModelParser.graphFromXMLFile(initialModelPath))
 		self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 
-		self.plannerCaller = PlannerCaller(self, agglPath, self.startPlanServer)
-		self.plannerCaller.start()
+		if not self.doNotPlan:
+			self.plannerCaller = PlannerCaller(self, agglPath, self.startPlanServer)
+			self.plannerCaller.start()
 		print '--- setMission ---------------------------------------------'
 		self.setMission(initialMissionPath, avoidUpdate=True)
 		print '--- setMission ---------------------------------------------'
@@ -435,11 +436,12 @@ class Executive(object):
 			self.mutex.release()
 
 	def setMission(self, target, avoidUpdate=False):
+		if self.doNotPlan:
+			return
 		self.mutex.acquire()
 		self.targetStr = target
 		self.plannerCaller.setMission(self.targetStr)
 		self.mutex.release()
-
 
 
 	def getModel(self):
@@ -503,6 +505,8 @@ class Executive(object):
 
 
 	def updatePlan(self):
+		if self.doNotPlan:
+			return
 		self.plannerCaller.setWork(self.currentModel)
 
 	def gotPlan(self, plan):
