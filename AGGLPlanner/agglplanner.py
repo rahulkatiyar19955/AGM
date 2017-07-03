@@ -435,7 +435,7 @@ class AGGLPlanner(object):
 				pass
 		# Set target
 		self.targetCode = target
-		# Descomp
+		# Decomposing
 		self.decomposing = decomposing
 
 		# set stop flat

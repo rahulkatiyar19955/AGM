@@ -89,10 +89,6 @@ class Plotter(FigureCanvas):
 		super(Plotter,self).__init__(self.fig)
 		# create an axis
 		self.axes = self.fig.add_subplot(111)
-		# discards the old graph
-		# self.axes.hold(False)
-		# plot data
-		# self.axes.plot(data, '*-')
 	def plot(self, data):
 		self.axes.clear()
 		g = nx.DiGraph()
