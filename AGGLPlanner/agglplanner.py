@@ -752,11 +752,12 @@ class AGGLPlanner(object):
 			# be reached from the state described in 'head'.
 			#
 			if verbose>5: print 'Expanding'.ljust(5), head
-			# For each action 'k', in the domain
+			# The dictionary 'ruleMap' contains the python implementation of the actions in the domain.
+  			# For each action 'k', in the domain:
 			for k in ruleMap:
 				# Calling ruleMap[k] with the most promising node of the list of nodes to explore (head)
  				# returns all the nodes that can be reached from the previously mentioned node. We iterate over
-				# those nodes
+				# those nodes.
 				for deriv in ruleMap[k](head):
 					# At this point 'deriv' is one of the nodes that can be reached by applying the action 'k' to the node 'head'
 					self.explored.increase() # Add 1 to the number of explored nodes (used just for providing the information to the user)
@@ -778,7 +779,7 @@ class AGGLPlanner(object):
 					self.knownNodes.lock()
 					notDerivInKnownNodes = not self.computeDerivInKnownNodes(deriv)
 					self.knownNodes.unlock()
-					# If the node is not in the list of known nodes, append if to the list of openNodes
+					# If the node is not in the list of known nodes, append it to the list of openNodes
 					if notDerivInKnownNodes:
 						if deriv.stop == False:
 							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
