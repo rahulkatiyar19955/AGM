@@ -748,17 +748,24 @@ class AGGLPlanner(object):
 				lock.release()
 				return
 			#
-			#
+			# For each action in the domain (for k in ruleMap) we generate the possible nodes of the state space that can
+			# be reached from the state described in 'head'.
 			#
 			if verbose>5: print 'Expanding'.ljust(5), head
+			# For each action 'k', in the domain
 			for k in ruleMap:
-				# Iterate over rules and generate derivates
+				# Calling ruleMap[k] with the most promising node of the list of nodes to explore (head)
+ 				# returns all the nodes that can be reached from the previously mentioned node. We iterate over
+				# those nodes
 				for deriv in ruleMap[k](head):
-					self.explored.increase()
+					# At this point 'deriv' is one of the nodes that can be reached by applying the action 'k' to the node 'head'
+					self.explored.increase() # Add 1 to the number of explored nodes (used just for providing the information to the user)
+					# Compute the heuristic (score) and whether or not the goal is met
 					if self.symbol_mapping:
 						deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
 					else:
 						deriv.score, achieved = self.targetCode(deriv.graph)
+					# If the goal is achieved after executing the action we append the new node in the list of nodes that achieve the mission
 					if achieved:
 						self.results.append(deriv)
 						if stopWithFirstPlan:
@@ -767,9 +774,11 @@ class AGGLPlanner(object):
 							return
 						# Compute cheapest solution
 						self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
+					# Check if the node was already in the list of known nodes
 					self.knownNodes.lock()
 					notDerivInKnownNodes = not self.computeDerivInKnownNodes(deriv)
 					self.knownNodes.unlock()
+					# If the node is not in the list of known nodes, append if to the list of openNodes
 					if notDerivInKnownNodes:
 						if deriv.stop == False:
 							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
