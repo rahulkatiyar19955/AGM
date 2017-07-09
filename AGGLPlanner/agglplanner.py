@@ -451,9 +451,9 @@ class AGGLPlanner(object):
 		self.maxWorldSize = maxWorldIncrement+len(self.initWorld.graph.nodes.keys())
 		## This attribute indicates the minimun cost of the open nodes of the graph
 		self.minCostOnOpenNodes = LockableInteger(0)
-		## This is the lockable list of all the open nodes.
+		## self.openNodes is a lockable list that contains all the open nodes of the state space that have not been completely explored.
 		self.openNodes = LockableList()
-		## This is the lockable list of all the know nodes of the graph.
+		## self.knownNodes is a lockable list that contains of all the know nodes of the graph, that is, those that have been completely explored.
 		self.knownNodes = LockableList()
 		## This is the lockable list of all the calculated results.
 		self.results = LockableList()
@@ -469,27 +469,20 @@ class AGGLPlanner(object):
 
 		# Create initial state
 		if self.symbol_mapping:
-			#print 'eo 1'
 			self.initWorld.score, achieved = self.targetCode(self.initWorld.graph, self.symbol_mapping)
-			#print 'eo 11'
 		else:
-			#print 'eo 21'
 			self.initWorld.score, achieved = self.targetCode(self.initWorld.graph)
-			#print 'eo 2'
 
 		if achieved:
-			#print 'AQUI 2'
 			# If the goal is achieved, we save the solution in the result list, the
 			# solution cost in the cheapest solution cost and we put the end_condition
 			# as goal achieved in order to stop the execution.
 			self.results.append(self.initWorld)
-			#print 'AQUI 2.1'
 			self.cheapestSolutionCost.set(self.results.getFirstElement().cost)
-			#print 'AQUI 2.2'
 			if self.indent == '':
-				self.end_condition.set("GoalAchieved")
+ 				self.end_condition.set("GoalAchieved")
 		elif number_of_threads>0:
-			#print 'AQUI 3'
+			print "Using multiple threads is not currently supported"
 			# But, if the goal is not achieved and there are more than 0 thread running (1, 2...)
 			# we creates a list where we will save the status of all the threads, take all
 			# the threads (with their locks) and save it in the thread_locks list.
@@ -497,24 +490,19 @@ class AGGLPlanner(object):
 			## This attributes is a list where we save all the thread that are running.
 			self.thread_locks = []
 			threadStatus = LockableList()
-			#print 'AQUI 3.1'
 			for i in xrange(number_of_threads):
-				#print 'AQUI 3.2'
 				lock = thread.allocate_lock()
 				lock.acquire()
 				threadStatus.append(True)
 				self.thread_locks.append(lock)
 				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), copy.deepcopy(self.triggerMap), lock, i, threadStatus))
-				#print 'AQUI 3.3'
 			# Wait for the threads to stop
 			for lock in self.thread_locks:
 				lock.acquire()
 		else:
 			# If the solution is not achieved and there arent any thread to execute the programm
 			# we stop it and show an error message.
-			#print 'AQUI 4.2'
 			self.startThreadedWork(self.ruleMap, self.triggerMap)
-			#print 'AQUI 4.3'
 
 		# We make others checks over the end_condition:
 		#	-- If the end condition is wrong.
@@ -582,7 +570,7 @@ class AGGLPlanner(object):
 			except:
 				traceback.print_exc()
 				pass
-			planConDescomposicion = False
+			firstActionIsHierarchical = False
 			if len(self.results[i].history) > 0:
 				action = self.results[i].history[0]
 				ac = AGGLPlannerAction(action)
@@ -603,13 +591,13 @@ class AGGLPlanner(object):
 							#paramsWithoutNew[param] = str('v')+str(paramsWithoutNew[param])
 					#print paramsWithoutNew
 					print '\nDecomposing hierarchical rule ', ac.name, paramsWithoutNew
-					""" Creamos estado intermedio, primero lo creamos en fichero .xml para poder quitarle los nuevos nodos creados al aplicar la regla jerarquica"""
+					""" We create an temporary state, without all the nodes created by the hierarchical rule"""
 					estadoIntermedio = self.triggerMap[ac.name](self.initWorld, ac.parameters)
-					"""Quitamos los nodos constantes creados por la regla jerarquica: los volvemos variables para evitar errores cuando se genere el codigo target en python."""
+					""" We remove the constants created by the hierarchical rule, making them variables."""
 					graph = setNewConstantsAsVariables(self.initWorld.graph, estadoIntermedio.graph)
 					outputText = generateTarget(self.domainParsed, graph)
-					"""Ponemos una bandera para pintar despues el plan completa una vez descompuesta la primera regla jerarquica"""
-					planConDescomposicion = True
+					""" The following flag is set so the planning of the hierarchical rule is shown on screen"""
+					firstActionIsHierarchical = True
 					hierarchicalTarget = self.domainModule.getHierarchicalTargets()[ac.name]
 					aaa = AGGLPlanner( # domainParsed, domainModule, initWorld, target, indent=None, symbol_mapping=None, excludeList=None, resultFile=None, decomposing=False, awakenRules=set()):
 					   self.domainParsed,
@@ -640,9 +628,9 @@ class AGGLPlanner(object):
 							h_retText += str(action)+'\n'
 
 				else:
-					planConDescomposicion = False
+					firstActionIsHierarchical = False
 
-			# if self.decomposing == False and planConDescomposicion == True: print 'len results:', len(self.results)
+			# if self.decomposing == False and firstActionIsHierarchical == True: print 'len results:', len(self.results)
 			if len(self.results)>0: # If there are plans, proceed
 				#printResult(self.results[i]) #the best solution
 				retText = ''
@@ -777,7 +765,7 @@ class AGGLPlanner(object):
 						if notDerivInKnownNodes:
 							if deriv.stop == False:
 								if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
-									self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+									self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) )
 			if verbose > 0:
 				doIt=False
 				nowNow = datetime.datetime.now()
@@ -833,7 +821,7 @@ class AGGLPlanner(object):
 		self.openNodes.unlock()
 		self.minCostOnOpenNodes.unlock()
 
-	def  computeDerivInKnownNodes(self, deriv):
+	def computeDerivInKnownNodes(self, deriv):
 		for other in self.knownNodes:
 			if deriv == other:
 				if other.cost <= deriv.cost:
