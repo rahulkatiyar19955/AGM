@@ -662,32 +662,35 @@ class AGGLPlanner(object):
 
 
 	##@brief This method starts the execution of program threads
-	# @param ruleMap all the actives rules of the grammar
-	# @param lock this is the clench of the each thread.
-	# @param i is the index of the thread
+	# @param ruleMap all the active rules of the grammar
+	# @param lock this is the mutex of each thread.
+	# @param i is the index (id) of the thread
 	# @param threadPoolStatus this is the status of the thread. The threads have three possible status:
 	#	1) On hold because they are waiting for another thread finishes his execution.
 	#	2) Active. They are expanding a node.
 	#	3) All the threads are idle because all of them have finished his executions.
 	def startThreadedWork(self, ruleMap, triggerMap, lock=None, i=0, threadPoolStatus=None):
-		if lock == None:
-			# If there isnt any lock, we create one and we give it to the thread.
+		if lock == None: # If there isnt any lock, we create one and we give it to the thread.
 			lock = thread.allocate_lock()
 			lock.acquire()
 
-		if threadPoolStatus != None:
-			# If the thread status is different of none, we lock the
-			# code and put the status of the i thread.
+		if threadPoolStatus != None: # If the thread status is different of none, we lock the code and put the status of the i thread.
 			threadPoolStatus.lock()
-			threadPoolStatus[i] = True # el hilo esta en marcha.
+			threadPoolStatus[i] = True # the thread is working
 			threadPoolStatus.unlock()
 		# We take the initial time.
 		timeA = datetime.datetime.now()
 		self.timeElapsed = -1.
 
+
+		#
+		# MAIN SEARCH LOOP
+		#
 		while True:
+			#
+			# Check stop conditions and compute the time spent
+			#
 			if self.externalStopFlag.get() != 0:
-				print 'WE STOP BECAUSE WE GOT A ZERO'
 				self.end_condition.set('ExternalFlag')
 				break
 			# Again, we take the time and we calculated the elapsed time
@@ -704,8 +707,9 @@ class AGGLPlanner(object):
 					self.end_condition.set("TimeLimit")
 				lock.release()
 				return
-			# Else, proceed...
-			# Try to pop a node from the queue
+			#
+			# Pop an unexplored node from the queue, according to the heuristic. The popped node is stored in a variable named "head"
+			#
 			try:
 				# We take the head of the openNodes list: the first open node.
 				head = self.openNodes.heapqPop()[1] # P O P   POP   p o p   pop
@@ -729,7 +733,9 @@ class AGGLPlanner(object):
 					return
 				threadPoolStatus.unlock()
 				continue
-
+			#
+			# We now check other end conditions
+			#
 			# Update 'minCostOnOpenNodes', so we can stop when the minimum cost in the queue is bigger than one in the results
 			self.updateMinCostOnOpenNodes(head.cost)
 			# Check if we got to the maximum cost or the minimum solution
@@ -741,31 +747,33 @@ class AGGLPlanner(object):
 				self.end_condition.set("GoalAchieved")
 				lock.release()
 				return
+			#
+			#
+			#
 			if verbose>5: print 'Expanding'.ljust(5), head
 			for k in ruleMap:
 				# Iterate over rules and generate derivates
-				if True:# k in head.awakenRules:
-					for deriv in ruleMap[k](head):
-						self.explored.increase()
-						if self.symbol_mapping:
-							deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
-						else:
-							deriv.score, achieved = self.targetCode(deriv.graph)
-						if achieved:
-							self.results.append(deriv)
-							if stopWithFirstPlan:
-								self.end_condition.set("GoalAchieved")
-								lock.release()
-								return
-							# Compute cheapest solution
-							self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
-						self.knownNodes.lock()
-						notDerivInKnownNodes = not self.computeDerivInKnownNodes(deriv)
-						self.knownNodes.unlock()
-						if notDerivInKnownNodes:
-							if deriv.stop == False:
-								if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
-									self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) )
+				for deriv in ruleMap[k](head):
+					self.explored.increase()
+					if self.symbol_mapping:
+						deriv.score, achieved = self.targetCode(deriv.graph, self.symbol_mapping)
+					else:
+						deriv.score, achieved = self.targetCode(deriv.graph)
+					if achieved:
+						self.results.append(deriv)
+						if stopWithFirstPlan:
+							self.end_condition.set("GoalAchieved")
+							lock.release()
+							return
+						# Compute cheapest solution
+						self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
+					self.knownNodes.lock()
+					notDerivInKnownNodes = not self.computeDerivInKnownNodes(deriv)
+					self.knownNodes.unlock()
+					if notDerivInKnownNodes:
+						if deriv.stop == False:
+							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
+								self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) )
 			if verbose > 0:
 				doIt=False
 				nowNow = datetime.datetime.now()
@@ -777,18 +785,8 @@ class AGGLPlanner(object):
 					doIt = True
 				if doIt:
 					self.lastTime = nowNow
-					#try:
-						#if self.indent == '':
 					print str(int(self.timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
-						#rrrr = heapsort(self.openNodes)
-						#print 'OpenNodes', len(rrrr), "(HEAD cost:"+str(head.cost)+"  depth:"+str(head.depth)+"  score:"+str(head.score)+")"
-						#if len(self.openNodes) > 0:
-							#print 'First['+str(rrrr[ 0][0])+'](cost:'+str(rrrr[ 0][1].cost)+', score:'+str(rrrr[ 0][1].score)+', depth:'+str(rrrr[ 0][1].depth)+')'
-							#print  'Last['+str(rrrr[-1][0])+'](cost:'+str(rrrr[-1][1].cost)+', score:'+str(rrrr[-1][1].score)+', depth:'+str(rrrr[-1][1].depth)+')'
-						#else:
-							#print 'no open nodes'
-					#except:
-						#traceback.print_exc()
+
 
 	def updateCheapestSolutionCostAndCutOpenNodes(self, cost):
 		self.cheapestSolutionCost.lock()
