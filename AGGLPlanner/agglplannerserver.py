@@ -64,19 +64,24 @@ class Worker(object):
 			self.mapsLock.release()
 			print '------------------------------------------------------------------------'
 
-	def getTargetIdentifier(self, targetText):
+	def getTargetIdentifier(self, targetText, domainId):
 		print '------------------------------------------------------------------------'
 		print 'getTargetIdentifier targetText(', type(targetText), ')'
+		self.mapsLock.acquire()
 		try:
-			self.mapsLock.acquire()
 			ret = self.lastUsedTargetKey + 1
-			self.targetMap[ret] = agglplanner.TargetInformation(ret, targetText)
+			print 'ret:', ret
+			print 'targetText', targetText
+			print 'domainId', domainId
+			print 'O', agglplanner.TargetInformation(ret, targetText, self.domainMap[domainId].parsed)
+			self.targetMap[ret] = agglplanner.TargetInformation(ret, targetText, self.domainMap[domainId].parsed)
+			print 'TargetInformation', self.targetMap[ret]
 			open("targetText.txt", 'w').write(targetText)
 			open("targetCode.py", 'w').write(self.targetMap[ret].code)
 			self.lastUsedTargetKey += 1
 			return ret
 		except:
-			open("roro", 'w').write(self.targetMap[ret].code)
+			# open("roro", 'w').write(self.targetMap[ret].code)
 			traceback.print_exc()
 			return -1
 		finally:

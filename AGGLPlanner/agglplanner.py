@@ -364,11 +364,11 @@ class DomainInformation(object):
 
 
 class TargetInformation(object):
-	def __init__(self, identifier, text):
+	def __init__(self, identifier, text, agm):
 		self.identifier = identifier
 		self.text = text
+		self.code = generateTarget_AGGT(agm, AGMFileDataParsing.targetFromText(text))
 		self.module = self.getModuleFromText(self.code).CheckTarget
-		self.code = generateTarget_AGGT(self.module, AGMFileDataParsing.targetFromText(text))
 	def getModuleFromText(self, moduleText):
 		if len(moduleText) < 10:
 			print 'len(moduleText) < 10'

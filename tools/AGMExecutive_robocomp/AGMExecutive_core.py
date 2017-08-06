@@ -104,7 +104,7 @@ class PlannerCaller(threading.Thread):
 		except: pass
 		missionStr = open(tempStr, 'r').read()
 		print type(missionStr), missionStr
-		self.targetId = self.agglplannerclient.getTargetIdentifier(missionStr)
+		self.targetId = self.agglplannerclient.getTargetIdentifier(missionStr, self.domainId)
 		self.setWork(self.executive.currentModel)
 
 
