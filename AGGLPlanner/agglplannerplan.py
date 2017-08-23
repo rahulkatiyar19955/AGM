@@ -209,6 +209,8 @@ class WorldStateHistory(object):
 	# @param init initialization variable
 	def __init__(self, init):
 		object.__init__(self)
+		# Contains all the actions applied to this state
+		self.actionList = []
 
 		# If INIT IS A GRAPH
 		if isinstance(init, list):

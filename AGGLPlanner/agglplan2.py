@@ -31,9 +31,9 @@
     @ingroup PyAPI
     This file loads the grammar, the initial state of the world and the GOAL status without changing the files extensions of the grammar and the goal.
 
-    MODE USE:	agglplan grammar.aggl init.xml target.aggt
+    MODE USE:	agglplan2 grammar.aggl init.xml target.aggt learning.data
 
-    Also, we can keep the results in a file with: agglplan grammar.aggl init.xml target.xml result.plan
+    Also, we can keep the results in a file with: agglplan grammar.aggl init.xml target.xml learning.data result.plan
 """
 
 # Python distribution imports
@@ -43,15 +43,16 @@ sys.path.append('/usr/local/share/agm/')
 from AGGL import *
 from parseAGGL import *
 from generateAGGLPlannerCode import *
-from agglplanner import *
+from agglplanner2 import *
 from agglplanchecker import *
+# from generate import Generate
 
 if __name__ == '__main__': # program domain problem result
 	# We check if the program was run with all necessary arguments.
 	# If there aren't all the arguments, we show an error mesage with how to use the program.
 	# If there are all the arguments, we keep them in local variables.
-	if len(sys.argv)<4:
-		print 'Usage\n\t', sys.argv[0], ' domain.aggl init.xml target.aggt [result.plan]'
+	if len(sys.argv)<5:
+		print 'Usage\n\t', sys.argv[0], ' domain.aggl init.xml target.aggt store.data [result.plan]'
 	else:
 		## the file that contains the grammar rules
 		domainFile = sys.argv[1]
@@ -59,10 +60,15 @@ if __name__ == '__main__': # program domain problem result
 		worldFile  = sys.argv[2]
 		## the goal o target world status
 		targetFile = sys.argv[3]
+		## probability distribution over
+		trainFile = sys.argv[4]
+		# threshFile = "prb_distrb.prb"
+		# g = Generate()
+		# g.get_distrb(worldFile, targetFile, trainFile, threshFile)
 		## the file name where we keep the results of the program
 		result = None
-		if len(sys.argv)>4:
-			result = sys.argv[4]
+		if len(sys.argv)>5:
+			result = sys.argv[5]
 
 		print '\nGenerating search code...'
 
@@ -80,7 +86,7 @@ if __name__ == '__main__': # program domain problem result
 			# This sentence creates a graph based on the target world status
 			graph = graphFromXMLFile(targetFile)
 			## Generate the python code correspondig to the graph and
-			outputText = generateTarget(agmData, graph)
+			outputText = generateTarget(graph)
 		## Save the python code of the target world status in the file target.py.
 		ofile = open("/tmp/target.py", 'w')
 		ofile.write(outputText)
@@ -92,9 +98,9 @@ if __name__ == '__main__': # program domain problem result
 		## We store the initial or start time of the planner and call the agglplaner, the main program that makes all the process...
 		start = time.time()
 		if result:
-			subprocess.call(["agglplanner", domainFile, "/tmp/domain.py", worldFile, "/tmp/target.py", result])
+			subprocess.call(["agglplanner2", domainFile, "/tmp/domain.py", worldFile, "/tmp/target.py", trainFile, result])
 		else:
-			subprocess.call(["agglplanner", domainFile, "/tmp/domain.py", worldFile, "/tmp/target.py"])
+			subprocess.call(["agglplanner2", domainFile, "/tmp/domain.py", worldFile, "/tmp/target.py", trainFile])
 		## We store the final time of the planner to calculate the total duration of the program
 		end = time.time()
 		print 'It took', end - start, 'seconds'

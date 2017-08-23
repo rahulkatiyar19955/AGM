@@ -2,44 +2,44 @@
 
 # -*- coding: utf-8 -*-
 #
-#  -------------------------
-#  -----  AGGLPlanner  -----
-#  -------------------------
+#  --------------------------
+#  -----  AGGLPlanner2  -----
+#  --------------------------
 #
 #  A free/libre open source AI planner.
 #
 #  Copyright (C) 2013 - 2017 by Luis J. Manso
 #
-#  AGGLPlanner is free software: you can redistribute it and/or modify
+#  AGGLPlanner2 is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  AGGLPlanner is distributed in the hope that it will be useful,
+#  AGGLPlanner2 is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with AGGLPlanner. If not, see <http://www.gnu.org/licenses/>.
+#  along with AGGLPlanner2. If not, see <http://www.gnu.org/licenses/>.
 
 
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
-"""@package agglplanner
+"""@package agglplanner2
     @ingroup PyAPI
     This file loads the grammar, the initial state of the world and the GOAL status without changing the files extensions of the grammar and the goal.
 
-    Usage: agglplanner grammar.aggl init.xml target.py
+    Usage: agglplanner2 grammar.aggl init.xml target.py trainFile
 
-    Also, we can keep the results in a file with: agglplanner grammar.aggl init.xml target.py result.plan
+    Also, we can keep the results in a file with: agglplanner2 grammar.aggl init.xml target.py trainFile result.plan
 """
 
 import time
 #import signal
 import thread
-
+import pickle
 #signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 import sys, traceback, os, re, threading, time, string, math, copy
@@ -57,6 +57,7 @@ import xmlModelParser
 import agglplanchecker
 from agglplanchecker import *
 from agglplannerplan import *
+from generate import *
 
 # C O N F I G U R A T I O N
 number_of_threads = 0 #4
@@ -64,7 +65,7 @@ maxWorldIncrement = 5
 maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
-maxTimeWaitAchieved = 5.
+maxTimeWaitAchieved = 1.5
 maxTimeWaitLimit = 2500.
 
 
@@ -306,44 +307,6 @@ class LockableInteger(object):
 
 
 
-
-
-if __name__ == '__main__': # program domain problem result
-	#from pycallgraph import *
-	#from pycallgraph.output import GraphvizOutput
-	#graphviz = GraphvizOutput()
-	#graphviz.output_file = 'basic.png'
-	if True:
-	#with PyCallGraph(output=graphviz):
-		from parseAGGL import AGMFileDataParsing   #AGMFileDataParsing en fichero parseAGGL.py
-		t0 = time.time()
-
-		if len(sys.argv)<5:
-			print 'Usage\n\t', sys.argv[0], ' domain.aggl activeRules.py init.xml target.xml.py [result.plan] [input_hierarchical.plan]'
-
-		else:
-			domainAGM = AGMFileDataParsing.fromFile(sys.argv[1]) #From domain.aggl
-			domainPath = sys.argv[2] # Get the activeRules.py path
-			initPath = sys.argv[3]       # Get the inital model or world.
-			targetPath = sys.argv[4] # Get the target model or world.
-			resultFile = None
-			if len(sys.argv)>=6: resultFile = open(sys.argv[5], 'w')
-			hierarchicalInputPlan = None
-			if len(sys.argv)>=7: hierarchicalInputPlan = open(sys.argv[6], 'r')
-
-			domainRuleSet = imp.load_source('module__na_me', domainPath).RuleSet()
-			targetCode = imp.load_source('modeeeule__na_me', targetPath).CheckTarget
-			p = AGGLPlanner(domainAGM, domainRuleSet, initPath, targetCode, '', dict(), [], resultFile)
-			p.run()
-		print 'Total time: ', (time.time()-t0).__str__()
-
-
-
-
-
-
-
-
 class DomainInformation(object):
 	def __init__(self, identifier, text):
 		self.identifier = identifier
@@ -364,11 +327,11 @@ class DomainInformation(object):
 
 
 class TargetInformation(object):
-	def __init__(self, identifier, text, agm):
+	def __init__(self, identifier, text):
 		self.identifier = identifier
 		self.text = text
-		self.code = generateTarget_AGGT(agm, AGMFileDataParsing.targetFromText(text))
 		self.module = self.getModuleFromText(self.code).CheckTarget
+		self.code = generateTarget_AGGT(self.module, AGMFileDataParsing.targetFromText(text))
 	def getModuleFromText(self, moduleText):
 		if len(moduleText) < 10:
 			print 'len(moduleText) < 10'
@@ -378,12 +341,8 @@ class TargetInformation(object):
 		return m
 
 
-
-
-
-
 ## @brief This is the main class. This makes all the process in order to create, check and execute the plan.
-class AGGLPlanner(object):
+class AGGLPlanner2(object):
 	## @brief The constructor method. This initializes all the attributes of the class and makes the first check of the plan.
 	# @param domainAGM  is the file name where is saved the grammar rules.
 	# @param domainPath is the file name where is saved the grammar rules.
@@ -395,14 +354,27 @@ class AGGLPlanner(object):
 	# @param resultFile is the optional name of the file where the plan result will be stored.
 	# @param decomposing: added whe we are decomposing a jerarchical rule
 	# @param awakenRules: the set of rules that are currently available for the planner to find a solution
-	def __init__(self, domainParsed, domainModule, initWorld, target, indent=None, symbol_mapping=None, excludeList=None, resultFile=None, decomposing=False, awakenRules=set()):
+	def __init__(self, domainParsed, domainModule, initWorld, targetTuple, trainFile, indent=None, symbol_mapping=None, excludeList=None, resultFile=None, decomposing=False, awakenRules=set()):
 		object.__init__(self)
+		#print 'domainParsed', type(domainParsed)
+		#print 'domainModule', type(domainModule)
+		#print 'initWorld', type(initWorld)
+		#print 'targetTuple', type(targetTuple)
+		#print 'threshData', type(threshData)
+		#print 'indent', type(indent)
+		#print 'symbol_mapping', type(symbol_mapping)
+		#print 'excludeList', type(excludeList)
+		#print 'decomposing', type(decomposing)
+		#print 'awakenRules', type(awakenRules)
+		print(initWorld)
 		self.timeElapsed = 0.
 		self.symbol_mapping = copy.deepcopy(symbol_mapping)
 		if excludeList == None: excludeList = []
 		self.excludeList = copy.deepcopy(excludeList)
 		self.indent = copy.deepcopy(indent)
 		self.resultFile = resultFile
+		target = targetTuple[0]
+		self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary = targetTuple[1]()
 		if self.indent == None: self.indent = ''
 		# Get initial world mdoel
 		if isinstance(initWorld,unicode) or isinstance(initWorld,str):
@@ -441,11 +413,13 @@ class AGGLPlanner(object):
 		# set stop flat
 		self.externalStopFlag = LockableInteger(0)
 
+
 	def setStopFlag(self):
 		print 'got setStopFlag (internal class)'
 		self.externalStopFlag.set(1)
 
 	def run(self):
+		print 'AGGLPlanner2.run'
 		# Search initialization
 		## This attribute indicates the maximum size that can reach the graph
 		self.maxWorldSize = maxWorldIncrement+len(self.initWorld.graph.nodes.keys())
@@ -453,6 +427,8 @@ class AGGLPlanner(object):
 		self.minCostOnOpenNodes = LockableInteger(0)
 		## self.openNodes is a lockable list that contains all the open nodes of the state space that have not been completely explored.
 		self.openNodes = LockableList()
+		## This is the lockable list of all the stales nodes
+		self.staleNodes = LockableList()
 		## self.knownNodes is a lockable list that contains of all the know nodes of the graph, that is, those that have been completely explored.
 		self.knownNodes = LockableList()
 		## This is the lockable list of all the calculated results.
@@ -469,9 +445,30 @@ class AGGLPlanner(object):
 
 		# Create initial state
 		if self.symbol_mapping:
-			self.initWorld.score, achieved, unused = self.targetCode(self.initWorld.graph, self.symbol_mapping)
+			self.initWorld.score, achieved, variables_achieved = self.targetCode(self.initWorld.graph, self.symbol_mapping)
 		else:
-			self.initWorld.score, achieved, unused = self.targetCode(self.initWorld.graph)
+			self.initWorld.score, achieved, variables_achieved = self.targetCode(self.initWorld.graph)
+
+
+		print 'TARGET VARIABLES'
+		print self.targetVariables_types
+ 		print self.targetVariables_binary
+		print self.targetVariables_unary
+		types_achieved  = variables_achieved[0] & self.targetVariables_types
+		binary_achieved = variables_achieved[1] & self.targetVariables_binary
+		unary_achieved  = variables_achieved[2] & self.targetVariables_unary
+		print 'ACHIEVED VARIABLES'
+		print types_achieved
+		print binary_achieved
+		print unary_achieved
+		self.trainFile = trainFile
+		# Getting Action Preference data
+		g = Generate()
+		# Sorting actions by relevance
+		self.threshData = g.get_distrb(self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary, self.trainFile)
+		print self.threshData
+		self.threshData = sorted(self.threshData)
+
 
 		if achieved:
 			# If the goal is achieved, we save the solution in the result list, the
@@ -495,6 +492,7 @@ class AGGLPlanner(object):
 				lock.acquire()
 				threadStatus.append(True)
 				self.thread_locks.append(lock)
+				#                        def startThreadedWork( ruleMap,                 triggerMap,                     lock=None, i=0, threadPoolStatus=None):
 				thread.start_new_thread(self.startThreadedWork, (copy.deepcopy(ruleMap), copy.deepcopy(self.triggerMap), lock, i, threadStatus))
 			# Wait for the threads to stop
 			for lock in self.thread_locks:
@@ -595,15 +593,17 @@ class AGGLPlanner(object):
 					estadoIntermedio = self.triggerMap[ac.name](self.initWorld, ac.parameters)
 					""" We remove the constants created by the hierarchical rule, making them variables."""
 					graph = setNewConstantsAsVariables(self.initWorld.graph, estadoIntermedio.graph)
-					outputText = generateTarget(self.domainParsed, graph)
+					outputText = generateTarget(self.domainParsed, graph)#, xgraph=estadoIntermedio.graph)
 					""" The following flag is set so the planning of the hierarchical rule is shown on screen"""
 					firstActionIsHierarchical = True
 					hierarchicalTarget = self.domainModule.getHierarchicalTargets()[ac.name]
-					aaa = AGGLPlanner( # domainParsed, domainModule, initWorld, target, indent=None, symbol_mapping=None, excludeList=None, resultFile=None, decomposing=False, awakenRules=set()):
+					hierarchicalTargetVariables = getattr(self.domainModule, ac.name+'_variables')
+					aaa = AGGLPlanner2( #domainParsed, domainModule, initWorld, targetTuple, threshData, indent=None, symbol_mapping=None, excludeList=None, resultFile=None, decomposing=False, awakenRules=set()):
 					   self.domainParsed,
 					   self.domainModule,
 					   self.initWorld,
-					   hierarchicalTarget,
+					   (hierarchicalTarget, hierarchicalTargetVariables),
+					   self.trainFile,
 					   self.indent+'\t',
 					   paramsWithoutNew,
 					   self.excludeList,
@@ -680,6 +680,18 @@ class AGGLPlanner(object):
 			threadPoolStatus.unlock()
 		# We take the initial time.
 		timeA = datetime.datetime.now()
+		# Size of operator chunk
+		chunkSize = [0.3, 0.7, 0.8, 1.0]
+		# chunkSize = [1.0]
+		# TimeSlots for chunks
+		chunkTime = [10., 0.05, 0.075, 0.05]
+		# chunkTime = [100.]
+		print chunkTime
+		# Chunk pointer
+		chunkNumber = -1
+		# known Flag
+		knownFlag = False
+
 		self.timeElapsed = -1.
 
 
@@ -707,95 +719,126 @@ class AGGLPlanner(object):
 					self.end_condition.set("TimeLimit")
 				lock.release()
 				return
-			#
-			# Pop an unexplored node from the queue, according to the heuristic. The popped node is stored in a variable named "head"
-			#
-			try:
-				# We take the head of the openNodes list: the first open node.
-				head = self.openNodes.heapqPop()[1] # P O P   POP   p o p   pop
-				if threadPoolStatus:
-					threadPoolStatus.lock()
-					threadPoolStatus[i] = True # We say that the thread i is active.
-					threadPoolStatus.unlock()
-				self.knownNodes.append(head)
-			except:
-				#traceback.print_exc()
-				if not threadPoolStatus:
-					self.end_condition.set("IndexError")
-					lock.release()
-					return
-				time.sleep(0.001)
-				threadPoolStatus.lock()
-				threadPoolStatus[i] = False
-				if not True in threadPoolStatus:
-					self.end_condition.set("IndexError")
-					lock.release()
-					return
-				threadPoolStatus.unlock()
-				continue
-			#
-			# We now check other end conditions
-			#
-			# Update 'minCostOnOpenNodes', so we can stop when the minimum cost in the queue is bigger than one in the results
-			self.updateMinCostOnOpenNodes(head.cost)
-			# Check if we got to the maximum cost or the minimum solution
-			if head.cost > maxCost:
-				self.end_condition.set("MaxCostReached")
-				lock.release()
-				return
-			elif self.results.size()>0 and head.cost>self.cheapestSolutionCost.value and stopWithFirstPlan:
-				self.end_condition.set("GoalAchieved")
-				lock.release()
-				return
-			#
-			# For each action in the domain (for k in ruleMap) we generate the possible nodes of the state space that can
-			# be reached from the state described in 'head'.
-			#
-			if verbose>5: print 'Expanding'.ljust(5), head
-			# The dictionary 'ruleMap' contains the python implementation of the actions in the domain.
-  			# For each action 'k', in the domain:
-			for k in ruleMap:
-				# Calling ruleMap[k] with the most promising node of the list of nodes to explore (head)
- 				# returns all the nodes that can be reached from the previously mentioned node. We iterate over
-				# those nodes.
-				for deriv in ruleMap[k](head):
-					# At this point 'deriv' is one of the nodes that can be reached by applying the action 'k' to the node 'head'
-					self.explored.increase() # Add 1 to the number of explored nodes (used just for providing the information to the user)
-					# Compute the heuristic (score) and whether or not the goal is met
-					if self.symbol_mapping:
-						deriv.score, achieved, unused = self.targetCode(deriv.graph, self.symbol_mapping)
-					else:
-						deriv.score, achieved, unused = self.targetCode(deriv.graph)
-					# If the goal is achieved after executing the action we append the new node in the list of nodes that achieve the mission
-					if achieved:
-						self.results.append(deriv)
-						if stopWithFirstPlan:
-							self.end_condition.set("GoalAchieved")
-							lock.release()
-							return
-						# Compute cheapest solution
-						self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
-					# Check if the node was already in the list of known nodes
-					self.knownNodes.lock()
-					notDerivInKnownNodes = not self.computeDerivInKnownNodes(deriv)
-					self.knownNodes.unlock()
-					# If the node is not in the list of known nodes, append it to the list of openNodes
-					if notDerivInKnownNodes:
-						if deriv.stop == False:
-							if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
-								self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) )
-			if verbose > 0:
-				doIt=False
-				nowNow = datetime.datetime.now()
+			chunkNumber = (chunkNumber + 1)%len(chunkSize)
+			if chunkNumber == len(chunkSize) - 1:
+				knownFlag = True
+			else:
+				knownFlag = False
+
+			while len(self.staleNodes) > 0:
+				self.openNodes.heapqPush(self.staleNodes.heapqPop())
+
+
+			# Loop shall ran for one chunk time
+			while True:
+				timeC = datetime.datetime.now()
+				timeElapsed = float((timeC-timeA).seconds) + float((timeC-timeA).microseconds)/1e6
+				timeElapsedChunk = float((timeC-timeB).seconds) + float((timeC-timeB).microseconds)/1e6
+				nResults = self.results.size()
+				if timeElapsed > maxTimeWaitLimit or (timeElapsed > maxTimeWaitAchieved and nResults > 0):
+					break
+				if timeElapsedChunk >= chunkTime[chunkNumber]:
+					print 'timeElapsedChunk >= chunkTime[chunkNumber]'
+					break
+				if self.externalStopFlag.get() != 0:
+					self.end_condition.set('ExternalFlag')
+					break
+				#
+				# Pop an unexplored node from the queue, according to the heuristic. The popped node is stored in a variable named "head"
+				#
 				try:
-					elap = (nowNow-self.lastTime).seconds + (nowNow-self.lastTime).microseconds/1e6
-					doIt = elap > 3
+					# We take the head of the openNodes list: the first open node.
+					headNode = self.openNodes.heapqPop() # P O P   POP   p o p   pop
+					head = headNode[1]
+					if threadPoolStatus:
+						threadPoolStatus.lock()
+						threadPoolStatus[i] = True # We say that the thread i is active.
+						threadPoolStatus.unlock()
+					if knownFlag:
+						self.knownNodes.append(head)
+					else:
+						self.staleNodes.append(headNode)
 				except:
-					self.lastTime = datetime.datetime.now()
-					doIt = True
-				if doIt:
-					self.lastTime = nowNow
-					print str(int(self.timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
+					#traceback.print_exc()
+					if not threadPoolStatus:
+ 						if chunkNumber!=len(chunkSize)-1: # we dont raise IndexError unless we are in the last chunk
+							print 'skipping chunk because the space state was exhausted for the current one'
+							break
+						self.end_condition.set("IndexError")
+						lock.release()
+						return
+					time.sleep(0.001)
+					threadPoolStatus.lock()
+					threadPoolStatus[i] = False
+					if not True in threadPoolStatus:
+ 						if chunkNumber!=len(chunkSize)-1: # we dont raise IndexError unless we are in the last chunk
+							print 'skipping chunk because the space state was exhausted for the current one'
+							break
+						self.end_condition.set("IndexError")
+						lock.release()
+						return
+					threadPoolStatus.unlock()
+					continue
+				#
+				# We now check other end conditions
+				#
+				# Update 'minCostOnOpenNodes', so we can stop when the minimum cost in the queue is bigger than one in the results
+				self.updateMinCostOnOpenNodes(head.cost)
+				# Check if we got to the maximum cost or the minimum solution
+				if head.cost > maxCost:
+					self.end_condition.set("MaxCostReached")
+					lock.release()
+					return
+				elif self.results.size()>0 and head.cost>self.cheapestSolutionCost.value and stopWithFirstPlan:
+					self.end_condition.set("GoalAchieved")
+					lock.release()
+					return
+				#
+				# For each action in the domain (for k in ruleMap) we generate the possible nodes of the state space that can
+				# be reached from the state described in 'head'.
+				#
+				if verbose>5: print 'Expanding'.ljust(5), head
+				for k in self.threshData[0:int(len(self.threshData) * chunkSize[chunkNumber])]:
+					if k not in head.actionList and k in ruleMap:
+						head.actionList.append(k)
+						# Iterate over rules and generate derivates
+						if True:# k in head.awakenRules:
+							for deriv in ruleMap[k](head):
+								self.explored.increase()
+								if self.symbol_mapping:
+									deriv.score, achieved, variables_achieved = self.targetCode(deriv.graph, self.symbol_mapping)
+								else:
+									deriv.score, achieved, variables_achieved = self.targetCode(deriv.graph)
+								if achieved:
+									self.results.append(deriv)
+									if stopWithFirstPlan:
+										self.end_condition.set("GoalAchieved")
+										lock.release()
+										return
+									# Compute cheapest solution
+									self.updateCheapestSolutionCostAndCutOpenNodes(self.results[0].cost)
+								self.knownNodes.lock()
+								notDerivInKnownNodes = not self.computeDerivInKnownNodes(deriv)
+								self.knownNodes.unlock()
+								self.staleNodes.lock()
+								notDerivInStaleNodes = not self.computeDerivInStaleNodes(deriv)
+								self.staleNodes.unlock()
+								if notDerivInKnownNodes and notDerivInStaleNodes:
+									if deriv.stop == False:
+										if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
+											self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+				if verbose > 0:
+					doIt=False
+					nowNow = datetime.datetime.now()
+					try:
+						elap = (nowNow-self.lastTime).seconds + (nowNow-self.lastTime).microseconds/1e6
+						doIt = elap > 3
+					except:
+						self.lastTime = datetime.datetime.now()
+						doIt = True
+					if doIt:
+						self.lastTime = nowNow
+						print str(int(self.timeElapsed)).zfill(10)+','+str(len(self.openNodes))+','+str(len(self.knownNodes))+','+str(head.score)
 
 
 	def updateCheapestSolutionCostAndCutOpenNodes(self, cost):
@@ -835,3 +878,44 @@ class AGGLPlanner(object):
 				if other.cost <= deriv.cost:
 					return True
 		return False
+
+	def  computeDerivInStaleNodes(self, deriv):
+		for other in self.staleNodes:
+			if deriv == other[1]:
+				if other[1].cost <= deriv.cost:
+					return True
+		return False
+
+
+
+if __name__ == '__main__': # program domain problem result
+	#from pycallgraph import *
+	#from pycallgraph.output import GraphvizOutput
+	#graphviz = GraphvizOutput()
+	#graphviz.output_file = 'basic.png'
+	if True:
+	#with PyCallGraph(output=graphviz):
+		from parseAGGL import AGMFileDataParsing   #AGMFileDataParsing en fichero parseAGGL.py
+		t0 = time.time()
+
+		if len(sys.argv)<6:
+			print 'Usage\n\t', sys.argv[0], ' domainFile.aggl activeRules.py init.xml target.xml.py trainFile [result.plan] [input_hierarchical.plan]'
+
+		else:
+			domainAGM = AGMFileDataParsing.fromFile(sys.argv[1]) #From domain.aggl
+			domainPath = sys.argv[2]                            # ActiveRules.py path
+			initPath =   sys.argv[3]                            # Inital model or world.
+			targetPath = sys.argv[4]                            # Target model or world.
+			trainFile = sys.argv[5] # Sorting actions by relevance
+			resultFile = None
+			if len(sys.argv)>=7: resultFile = open(sys.argv[6], 'w')
+			hierarchicalInputPlan = None
+			if len(sys.argv)>=8: hierarchicalInputPlan = open(sys.argv[7], 'r')
+
+			domainRuleSet = imp.load_source('module__na_me', domainPath).RuleSet()
+			targetCode = imp.load_source('modeeeule__na_me', targetPath).CheckTarget
+			targetVariablesCode = imp.load_source('modeeeule__na_me', targetPath).getTargetVariables
+			#                domainParsed domainModule initWorld targetTuple,                       threshData indent symbol_mapping excludeList, resultFile, decomposing, awakenRules):
+			p = AGGLPlanner2(domainAGM, domainRuleSet, initPath, (targetCode, targetVariablesCode), trainFile, '',    dict(),        [],         resultFile)
+			p.run()
+		print 'Total time: ', (time.time()-t0).__str__()
