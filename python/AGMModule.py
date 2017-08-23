@@ -596,3 +596,4 @@ class Appearance(QWidget):
 		dashPattern.append(self.ui.spacePattern.value() * lineThickness)
 		dashPattern.append(self.ui.shortPattern.value() * lineThickness)
 		dashPattern.append(self.ui.spacePattern.value() * lineThickness)
+

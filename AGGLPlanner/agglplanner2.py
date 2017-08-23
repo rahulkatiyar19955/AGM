@@ -2,44 +2,45 @@
 
 # -*- coding: utf-8 -*-
 #
-#  --------------------------
-#  -----  AGGLPlanner2  -----
-#  --------------------------
+#  -------------------------
+#  -----  AGGLPlanner  -----
+#  -------------------------
 #
 #  A free/libre open source AI planner.
 #
 #  Copyright (C) 2013 - 2017 by Luis J. Manso
 #
-#  AGGLPlanner2 is free software: you can redistribute it and/or modify
+#  AGGLPlanner is free software: you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License as published by
 #  the Free Software Foundation, either version 3 of the License, or
 #  (at your option) any later version.
 #
-#  AGGLPlanner2 is distributed in the hope that it will be useful,
+#  AGGLPlanner is distributed in the hope that it will be useful,
 #  but WITHOUT ANY WARRANTY; without even the implied warranty of
 #  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #  GNU General Public License for more details.
 #
 #  You should have received a copy of the GNU General Public License
-#  along with AGGLPlanner2. If not, see <http://www.gnu.org/licenses/>.
+#  along with AGGLPlanner. If not, see <http://www.gnu.org/licenses/>.
 
 
 
 
 #---------------------------------------------------------------------------------------------------------------------------------------------------#
-"""@package agglplanner2
+"""@package agglplanner
     @ingroup PyAPI
     This file loads the grammar, the initial state of the world and the GOAL status without changing the files extensions of the grammar and the goal.
 
-    Usage: agglplanner2 grammar.aggl init.xml target.py trainFile
+    Usage: agglplanner grammar.aggl init.xml target.py trainFile
 
-    Also, we can keep the results in a file with: agglplanner2 grammar.aggl init.xml target.py trainFile result.plan
+    Also, we can keep the results in a file with: agglplanner grammar.aggl init.xml target.py trainFile result.plan
 """
 
 import time
 #import signal
 import thread
 import pickle
+
 #signal.signal(signal.SIGINT, signal.SIG_DFL)
 
 import sys, traceback, os, re, threading, time, string, math, copy
@@ -356,17 +357,6 @@ class AGGLPlanner2(object):
 	# @param awakenRules: the set of rules that are currently available for the planner to find a solution
 	def __init__(self, domainParsed, domainModule, initWorld, targetTuple, trainFile, indent=None, symbol_mapping=None, excludeList=None, resultFile=None, decomposing=False, awakenRules=set()):
 		object.__init__(self)
-		#print 'domainParsed', type(domainParsed)
-		#print 'domainModule', type(domainModule)
-		#print 'initWorld', type(initWorld)
-		#print 'targetTuple', type(targetTuple)
-		#print 'threshData', type(threshData)
-		#print 'indent', type(indent)
-		#print 'symbol_mapping', type(symbol_mapping)
-		#print 'excludeList', type(excludeList)
-		#print 'decomposing', type(decomposing)
-		#print 'awakenRules', type(awakenRules)
-		print(initWorld)
 		self.timeElapsed = 0.
 		self.symbol_mapping = copy.deepcopy(symbol_mapping)
 		if excludeList == None: excludeList = []
@@ -418,8 +408,28 @@ class AGGLPlanner2(object):
 		print 'got setStopFlag (internal class)'
 		self.externalStopFlag.set(1)
 
+
+	def getProbabilityDensityFunctionGenerator(self, trainFile):
+		splitted = trainFile.split(':')
+		if len(splitted) > 2:
+			print 'internal error f'
+			sys.exit(-1)
+		print 'learn file:', splitted[1]
+		print 'learn file:', splitted[1]
+		method = splitted[0].lower()
+		if method == 'naivebayes':
+			return Generate(splitted[1])
+		elif method == 'none':
+			print 'method', method, ' to be implemented'
+			sys.exit(-1)
+		elif method == 'dummysemantics':
+			print 'method', method, ' to be implemented'
+			sys.exit(-1)
+		else:
+			print 'method', method, 'not supported'
+			sys.exit(-1)
+
 	def run(self):
-		print 'AGGLPlanner2.run'
 		# Search initialization
 		## This attribute indicates the maximum size that can reach the graph
 		self.maxWorldSize = maxWorldIncrement+len(self.initWorld.graph.nodes.keys())
@@ -462,10 +472,12 @@ class AGGLPlanner2(object):
 		print binary_achieved
 		print unary_achieved
 		self.trainFile = trainFile
+
 		# Getting Action Preference data
-		g = Generate()
+		g = self.getProbabilityDensityFunctionGenerator(self.trainFile)
+
 		# Sorting actions by relevance
-		self.threshData = g.get_distrb(self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary, self.trainFile)
+		self.threshData = g.get_distrb(self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary)
 		print self.threshData
 		self.threshData = sorted(self.threshData)
 

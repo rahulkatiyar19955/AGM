@@ -34,7 +34,7 @@ def constantHeader(agm):
 	return """import copy, sys, cPickle
 sys.path.append('/usr/local/share/agm/')
 from AGGL import *
-from agglplanner import *
+from agglplannerplan import *
 
 def computeMaxScore(a, b, maxScore):
 	s = 0
@@ -188,7 +188,12 @@ def newLinkScore(linkList, newSymbol, alreadyThere):
 			else: negated = ''
 			# Condition itself
 			if ((newSymbol == link.a) and (link.b in alreadyThere)) or ((newSymbol == link.b) and (link.a in alreadyThere)):
-				ret.append('if [n2id["'+str(link.a)+'"],n2id["'+str(link.b)+'"],"'+str(link.linkType)+'"] ' + negated + ' in graph.links: linksVal += 100')
+				ret.append('if [n2id["'+str(link.a)+'"],n2id["'+str(link.b)+'"],"'+str(link.linkType)+'"] ' + negated + ' in graph.links:')
+				ret.append('\tlinksVal += 100')
+				if link.a != link.b:
+					ret.append('\tbinary.add(("'+link.linkType+'", graph.nodes[n2id["'+link.a+'"]].sType, graph.nodes[n2id["'+link.b+'"]].sType))')
+				else:
+					ret.append('\tunary.add(("'+link.linkType+'", graph.nodes[n2id["'+link.a+'"]].sType))')
 	return ret
 
 
@@ -931,10 +936,10 @@ def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 #
 # @param graph is the target graph used to generate the target code.
 # @param forHierarchicalRule is a condition. It means that the target uses hierarchical rules.
-# @param lgraph I dont have any idea of this param... It is the graph of the left hand?
+# @param lgraph It is the graph of the left hand
 #
 # @retval ret is the python code used to chek the target world state.
-def generateTarget(agm, graph, forHierarchicalRule='', lgraph=None, verbose=False):
+def generateTarget(agm, graph, forHierarchicalRule='', lgraph=None, verbose=False, xgraph=None):
 	# Variables del programa
 	linkList = []   # vector de enlaces del grafo.
 
@@ -946,7 +951,7 @@ def generateTarget(agm, graph, forHierarchicalRule='', lgraph=None, verbose=Fals
 	indent = "\n\t"
 
 	if len(forHierarchicalRule)==0:
-		ret += """import copy, sys\nsys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import *\n
+		ret += """import copy, sys\nsys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplannerplan import *\n
 def computeMaxScore(a, b, maxScore):
 	s = 0
 	for i in a: s+=i
@@ -954,19 +959,21 @@ def computeMaxScore(a, b, maxScore):
 	if s > maxScore: return s
 	return maxScore\n
 """ + generateTypeCode(agm) + """
-def CheckTarget(graph):\n
+def CheckTarget(graph):
 	n2id = dict()                             # diccionario
 	available = copy.deepcopy(graph.nodes)    # lista de nodos del grafo inicial.
 """
 	else:
 		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping=dict()): # vm'
 		indent += "\t"
-		#ret += indent + 'print "' + forHierarchicalRule + '_target"\n'
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 		ret += indent+"available = copy.deepcopy(graph.nodes)"
 
 	ret += indent+"maxScore = 0"
 	ret += indent+"totalScore = " + str(calcularTotalScore(graph)) + '\n'
+	ret += indent+"binary = set([])"
+	ret += indent+"types = set([])"
+	ret += indent+"unary = set([])"
 
 	# Sacamos los enlaces y los transformamos de AGMLink a tuplas de string [origen, enlace, destino]
 	# y los ordenamos de menor a mayor con el metodo sorted
@@ -1069,15 +1076,47 @@ def CheckTarget(graph):\n
 			realCond += 1
 			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
 	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
-	ret += indent+"\treturn maxScore, True"
+	ret += indent+"\treturn maxScore, True, None"
 
 	# Rule ending
 	while len(pops)>0:
 		ret += pops.pop()
 	indent = "\n\t"
 	if len(forHierarchicalRule)>0: indent+='\t'
-	ret += indent+"return maxScore, False"
+	ret += indent+"return maxScore, False, None"
 	ret += "\n"
+
+
+	# Generate code for getting the variables (we still need to take preconditions into account!)
+	if len(forHierarchicalRule)==0:
+		ret += """\n\ndef getTargetVariables():"""
+	else:
+		ret += indent[:-1]+'def ' + forHierarchicalRule + '_variables(self):'
+		indent += "\t"
+	types = set()
+	binary = set()
+	unary = set()
+
+	for link_i in range(len(graph.links)):
+		link = graph.links[link_i]
+		if link.a in graph.nodes.keys():
+			aType = graph.nodes[link.a].sType
+		else:
+			aType = link.a#xgraph.nodes[link.a].sType
+		if link.b in graph.nodes.keys():
+			bType = graph.nodes[link.b].sType
+		else:
+			bType = link.b#xgraph.nodes[link.b].sType
+		if link.a == link.b:
+			unary.add((link.linkType, aType))
+		else:
+			binary.add((link.linkType, aType, bType))
+	for n in graph.nodes:
+		types.add(graph.nodes[n].sType)
+	ret += indent + 'types = ' + str(types)
+	ret += indent + 'binary = ' + str(binary)
+	ret += indent + 'unary = ' + str(unary)
+	ret += indent + 'return types, binary, unary'
 
 	return ret
 
@@ -1260,13 +1299,14 @@ def componerSubgrafos(grafo, ramasGrafo, constantes):
 
 def generateTarget_AGGT(agm, target, forHierarchicalRule='', lgraph=None, verbose=False):
 	graph = target['graph']
+
 	linkList = []   # vector de enlaces del grafo.
 	constantes, listaNodos = encontrarOrden(graph, lgraph, verbose)
 	ret = ''
 	indent = "\n\t"
 
 	if len(forHierarchicalRule)==0:
-		ret += """import copy, sys\nsys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplanner import *\n
+		ret += """import copy, sys\nsys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplannerplan import *\n
 def computeMaxScore(a, b, maxScore):
 	s = 0
 	for i in a: s+=i
@@ -1274,7 +1314,7 @@ def computeMaxScore(a, b, maxScore):
 	if s > maxScore: return s
 	return maxScore\n
 """ + generateTypeCode(agm) + """
-def CheckTarget(graph):\n
+def CheckTarget(graph):
 	n2id = dict()                             # diccionario
 	available = copy.deepcopy(graph.nodes)    # lista de nodos del grafo inicial.
 """
@@ -1283,6 +1323,12 @@ def CheckTarget(graph):\n
 		indent += "\t"
 		ret += indent+"n2id = copy.deepcopy(smapping)\n"
 		ret += indent+"available = copy.deepcopy(graph.nodes)"
+
+	### <<<
+	ret += indent+'types = set()'
+	ret += indent+'binary = set()'
+	ret += indent+'unary = set()'
+	### >>>
 
 	ret += indent+"maxScore = 0"
 	ret += indent+"totalScore = " + str(calcularTotalScore(graph)) + '\n'
@@ -1375,6 +1421,7 @@ def CheckTarget(graph):\n
 		indent += "\t"
 		score += scorePerContition
 		ret += indent + "scoreNodes.append(100)"
+		ret += indent + 'types.add("'+graph.nodes[n_n].sType+'")'
 		pops.append(indent+'scoreNodes.pop()')
 		ret += indent + "maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)"
 
@@ -1394,18 +1441,41 @@ def CheckTarget(graph):\n
 		preconditionCode, totalCond = generateTargetPreconditionCode(target['precondition'], realCond, indent+'\t')
 		#print totalCond
 		ret += preconditionCode
-		ret += indent+"\t\t\treturn maxScore, True # there were preconditions and were met"
+		ret += indent+"\t\t\treturn maxScore, True, copy.deepcopy((types, binary, unary)) # there were preconditions and were met"
 	else:
 		ret += indent+"if maxScore == " + str(score + totalCond*scorePerContition) + ": # there are no preconditions"
-		ret += indent+"\treturn maxScore, True"
+		ret += indent+"\treturn maxScore, True, copy.deepcopy((types, binary, unary))"
 
 	# Rule ending
 	while len(pops)>0:
 		ret += pops.pop()
 	indent = "\n\t"
 	if len(forHierarchicalRule)>0: indent+='\t'
-	ret += indent+"return maxScore, False"
+	ret += indent+"return maxScore, False, copy.deepcopy((types, binary, unary))"
 	ret += "\n"
+
+
+	# Generate code for getting the variables (we still need to take preconditions into account!)
+	if len(forHierarchicalRule)==0:
+		ret += """\n\ndef getTargetVariables():"""
+	else:
+		ret += indent[:-1]+'def ' + forHierarchicalRule + '_variables(self):'
+		indent += "\t"
+	types = set()
+	binary = set()
+	unary = set()
+	for link_i in range(len(graph.links)):
+		link = graph.links[link_i]
+		if link.a == link.b:
+			unary.add((link.linkType, graph.nodes[link.a].sType))
+		else:
+			binary.add((link.linkType, graph.nodes[link.a].sType, graph.nodes[link.b].sType))
+	for n in graph.nodes:
+		types.add(graph.nodes[n].sType)
+	ret += indent + 'types = ' + str(types)
+	ret += indent + 'binary = ' + str(binary)
+	ret += indent + 'unary = ' + str(unary)
+	ret += indent + 'return types, binary, unary'
 
 	return ret
 

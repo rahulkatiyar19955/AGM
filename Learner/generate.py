@@ -23,8 +23,8 @@ def ignored(*exceptions):
         pass
 
 class Generate:
-	def __init__(self):
-		pass
+	def __init__(self, train_file):
+		self.train_file = train_file
 
 	def fetch(self, fileName):
 		f = open(fileName, "rb")
@@ -45,9 +45,9 @@ class Generate:
 		return prb_distrb
 
 
-	def get_distrb(self, targetVariables_types, targetVariables_binary, targetVariables_unary, train_file):
+	def get_distrb(self, targetVariables_types, targetVariables_binary, targetVariables_unary):
 		'''
-		For singleton testing pass pickled data from train.py . "python fileName initModel.xml target.aggt learning_file"
+		For singleton testing pass pickled data from train.py . "python fileName initModel.xml target.aggt"
 		'''
 		self.classifier = Classifier([])
 		self.parser = Parser()
@@ -71,7 +71,7 @@ class Generate:
 						self.parser.attr_link.append((type1, relation, rel, type2))
 
 		# train_file contains relevant trained data (pickled)
-		self.classifier.prefetch(*self.fetch(train_file))
+		self.classifier.prefetch(*self.fetch(self.train_file))
 		self.prb_distrb = self.normalize(self.classifier.predict(self.parser.attr_link + self.parser.attr_node))
 
 		with ignored(Exception):

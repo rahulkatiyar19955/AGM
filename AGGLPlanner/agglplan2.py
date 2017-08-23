@@ -48,11 +48,24 @@ from agglplanchecker import *
 # from generate import Generate
 
 if __name__ == '__main__': # program domain problem result
+	def find_arg(l, v):
+		for idx, value in enumerate(l):
+			if v == value:
+				if len(l)>idx+1:
+					return l[idx+1]
+		return None
+	def showHelp():
+		print 'Usage\n\t', sys.argv[0], 'domain.aggl init.xml target.aggt [-o result.plan] [-l learning_algorithm[:data_file]]\n'
+		print '-l    The learning algorithm can be one of the following (case insensitive): None, NaiveBayes, DummySemantics.'
+		print '      If no learning method is provided agglplan used "None" as default option.\n'
+		print '-o    Optional file path to store the computed plan. Optional argument.\n'
+		print ''
+		sys.exit(-1)
 	# We check if the program was run with all necessary arguments.
 	# If there aren't all the arguments, we show an error mesage with how to use the program.
 	# If there are all the arguments, we keep them in local variables.
-	if len(sys.argv)<5:
-		print 'Usage\n\t', sys.argv[0], ' domain.aggl init.xml target.aggt store.data [result.plan]'
+	if len(sys.argv)<4:
+		showHelp()
 	else:
 		## the file that contains the grammar rules
 		domainFile = sys.argv[1]
@@ -60,18 +73,24 @@ if __name__ == '__main__': # program domain problem result
 		worldFile  = sys.argv[2]
 		## the goal o target world status
 		targetFile = sys.argv[3]
-		## probability distribution over
-		trainFile = sys.argv[4]
-		# threshFile = "prb_distrb.prb"
-		# g = Generate()
-		# g.get_distrb(worldFile, targetFile, trainFile, threshFile)
 		## the file name where we keep the results of the program
-		result = None
-		if len(sys.argv)>5:
-			result = sys.argv[5]
-
+		result = find_arg(sys.argv, '-o')
+		## probability distribution generator
+		trainFile = find_arg(sys.argv, '-l')
+		if trainFile == None: trainFile = 'none'
+		trainList = trainFile.split(':')
+		trainMethod = trainList[0].lower()
+		print 'trainMethod', trainMethod
+		validMethods = [ 'none', 'naivebayes', 'dummysemantics' ]
+		if not trainMethod in validMethods:
+			print 'ERROR:', trainMethod, 'not in the list of known learning methods: None, NaiveBayes, DummySemantics\n'
+			showHelp()
+		trainList2 = [trainList[0].lower()]
+		if len(trainList)>1:
+			trainList2 += trainList[1:]
+		trainFile = ':'.join(trainList2)
+		print 'learning_algorithm:',trainFile
 		print '\nGenerating search code...'
-
 		## Generate domain Python file <--- like aggl2agglpy.
 		# agmData is a variable of AGMFileData class, in AGGL.py file.
 		# First: we CHECK the grammar. Is a parseAGGL.py's class
