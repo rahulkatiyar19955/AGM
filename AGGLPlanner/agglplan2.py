@@ -51,8 +51,7 @@ if __name__ == '__main__': # program domain problem result
 	def find_arg(l, v):
 		for idx, value in enumerate(l):
 			if v == value:
-				if len(l)>idx+1:
-					return l[idx+1]
+				return l[idx+1]
 		return None
 	def showHelp():
 		print 'Usage\n\t', sys.argv[0], 'domain.aggl init.xml target.aggt [-o result.plan] [-l learning_algorithm[:data_file]]\n'
@@ -73,11 +72,14 @@ if __name__ == '__main__': # program domain problem result
 		worldFile  = sys.argv[2]
 		## the goal o target world status
 		targetFile = sys.argv[3]
-		## the file name where we keep the results of the program
-		result = find_arg(sys.argv, '-o')
-		## probability distribution generator
-		trainFile = find_arg(sys.argv, '-l')
-		if trainFile == None: trainFile = 'none'
+		try:
+			## the file name where we keep the results of the program
+			result = find_arg(sys.argv, '-o')
+			## probability distribution generator
+			trainFile = find_arg(sys.argv, '-l')
+			if trainFile == None: trainFile = 'none'
+		except:
+			showHelp()
 		trainList = trainFile.split(':')
 		trainMethod = trainList[0].lower()
 		print 'trainMethod', trainMethod

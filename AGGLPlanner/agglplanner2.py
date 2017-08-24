@@ -60,6 +60,9 @@ from agglplanchecker import *
 from agglplannerplan import *
 from generate import *
 
+from dummysemanticspredictor import *
+from nopredictor import *
+
 # C O N F I G U R A T I O N
 number_of_threads = 0 #4
 maxWorldIncrement = 5
@@ -411,20 +414,16 @@ class AGGLPlanner2(object):
 
 	def getProbabilityDensityFunctionGenerator(self, trainFile):
 		splitted = trainFile.split(':')
-		if len(splitted) > 2:
-			print 'internal error f'
+		if len(splitted)>2:
+			print 'internal error f', trainFile
 			sys.exit(-1)
-		print 'learn file:', splitted[1]
-		print 'learn file:', splitted[1]
 		method = splitted[0].lower()
 		if method == 'naivebayes':
 			return Generate(splitted[1])
 		elif method == 'none':
-			print 'method', method, ' to be implemented'
-			sys.exit(-1)
+			return NoPredictor(self.domainParsed)
 		elif method == 'dummysemantics':
-			print 'method', method, ' to be implemented'
-			sys.exit(-1)
+			return DummySemanticsPredictor(self.domainParsed)
 		else:
 			print 'method', method, 'not supported'
 			sys.exit(-1)
@@ -476,8 +475,11 @@ class AGGLPlanner2(object):
 		# Getting Action Preference data
 		g = self.getProbabilityDensityFunctionGenerator(self.trainFile)
 
-		# Sorting actions by relevance
-		self.threshData = g.get_distrb(self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary)
+		# Sorting actions by relevance   # #   Size of operator chunk   # #   TimeSlots for chunks
+		self.threshData, chunkSize, chunkTime = g.get_distrb(types_achieved, binary_achieved, unary_achieved, self.initWorld.graph, self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary)
+		self.chunkSize = chunkSize
+		self.chunkTime = chunkTime
+ 		print chunkTime
 		print self.threshData
 		self.threshData = sorted(self.threshData)
 
@@ -692,13 +694,7 @@ class AGGLPlanner2(object):
 			threadPoolStatus.unlock()
 		# We take the initial time.
 		timeA = datetime.datetime.now()
-		# Size of operator chunk
-		chunkSize = [0.3, 0.7, 0.8, 1.0]
-		# chunkSize = [1.0]
-		# TimeSlots for chunks
-		chunkTime = [10., 0.05, 0.075, 0.05]
-		# chunkTime = [100.]
-		print chunkTime
+
 		# Chunk pointer
 		chunkNumber = -1
 		# known Flag
@@ -731,8 +727,8 @@ class AGGLPlanner2(object):
 					self.end_condition.set("TimeLimit")
 				lock.release()
 				return
-			chunkNumber = (chunkNumber + 1)%len(chunkSize)
-			if chunkNumber == len(chunkSize) - 1:
+			chunkNumber = (chunkNumber + 1)%len(self.chunkSize)
+			if chunkNumber == len(self.chunkSize) - 1:
 				knownFlag = True
 			else:
 				knownFlag = False
@@ -749,8 +745,8 @@ class AGGLPlanner2(object):
 				nResults = self.results.size()
 				if timeElapsed > maxTimeWaitLimit or (timeElapsed > maxTimeWaitAchieved and nResults > 0):
 					break
-				if timeElapsedChunk >= chunkTime[chunkNumber]:
-					print 'timeElapsedChunk >= chunkTime[chunkNumber]'
+				if timeElapsedChunk >= self.chunkTime[chunkNumber]:
+					print 'timeElapsedChunk >= self.chunkTime[chunkNumber]'
 					break
 				if self.externalStopFlag.get() != 0:
 					self.end_condition.set('ExternalFlag')
@@ -773,7 +769,7 @@ class AGGLPlanner2(object):
 				except:
 					#traceback.print_exc()
 					if not threadPoolStatus:
- 						if chunkNumber!=len(chunkSize)-1: # we dont raise IndexError unless we are in the last chunk
+ 						if chunkNumber!=len(self.chunkSize)-1: # we dont raise IndexError unless we are in the last chunk
 							print 'skipping chunk because the space state was exhausted for the current one'
 							break
 						self.end_condition.set("IndexError")
@@ -783,7 +779,7 @@ class AGGLPlanner2(object):
 					threadPoolStatus.lock()
 					threadPoolStatus[i] = False
 					if not True in threadPoolStatus:
- 						if chunkNumber!=len(chunkSize)-1: # we dont raise IndexError unless we are in the last chunk
+ 						if chunkNumber!=len(self.chunkSize)-1: # we dont raise IndexError unless we are in the last chunk
 							print 'skipping chunk because the space state was exhausted for the current one'
 							break
 						self.end_condition.set("IndexError")
@@ -810,7 +806,7 @@ class AGGLPlanner2(object):
 				# be reached from the state described in 'head'.
 				#
 				if verbose>5: print 'Expanding'.ljust(5), head
-				for k in self.threshData[0:int(len(self.threshData) * chunkSize[chunkNumber])]:
+				for k in self.threshData[0:int(len(self.threshData) * self.chunkSize[chunkNumber])]:
 					if k not in head.actionList and k in ruleMap:
 						head.actionList.append(k)
 						# Iterate over rules and generate derivates
