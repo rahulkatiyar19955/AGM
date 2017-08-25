@@ -1,17 +1,27 @@
+from __future__ import division
 import sys
 import pickle
+from naiveBayesInputValidator import *
 
 class NaiveBayesClassifier:
 
-	def __init__(attr_freq=None, target_list=None, laplace_constant=0, fileName=None):
+	def __init__(self, attr_freq, target_freq, laplace_constant=1, fileName=None):
 		'''
-		2D Dictionary refernced by target value, attribute value
-		returns number of instance a given attribute value was found given
-		the target value while training.
+		Initializes following variables:
+
+		attr_freq: 2D Dictionary refernced by (target, attribute)
+		returns number of instance an (target, attribute) was trained.
+
+		target_freq: 1D Dictionary referenced by (target) returns number of instance
+		a given target was trained.
+
+		If you want to pass variable data via a file, pickle it and store.
+		Unpickling the file should return a tuple of the form: (attr_freq, target_freq)
 		'''
+
 		self.attr_freq = attr_freq
 		# 1D array target variables
-		self.target_list = target_list
+		self.target_freq = target_freq
 		self.laplace_constant = laplace_constant
 		
 		if self.laplace_constant < 0:
@@ -28,11 +38,30 @@ class NaiveBayesClassifier:
 				loadFromPickle(fileName)
 
 
+	def normalize(self, target_prob, sort=True):
+		'''
+		This function normalizes the probability distribution over all actions
+		'''
+		total = 0
+
+		for target in target_prob:
+			total += target_prob[target]
+
+		for target in target_prob:
+			target_prob[target] = target_prob[target]/total
+		
+		if sort:
+			return sorted(target_prob, key=target_prob.get, reverse=True)
+		else:
+			return target_prob
+
+
 
 	def loadFromPickle(fileName):
-		'''Load pickled data
-		For information about variables read class constructor
-		The pickled data should return two valie 
+		'''
+		File should be pickled.
+		Loading the unpickled file must return a tuple of the form: (attr_freq, target_freq) 
+		For information about attr_freq and target_freq read class constructor
 		'''
 		try:
 			f = open(fileName, "rb")
@@ -47,51 +76,52 @@ class NaiveBayesClassifier:
 			sys.exit(-1)
 
 		try:
-			self.attr_freq, self.target_list = pickle.load(f)
+			self.attr_freq, self.target_freq = pickle.load(f)
 		except ValueError:
 			print("Error: Expected a tuple of form :(<dict>, <list>)")
 
 
-	def getParams():
+	def getParams(self):
+		'''
+		This functions validates certain matrix shape and value requirement.
+		Also it sums up and adds total training instance count
+		All future manipulations can be done in this function
+		'''
 
-		vld = naiveBayesInputValidator(self.target_list, self.attr_freq)
-
-
+		vld = NaiveBayesInputValidator(self.target_freq, self.attr_freq)
+		
 		self.instance_count = 0
-		self.target_count = [0 * len(self.target_list)]
-
-		for target in self.target_list:
-			for attr in self.attr_freq[target]:
-				self.instance_count += self.attr_freq[target][attr]
-				self.target_count[target] += self.attr_freq[target][attr]
-
-		self.laplace_constant = vld.checkZeroDivisionError(self.instance_count, self.target_count, self.laplace_constant)
+		for target in self.target_freq:
+			self.instance_count += self.target_freq[target]
+		
+		self.laplace_constant = vld.checkZeroDivisionError(self.instance_count, self.target_freq, self.laplace_constant)
 	
-	def predict(self, attr_list):
-		'''Provides a probability distribution over target values'''
 
-		getParams()
+	def predict(self, attr_list, normFlag=True):
+		'''
+		Provides a probability distribution over target values
+		attr_list is the list of attributes which are hold true in the instance
+		To normalize the distribution set normFlag to True
+		'''
+
+		self.getParams()
 		target_prob = {}
-		
-		for target in self.target_list:
+
+		for target in self.target_freq:
 			
-			target_prob[target] = self.target_count[target]/self.instance_count
+			target_prob[target] = self.target_freq[target]/self.instance_count
 			
 			for attr in self.attr_freq[target]:
 				
-				prob_term = 1 / (self.target_count[target] + 2 * self.laplace_constant)
-				
-				if attr in self.attr_freq[target]:
-					prob_term *= (self.target_count[target][attr] + self.laplace_constant)
-					if attr in attr_list:
-						target_prob[target] *= prob_term
-					else:
-						target_prob[target] *= 1 - prob_term
+				prob_term = 1 / (self.target_freq[target] + 2 * self.laplace_constant)
+				prob_term *= (self.attr_freq[target][attr] + self.laplace_constant)
+
+				if attr in attr_list:
+					target_prob[target] *= prob_term
 				else:
-					prob_term *= self.laplace_constant
-					if attr in attr_list:
-						target_prob[target] *= prob_term
-					else:
-						target_prob[target] *= 1 - prob_term 
-		
-		return target_prob
+					target_prob[target] *= 1 - prob_term
+
+		if normFlag:
+			return self.normalize(target_prob)
+		else:
+			return target_prob

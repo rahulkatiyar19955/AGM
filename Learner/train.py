@@ -45,4 +45,5 @@ for i in dirs:
 						# traceback.print_exc()
 						pass
 	print("At dir : ", i)
+c.make_square()
 c.store()
