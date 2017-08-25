@@ -69,7 +69,7 @@ maxWorldIncrement = 5
 maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
-maxTimeWaitAchieved = 1.5
+maxTimeWaitAchieved = 0.0001
 maxTimeWaitLimit = 2500.
 
 
@@ -464,6 +464,8 @@ class AGGLPlanner2(object):
  		print self.targetVariables_binary
 		print self.targetVariables_unary
 		types_achieved  = variables_achieved[0] & self.targetVariables_types
+		print 'esto1', variables_achieved[1]
+		print 'esto2', self.targetVariables_binary
 		binary_achieved = variables_achieved[1] & self.targetVariables_binary
 		unary_achieved  = variables_achieved[2] & self.targetVariables_unary
 		print 'ACHIEVED VARIABLES'
@@ -480,9 +482,8 @@ class AGGLPlanner2(object):
 		self.chunkSize = chunkSize
 		self.chunkTime = chunkTime
  		print chunkTime
+		self.threshData = sorted(self.threshData, reverse=True, key=self.threshData.__getitem__)
 		print self.threshData
-		self.threshData = sorted(self.threshData)
-
 
 		if achieved:
 			# If the goal is achieved, we save the solution in the result list, the
@@ -738,6 +739,7 @@ class AGGLPlanner2(object):
 
 
 			# Loop shall ran for one chunk time
+			selectedActions = self.threshData[0:int(len(self.threshData) * self.chunkSize[chunkNumber])]
 			while True:
 				timeC = datetime.datetime.now()
 				timeElapsed = float((timeC-timeA).seconds) + float((timeC-timeA).microseconds)/1e6
@@ -767,7 +769,7 @@ class AGGLPlanner2(object):
 					else:
 						self.staleNodes.append(headNode)
 				except:
-					#traceback.print_exc()
+					traceback.print_exc()
 					if not threadPoolStatus:
  						if chunkNumber!=len(self.chunkSize)-1: # we dont raise IndexError unless we are in the last chunk
 							print 'skipping chunk because the space state was exhausted for the current one'
@@ -806,7 +808,8 @@ class AGGLPlanner2(object):
 				# be reached from the state described in 'head'.
 				#
 				if verbose>5: print 'Expanding'.ljust(5), head
-				for k in self.threshData[0:int(len(self.threshData) * self.chunkSize[chunkNumber])]:
+				print 'selectedActions', selectedActions
+				for k in selectedActions:
 					if k not in head.actionList and k in ruleMap:
 						head.actionList.append(k)
 						# Iterate over rules and generate derivates
