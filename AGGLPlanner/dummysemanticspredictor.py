@@ -42,10 +42,10 @@ class DummySemanticsPredictor(object):
 			ruleTypes = set()
 			rulePredsL = set()
 			# for preds, graph in [(rulePredsL, rule.lhs), (rulePredsR, rule.rhs)]
-			# for node in rule.lhs.nodes:
-			# 	typeA = rule.lhs.nodes[node].sType
-			# 	for tA in [typeA] + self.parsed.agm.inverseTypes[typeA]:
-			# 		ruleTypes.add(tA)
+			for node in rule.lhs.nodes:
+				typeA = rule.lhs.nodes[node].sType
+				for tA in [typeA] + self.parsed.agm.inverseTypes[typeA]:
+					ruleTypes.add(tA)
 			for link in rule.lhs.links:
 				lt = link.linkType
 				if not link.enabled: lt += '*'
@@ -58,10 +58,10 @@ class DummySemanticsPredictor(object):
 					else:
 						rulePredsL.add((lt, tA))
 			rulePredsR = set()
-			# for node in rule.rhs.nodes:
-			# 	typeA = rule.rhs.nodes[node].sType
-			# 	for tA in [typeA] + self.parsed.agm.inverseTypes[typeA]:
-			# 		ruleTypes.add(tA)
+			for node in rule.rhs.nodes:
+				typeA = rule.rhs.nodes[node].sType
+				for tA in [typeA] + self.parsed.agm.inverseTypes[typeA]:
+					ruleTypes.add(tA)
 			for link in rule.rhs.links:
 				lt = link.linkType
 				if not link.enabled: lt += '*'
@@ -87,8 +87,8 @@ class DummySemanticsPredictor(object):
 			print '  predR:', pointsByPredsRequired, rulePredsL & needPreds
 			print '  predA:', pointsByPredsAdded, rulePredsR & needPreds
 
-		chunkSize = [0.3, 0.7, 0.8, 1.0]
-		chunkTime = [10., 0.05, 0.075, 0.05]
+		chunkSize = [0.3, 0.7, 0.9, 1.0]
+		chunkTime = [ 2.,  2.,  2.,  2.]
 
 		return result, chunkSize, chunkTime
 
