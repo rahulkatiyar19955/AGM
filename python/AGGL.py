@@ -623,6 +623,10 @@ class AGM(object):
 		self.typesDirect = {}
 	def addRule(self, rule):
 		self.rules.append(rule)
+	def getRule(self, ruleName):
+		for i in self.rules:
+			if i.name == ruleName:
+				return i
 	def addType(self, t, rhs=[]):
 		if t in self.types.keys():
 			print "type", t, "already defined"

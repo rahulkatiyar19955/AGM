@@ -74,18 +74,18 @@ class DummySemanticsPredictor(object):
 					else:
 						rulePredsR.add((lt, tA))
 
-			print ''
-			print 'rulePredsL', rulePredsL
-			print 'rulePredsR', rulePredsR
+			# print ''
+			# print 'rulePredsL', rulePredsL
+			# print 'rulePredsR', rulePredsR
 			pointsByTypes = len( ruleTypes & needTypes )
 			pointsByPredsRequired = len( rulePredsL & needPreds )
 			pointsByPredsAdded    = len( (rulePredsR-rulePredsL) & needPreds )
 			points = 0.125*pointsByTypes+0.5*pointsByPredsRequired+2.0*pointsByPredsAdded
-			print 'points for', rule.name, points
+			# print 'points for', rule.name, points
 			result[rule.name] = points
 			# print '  types:', pointsByTypes
-			print '  predR:', pointsByPredsRequired, rulePredsL & needPreds
-			print '  predA:', pointsByPredsAdded, rulePredsR & needPreds
+			# print '  predR:', pointsByPredsRequired, rulePredsL & needPreds
+			# print '  predA:', pointsByPredsAdded, rulePredsR & needPreds
 
 		chunkSize = [0.3, 0.7, 0.9, 1.0]
 		chunkTime = [ 2.,  2.,  2.,  2.]

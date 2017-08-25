@@ -75,6 +75,9 @@ if __name__ == '__main__': # program domain problem result
 		try:
 			## the file name where we keep the results of the program
 			result = find_arg(sys.argv, '-o')
+		except:
+			showHelp()
+		try:
 			## probability distribution generator
 			trainFile = find_arg(sys.argv, '-l')
 			if trainFile == None: trainFile = 'none'
@@ -118,6 +121,11 @@ if __name__ == '__main__': # program domain problem result
 		print 'done\nRunning the planner...'
 		## We store the initial or start time of the planner and call the agglplaner, the main program that makes all the process...
 		start = time.time()
+
+
+		print 'RESULT', result
+		print 'TRAINN', trainFile
+
 		if result:
 			subprocess.call(["agglplanner2", domainFile, "/tmp/domain.py", worldFile, "/tmp/target.py", trainFile, result])
 		else:

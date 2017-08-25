@@ -65,12 +65,12 @@ from nopredictor import *
 
 # C O N F I G U R A T I O N
 number_of_threads = 0 #4
-maxWorldIncrement = 5
+maxWorldIncrement = 4
 maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
-maxTimeWaitAchieved = 0.0001
-maxTimeWaitLimit = 2500.
+maxTimeWaitAchieved = 1.0001
+maxTimeWaitLimit = 1000.
 
 
 
@@ -459,19 +459,17 @@ class AGGLPlanner2(object):
 			self.initWorld.score, achieved, variables_achieved = self.targetCode(self.initWorld.graph)
 
 
-		print 'TARGET VARIABLES'
-		print self.targetVariables_types
- 		print self.targetVariables_binary
-		print self.targetVariables_unary
+		# print 'TARGET VARIABLES'
+		# print self.targetVariables_types
+ 	# 	print self.targetVariables_binary
+		# print self.targetVariables_unary
 		types_achieved  = variables_achieved[0] & self.targetVariables_types
-		print 'esto1', variables_achieved[1]
-		print 'esto2', self.targetVariables_binary
 		binary_achieved = variables_achieved[1] & self.targetVariables_binary
 		unary_achieved  = variables_achieved[2] & self.targetVariables_unary
-		print 'ACHIEVED VARIABLES'
-		print types_achieved
-		print binary_achieved
-		print unary_achieved
+		# print 'ACHIEVED VARIABLES'
+		# print types_achieved
+		# print binary_achieved
+		# print unary_achieved
 		self.trainFile = trainFile
 
 		# Getting Action Preference data
@@ -610,7 +608,7 @@ class AGGLPlanner2(object):
 					estadoIntermedio = self.triggerMap[ac.name](self.initWorld, ac.parameters)
 					""" We remove the constants created by the hierarchical rule, making them variables."""
 					graph = setNewConstantsAsVariables(self.initWorld.graph, estadoIntermedio.graph)
-					outputText = generateTarget(self.domainParsed, graph)#, xgraph=estadoIntermedio.graph)
+					outputText = generateTarget_AGGT(self.domainParsed, {'graph':estadoIntermedio.graph, 'precondition': self.domainParsed.agm.getRule(ac.name).precondition})#, xgraph=estadoIntermedio.graph)
 					""" The following flag is set so the planning of the hierarchical rule is shown on screen"""
 					firstActionIsHierarchical = True
 					hierarchicalTarget = self.domainModule.getHierarchicalTargets()[ac.name]
@@ -742,7 +740,7 @@ class AGGLPlanner2(object):
 
 			# Loop shall ran for one chunk time
 			selectedActions = self.threshData[0:int(len(self.threshData) * self.chunkSize[chunkNumber])]
-			print 'selectedActions', selectedActions
+			# print 'selectedActions', selectedActions
 			while True:
 				timeC = datetime.datetime.now()
 				timeElapsed = float((timeC-timeA).seconds) + float((timeC-timeA).microseconds)/1e6
@@ -751,7 +749,7 @@ class AGGLPlanner2(object):
 				if timeElapsed > maxTimeWaitLimit or (timeElapsed > maxTimeWaitAchieved and nResults > 0):
 					break
 				if timeElapsedChunk >= self.chunkTime[chunkNumber]:
-					print 'timeElapsedChunk >= self.chunkTime[chunkNumber]'
+					# print 'timeElapsedChunk >= self.chunkTime[chunkNumber]'
 					break
 				if self.externalStopFlag.get() != 0:
 					self.end_condition.set('ExternalFlag')

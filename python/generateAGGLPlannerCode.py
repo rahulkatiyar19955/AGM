@@ -221,7 +221,7 @@ def ruleImplementation(agm, rule):
 	elif type(rule) == AGMHierarchicalRule:
 		#print rule.name, 'hierarchical'
 		ret += normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=True)
-		ret += generateTarget(agm, rule.rhs, rule.name, rule.lhs)
+		ret += generateTarget_AGGT(agm, {'graph':rule.rhs, 'precondition':rule.precondition}, rule.name, rule.lhs)
 
 #ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 	else:
@@ -425,6 +425,9 @@ def normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=
 		indent += "\t"
 	# Quantifier-related code (PRECONDITION)
 	# <<<
+	if rule.name == "moveObjectToTable_hierarchical":
+		print 'rule.name', rule.name
+		print '     preconditionAST', rule.preconditionAST,
 	if rule.preconditionAST != None:
 		indentP = indent
 		ret += indentP+'# <preconds'
@@ -434,9 +437,10 @@ def normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=
 		ret += indentP+'for k in n2id.keys():'
 		ret += indentP+'\tif not k in backVars:'
 		ret += indentP+'\t\tdel n2id[k]'
-		ret += indentP+'# preconds end after this line'
-		ret += indentP+'if precondition'+str(conditionId)+':'
-		indent += '\t'
+		ret += indentP+'# preconds end after this lin e'
+		if str(conditionId)!= '':
+			ret += indentP+'if precondition'+str(conditionId)+':'
+			indent += '\t'
 	# >>>
 	# Code to call rule execution
 	ret += indent+"# At this point we meet all the conditions."
@@ -930,195 +934,6 @@ def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 	return optimal_node_list
 
 
-##@brief This is the second version of the method that generates the target s code.
-#
-# @ingroup AGGLGeneration
-#
-# @param graph is the target graph used to generate the target code.
-# @param forHierarchicalRule is a condition. It means that the target uses hierarchical rules.
-# @param lgraph It is the graph of the left hand
-#
-# @retval ret is the python code used to chek the target world state.
-def generateTarget(agm, graph, forHierarchicalRule='', lgraph=None, verbose=False, xgraph=None):
-	# Variables del programa
-	linkList = []   # vector de enlaces del grafo.
-
-	constantes, listaNodos = encontrarOrden(graph, lgraph, verbose)
-	#if verbose: print forHierarchicalRule, constantes
-	#if verbose: print forHierarchicalRule, listaNodos
-
-	ret = ''
-	indent = "\n\t"
-
-	if len(forHierarchicalRule)==0:
-		ret += """import copy, sys\nsys.path.append('/usr/local/share/agm/')\nfrom AGGL import *\nfrom agglplannerplan import *\n
-def computeMaxScore(a, b, maxScore):
-	s = 0
-	for i in a: s+=i
-	for i in b: s+=i
-	if s > maxScore: return s
-	return maxScore\n
-""" + generateTypeCode(agm) + """
-def CheckTarget(graph):
-	n2id = dict()                             # diccionario
-	available = copy.deepcopy(graph.nodes)    # lista de nodos del grafo inicial.
-"""
-	else:
-		ret += indent+'def ' + forHierarchicalRule + '_target(self, graph, smapping=dict()): # vm'
-		indent += "\t"
-		ret += indent+"n2id = copy.deepcopy(smapping)\n"
-		ret += indent+"available = copy.deepcopy(graph.nodes)"
-
-	ret += indent+"maxScore = 0"
-	ret += indent+"totalScore = " + str(calcularTotalScore(graph)) + '\n'
-	ret += indent+"binary = set([])"
-	ret += indent+"types = set([])"
-	ret += indent+"unary = set([])"
-
-	# Sacamos los enlaces y los transformamos de AGMLink a tuplas de string [origen, enlace, destino]
-	# y los ordenamos de menor a mayor con el metodo sorted
-	for link_i in range(len(graph.links)):
-		link = graph.links[link_i]
-		linkList.append([link.a, link.b, link.linkType])
-	linkList = sorted(linkList, key=itemgetter(0, 1, 2))
-
-	# Eliminamos las constantes de la lista de nodos 'available', de forma ordenada.
-	for symbol in constantes:
-		if len(forHierarchicalRule)>0:
-			ret += indent+"try:"
-			ret += indent+"\t"+"del available[n2id['"+symbol+"']]"
-			ret += indent+"except:"
-			ret += indent+"\t"+"pass"
-		else:
-			ret += indent+"try:"
-			ret += indent+"\t"+"del available['"+symbol+"']"
-			ret += indent+"except:"
-			ret += indent+"\t"+"pass"
-
-	conditionsListList = []
-	# Generate the loop that checks the model
-	symbols_in_stack = []
-	score = 0
-
-	pops = []
-
-	ret += indent+"# Hard score"
-	ret += indent+"scoreNodes = []"
-	ret += indent+"scoreLinks = []"
-
-	#if verbose: print 'hierarchical\nhierarchical'
-	#if verbose: print 'constantes', constantes
-	#if verbose: print 'nodos', listaNodos
-	for n_n in listaNodos:
-		n = str(n_n)
-		ret += indent+"# "+n
-
-		constant = False
-		if (n[0] in "0123456789") and n in graph.nodes: # This checks the node is already in the model
-			constant = True
-		elif lgraph:
-			if n in lgraph.nodes:
-				constant = True
-		if constant:
-			#if verbose: print forHierarchicalRule, 'CONSTANTE', n
-			if (n[0] in "0123456789") and n in graph.nodes:
-				ret += indent+"symbol_"+n+" = graph.nodes['"+n+"']"
-			else:
-				ret += indent+"symbol_"+n+" = graph.nodes[n2id['"+n+"']]"
-				#ret += indent+"print '"+n+"', n2id['"+n+"'], graph.nodes[n2id['"+n+"']]"
-		else: # otherwise, we're talking about a variable!
-			#if verbose: print forHierarchicalRule, 'VARIABLE', n
-			#if len(forHierarchicalRule) > 0:
-				#ret += indent+"print '" + n + "', available, n2id"
-			ret += indent+"symbol_"+n+"_name = '" + n + "'"
-			ret += indent+"for symbol_"+n+"_name in available:"
-			indent += "\t"
-			ret += indent+"symbol_"+n+" = graph.nodes[symbol_"+n+"_name]"
-			#ret += indent+"print symbol_"+n
-
-		if len(forHierarchicalRule)>0:
-			if not constant:
-				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
-		else:
-			if constant:
-				ret += indent+"n2id['"+n+"'] = '"+n+"'"
-			else:
-				ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
-		ret += indent+"linksVal = 0"
-		#ret += indent+"print n2id"
-		for cond in newLinkScore(graph.links, n_n, symbols_in_stack+[n_n]):
-			ret += indent+cond
-		ret += indent+"scoreLinks.append(linksVal)"
-		pops.append(indent+'scoreLinks.pop()')
-		ret += indent+"maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)"
-		ret += indent+"if typeValid(symbol_"+n+".sType, '"+graph.nodes[n_n].sType+"')"
-		for other in symbols_in_stack:
-			ret += " and symbol_"+n+".name!=symbol_" + str(other) + ".name"
-		conditions, number, ll = extractNewLinkConditionsFromList(graph.links, n_n, symbols_in_stack+[n_n])
-		conditions = conditions.replace("snode.graph", "graph")
-		conditionsListList.append( [conditions, number] )
-		ret += conditions
-		ret += ":"
-		symbols_in_stack.append(n_n)
-		indent += "\t"
-		score += scorePerContition
-		ret += indent + "scoreNodes.append(100)"
-		pops.append(indent+'scoreNodes.pop()')
-		ret += indent + "maxScore = computeMaxScore(scoreNodes, scoreLinks, maxScore)"
-
-	allConditionsStr = ''
-	for c in conditionsListList:
-		allConditionsStr += c[0]
-	conditionsSeparated = allConditionsStr.split("and ")
-	realCond = 0
-	for cond in conditionsSeparated:
-		if len(cond) > 1:
-			realCond += 1
-			#ret += indent+"if " + cond + ": scoreNodes += "+str(scorePerContition)+""
-	ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
-	ret += indent+"\treturn maxScore, True, None"
-
-	# Rule ending
-	while len(pops)>0:
-		ret += pops.pop()
-	indent = "\n\t"
-	if len(forHierarchicalRule)>0: indent+='\t'
-	ret += indent+"return maxScore, False, None"
-	ret += "\n"
-
-
-	# Generate code for getting the variables (we still need to take preconditions into account!)
-	if len(forHierarchicalRule)==0:
-		ret += """\n\ndef getTargetVariables():"""
-	else:
-		ret += indent[:-1]+'def ' + forHierarchicalRule + '_variables(self):'
-		indent += "\t"
-	types = set()
-	binary = set()
-	unary = set()
-
-	for link_i in range(len(graph.links)):
-		link = graph.links[link_i]
-		if link.a in graph.nodes.keys():
-			aType = graph.nodes[link.a].sType
-		else:
-			aType = link.a#xgraph.nodes[link.a].sType
-		if link.b in graph.nodes.keys():
-			bType = graph.nodes[link.b].sType
-		else:
-			bType = link.b#xgraph.nodes[link.b].sType
-		if link.a == link.b:
-			unary.add((link.linkType, aType))
-		else:
-			binary.add((link.linkType, aType, bType))
-	for n in graph.nodes:
-		types.add(graph.nodes[n].sType)
-	ret += indent + 'types = ' + str(types)
-	ret += indent + 'binary = ' + str(binary)
-	ret += indent + 'unary = ' + str(unary)
-	ret += indent + 'return types, binary, unary'
-
-	return ret
 
 
 #---------------------------------------------------------------------------------------------------
@@ -1299,7 +1114,6 @@ def componerSubgrafos(grafo, ramasGrafo, constantes):
 
 def generateTarget_AGGT(agm, target, forHierarchicalRule='', lgraph=None, verbose=False):
 	graph = target['graph']
-
 	linkList = []   # vector de enlaces del grafo.
 	constantes, listaNodos = encontrarOrden(graph, lgraph, verbose)
 	ret = ''
@@ -1438,9 +1252,10 @@ def CheckTarget(graph):
 	totalCond = realCond
 	if target['precondition'] != None:
 		ret += indent+"if maxScore == " + str(score + realCond*scorePerContition) + ":"
-		preconditionCode, totalCond = generateTargetPreconditionCode(target['precondition'], realCond, indent+'\t')
-		#print totalCond
-		ret += preconditionCode
+		if target['precondition']:
+			preconditionCode, totalCond = generateTargetPreconditionCode(target['precondition'], realCond, indent+'\t')
+			#print totalCond
+			ret += preconditionCode
 		ret += indent+"\t\t\treturn maxScore, True, copy.deepcopy((types, binary, unary)) # there were preconditions and were met"
 	else:
 		ret += indent+"if maxScore == " + str(score + totalCond*scorePerContition) + ": # there are no preconditions"
