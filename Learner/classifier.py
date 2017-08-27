@@ -22,7 +22,7 @@ class Classifier:
 			self.attr_count[action] = {}
 
 	def train(self, attr_list, tgt_actions):
-		# attr_list contains both attr_node and attr_link [refer Parser class] (list of all the attributes)
+		'''attr_list contains both attr_node and attr_link [refer Parser class] (list of all the attributes)'''
 		flag = {}
 		for action in tgt_actions:
 			for attr in attr_list:
@@ -54,16 +54,30 @@ class Classifier:
 		f.close()
 
 	def prefetch(self, total_count, action_count, attr_count, attr_all, action_list):
-		# In case data is already trained
+		'''In case data is already trained'''
 		self.total_count = total_count
 		self.action_count = action_count
 		self.attr_count = attr_count
 		self.attr_all = attr_all
 		self.action_list = action_list
 
+	def make_square(self):
+		'''For API Compatibility'''
+
+		square_matrix = {}
+		for action in self.action_list:
+			square_matrix[action] = {}
+			for attr in self.attr_all:
+				if attr in self.attr_count[action]:
+					square_matrix[action][attr] = self.attr_count[action][attr]
+				else:
+					square_matrix[action][attr] = 0
+					
+		self.attr_count = square_matrix
+
 
 	def store(self):
-		# stores data for further training purpose
+		'''stores data for further training purpose'''
 		f = open("store.data", "wb")
 		pickle.dump((self.total_count, self.action_count, self.attr_count, self.attr_all, self.action_list), f)
 		f.close()
