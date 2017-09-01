@@ -61,6 +61,7 @@ from agglplannerplan import *
 from generate import *
 
 from dummysemanticspredictor import *
+from linearregressionpredictor import *
 from nopredictor import *
 
 # C O N F I G U R A T I O N
@@ -424,6 +425,8 @@ class AGGLPlanner2(object):
 			return NoPredictor(self.domainParsed)
 		elif method == 'dummysemantics':
 			return DummySemanticsPredictor(self.domainParsed)
+		elif method == 'linearregression':
+			return LinearRegressionPredictor(splitted[1])
 		else:
 			print 'method', method, 'not supported'
 			sys.exit(-1)
@@ -474,12 +477,12 @@ class AGGLPlanner2(object):
 
 		# Getting Action Preference data
 		g = self.getProbabilityDensityFunctionGenerator(self.trainFile)
+		g.domainParsed = self.domainParsed
 
 		# Sorting actions by relevance   # #   Size of operator chunk   # #   TimeSlots for chunks
 		self.threshData, chunkSize, chunkTime = g.get_distrb(types_achieved, binary_achieved, unary_achieved, self.initWorld.graph, self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary)
 		self.chunkSize = chunkSize
 		self.chunkTime = chunkTime
- 		print chunkTime
 		print 'ACTIONS', sorted([ [x, self.threshData[x] ] for x in self.threshData ], reverse=True, key=itemgetter(1))
 		# print self.threshData
 		self.threshData = sorted(self.threshData, reverse=True, key=self.threshData.__getitem__)
@@ -740,6 +743,7 @@ class AGGLPlanner2(object):
 
 			# Loop shall ran for one chunk time
 			selectedActions = self.threshData[0:int(len(self.threshData) * self.chunkSize[chunkNumber])]
+			print 'SELECTED', selectedActions
 			# print 'selectedActions', selectedActions
 			while True:
 				timeC = datetime.datetime.now()

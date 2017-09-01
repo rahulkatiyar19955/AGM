@@ -7,3 +7,6 @@ cd thriftpy
 sudo pypy setup.py install
 sudo make clean
 sudo python setup.py install
+git clone https://bitbucket.org/pypy/numpy.git
+cd numpy
+sudo pypy setup.py install
