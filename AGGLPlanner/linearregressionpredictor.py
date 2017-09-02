@@ -20,11 +20,12 @@ class LinearRegressionPredictor(object):
 		print '--------------------------------------------------------------------'
 		self.prdDictionary = setInverseDictionaryFromList(self.xHeaders)
 		self.actDictionary = setInverseDictionaryFromList(self.yHeaders)
-		
+
 
 	def get_distrb(self, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary): # returns data size time
 		# yr2 = np.dot(values, self.coeff)+self.intercept
-		inputv = inputVectorFromTarget(self.domainParsed, self.prdDictionary, self.actDictionary, "ex.aggt")
+		#inputv = inputVectorFromTarget(self.domainParsed, self.prdDictionary, self.actDictionary, "ex.aggt")
+		inputv = inputVectorFromSets(self.domainParsed, self.prdDictionary, self.actDictionary, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary)
 		#print 'INPUT V', inputv
 		outputv = np.dot(inputv, self.coeff)+self.intercept
 		#print '---------------------'
@@ -68,9 +69,6 @@ class LinearRegressionPredictor(object):
 		if chunkSize[-1] < 0.999999:
 			chunkSize.append(1)
 		chunkTime = [ 2 for x in chunkSize ]
-		print chunkSize
-		print chunkSize
-		print chunkSize
 		print chunkSize
 		return result, chunkSize, chunkTime
 

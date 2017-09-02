@@ -464,7 +464,7 @@ class AGGLPlanner2(object):
 
 		# print 'TARGET VARIABLES'
 		# print self.targetVariables_types
- 	# 	print self.targetVariables_binary
+		# print self.targetVariables_binary
 		# print self.targetVariables_unary
 		types_achieved  = variables_achieved[0] & self.targetVariables_types
 		binary_achieved = variables_achieved[1] & self.targetVariables_binary
@@ -476,11 +476,10 @@ class AGGLPlanner2(object):
 		self.trainFile = trainFile
 
 		# Getting Action Preference data
-		g = self.getProbabilityDensityFunctionGenerator(self.trainFile)
-		g.domainParsed = self.domainParsed
-
+		self.g = self.getProbabilityDensityFunctionGenerator(self.trainFile)
+		self.g.domainParsed = self.domainParsed
 		# Sorting actions by relevance   # #   Size of operator chunk   # #   TimeSlots for chunks
-		self.threshData, chunkSize, chunkTime = g.get_distrb(types_achieved, binary_achieved, unary_achieved, self.initWorld.graph, self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary)
+		self.threshData, chunkSize, chunkTime = self.g.get_distrb(types_achieved, binary_achieved, unary_achieved, self.initWorld.graph, self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary)
 		self.chunkSize = chunkSize
 		self.chunkTime = chunkTime
 		print 'ACTIONS', sorted([ [x, self.threshData[x] ] for x in self.threshData ], reverse=True, key=itemgetter(1))
@@ -719,12 +718,11 @@ class AGGLPlanner2(object):
 				break
 			# Again, we take the time and we calculated the elapsed time
 			timeB = datetime.datetime.now()
-			timeElapsed = float((timeB-timeA).seconds) + float((timeB-timeA).microseconds)/1e6
-			self.timeElapsed = timeElapsed
+			self.timeElapsed = float((timeB-timeA).seconds) + float((timeB-timeA).microseconds)/1e6
 			# We take the length of the result list.
 			nResults = self.results.size()
 			# Check if we should give up because it already took too much time
-			if timeElapsed > maxTimeWaitLimit or (timeElapsed > maxTimeWaitAchieved and nResults > 0):
+			if self.timeElapsed > maxTimeWaitLimit or (self.timeElapsed > maxTimeWaitAchieved and nResults > 0):
 				if nResults>0:
 					self.end_condition.set("GoalAchieved")
 				else:
@@ -743,14 +741,15 @@ class AGGLPlanner2(object):
 
 			# Loop shall ran for one chunk time
 			selectedActions = self.threshData[0:int(len(self.threshData) * self.chunkSize[chunkNumber])]
-			print 'SELECTED', selectedActions
+			if type(self.g) == LinearRegressionPredictor:
+ 				print 'SELECTED', selectedActions
 			# print 'selectedActions', selectedActions
 			while True:
 				timeC = datetime.datetime.now()
-				timeElapsed = float((timeC-timeA).seconds) + float((timeC-timeA).microseconds)/1e6
+				self.timeElapsed = float((timeC-timeA).seconds) + float((timeC-timeA).microseconds)/1e6
 				timeElapsedChunk = float((timeC-timeB).seconds) + float((timeC-timeB).microseconds)/1e6
 				nResults = self.results.size()
-				if timeElapsed > maxTimeWaitLimit or (timeElapsed > maxTimeWaitAchieved and nResults > 0):
+				if self.timeElapsed > maxTimeWaitLimit or (self.timeElapsed > maxTimeWaitAchieved and nResults > 0):
 					break
 				if timeElapsedChunk >= self.chunkTime[chunkNumber]:
 					# print 'timeElapsedChunk >= self.chunkTime[chunkNumber]'
