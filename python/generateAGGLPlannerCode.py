@@ -425,9 +425,6 @@ def normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=
 		indent += "\t"
 	# Quantifier-related code (PRECONDITION)
 	# <<<
-	if rule.name == "moveObjectToTable_hierarchical":
-		print 'rule.name', rule.name
-		print '     preconditionAST', rule.preconditionAST,
 	if rule.preconditionAST != None:
 		indentP = indent
 		ret += indentP+'# <preconds'
