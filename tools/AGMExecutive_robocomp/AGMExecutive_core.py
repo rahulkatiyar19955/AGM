@@ -432,6 +432,17 @@ class Executive(object):
 				if not found:
 					print 'Executive::edgesUpdate: couldn\'t update edge because no match was found'
 					print 'Executive::edgesUpdate: edge', edge.a, edge.b, edge.edgeType
+				found = False
+				for i in xrange(len(self.worldModelICE.edges)):
+					if str(self.worldModelICE.edges[i].a) == str(edge.a):
+						if str(self.worldModelICE.edges[i].b) == str(edge.b):
+							if str(self.worldModelICE.edges[i].edgeType) == str(edge.edgeType):
+								self.worldModelICE.edges[i].attributes = copy.deepcopy(edge.attributes)
+								print 'hecho'
+								found = True
+				if not found:
+					print 'Executive::edgesUpdate: couldn\'t update edge because no match was found'
+					print 'Executive::edgesUpdate: edge', edge.a, edge.b, edge.edgeType
 		finally:
 			self.mutex.release()
 
