@@ -74,23 +74,25 @@ class PlannerCaller(threading.Thread):
 		self.startPlanServer = startPlanServer
 		self.executive = executive
 		self.agglPath = agglPath
-		try:
-			self.agglplannerclient = make_client(agglplanner_thrift.AGGLPlanner, '127.0.0.1', 6000, timeout=1000000)
-		except Exception, e:
-			if self.startPlanServer.startswith('rcremote'):
-				parts = self.startPlanServer.split(',')
-				subprocess.Popen(parts+['agglplannerserver'])
-			elif self.startPlanServer == 'local':
-				subprocess.Popen(['agglplannerserver'])
-			elif self.startPlanServer == 'off':
-				print 'Cannot connect to agglplanner service'
-				print e.message
-				sys.exit(-1)
-			else:
-				print 'Cannot connect to agglplanner service. Unknown configuration parameter for variable "AutostarAGGLPlannerServer"'
-				print e.message
-				sys.exit(-1)
-			time.sleep(1)
+		for anumber in range(5):
+			try:
+				self.agglplannerclient = make_client(agglplanner_thrift.AGGLPlanner, '127.0.0.1', 6000, timeout=1000000)
+				break
+			except Exception, e:
+				if self.startPlanServer.startswith('rcremote'):
+					parts = self.startPlanServer.split(',')
+					subprocess.Popen(parts+['agglplannerserver'])
+				elif self.startPlanServer == 'local':
+					subprocess.Popen(['agglplannerserver'])
+				elif self.startPlanServer == 'off':
+					print 'Cannot connect to agglplanner service'
+					print e.message
+					sys.exit(-1)
+				else:
+					print 'Cannot connect to agglplanner service. Unknown configuration parameter for variable "AutostarAGGLPlannerServer"'
+					print e.message
+					sys.exit(-1)
+				time.sleep(1)
 
 		self.domainText = open(self.agglPath, 'r').read()
 		tempStr = self.domainText

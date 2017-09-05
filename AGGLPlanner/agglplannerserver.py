@@ -26,7 +26,7 @@ import sys, imp, traceback, thread
 
 
 sys.path.append('/usr/local/share/agm/')
-import agglplanner
+import agglplanner2
 from agglplanningcache import *
 
 class JobObject(object):
@@ -54,7 +54,7 @@ class Worker(object):
 		try:
 			self.mapsLock.acquire()
 			ret = self.lastUsedDomainKey + 1
-			self.domainMap[ret] = agglplanner.DomainInformation(ret, domainText)
+			self.domainMap[ret] = agglplanner2.DomainInformation(ret, domainText)
 			self.lastUsedDomainKey += 1
 			return ret
 		except:
@@ -73,8 +73,8 @@ class Worker(object):
 			print 'ret:', ret
 			print 'targetText', targetText
 			print 'domainId', domainId
-			print 'O', agglplanner.TargetInformation(ret, targetText, self.domainMap[domainId].parsed)
-			self.targetMap[ret] = agglplanner.TargetInformation(ret, targetText, self.domainMap[domainId].parsed)
+			print 'O', agglplanner2.TargetInformation(ret, targetText, self.domainMap[domainId].parsed)
+			self.targetMap[ret] = agglplanner2.TargetInformation(ret, targetText, self.domainMap[domainId].parsed)
 			print 'TargetInformation', self.targetMap[ret]
 			open("targetText.txt", 'w').write(targetText)
 			open("targetCode.py", 'w').write(self.targetMap[ret].code)
@@ -96,7 +96,7 @@ class Worker(object):
 			ret = self.lastUsedJobKey + 1
 			dI = self.domainMap[domainId]
 			tI = self.targetMap[targetId]
-			planningObject = agglplanner.AGGLPlanner(dI.parsed, dI.module, initWorld, tI.module)
+			planningObject = agglplanner2.AGGLPlanner2(dI.parsed, dI.module, initWorld, tI.module)
 			self.jobMap[ret] = JobObject(ret, planningObject, domainId, targetId)
 			self.lastUsedJobKey += 1
 			return ret

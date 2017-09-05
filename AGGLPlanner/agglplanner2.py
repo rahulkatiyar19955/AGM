@@ -318,7 +318,15 @@ class DomainInformation(object):
 		self.text = text
 		self.parsed = AGMFileDataParsing.fromText(text)
 		self.plannerCode = self.parsed.getAGGLPlannerCode(skipPassiveRules=True)
-		self.module = self.getModuleFromText(self.plannerCode).RuleSet()
+		try:
+			self.module = self.getModuleFromText(self.plannerCode).RuleSet()
+		except:
+			f = open('getModuleFromText_error.py', 'w')
+			f.write(self.plannerCode)
+			traceback.print_exc()
+			print 'Code written to getModuleFromText_error.py'
+			sys.exit(1)
+
 	def getModuleFromText(self, moduleText):
 		if len(moduleText) < 10:
 			print 'len(moduleText) < 10'
@@ -328,6 +336,8 @@ class DomainInformation(object):
 			exec moduleText in m.__dict__
 		except:
 			open("dede", 'w').write(moduleText)
+			traceback.print_exc()
+			sys.exit(1)
 		return m
 
 
