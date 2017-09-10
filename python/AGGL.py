@@ -541,68 +541,6 @@ class AGMRule(object):
 
 
 
-
-## AGM Combo rule
-# @ingroup PyAPI
-#
-class AGMComboRule(object):
-	def __init__(self, name='', passive=False, cost=1, ats=None, eqs=None):
-		object.__init__(self)
-		if ats==None: ats=list()
-		if eqs==None: eqs=list()
-		self.name = name
-		self.passive = passive
-		self.atoms = ats
-		self.cost = cost
-		self.equivalences = []
-		for eq in eqs:
-			eqResult = list()
-			for element in eq:
-				eqResult.append([element[0], element[1]])
-			self.equivalences.append(eqResult)
-		self.text = self.generateTextFromCombo()
-	def generateTextFromCombo(self):
-		ret = ''
-		for a in self.atoms:
-			ret += '\t' + a[0] + ' as ' + a[1] + '\n'
-		ret += '\twhere:\n'
-		for e in self.equivalences:
-			first = True
-			for element in e:
-				if first:
-					first = False
-					ret += '\t'  + element[0] + '.' + element[1]
-				else:
-					ret += ' = ' + element[0] + '.' + element[1]
-			ret += '\n'
-		return ret
-
-	def toString(self):
-		passiveStr = "active"
-		if self.passive: passiveStr = "passive"
-		ret = self.name + ' : ' + passiveStr + '('+ str(self.cost) +')\n{\n'
-
-		if len(self.text) > 0:
-			ret += self.text
-		else:
-			for a in self.atoms:
-				ret += '\t' + a[0] + ' as ' + a[1] + '\n'
-			ret += '\twhere:\n'
-			for e in self.equivalences:
-				first = True
-				for element in e:
-					if first:
-						first = False
-						ret += '\t'  + element[0] + '.' + element[1]
-					else:
-						ret += ' = ' + element[0] + '.' + element[1]
-				ret += '\n'
-
-		ret += '}\n'
-		return ret
-
-
-
 ## AGM Hierarchical rule
 # @ingroup PyAPI
 #
@@ -643,6 +581,54 @@ class AGMHierarchicalRule(AGMRule):
 			ret += '\t=>\n'
 			ret += self.rhs.toString() + '\n'
 		ret += '}\n'
+		return ret
+	def getPlanarVersions(self, ts, inv):
+		'''Rules often use virtual types which can correspond to different actual types. Since learning in AGM uses the types of the objects we
+ 		can differentiate between the probability of use of any given rule with the different possible types with which the rule can be used.
+		This method is used to generate all the possible concrete-type-rules associated with a rule '''
+		print 'RULE', self.name
+		### 1 Generate a dictionary without empty entries
+		inverseTypes = copy.deepcopy(inv)
+		# 1.a Remove the type itself from the list of children
+		for i in inverseTypes:
+			inverseTypes[i].remove(i)
+		# 1.b Create inverseTypes2, containing only non-empty entries
+		inverseTypes2 = {}
+		for i in inverseTypes:
+			if len(inverseTypes[i])>0: inverseTypes2[i] = inverseTypes[i]
+		for i in inverseTypes2:
+			inverseTypes2[i] = [ x for x in inverseTypes2[i] if not (x in inverseTypes2.keys()) ]
+		### 2 Compute which nodes should be modified
+		toModifyTy = []
+		toModifyId = []
+		for nodeDict in [self.lhs.nodes, self.rhs.nodes]:
+			for node in nodeDict:
+				t = nodeDict[node].sType
+				if (t in inverseTypes2.keys()) and (not node in toModifyId):
+					toModifyId.append(node)
+					toModifyTy.append(t)
+		if len(toModifyId) == 0:
+			return [self]
+		changes = [ inverseTypes2[x] for x in toModifyTy]
+		print '-------------------'
+		### 3 Generate derivate rules
+		ret = []
+		for i in itertools.product(*changes):
+			change = zip(toModifyId, i)
+			print 'Generate copy', change
+			log = ''
+			derivate = copy.deepcopy(self)
+			for atomicChange in change:
+				log += '__'+atomicChange[0]+'_'+atomicChange[1]
+				for graph in [derivate.lhs, derivate.rhs]:
+					for node in graph.nodes:
+						if node == atomicChange[0]:
+							graph.nodes[node].sType = atomicChange[1]
+			print derivate.lhs
+			print derivate.rhs
+			derivate.name += log
+			ret.append(derivate)
+		print '-------------------'
 		return ret
 
 
