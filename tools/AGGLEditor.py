@@ -146,28 +146,28 @@ class AGMEditor(QMainWindow):
 		self.timer = QTimer()
 		self.tool = ''
 		self.statusBar().hide()
-		self.connect(self.timer,                               SIGNAL('timeout()'),                    self.draw)
-		# self.connect(self.ui.toolsList,                        SIGNAL('currentRowChanged(int)'),       self.selectTool)
-		self.connect(self.ui.rulesList,                        SIGNAL('currentRowChanged(int)'),       self.changeRule)
-		self.connect(self.ui.actionChangeAppearance,           SIGNAL("triggered(bool)"),              self.changeAppearance)
-		self.connect(self.ui.actionTypeHierarchy,              SIGNAL("triggered(bool)"),              self.showTypeHierarchy)
-		self.connect(self.ui.actionAddRule,                    SIGNAL("triggered(bool)"),              self.addRule)
-		self.connect(self.ui.actionRemoveCurrentRule,          SIGNAL("triggered(bool)"),              self.removeCurrentRule)
-		self.connect(self.ui.actionRenameCurrentRule,          SIGNAL("triggered(bool)"),              self.renameCurrentRule)
-		self.connect(self.ui.actionExport,                     SIGNAL("triggered(bool)"),              self.exportRule)
-		self.connect(self.ui.actionGenerateCode,               SIGNAL("triggered(bool)"),              self.generateCode)
-		self.connect(self.ui.actionGenerateAGGLPlanner,        SIGNAL("triggered(bool)"),              self.generateAGGLPlannerCode)
-		self.connect(self.ui.actionExportAllRules,             SIGNAL("triggered(bool)"),              self.exportAll)
-		self.connect(self.ui.actionExportAllRulesPNG,          SIGNAL("triggered(bool)"),              self.exportAllPNG)
-		self.connect(self.ui.actionSaveAs,                     SIGNAL("triggered(bool)"),              self.saveAs)
-		self.connect(self.ui.actionSave,                       SIGNAL("triggered(bool)"),              self.save)
-		self.connect(self.ui.actionOpen,                       SIGNAL("triggered(bool)"),              self.open)
-		self.connect(self.ui.actionQuit,                       SIGNAL("triggered(bool)"),              self.appClose)
-		self.connect(self.ui.actionGraphmar,                   SIGNAL("triggered(bool)"),              self.about)
-		self.connect(self.ui.actionHideToolNames,              SIGNAL("triggered(bool)"),              self.hideToolNames)
-		self.connect(self.ui.passiveCheckBox,                  SIGNAL("stateChanged(int)"),            self.changePassive)
-		self.connect(self.ui.hierarchicalCheckBox,             SIGNAL("stateChanged(int)"),            self.changeHierarchical)
-		self.connect(self.ui.cost,                             SIGNAL("valueChanged(int)"),            self.changeCost)
+		self.connect(self.timer,                              SIGNAL('timeout()'),                    self.draw)
+		# self.connect(self.ui.toolsList,                     SIGNAL('currentRowChanged(int)'),       self.selectTool)
+		self.connect(self.ui.rulesList,                       SIGNAL('currentRowChanged(int)'),       self.changeRule)
+		self.connect(self.ui.actionChangeAppearance,          SIGNAL("triggered(bool)"),              self.changeAppearance)
+		self.connect(self.ui.actionTypeHierarchy,             SIGNAL("triggered(bool)"),              self.showTypeHierarchy)
+		self.connect(self.ui.actionAddRule,                   SIGNAL("triggered(bool)"),              self.addRule)
+		self.connect(self.ui.actionRemoveCurrentRule,         SIGNAL("triggered(bool)"),              self.removeCurrentRule)
+		self.connect(self.ui.actionRenameCurrentRule,         SIGNAL("triggered(bool)"),              self.renameCurrentRule)
+		self.connect(self.ui.actionExport,                    SIGNAL("triggered(bool)"),              self.exportRule)
+		self.connect(self.ui.actionGenerateCode,              SIGNAL("triggered(bool)"),              self.generateCode)
+		self.connect(self.ui.actionGenneratePlanarAGGLDomain, SIGNAL("triggered(bool)"),              self.generatePlanarAGGLDomain)
+		self.connect(self.ui.actionExportAllRules,            SIGNAL("triggered(bool)"),              self.exportAll)
+		self.connect(self.ui.actionExportAllRulesPNG,         SIGNAL("triggered(bool)"),              self.exportAllPNG)
+		self.connect(self.ui.actionSaveAs,                    SIGNAL("triggered(bool)"),              self.saveAs)
+		self.connect(self.ui.actionSave,                      SIGNAL("triggered(bool)"),              self.save)
+		self.connect(self.ui.actionOpen,                      SIGNAL("triggered(bool)"),              self.open)
+		self.connect(self.ui.actionQuit,                      SIGNAL("triggered(bool)"),              self.appClose)
+		self.connect(self.ui.actionGraphmar,                  SIGNAL("triggered(bool)"),              self.about)
+		self.connect(self.ui.actionHideToolNames,             SIGNAL("triggered(bool)"),              self.hideToolNames)
+		self.connect(self.ui.passiveCheckBox,                 SIGNAL("stateChanged(int)"),            self.changePassive)
+		self.connect(self.ui.hierarchicalCheckBox,            SIGNAL("stateChanged(int)"),            self.changeHierarchical)
+		self.connect(self.ui.cost,                            SIGNAL("valueChanged(int)"),            self.changeCost)
 
 
 
@@ -514,13 +514,6 @@ class AGMEditor(QMainWindow):
 		path_pddl = QFileDialog.getSaveFileName(self, "Save partial grammar (active rules) PDDL file as", "", "*.pddl")[0]
 		if not path_pddl.endswith(".pddl"): path_pddl += ".pddl"
 		self.agmData.generatePDDL(path_pddl, True)
-	def generateAGGLPlannerCode(self):
-		path_apy = QFileDialog.getSaveFileName(self, "Save FULL grammar (model verification) AGGLPlanner file as", "", "*.aggl.py")[0]
-		if not path_apy.endswith(".aggl.py"): path_apy += ".aggl.py"
-		self.agmData.generateAGGLPlannerCode(path_apy, False)
-		path_apy = QFileDialog.getSaveFileName(self, "Save partial grammar (active rules) AGGLPlanner file as", "", "*.aggl.py")[0]
-		if not path_apy.endswith(".aggl.py"): path_apy += ".aggl.py"
-		self.agmData.generateAGGLPlannerCode(path_apy, True)
 	def exportRule(self):
 		path = str(QFileDialog.getSaveFileName(self, "Export rule", "", "*"))
 		if path[-4:] == '.svg': path = path[:-4]
@@ -733,36 +726,45 @@ class AGMEditor(QMainWindow):
 
 		self.reloadTypes()
 
+	def generatePlanarAGGLDomain(self):
+		path = QFileDialog.getSaveFileName(self, "Export planar version to", "", "*.aggl")[0]
+		other = self.agmData.planarCopy()
+		self.save(False, path, other)
 	def saveAs(self):
 		path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
 		self.save(False, path)
-	def save(self, triggered=False, path=''):
+	def save(self, triggered=False, path='', instance=None):
+		if instance == None:
+			instance = self.agmData
+		path_init = path
 		if path == '':
 			if self.filePath != '':
 				path = self.filePath
 			else:
 				path = QFileDialog.getSaveFileName(self, "Save as", "", "*.aggl")[0]
 		self.filePath = path
-		self.agmData.properties['name'] = path.split('/')[-1].split('.')[0]
+		instance.properties['name'] = path.split('/')[-1].split('.')[0]
 		global vertexDiameter
-		self.agmData.properties['vertexDiameter'] = vertexDiameter
+		instance.properties['vertexDiameter'] = vertexDiameter
 		global nodeThickness
-		self.agmData.properties['nodeThickness'] = nodeThickness
+		instance.properties['nodeThickness'] = nodeThickness
 		global lineThickness
-		self.agmData.properties['lineThickness'] = lineThickness
+		instance.properties['lineThickness'] = lineThickness
 		global longPattern
-		self.agmData.properties['longPattern'] = longPattern
+		instance.properties['longPattern'] = longPattern
 		global shortPattern
-		self.agmData.properties['shortPattern'] = shortPattern
+		instance.properties['shortPattern'] = shortPattern
 		global spacePattern
-		self.agmData.properties['spacePattern'] = spacePattern
+		instance.properties['spacePattern'] = spacePattern
 		global fontName
-		self.agmData.properties['fontName'] = fontName
+		instance.properties['fontName'] = fontName
 		global fontSize
-		self.agmData.properties['fontSize'] = fontSize
+		instance.properties['fontSize'] = fontSize
 
-		self.agmData.toFile(path)
-		self.modified = False
+		instance.toFile(path)
+
+		if instance == self.agmData and path_init == path:
+			self.modified = False
 
 	def textParametersChanged(self):
 		self.agmData.agm.rules[self.ui.rulesList.currentRow()].parameters   = str(self.ui.textParameters.toPlainText().encode(  'latin1')).strip().replace("\n", "\n\t\t")

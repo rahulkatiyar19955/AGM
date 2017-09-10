@@ -451,38 +451,73 @@ class AGMRule(object):
 		self.lhs = lhs
 		self.rhs = rhs
 		self.cost = cost
-		if len(str(success)) == 0:
-			self.success = 1.
-		else:
-			self.success = float(str(success))
+		if len(str(success)) == 0: self.success = 1.
+		else: self.success = float(str(success))
 		self.dormant = dormant
-		if activates == None:
-			activates = []
+		if activates == None: activates = []
 		self.activates = activates
 		self.passive = passive
 		self.parameters = parameters
 		self.precondition = precondition
 		self.effect = effect
-		if lhs == None:
-			self.lhs = AGMGraph()
-		if rhs == None:
-			self.rhs = AGMGraph()
+		if lhs == None: self.lhs = AGMGraph()
+		if rhs == None: self.rhs = AGMGraph()
 	def toString(self):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
-		costStr = str(self.cost)
-		ret = self.name + ' : ' + passiveStr + '(' + costStr + ')'
-		ret += '\n{\n'
-		ret += self.lhs.toString() + '\n'
-		ret += '\t=>\n'
-		ret += self.rhs.toString() + '\n'
-		if len(self.parameters) > 0:
-			ret += '\tparameters'   + '\n\t{\n\t\t' + self.parameters.strip()   + '\n\t}\n'
-		if len(self.precondition) > 0:
-			ret += '\tprecondition' + '\n\t{\n\t\t' + self.precondition.strip() + '\n\t}\n'
-		if len(self.effect) > 0:
-			ret += '\teffect'       + '\n\t{\n\t\t' + self.effect.strip()       + '\n\t}\n'
+		ret = self.name + ' : ' + passiveStr + '(' + str(self.cost) + ')\n{\n' + self.lhs.toString() + '\n\t=>\n' + self.rhs.toString() + '\n'
+		if len(self.parameters) > 0:   ret += '\tparameters\n\t{\n\t\t'   + self.parameters.strip()   + '\n\t}\n'
+		if len(self.precondition) > 0: ret += '\tprecondition\n\t{\n\t\t' + self.precondition.strip() + '\n\t}\n'
+		if len(self.effect) > 0:       ret += '\teffect\n\t{\n\t\t'       + self.effect.strip()       + '\n\t}\n'
 		ret += '}'
+		return ret
+	def getPlanarVersions(self, ts, inv):
+		'''Rules often use virtual types which can correspond to different actual types. Since learning in AGM uses the types of the objects we
+ 		can differentiate between the probability of use of any given rule with the different possible types with which the rule can be used.
+		This method is used to generate all the possible concrete-type-rules associated with a rule '''
+		print 'RULE', self.name
+		### 1 Generate a dictionary without empty entries
+		inverseTypes = copy.deepcopy(inv)
+		# 1.a Remove the type itself from the list of children
+		for i in inverseTypes:
+			inverseTypes[i].remove(i)
+		# 1.b Create inverseTypes2, containing only non-empty entries
+		inverseTypes2 = {}
+		for i in inverseTypes:
+			if len(inverseTypes[i])>0: inverseTypes2[i] = inverseTypes[i]
+		for i in inverseTypes2:
+			inverseTypes2[i] = [ x for x in inverseTypes2[i] if not (x in inverseTypes2.keys()) ]
+		### 2 Compute which nodes should be modified
+		toModifyTy = []
+		toModifyId = []
+		for nodeDict in [self.lhs.nodes, self.rhs.nodes]:
+			for node in nodeDict:
+				t = nodeDict[node].sType
+				if (t in inverseTypes2.keys()) and (not node in toModifyId):
+					toModifyId.append(node)
+					toModifyTy.append(t)
+		if len(toModifyId) == 0:
+			return [self]
+		changes = [ inverseTypes2[x] for x in toModifyTy]
+		print '-------------------'
+		### 3 Generate derivate rules
+		ret = []
+		for i in itertools.product(*changes):
+			change = zip(toModifyId, i)
+			print 'Generate copy', change
+			log = ''
+			derivate = copy.deepcopy(self)
+			for atomicChange in change:
+				log += '__'+atomicChange[0]+'_'+atomicChange[1]
+				for graph in [derivate.lhs, derivate.rhs]:
+					for node in graph.nodes:
+						if node == atomicChange[0]:
+							graph.nodes[node].sType = atomicChange[1]
+			print derivate.lhs
+			print derivate.rhs
+			derivate.name += log
+			ret.append(derivate)
+		print '-------------------'
 		return ret
 	def forgetNodesList(self):
 		return list(set(self.lhs.nodes).difference(set(self.rhs.nodes)))
@@ -571,7 +606,7 @@ class AGMComboRule(object):
 ## AGM Hierarchical rule
 # @ingroup PyAPI
 #
-class AGMHierarchicalRule(object):
+class AGMHierarchicalRule(AGMRule):
 	def __init__(self, name='', lhs=None, rhs=None, passive=False, cost=1, success=1., dormant=False, activates=None):
 		object.__init__(self)
 		self.cost = cost
@@ -623,6 +658,13 @@ class AGM(object):
 		self.typesDirect = {}
 	def addRule(self, rule):
 		self.rules.append(rule)
+	def planarCopy(self):
+		ret = copy.deepcopy(self)
+		backRules = ret.rules
+		ret.rules = []
+		for rule in backRules:
+			ret.rules += rule.getPlanarVersions(self.types, self.inverseTypes)
+		return ret
 	def getRule(self, ruleName):
 		for i in self.rules:
 			if i.name == ruleName:
@@ -785,6 +827,11 @@ class AGMFileData(object):
 		w = open(filename, 'w')
 		w.write(writeString)
 		w.close()
+
+	def planarCopy(self):
+		ret = copy.deepcopy(self)
+		ret.agm = ret.agm.planarCopy()
+		return ret
 
 	## Generates PDDL code
 	# @param filename The path of the file where the PDDL version of the grammar is written

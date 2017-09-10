@@ -81,7 +81,7 @@ class GraphViewer(QMainWindow):
 		self.drawers = []
 		self.widgets = []
 		self.automatic = False#True
-		
+
 		global vertexDiameter
 		global fontName
 		global fontSize
@@ -111,12 +111,14 @@ class GraphViewer(QMainWindow):
 			self.drawers.append(GraphDraw(self.widgets[fil], self, "xxxx"))
 			print 'xmlModelParser()', fileList[fil]
 			self.drawers[fil].graph = xmlModelParser.graphFromXMLFile(fileList[fil])
-			
+			self.drawers[fil].tool = 'move node'
+			self.drawers[fil].readOnly = True
+
 			print 'nodes',self.drawers[fil].graph.nodes
 			for key in self.drawers[fil].graph.nodes.keys():
 				v = self.drawers[fil].graph.nodes[key]
 				print key,v, self.drawers[fil].graph.nodes[key].attributes
-				
+
 			print 'links',self.drawers[fil].graph.links
 			L=self.drawers[fil].graph.links
 			for index, item in enumerate(L):
@@ -180,5 +182,3 @@ if __name__ == '__main__':
 		app.exec_()
 	else:
 		print 'Usage:\n\t'+sys.argv[0]
-
-

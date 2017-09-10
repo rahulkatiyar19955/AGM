@@ -90,31 +90,13 @@ def inputVectorFromTarget(domain, prdDictionary, actDictionary, target):
  			code = generateTarget_AGGT(domain, AGMFileDataParsing.targetFromFile(target))
 			m = imp.new_module('targetModule')
 			exec code in m.__dict__
-			a, b, c = m.getTargetVariables()
-			print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-			print a
-			print b
-			print c
-			print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-			print prdDictionary
-			print 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
-			ret = np.zeros( (1, len(prdDictionary)) )
-			for r in b|c:
-				if len(r) == 2:
-					x = (r[0], r[1], r[2])
-				elif len(r) == 3:
-					x = r
-				else:
-					print 'inputVectorFromTarget: unexpected predicate size', r
-					sys.exit(-1)
-				k = '#'.join(x)
-				if k in prdDictionary.keys():
-					print prdDictionary[k], ret.shape
-					ret[0][prdDictionary[k]] = 1
-			return ret
+			return m.getTargetVariables()
 		else:
 			print 'to implement (maybe here would just be an error)'
 			sys.exit(-1)
 	else:
 		print 'to implement (maybe we are in a hierarchical target which is given directly by code)'
 		sys.exit(-1)
+
+
+#

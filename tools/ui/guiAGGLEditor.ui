@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1363</width>
+    <width>1380</width>
     <height>898</height>
    </rect>
   </property>
@@ -446,7 +446,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1363</width>
+     <width>1380</width>
      <height>27</height>
     </rect>
    </property>
@@ -490,7 +490,7 @@
     <addaction name="actionExportAllRules"/>
     <addaction name="actionExportAllRulesPNG"/>
     <addaction name="actionGenerateCode"/>
-    <addaction name="actionGenerateAGGLPlanner"/>
+    <addaction name="actionGenneratePlanarAGGLDomain"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuTools"/>
@@ -636,6 +636,11 @@
    </property>
    <property name="text">
     <string>Hide tool names</string>
+   </property>
+  </action>
+  <action name="actionGenneratePlanarAGGLDomain">
+   <property name="text">
+    <string>Gennerate planar AGGL domain</string>
    </property>
   </action>
  </widget>

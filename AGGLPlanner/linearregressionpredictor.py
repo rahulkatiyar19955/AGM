@@ -114,11 +114,8 @@ def generateLinearRegressionMatricesFromDomainAndPlansDirectory(domain, data, ou
 						data_y = yi # traceback.print_exc()
 					xi = np.zeros( (1, len(prdDictionary)) )
 					xi_preproc = inputVectorFromTarget(domainAGM, prdDictionary, actDictionary, target)
-					#print xi_preproc
-					#print target
 					try:
 						for predicate in xi_preproc[1]|xi_preproc[2]:
-							#print predicate
 							binary = len(predicate)==2
 							if binary:
 								predicate = (predicate[0], predicate[1], predicate[1])

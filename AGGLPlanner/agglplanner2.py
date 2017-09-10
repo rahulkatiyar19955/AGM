@@ -342,11 +342,13 @@ class DomainInformation(object):
 
 
 class TargetInformation(object):
-	def __init__(self, identifier, text):
+	def __init__(self, identifier, text, domain):
 		self.identifier = identifier
+		self.domain = domain
 		self.text = text
-		self.module = self.getModuleFromText(self.code).CheckTarget
-		self.code = generateTarget_AGGT(self.module, AGMFileDataParsing.targetFromText(text))
+		self.code = generateTarget_AGGT(self.domain, AGMFileDataParsing.targetFromText(text))
+		self.module    = self.getModuleFromText(self.code).CheckTarget
+		self.variables = self.getModuleFromText(self.code).getTargetVariables
 	def getModuleFromText(self, moduleText):
 		if len(moduleText) < 10:
 			print 'len(moduleText) < 10'
@@ -371,6 +373,7 @@ class AGGLPlanner2(object):
 	# @param awakenRules: the set of rules that are currently available for the planner to find a solution
 	def __init__(self, domainParsed, domainModule, initWorld, targetTuple, trainFile, indent=None, symbol_mapping=None, excludeList=None, resultFile=None, decomposing=False, awakenRules=set()):
 		object.__init__(self)
+		self.trainFile = trainFile
 		self.timeElapsed = 0.
 		self.symbol_mapping = copy.deepcopy(symbol_mapping)
 		if excludeList == None: excludeList = []
@@ -483,7 +486,6 @@ class AGGLPlanner2(object):
 		# print types_achieved
 		# print binary_achieved
 		# print unary_achieved
-		self.trainFile = trainFile
 
 		# Getting Action Preference data
 		self.g = self.getProbabilityDensityFunctionGenerator(self.trainFile)

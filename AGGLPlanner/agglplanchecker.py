@@ -204,6 +204,7 @@ if __name__ == '__main__': # program domain problem result
 	# Generate a WorldStateHistory from the initital XML file
 	init = WorldStateHistory([xmlModelParser.graphFromXMLFile(init), agmData.getInitiallyAwakeRules()])
 
+	# Call the checker
 	import tempfile
 	with tempfile.NamedTemporaryFile() as temp:
 		agmData.generateAGGLPlannerCode(temp.name, skipPassiveRules=True)

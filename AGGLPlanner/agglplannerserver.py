@@ -73,16 +73,20 @@ class Worker(object):
 			print 'ret:', ret
 			print 'targetText', targetText
 			print 'domainId', domainId
-			print 'O', agglplanner2.TargetInformation(ret, targetText, self.domainMap[domainId].parsed)
 			self.targetMap[ret] = agglplanner2.TargetInformation(ret, targetText, self.domainMap[domainId].parsed)
+			print 'O', self.targetMap[ret]
 			print 'TargetInformation', self.targetMap[ret]
 			open("targetText.txt", 'w').write(targetText)
 			open("targetCode.py", 'w').write(self.targetMap[ret].code)
 			self.lastUsedTargetKey += 1
 			return ret
 		except:
-			# open("roro", 'w').write(self.targetMap[ret].code)
+			f = open("targetCode.py", 'w')
+			f.write(targetText)
+			f.close()
+			print 'Wrote erroneoous code to targetCode.py'
 			traceback.print_exc()
+			print 'Wrote erroneoous code to targetCode.py'
 			return -1
 		finally:
 			self.mapsLock.release()
@@ -96,7 +100,7 @@ class Worker(object):
 			ret = self.lastUsedJobKey + 1
 			dI = self.domainMap[domainId]
 			tI = self.targetMap[targetId]
-			planningObject = agglplanner2.AGGLPlanner2(dI.parsed, dI.module, initWorld, tI.module)
+			planningObject = agglplanner2.AGGLPlanner2(dI.parsed, dI.module, initWorld, (tI.module, tI.variables), 'none')
 			self.jobMap[ret] = JobObject(ret, planningObject, domainId, targetId)
 			self.lastUsedJobKey += 1
 			return ret
@@ -127,16 +131,12 @@ class Worker(object):
 	def getPlanningResults(self, jobIdentifier):
 		print '------------------------------------------------------------------------'
 		print 'getPlanningResults', jobIdentifier, '(', type(jobIdentifier), ')'
-		print 'a'
 		ret = agglplanner_thrift.PlanningResults()
-		print 'b'
 		try:
-			print 'c'
 			self.mapsLock.acquire()
 			job = self.jobMap[jobIdentifier]
 			dI = self.domainMap[job.domainId]
 			tI = self.targetMap[job.targetId]
-			print 'd'
 		except:
 			print 'ERROR AQUI 1'
 			traceback.print_exc()
