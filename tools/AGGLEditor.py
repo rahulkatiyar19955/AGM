@@ -402,7 +402,14 @@ class AGMEditor(QMainWindow):
 		settings.setValue("geometry", g)
 
 	def about(self):
-		QMessageBox.information(self, "About", "Active Graph Grammar Language Editor (AGGLEditor):\n https://github.com/ljmanso/AGM/wiki \n\n Icons by Alexander Madyankin and Roman Shamin\n(MIT license)")
+		QMessageBox.information(self, "About", """Active Graph Grammar Language Editor (AGGLEditor):
+https://github.com/ljmanso/AGM/wiki
+
+AGM has been developed by:
+Luis J. Manso: main developer
+Lashit Jain: contributed to learning features. Supported by GSoC'17.
+
+AGGLEditor's icons are based on work by Alexander Madyankin and Roman Shamin (MIT license)""")
 	def draw(self):
 		self.lhsPainter.graph.setColors(self.rhsPainter.graph, True)
 		self.rhsPainter.graph.setColors(self.lhsPainter.graph, False)
