@@ -197,7 +197,7 @@ def newLinkScore(linkList, newSymbol, alreadyThere):
 	return ret
 
 
-## This method calls the corresponding generator for a rule (normal or combo)
+## This method calls the corresponding generator for a rule
 #
 # @ingroup AGGLGeneration
 #
@@ -211,105 +211,20 @@ def ruleImplementation(agm, rule):
 	ret = ''
 	indent = "\n\t"  # tabulation
 	ret += indent+"# Rule " + rule.name
-	# We distinguish between normal rules and combo rules.
+	#
 	if type(rule) == AGMRule:
 		#print rule.name, 'normal'
 		ret += normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=False)
-	elif type(rule) == AGMComboRule:
-		#print rule.name, 'combo'
-		ret += comboRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=False)
 	elif type(rule) == AGMHierarchicalRule:
 		#print rule.name, 'hierarchical'
 		ret += normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=True)
 		ret += generateTarget_AGGT(agm, {'graph':rule.rhs, 'precondition':rule.precondition}, rule.name, rule.lhs)
 
-#ret += comboRuleImplementation(rule, indent, thisIsActuallyAHierarchicalRule=True)
 	else:
 		print 'Unknown rule type'
 		sys.exit(-2346)
 	return ret
 
-## This method generates the code for a combo rule
-#
-# @ingroup AGGLGeneration
-#
-# @param rule the current combo rule
-# @param indent
-#
-# @retval the string with the code
-def comboRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=False):
-	ret = ''
-	ret += indent+"def " + rule.name + "(self, snode, stackP=None, equivalencesP=None):"
-	indent += "\t"
-	ret += indent+"if stackP == None: stackP=[]"
-	ret += indent+"if equivalencesP == None: equivalencesP=[]"
-	ret += indent+"stack        = "+COPY_OPTION+"(stackP)"
-	ret += indent+"equivalences = "+COPY_OPTION+"(equivalencesP)"
-	ret += indent+"return self." + rule.name + "_trigger(snode, dict(), stack, equivalences)"
-	ret += indent
-	ret += "\n"
-
-	indent = "\n\t"
-	ret += indent+"# Rule " + rule.name
-	ret += indent+"def " + rule.name + "_trigger(self, snode, n2id, stack=None, equivalences=None, checked=True, finish='', verbose=False):"
-	indent += "\t"
-	ret += indent+"if stack == None: stack=[]"
-	ret += indent+"if equivalences == None: equivalences=[]"
-	ret += indent+"aliasDict = dict()"
-	ret += indent+"sid = str(len(stack)+"+str(len(rule.atoms))+")"
-	ret += indent+"inCombo = (len(stack) > 0)"
-	#ret += indent+"stack = "+COPY_OPTION+"(stack)"
-	#ret += indent+"equivalences = "+COPY_OPTION+"(equivalences)"
-	ret += indent+"for atom in ["
-	a_n = 0
-	for a in reversed(rule.atoms):
-		if a_n == 0:
-			ret += "['"+a[0]+"','"+a[1]+"', '"+"# ENDS COMBO:"+rule.name+"_'+sid], "
-		else:
-			ret += "['"+a[0]+"','"+a[1]+"'], "
-		a_n += 1
-	ret = ret[:-2]
-	ret += ']:'
-	indent += "\t"
-	ret += indent+'idInStack = len(stack)'
-	ret += indent+'if len(atom)<3:'
-	ret += indent+'\tstack.append((idInStack, atom[0]))'
-	ret += indent+'else:'
-	ret += indent+'\tstack.append((idInStack, atom[0], atom[2]))'
-	ret += indent+'aliasDict[atom[1]] = idInStack'
-	indent = indent[:-1]
-	ret += indent+'for equivalence in ' + str(rule.equivalences) + ':'
-	indent += "\t"
-	ret += indent+'equivList = []'
-	ret += indent+'for similar in equivalence:'
-	indent += "\t"
-	ret += indent+'equivList.append([aliasDict[similar[0]], similar[1]])'
-	indent = indent[:-1]
-	ret += indent+'equivalences.append([equivList, None])'
-	indent = indent[:-1]
-	#ret += indent+'print "Current stack:", stack'
-	#ret += indent+'print stack[-1]'
-	#ret += indent+'print stack[-1][0]'
-
-	ret += indent+"newNode = WorldStateHistory(snode)"
-	#ret += indent+"newNode.depth -= 1 + " + str(len(rule.atoms))
-	ret += indent+"global lastNodeId"
-	ret += indent+"lastNodeId += 1"
-	ret += indent+"if not inCombo:"
-	ret += indent+"\tnewNode.cost = computePlanCost(newNode)"
-	ret += indent+"newNode.depth += 1"
-	ret += indent+"newNode.nodeId = lastNodeId"
-	#ret += indent+"newNode.parentId = snode.nodeId"
-	#if debug:
-		#ret += indent+"print ' ------- Created', newNode.nodeId, 'from', newNode.parentId, 'rule', '" + rule.name + "'"
-	ret += indent+"newNode.history.append('# STARTS COMBO:"+rule.name+"_' + sid)"
-	#ret += indent+"print 'Calling ', stack[-1][1]"
-	ret += indent+'ret = self.getRules()[stack[-1][1]](newNode, stack, equivalences)'
-	ret += indent+"return ret"
-
-	ret += "\n"
-	ret += "\n"
-	return ret
 
 ## This method generates the code for a NORMAL rule
 #
