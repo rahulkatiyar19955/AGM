@@ -571,7 +571,7 @@ class AGMHierarchicalRule(AGMRule):
 	def toString(self):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
-		ret = self.name + ' : ' + passiveStr + '('+ str(self.cost) +')\n{\n'
+		ret = 'hierarchical ' + self.name + ' : ' + passiveStr + '('+ str(self.cost) +')\n{\n'
 
 		if self.text:
 			if len(self.text) > 0:
