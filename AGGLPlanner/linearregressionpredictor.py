@@ -8,15 +8,17 @@ from genericprediction import *
 
 class LinearRegressionPredictor(object):
 	def __init__(self, pickleFile):
-		f = open(pickleFile, 'r')
+		try:
+			f = open(pickleFile, 'r')
+		except IOError:
+			print 'agglplanner error: Could not open', pickleFile
 		# print str.split(' ', 1 )
 		self.coeff, self.intercept, self.xHeaders, self.yHeaders = pickle.load(f)
+		print '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
+		print self.xHeaders
+		print '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
 		self.coeff = np.array(self.coeff)
 		self.intercept = np.array(self.intercept)
-		print '--------------------------------------------------------------------'
-		print self.coeff
-		print '--------------------------------------------------------------------'
-		print self.intercept
 		print '--------------------------------------------------------------------'
 		self.prdDictionary = setInverseDictionaryFromList(self.xHeaders)
 		self.actDictionary = setInverseDictionaryFromList(self.yHeaders)
@@ -25,8 +27,16 @@ class LinearRegressionPredictor(object):
 	def get_distrb(self, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary): # returns data size time
 		# yr2 = np.dot(values, self.coeff)+self.intercept
 		#inputv = inputVectorFromTarget(self.domainParsed, self.prdDictionary, self.actDictionary, "ex.aggt")
+		print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+		print targetVariables_types
+		print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+		print targetVariables_unary
+		print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+		print targetVariables_binary
+		print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
 		inputv = inputVectorFromSets(self.domainParsed, self.prdDictionary, self.actDictionary, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary)
 		#print 'INPUT V', inputv
+		print inputv.shape, '*', self.coeff.shape, '+', self.intercept.shape
 		outputv = np.dot(inputv, self.coeff)+self.intercept
 		#print '---------------------'
 		#print outputv
@@ -43,7 +53,7 @@ class LinearRegressionPredictor(object):
 		from operator import itemgetter
 		kk = sorted([ [x, result[x] ] for x in result ], reverse=True, key=itemgetter(1))
 		indexes = []
-		thresholds = [0.5, 0.25, 0.001]
+		thresholds = [0.5, 0.125, 0.0]
 		for idx, action in enumerate(sorted([ [x, result[x] ] for x in result ], reverse=True, key=itemgetter(1))):
 			#print idx, type(idx), action, type(action)
 			if action[1] < thresholds[0]:
@@ -113,7 +123,12 @@ def generateLinearRegressionMatricesFromDomainAndPlansDirectory(domain, data, ou
 					except NameError:
 						data_y = yi # traceback.print_exc()
 					xi = np.zeros( (1, len(prdDictionary)) )
-					xi_preproc = inputVectorFromTarget(domainAGM, prdDictionary, actDictionary, target)
+					initWorld = plan.split('/')[:-1]
+					initWorld.append(initWorld[-1]+'.xml')
+					initWorld = '/'.join(initWorld)
+					# print initWorld
+					# sys.exit(-1)
+					xi_preproc = inputVectorFromTarget(domainAGM, prdDictionary, actDictionary, target, initWorld)
 					try:
 						for predicate in xi_preproc[1]|xi_preproc[2]:
 							binary = len(predicate)==2
@@ -140,8 +155,8 @@ def generateLinearRegressionMatricesFromDomainAndPlansDirectory(domain, data, ou
 							print 'wiiiiiiiiiii'
 							break
 					except KeyError:
-						print 'KeyError', plan
-						pass
+						print 'KeyError _ ', plan
+						traceback.print_exc()
 			if n == lim:
 				break
 		if n == lim:

@@ -232,6 +232,8 @@ INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/AGGLPlanner/agglplanningcache.py" DESTINAT
 INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/AGGLPlanner/agglplanchecker.py" DESTINATION ${INST_BIN_PATH}/ RENAME agglplanchecker )
 INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/AGGLPlanner/agglplanchecker.py" DESTINATION ${INST_SHARE_PATH}/ RENAME agglplanchecker.py )
 
+INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/AGGLPlanner/agglplanner2_utils.py" DESTINATION ${INST_SHARE_PATH}/ RENAME agglplanner2_utils.py )
+
 INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/AGGLPlanner/agglplannerplan.py" DESTINATION ${INST_BIN_PATH}/ RENAME agglplannerplan )
 INSTALL(PROGRAMS "${CMAKE_SOURCE_DIR}/AGGLPlanner/agglplannerplan.py" DESTINATION ${INST_SHARE_PATH}/ RENAME agglplannerplan.py )
 

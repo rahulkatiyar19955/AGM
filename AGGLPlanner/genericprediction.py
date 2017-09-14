@@ -2,6 +2,8 @@ import sys, random, os, traceback
 from subprocess import call
 import numpy as np
 import imp
+import xmlModelParser
+import agglplanner2_utils
 
 sys.path.append('/usr/local/share/agm/')
 from parseAGGL import AGMFileDataParsing
@@ -84,10 +86,16 @@ def inputVectorFromSets(domain, prdDictionary, actDictionary, init_types, init_b
 			ret[0][prdDictionary[k]] = 1
 	return ret
 
-def inputVectorFromTarget(domain, prdDictionary, actDictionary, target):
+def inputVectorFromTarget(domain, prdDictionary, actDictionary, target, initWorld):
+	# Auto symbols must be grounded before computing the input vector
+	if type(initWorld) == str:
+		initWorld = xmlModelParser.graphFromXMLFile(initWorld)
+
 	if type(target) == type(''):
 		if target.endswith('.aggt'):
- 			code = generateTarget_AGGT(domain, AGMFileDataParsing.targetFromFile(target))
+			parsedTarget = AGMFileDataParsing.targetFromFile(target)
+			agglplanner2_utils.groundAutoTypesInTarget(parsedTarget, initWorld)
+ 			code = generateTarget_AGGT(domain, parsedTarget)
 			m = imp.new_module('targetModule')
 			exec code in m.__dict__
 			return m.getTargetVariables()
