@@ -62,6 +62,7 @@ from generate import *
 
 from dummysemanticspredictor import *
 from linearregressionpredictor import *
+from dnnpredictor import *
 from nopredictor import *
 
 # C O N F I G U R A T I O N
@@ -440,6 +441,8 @@ class AGGLPlanner2(object):
 			return DummySemanticsPredictor(self.domainParsed)
 		elif method == 'linearregression':
 			return LinearRegressionPredictor(splitted[1])
+		elif method == 'dnn':
+			return DNNPredictor(splitted[1])
 		else:
 			print 'method', method, 'not supported'
 			sys.exit(-1)
@@ -753,7 +756,7 @@ class AGGLPlanner2(object):
 
 			# Loop shall ran for one chunk time
 			selectedActions = self.threshData[0:int(len(self.threshData) * self.chunkSize[chunkNumber])]
-			if type(self.g) == LinearRegressionPredictor:
+			if type(self.g) == LinearRegressionPredictor or type(self.g) == DNNPredictor:
  				print 'SELECTED', selectedActions
 			# print 'selectedActions', selectedActions
 			while True:

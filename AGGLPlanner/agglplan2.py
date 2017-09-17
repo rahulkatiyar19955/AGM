@@ -58,7 +58,7 @@ if __name__ == '__main__': # program domain problem result
 		return None
 	def showHelp():
 		print 'Usage\n\t', sys.argv[0], 'domain.aggl init.xml target.aggt [-o result.plan] [-l learning_algorithm[:data_file]]\n'
-		print '-l    The learning algorithm can be one of the following (case insensitive): None, NaiveBayes, DummySemantics, LinearRegression.'
+		print '-l    The learning algorithm can be one of the following (case insensitive): None, NaiveBayes, DummySemantics, LinearRegression, DNN.'
 		print '      If no learning method is provided agglplan used "None" as default option.\n'
 		print '-o    Optional file path to store the computed plan. Optional argument.\n'
 		print ''
@@ -89,9 +89,9 @@ if __name__ == '__main__': # program domain problem result
 		trainList = trainFile.split(':')
 		trainMethod = trainList[0].lower()
 		print 'trainMethod', trainMethod
-		validMethods = [ 'none', 'naivebayes', 'dummysemantics', 'linearregression' ]
+		validMethods = [ 'none', 'naivebayes', 'dummysemantics', 'linearregression', 'dnn' ]
 		if not trainMethod in validMethods:
-			print 'ERROR:', trainMethod, 'not in the list of known learning methods: None, NaiveBayes, DummySemantics, LinearRegression\n'
+			print 'ERROR:', trainMethod, 'not in the list of known learning methods: None, NaiveBayes, DummySemantics, LinearRegression, DNN\n'
 			showHelp()
 		trainList2 = [trainList[0].lower()]
 		if len(trainList)>1:
