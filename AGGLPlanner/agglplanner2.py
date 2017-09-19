@@ -43,7 +43,7 @@ import pickle
 
 #signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-import sys, traceback, os, re, threading, time, string, math, copy
+import sys, traceback, os, re, threading, string, math, copy
 import collections, imp, heapq
 import datetime
 sys.path.append('/usr/local/share/agm/')
@@ -62,8 +62,12 @@ from generate import *
 
 from dummysemanticspredictor import *
 from linearregressionpredictor import *
+from linearregressionpredictor2 import *
 from dnnpredictor import *
 from nopredictor import *
+
+from agglplanner2_utils import *
+
 
 # C O N F I G U R A T I O N
 number_of_threads = 0 #4
@@ -381,7 +385,9 @@ class AGGLPlanner2(object):
 		self.excludeList = copy.deepcopy(excludeList)
 		self.indent = copy.deepcopy(indent)
 		self.resultFile = resultFile
+		print type(targetTuple[0]), type(targetTuple[1])
 		target = targetTuple[0]
+		self.targetFile = targetTuple[2]
 		self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary = targetTuple[1]()
 		if self.indent == None: self.indent = ''
 		# Get initial world mdoel
@@ -417,8 +423,7 @@ class AGGLPlanner2(object):
 		self.targetCode = target
 		# Decomposing
 		self.decomposing = decomposing
-
-		# set stop flat
+		# set stop flag
 		self.externalStopFlag = LockableInteger(0)
 
 
@@ -441,6 +446,8 @@ class AGGLPlanner2(object):
 			return DummySemanticsPredictor(self.domainParsed)
 		elif method == 'linearregression':
 			return LinearRegressionPredictor(splitted[1])
+		elif method == 'linearregression2':
+			return LinearRegressionPredictor2(splitted[1])
 		elif method == 'dnn':
 			return DNNPredictor(splitted[1])
 		else:
@@ -494,7 +501,7 @@ class AGGLPlanner2(object):
 		self.g = self.getProbabilityDensityFunctionGenerator(self.trainFile)
 		self.g.domainParsed = self.domainParsed
 		# Sorting actions by relevance   # #   Size of operator chunk   # #   TimeSlots for chunks
-		self.threshData, chunkSize, chunkTime = self.g.get_distrb(types_achieved, binary_achieved, unary_achieved, self.initWorld.graph, self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary)
+		self.threshData, chunkSize, chunkTime = self.g.get_distrb(types_achieved, binary_achieved, unary_achieved, self.initWorld.graph, self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary, self.targetFile)
 		self.chunkSize = chunkSize
 		self.chunkTime = chunkTime
 		print 'ACTIONS', sorted([ [x, self.threshData[x] ] for x in self.threshData ], reverse=True, key=itemgetter(1))
@@ -634,7 +641,7 @@ class AGGLPlanner2(object):
 					   self.domainParsed,
 					   self.domainModule,
 					   self.initWorld,
-					   (hierarchicalTarget, hierarchicalTargetVariables),
+					   (hierarchicalTarget, hierarchicalTargetVariables, self.targetFile),
 					   self.trainFile,
 					   self.indent+'\t',
 					   paramsWithoutNew,
@@ -678,8 +685,6 @@ class AGGLPlanner2(object):
 						print '    ', action
 						if self.resultFile != None:
 							self.resultFile.write(str(action)+'\n')
-					if self.resultFile != None:
-						self.resultFile.write("# time: " + str(self.timeElapsed) + "\n")
 
 				return finalPlan
 			if self.indent=='' and verbose > 0: print "----------------\nExplored", self.explored.get(), "nodes"
@@ -918,33 +923,104 @@ class AGGLPlanner2(object):
 
 
 if __name__ == '__main__': # program domain problem result
+	def find_arg(l, v):
+		for idx, value in enumerate(l):
+			if v == value:
+				return l[idx+1]
+		return None
+	def showHelp():
+		print 'Usage\n\t', sys.argv[0], 'domain.aggl init.xml target.aggt [-o result.plan] [-l learning_algorithm[:data_file]]\n'
+		print '-l    The learning algorithm can be one of the following (case insensitive): None, NaiveBayes, DummySemantics, LinearRegression, DNN.'
+		print '      If no learning method is provided agglplan used "None" as default option.\n'
+		print '-o    Optional file path to store the computed plan. Optional argument.\n'
+		print ''
+		sys.exit(-1)
 	#from pycallgraph import *
 	#from pycallgraph.output import GraphvizOutput
 	#graphviz = GraphvizOutput()
 	#graphviz.output_file = 'basic.png'
 	if True:
-	#with PyCallGraph(output=graphviz):
-		from parseAGGL import AGMFileDataParsing   #AGMFileDataParsing en fichero parseAGGL.py
-		t0 = time.time()
+		#with PyCallGraph(output=graphviz):
+		# We check if the program was run with all necessary arguments.
+		# If there aren't all the arguments, we show an error mesage with how to use the program.
+		# If there are all the arguments, we keep them in local variables.
+		if len(sys.argv)<4:
+			showHelp()
+		domainFile = sys.argv[1] ## the file that contains the grammar rules
+		initPath  = sys.argv[2] ## the file that contains the initial world status
+		targetFile = sys.argv[3] ## the goal o target world status
+		try:
+			## the file name where we keep the results of the program
+			result = find_arg(sys.argv, '-o')
+		except:
+			showHelp()
+		try:
+			trainFile = find_arg(sys.argv, '-l') ## probability distribution generator
+			if trainFile == None: trainFile = 'none'
+		except:
+			showHelp()
+		trainList = trainFile.split(':')
+		trainMethod = trainList[0].lower()
+		print 'trainMethod', trainMethod
+		validMethods = [ 'none', 'naivebayes', 'dummysemantics', 'linearregression', 'linearregression2', 'dnn' ]
+		if not trainMethod in validMethods:
+			print 'ERROR:', trainMethod, 'not in the list of known learning methods: None, NaiveBayes, DummySemantics, LinearRegression, DNN\n'
+			showHelp()
+		trainList2 = [trainList[0].lower()]
+		if len(trainList)>1:
+			trainList2 += trainList[1:]
+		trainFile = ':'.join(trainList2)
+		print 'learning_algorithm:',trainFile
+		print '\nGenerating search code...'
+		## Generate domain Python file
+		# agmData is a variable of type AGMFileData, in AGGL.py file.
+		# First: we CHECK the grammar. Is a parseAGGL.py's class
+		# and we write the grammar in a python file.
+		agmData = AGMFileDataParsing.fromFile(domainFile)
+		agmData.generateAGGLPlannerCode("/tmp/domain.py", skipPassiveRules=True)
 
-		if len(sys.argv)<6:
-			print 'Usage\n\t', sys.argv[0], ' domainFile.aggl activeRules.py init.xml target.xml.py trainFile [result.plan] [input_hierarchical.plan]'
-
+		## Generate target Python file.
+		if targetFile.lower().endswith('.aggt'):
+			theTarget = AGMFileDataParsing.targetFromFile(targetFile)
+			agglplanner2_utils.groundAutoTypesInTarget(theTarget, initPath)
+			outputText = generateTarget_AGGT(agmData, theTarget)
 		else:
-			domainAGM = AGMFileDataParsing.fromFile(sys.argv[1]) #From domain.aggl
-			domainPath = sys.argv[2]                            # ActiveRules.py path
-			initPath =   sys.argv[3]                            # Inital model or world.
-			targetPath = sys.argv[4]                            # Target model or world.
-			trainFile = sys.argv[5] # Sorting actions by relevance
-			resultFile = None
-			if len(sys.argv)>=7: resultFile = open(sys.argv[6], 'w')
-			hierarchicalInputPlan = None
-			if len(sys.argv)>=8: hierarchicalInputPlan = open(sys.argv[7], 'r')
+			# This sentence creates a graph based on the target world status
+			graph = graphFromXMLFile(targetFile)
+			## Generate the python code correspondig to the graph and
+			outputText = generateTarget(graph)
+		## Save the python code of the target world status in the file target.py.
+		ofile = open("/tmp/target.py", 'w')
+		ofile.write(outputText)
+		ofile.close()
 
-			domainRuleSet = imp.load_source('module__na_me', domainPath).RuleSet()
-			targetCode = imp.load_source('modeeeule__na_me', targetPath).CheckTarget
-			targetVariablesCode = imp.load_source('modeeeule__na_me', targetPath).getTargetVariables
-			#                domainParsed domainModule initWorld targetTuple,                       threshData indent symbol_mapping excludeList, resultFile, decomposing, awakenRules):
-			p = AGGLPlanner2(domainAGM, domainRuleSet, initPath, (targetCode, targetVariablesCode), trainFile, '',    dict(),        [],         resultFile)
-			p.run()
-		print 'Total time: ', (time.time()-t0).__str__()
+		# Run planner
+		# print 'RESULT', result
+		# print 'TRAINN', trainFile
+		domainAGM = AGMFileDataParsing.fromFile(sys.argv[1]) # From domain.aggl
+		domainPath = "/tmp/domain.py"                        # ActiveRules.py path
+		targetPath = "/tmp/target.py"                        # Target model or world.
+		trainFile = sys.argv[5] # Sorting actions by relevance
+
+		if result:
+			resultFile = open(result, 'w')
+		else:
+			resultFile = None
+
+		hierarchicalInputPlan = None
+		if len(sys.argv)>=8: hierarchicalInputPlan = open(sys.argv[7], 'r')
+
+		domainRuleSet = imp.load_source('module__na_me', domainPath).RuleSet()
+		targetCode = imp.load_source('modeeeule__na_me', targetPath).CheckTarget
+		targetVariablesCode = imp.load_source('modeeeule__na_me', targetPath).getTargetVariables
+
+		## We store the initial or start time of the planner and call the agglplaner, the main program that makes all the process...
+		start = time.time()
+		#                domainParsed domainModule   initWorld           targetTuple,                         trainfile  indent symbol_mapping excludeList, resultFile, decomposing, awakenRules):
+		p = AGGLPlanner2(domainAGM,   domainRuleSet, initPath, (targetCode, targetVariablesCode, targetFile), trainFile, '',    dict(),        [],         resultFile)
+		p.run()
+		end = time.time()
+		print 'done\nRunning the planner...'
+		print 'It took', end - start, 'seconds'
+		if resultFile != None:
+			resultFile.write("# time: " + str(end-start) + "\n")

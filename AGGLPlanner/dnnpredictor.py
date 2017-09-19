@@ -1,24 +1,140 @@
 import copy
-import pickle
+import pickle, tempfile
 import numpy as np
 
 from parseAGGL import AGMFileDataParsing
+from zipfile import ZipFile
 
 from genericprediction import *
 
+try:
+	import keras.models
+	from keras.models import Sequential
+	from keras.layers import Dense
+except:
+	pass
+
+
+def zipFiles(files_paths, output_path):
+	print 'output_path', output_path
+	with ZipFile(output_path, 'w') as zip_out:
+		for f in files_paths:
+			print f
+			print zip_out.write(f)
+
+
+def getModel(input_path):
+	zip_base = tempfile.mkdtemp(prefix='agmDNN')
+	print 'zip_base', zip_base
+	with ZipFile(input_path, 'r') as zip:
+		zip.extractall(zip_base)
+	return zip_base+'/model.h5', zip_base+'/xHeaders.pckl', zip_base+'/yHeaders.pckl'
+
+
+
+def generateDNNMatricesFromDomainAndPlansDirectory(domain, data, outX, outY):
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Reading domain'
+	domainAGM = AGMFileDataParsing.fromFile(domain)
+
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Generating prdsHeader'
+	prdDictionary = getPredicateDictionary(domainAGM)
+	prdsHeader=range(len(prdDictionary))
+	for x in prdDictionary:
+		prdsHeader[prdDictionary[x]] = x
+	print prdsHeader
+
+
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Generating actsHeader'
+	actDictionary = getActionDictionary(domainAGM)
+	actsHeader=range(len(actDictionary))
+	for x in actDictionary:
+		actsHeader[actDictionary[x]] = x
+	print actsHeader
+
+
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Gathering data from stored files'
+	lim = -1
+	n = 0
+	for (dirpath, dirnames, filenames) in os.walk(data):
+		for x in filenames:
+			target = dirpath  +   '/'   + x
+			plan   = target   + '.plan'
+			if x.endswith('.aggt'):
+				if os.path.exists(plan) and os.path.exists(target) and os.path.getsize(plan)>15:
+					planLines = [x.strip().strip('*') for x in open(plan, 'r').readlines() if (not x.startswith('#')) and len(x) > 3 ]
+					try:
+						yi = outputVectorFromPlan(planLines, actDictionary)
+					except KeyError:
+						print 'Non existent action in', plan
+						continue
+					try:
+						data_y = np.concatenate( (data_y, yi), axis=0)
+					except NameError:
+						data_y = yi # traceback.print_exc()
+					xi = np.zeros( (1, 2*len(prdDictionary)) )
+					initWorld = plan.split('/')[:-1]
+					initWorld.append(initWorld[-1]+'.xml')
+					initWorld = '/'.join(initWorld)
+					# print initWorld
+					# sys.exit(-1)
+					xi = inputVectorFromTargetAndInit(domainAGM, prdDictionary, actDictionary, target, initWorld)
+					try:
+						try:
+							data_x = np.concatenate( (data_x, xi), axis=0)
+						except NameError:
+							data_x = xi # traceback.print_exc()
+						n += 1
+						if n%100 == 0:
+							print n, 'generateLinearRegressionMatricesFromDomainAndPlansDirectory2'
+						if n == lim:
+							print 'wiiiiiiiiiii'
+							break
+					except KeyError:
+						print 'KeyError _ ', plan
+						traceback.print_exc()
+			if n == lim:
+				break
+		if n == lim:
+			break
+
+	print 'x', np.sum(data_x)
+	print data_x.shape
+	# print data_x
+
+	print 'y', np.sum(data_y)
+	print data_y.shape
+	# print data_y
+
+
+	with open(outY, 'wb') as f:
+		f.write(';'.join(actsHeader)+'\n')
+		np.savetxt(f, data_y, delimiter=";")
+
+	with open(outX, 'wb') as f:
+		f.write(';'.join(prdsHeader)+'\n')
+		np.savetxt(f, data_x, delimiter=";")
+
+
+
+
+
+
+
+
+
+
 class DNNPredictor(object):
-	def __init__(self, pickleFile):
+	def __init__(self, inputFile):
 		try:
-			f = open(pickleFile, 'r')
+			model_path, xHeaders_path, yHeaders_path = getModel(inputFile)
+			self.model = keras.models.load_model(model_path)
+			self.xHeaders = pickle.load(xHeaders_path, 'r')
+			self.yHeaders = pickle.load(yHeaders_path, 'r')
 		except IOError:
 			print 'agglplanner error: Could not open', pickleFile
-		# print str.split(' ', 1 )
-		self.coeff, self.intercept, self.xHeaders, self.yHeaders = pickle.load(f)
 		print '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
 		print self.xHeaders
 		print '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
-		self.coeff = np.array(self.coeff)
-		self.intercept = np.array(self.intercept)
 		print '--------------------------------------------------------------------'
 		self.prdDictionary = setInverseDictionaryFromList(self.xHeaders)
 		self.actDictionary = setInverseDictionaryFromList(self.yHeaders)
@@ -81,103 +197,6 @@ class DNNPredictor(object):
 		chunkTime = [ 2 for x in chunkSize ]
 		print chunkSize
 		return result, chunkSize, chunkTime
-
-
-def generateDNNMatricesFromDomainAndPlansDirectory(domain, data, outX, outY):
-	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Reading domain'
-	domainAGM = AGMFileDataParsing.fromFile(domain)
-
-	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Generating prdsHeader'
-	prdDictionary = getPredicateDictionary(domainAGM)
-	prdsHeader=range(len(prdDictionary))
-	for x in prdDictionary:
-		prdsHeader[prdDictionary[x]] = x
-	print prdsHeader
-
-
-	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Generating actsHeader'
-	actDictionary = getActionDictionary(domainAGM)
-	actsHeader=range(len(actDictionary))
-	for x in actDictionary:
-		actsHeader[actDictionary[x]] = x
-	print actsHeader
-
-
-	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Gathering data from stored files'
-	lim = -1
-	n = 0
-	for (dirpath, dirnames, filenames) in os.walk(data):
-		for x in filenames:
-			target = dirpath  +   '/'   + x
-			plan   = target   + '.plan'
-			if x.endswith('.aggt'):
-				if os.path.exists(plan) and os.path.exists(target) and os.path.getsize(plan)>15:
-					planLines = [x.strip().strip('*') for x in open(plan, 'r').readlines() if (not x.startswith('#')) and len(x) > 3 ]
-					try:
-						yi = outputVectorFromPlan(planLines, actDictionary)
-					except KeyError:
-						print 'Non existent action in', plan
-						continue
-					try:
-						data_y = np.concatenate( (data_y, yi), axis=0)
-					except NameError:
-						data_y = yi # traceback.print_exc()
-					xi = np.zeros( (1, len(prdDictionary)) )
-					initWorld = plan.split('/')[:-1]
-					initWorld.append(initWorld[-1]+'.xml')
-					initWorld = '/'.join(initWorld)
-					# print initWorld
-					# sys.exit(-1)
-					xi_preproc = inputVectorFromTarget(domainAGM, prdDictionary, actDictionary, target, initWorld)
-					try:
-						for predicate in xi_preproc[1]|xi_preproc[2]:
-							binary = len(predicate)==2
-							if binary:
-								predicate = (predicate[0], predicate[1], predicate[1])
-							for p1 in domainAGM.agm.inverseTypes[predicate[1]]:
-								for p2 in domainAGM.agm.inverseTypes[predicate[2]]:
-									if binary and p1!=p2:
-										continue
-									predicate_str = predicate[0]+'#'+p1+'#'+p2
-									try:
-										xi[0][prdDictionary[predicate_str]]=1
-									except:
-										# print predicate_str, '                             N  O  T                             in the dictionary'
-										pass
-						try:
-							data_x = np.concatenate( (data_x, xi), axis=0)
-						except NameError:
-							data_x = xi # traceback.print_exc()
-						n += 1
-						if n%100 == 0:
-							print n
-						if n == lim:
-							print 'wiiiiiiiiiii'
-							break
-					except KeyError:
-						print 'KeyError _ ', plan
-						traceback.print_exc()
-			if n == lim:
-				break
-		if n == lim:
-			break
-
-	print 'x', np.sum(data_x)
-	print data_x.shape
-	# print data_x
-
-	print 'y', np.sum(data_y)
-	print data_y.shape
-	# print data_y
-
-
-	with open(outY, 'wb') as f:
-		f.write(';'.join(actsHeader)+'\n')
-		np.savetxt(f, data_y, delimiter=";")
-
-	with open(outX, 'wb') as f:
-		f.write(';'.join(prdsHeader)+'\n')
-		np.savetxt(f, data_x, delimiter=";")
 
 
 

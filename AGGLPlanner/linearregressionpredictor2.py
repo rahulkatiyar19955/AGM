@@ -7,13 +7,12 @@ from parseAGGL import AGMFileDataParsing
 from genericprediction import *
 
 
-class LinearRegressionPredictor(object):
+class LinearRegressionPredictor2(object):
 	def __init__(self, pickleFile):
 		try:
 			f = open(pickleFile, 'r')
 		except IOError:
 			print 'agglplanner error: Could not open', pickleFile
-			sys.exit(-1)
 		# print str.split(' ', 1 )
 		self.coeff, self.intercept, self.xHeaders, self.yHeaders = pickle.load(f)
 		self.coeff = np.array(self.coeff)
@@ -24,7 +23,7 @@ class LinearRegressionPredictor(object):
 
 
 	def get_distrb(self, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary, target): # returns data size time
-		inputv = inputVectorFromTarget(self.domainParsed, self.prdDictionary, self.actDictionary, target, initModel)
+		inputv = inputVectorFromTargetAndInit(self.domainParsed, self.prdDictionary, self.actDictionary, target, initModel)
 		print inputv.shape, '*', self.coeff.shape, '+', self.intercept.shape
 		outputv = np.dot(inputv, self.coeff)+self.intercept
 
@@ -66,7 +65,7 @@ class LinearRegressionPredictor(object):
 		return result, chunkSize, chunkTime
 
 
-def generateLinearRegressionMatricesFromDomainAndPlansDirectory(domain, data, outX, outY):
+def generateLinearRegressionMatricesFromDomainAndPlansDirectory2(domain, data, outX, outY):
 	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Reading domain'
 	domainAGM = AGMFileDataParsing.fromFile(domain)
 
@@ -105,13 +104,13 @@ def generateLinearRegressionMatricesFromDomainAndPlansDirectory(domain, data, ou
 						data_y = np.concatenate( (data_y, yi), axis=0)
 					except NameError:
 						data_y = yi # traceback.print_exc()
-					xi = np.zeros( (1, len(prdDictionary)) )
+					xi = np.zeros( (1, 2*len(prdDictionary)) )
 					initWorld = plan.split('/')[:-1]
 					initWorld.append(initWorld[-1]+'.xml')
 					initWorld = '/'.join(initWorld)
 					# print initWorld
 					# sys.exit(-1)
-					xi = inputVectorFromTarget(domainAGM, prdDictionary, actDictionary, target, initWorld)
+					xi = inputVectorFromTargetAndInit(domainAGM, prdDictionary, actDictionary, target, initWorld)
 					try:
 						try:
 							data_x = np.concatenate( (data_x, xi), axis=0)
@@ -119,7 +118,7 @@ def generateLinearRegressionMatricesFromDomainAndPlansDirectory(domain, data, ou
 							data_x = xi # traceback.print_exc()
 						n += 1
 						if n%100 == 0:
-							print n, 'generateLinearRegressionMatricesFromDomainAndPlansDirectory1'
+							print n, 'generateLinearRegressionMatricesFromDomainAndPlansDirectory2'
 						if n == lim:
 							print 'wiiiiiiiiiii'
 							break
