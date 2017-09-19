@@ -60,7 +60,12 @@ class LinearRegressionPredictor2(object):
 		chunkSize = [ float(x)/(len(self.actDictionary)-1) for x in reversed(chunkSize)]
 		if chunkSize[-1] < 0.999999:
 			chunkSize.append(1)
-		chunkTime = [ 2 for x in chunkSize ]
+
+		chunkTime = []
+		timeSplitter = 4.
+		for x in chunkSize:
+			chunkTime.append(timeSplitter)
+			timeSplitter *= 0.5
 		print chunkSize
 		return result, chunkSize, chunkTime
 

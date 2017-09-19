@@ -63,6 +63,7 @@ from generate import *
 from dummysemanticspredictor import *
 from linearregressionpredictor import *
 from linearregressionpredictor2 import *
+from linearregressionpredictor3 import *
 from dnnpredictor import *
 from nopredictor import *
 
@@ -448,6 +449,8 @@ class AGGLPlanner2(object):
 			return LinearRegressionPredictor(splitted[1])
 		elif method == 'linearregression2':
 			return LinearRegressionPredictor2(splitted[1])
+		elif method == 'linearregression3':
+			return LinearRegressionPredictor3(splitted[1])
 		elif method == 'dnn':
 			return DNNPredictor(splitted[1])
 		else:
@@ -962,7 +965,7 @@ if __name__ == '__main__': # program domain problem result
 		trainList = trainFile.split(':')
 		trainMethod = trainList[0].lower()
 		print 'trainMethod', trainMethod
-		validMethods = [ 'none', 'naivebayes', 'dummysemantics', 'linearregression', 'linearregression2', 'dnn' ]
+		validMethods = [ 'none', 'naivebayes', 'dummysemantics', 'linearregression', 'linearregression2', 'linearregression3', 'dnn' ]
 		if not trainMethod in validMethods:
 			print 'ERROR:', trainMethod, 'not in the list of known learning methods: None, NaiveBayes, DummySemantics, LinearRegression, DNN\n'
 			showHelp()
