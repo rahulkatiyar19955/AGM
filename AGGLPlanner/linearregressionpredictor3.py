@@ -35,7 +35,7 @@ class LinearRegressionPredictor3(object):
 		from operator import itemgetter
 		kk = sorted([ [x, result[x] ] for x in result ], reverse=True, key=itemgetter(1))
 		indexes = []
-		thresholds = [0.5, 0.125, 0.0]
+		thresholds = [0.5, 0.1, 0.0]
 		for idx, action in enumerate(sorted([ [x, result[x] ] for x in result ], reverse=True, key=itemgetter(1))):
 			#print idx, type(idx), action, type(action)
 			if action[1] < thresholds[0]:
@@ -62,10 +62,10 @@ class LinearRegressionPredictor3(object):
 			chunkSize.append(1)
 
 		chunkTime = []
-		timeSplitter = 4.
+		timeSplitter = 10.
 		for x in chunkSize:
 			chunkTime.append(timeSplitter)
-			timeSplitter *= 0.2
+			timeSplitter *= 0.05
 		print chunkSize
 		return result, chunkSize, chunkTime
 
