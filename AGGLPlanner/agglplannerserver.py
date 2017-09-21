@@ -100,7 +100,7 @@ class Worker(object):
 			ret = self.lastUsedJobKey + 1
 			dI = self.domainMap[domainId]
 			tI = self.targetMap[targetId]
-			planningObject = agglplanner2.AGGLPlanner2(dI.parsed, dI.module, initWorld, (tI.module, tI.variables), 'none')
+			planningObject = agglplanner2.AGGLPlanner2(dI.parsed, dI.module, initWorld, (tI.module, tI.variables, tI.text), 'none')
 			self.jobMap[ret] = JobObject(ret, planningObject, domainId, targetId)
 			self.lastUsedJobKey += 1
 			return ret

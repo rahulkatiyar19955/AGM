@@ -386,7 +386,8 @@ class AGGLPlanner2(object):
 		self.excludeList = copy.deepcopy(excludeList)
 		self.indent = copy.deepcopy(indent)
 		self.resultFile = resultFile
-		print type(targetTuple[0]), type(targetTuple[1])
+		print type(targetTuple[2])
+		print targetTuple[2]
 		target = targetTuple[0]
 		self.targetFile = targetTuple[2]
 		self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary = targetTuple[1]()
@@ -1020,7 +1021,7 @@ if __name__ == '__main__': # program domain problem result
 		## We store the initial or start time of the planner and call the agglplaner, the main program that makes all the process...
 		start = time.time()
 		#                domainParsed domainModule   initWorld           targetTuple,                         trainfile  indent symbol_mapping excludeList, resultFile, decomposing, awakenRules):
-		p = AGGLPlanner2(domainAGM,   domainRuleSet, initPath, (targetCode, targetVariablesCode, targetFile), trainFile, '',    dict(),        [],         resultFile)
+		p = AGGLPlanner2(domainAGM,   domainRuleSet, initPath, (targetCode, targetVariablesCode, open(targetFile, 'r').read()), trainFile, '',    dict(),        [],         resultFile)
 		p.run()
 		end = time.time()
 		print 'done\nRunning the planner...'

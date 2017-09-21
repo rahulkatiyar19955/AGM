@@ -89,33 +89,30 @@ def setInverseDictionaryFromList(lst):
 def inputVectorFromTarget(domain, prdDictionary, actDictionary, target, initWorld):
 	# Auto symbols must be grounded before computing the input vector
 	if type(initWorld) == str:
-		initWorld = xmlModelParser.graphFromXMLFile(initWorld)
+		initWorld = xmlModelParser.graphFromXMLText(initWorld)
 
 	if type(target) == type(''):
-		if target.endswith('.aggt'):
-			parsedTarget = AGMFileDataParsing.targetFromFile(target)
-			agglplanner2_utils.groundAutoTypesInTarget(parsedTarget, initWorld)
- 			code = generateTarget_AGGT(domain, parsedTarget)
-			m = imp.new_module('targetModule')
-			exec code in m.__dict__
-			a, b, c = m.getTargetVariables()
-			ret = np.zeros( (1, len(prdDictionary)) )
-			for r in b|c:
-				if len(r) == 2:
-					x = (r[0], r[1], r[1])
-				elif len(r) == 3:
-					x = r
-				else:
-					print 'inputVectorFromTarget: unexpected predicate size', r
-					sys.exit(-1)
-				k = '#'.join(x)
-				if k in prdDictionary.keys():
-					# print prdDictionary[k], ret.shape
-					ret[0][prdDictionary[k]] = 0
-			return ret
-		else:
-			print 'to implement (maybe here would just be an error)'
-			sys.exit(-1)
+		parsedTarget = AGMFileDataParsing.targetFromText(target)
+		agglplanner2_utils.groundAutoTypesInTarget(parsedTarget, initWorld)
+		code = generateTarget_AGGT(domain, parsedTarget)
+		m = imp.new_module('targetModule')
+		exec code in m.__dict__
+		a, b, c = m.getTargetVariables()
+		ret = np.zeros( (1, len(prdDictionary)) )
+		for r in b|c:
+			if len(r) == 2:
+				x = (r[0], r[1], r[1])
+			elif len(r) == 3:
+				x = r
+			else:
+				print 'inputVectorFromTarget: unexpected predicate size', r
+				sys.exit(-1)
+			k = '#'.join(x)
+			if k in prdDictionary.keys():
+				# print prdDictionary[k], ret.shape
+				ret[0][prdDictionary[k]] = 0
+		return ret
+
 	else:
 		print 'to implement (maybe we are in a hierarchical target which is given directly by code)'
 		sys.exit(-1)
@@ -123,7 +120,7 @@ def inputVectorFromTarget(domain, prdDictionary, actDictionary, target, initWorl
 
 def inputVectorFromTargetAndInit(domain, prdDictionary, actDictionary, target, initWorld):
 	if type(initWorld) == str:
-		initWorld = xmlModelParser.graphFromXMLFile(initWorld)
+		initWorld = xmlModelParser.graphFromXMLText(initWorld)
 
 	# Fill vector with the predicates from the target
 	if type(target) == type(''):
