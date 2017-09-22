@@ -30,8 +30,8 @@
  * @brief AGMModel drawing class
  *
  * @ingroup CPPAPI
- * 
- * 
+ *
+ *
  */
 class AGMModelDrawer : QObject
 {
@@ -62,9 +62,9 @@ public:
 	/// This method updates the widget with the current model ('w' vairable).
 	void update(const AGMModel::SPtr &w)
 	{
-		
+
 		drawer->autoResize(true);
-		
+
 		mutex.lock();
 		model = AGMModel::SPtr(new AGMModel(w));
 		updateStructure();
@@ -107,7 +107,7 @@ public:
 	{
 		showInner = s;
 	}
-	
+
 	void setShowRobot( bool s=false)
 	{
 		if (s==true)
@@ -115,7 +115,7 @@ public:
 			showRobot = s;
 			return;
 		}
-		
+
 		visited.clear();
 		bool loop=false;
 		int symbolID=1;
@@ -130,23 +130,23 @@ public:
 		listOfSymbolThroughLinkType (symbolID,visited,"RT",loop);
 		if (loop)
 		{
-			std::cout<<"mission setShowRobot loop starting from robot symbol 1\n";		   
+			std::cout<<"mission setShowRobot loop starting from robot symbol 1\n";
 			exit(-1);
 		}
 		showRobot=s;
-		
+
 // 		std::cout<<"visited.size() "<<visited.size()<<"\n";
 // 		for (int i=0; i<visited.size();i++)
 // 		{
 // 			std::cout<<"id "<<visited.at(i)<<" symbol "<<model->getSymbolByIdentifier(visited.at(i))->toString();
 // 		}
-// 		
-// 		
+//
+//
 // 		std::cout<<"\n setShowRobot "<<showRobot<<"\n\n";
 // 		std::cout<<" fin setShowRobot \n\n";
-		
-		
-		
+
+
+
 	}
 
 	void listOfSymbolThroughLinkType( int& symbolID, QList<int> &visited, std::string linkType, bool &loop)
@@ -169,7 +169,7 @@ public:
 				if ((*edge_itr)->getLabel() == linkType && (*edge_itr)->getSymbolPair().first==symbolID )
 				{
 					int second = (*edge_itr)->getSymbolPair().second;
-					//std::cout<<symbolID<<" -- "<<linkType<<" --> "<<second;				
+					//std::cout<<symbolID<<" -- "<<linkType<<" --> "<<second;
 					listOfSymbolThroughLinkType(second,visited, linkType,loop);
 				}
 			}
@@ -191,8 +191,8 @@ public:
 				break;
 			}
 		}
-		
-		
+
+
 		if (index2==-1)
 		{
 			for (uint32_t i=0; i<model->symbols.size(); ++i)
@@ -207,7 +207,7 @@ public:
 		}
 		if (index2 != -1 )
 		{
-			 
+
 			tableWidget->setColumnCount(2);
 			tableWidget->setRowCount(attributes.size()+1);
 			QTableWidgetItem *ti;
@@ -233,12 +233,12 @@ public:
 				ti->setText(QString::fromStdString( iter->second ));
 			}
 		}
-				
+
 		else
 		{
 			if (tableWidget != NULL) tableWidget->clear();
 		}
-		
+
 	}
 
 	/// Move the nodes according to a edges-attraction / nodes-repulsion simulation.
@@ -337,14 +337,14 @@ public:
 				totalX += nodes[n].pos[0];
 				totalY += nodes[n].pos[1];
 			}
-			
+
 			double nodesSizeShow=0;
 			for (uint32_t n=0; n<nodes.size(); n++)
 			{
 				if (nodes[n].show==false)
 					nodesSizeShow++;
 			}
-			
+
 			totalX /= nodes.size()-nodesSizeShow;
 			totalY /= nodes.size()-nodesSizeShow;
 			for (uint32_t n=0; n<nodes.size(); n++)
@@ -363,11 +363,11 @@ private:
 	void updateStructure()
 	{
 		// Push back new nodes
-		
+
 		for (uint32_t e1=0; e1<model->symbols.size(); e1++)
-		{	
-			
-				
+		{
+
+
 			bool found = false;
 			for (uint32_t e2=0; e2<nodes.size(); e2++)
 			{
@@ -383,7 +383,7 @@ private:
 				GraphicalNodeInfo node;
 				node.name = model->symbols[e1]->toString();
 				node.type = model->symbols[e1]->symbolType;
-				node.identifier = model->symbols[e1]->identifier;				
+				node.identifier = model->symbols[e1]->identifier;
 				node.show=true;
 				for (int d=0; d<2; d++)
 				{
@@ -393,9 +393,9 @@ private:
 				node.labelsPositions.clear();
 				nodes.push_back(node);
 			}
-			
-			
-				
+
+
+
 		}
 		// Remove deleted nodes
 		for (uint32_t e1=0; e1<nodes.size();)
@@ -424,7 +424,7 @@ private:
 		}
 		// Push back edges again
 		for (uint32_t e=0; e<model->edges.size(); e++)
-		{	
+		{
 			if (model->edges[e].linking=="RT" && showInner==false)
 				continue;
 			if (model->edges[e].linking=="RT" && showRobot==false && showInner==true)
@@ -448,14 +448,14 @@ private:
 				if ( planeList.contains(second) )
 					continue;
 			}
-			
+
 
 			int f = model->getIndexByIdentifier(model->edges[e].symbolPair.first);
 			int s = model->getIndexByIdentifier(model->edges[e].symbolPair.second);
 			if (s<0 or f<0)
 			{
 // 				printf("%d --> %d\n", model->getIndexByIdentifier(model->edges[e].symbolPair.first), model->getIndexByIdentifier(model->edges[e].symbolPair.second));
-				continue;	
+				continue;
 			}
 			std::string first  = model->symbols[f]->toString();
 			std::string second = model->symbols[s]->toString();
@@ -482,12 +482,12 @@ private:
 				exit(-1);
 			}
 		}
-		
+
 		// Remove nodes with only a nodes
 		//borra los nodos que solo tienen enlaces RT (deben estar solos)
 		if (showInner==false)
 		{
-			//std::cout << "\n\n ******************************** \n";			
+			//std::cout << "\n\n ******************************** \n";
 			for (uint32_t e1=0; e1<nodes.size(); e1++)
 			{
 				//nodo solo
@@ -502,26 +502,26 @@ private:
 		//borro los nodos del robot
 		else if (showRobot==false)
 		{
-// 			std::cout << "\n\n *************  statr bucle showRobot "<<nodes.size()<<" *******************  \n";			
+// 			std::cout << "\n\n *************  statr bucle showRobot "<<nodes.size()<<" *******************  \n";
 			for (uint32_t e1=0; e1<nodes.size();e1++)
 			{
-				
+
 					//nodo solo del robot
 					if (nodes.at(e1).edges.empty() and visited.contains(nodes[e1].identifier))
-					{					
+					{
 // 						std::cout << "\t must be erase, e1: "<< e1<<" "<< nodes[e1].name<<" labels: "<<nodes[e1].edgesNames.size()<<" \n";
 						nodes[e1].show=false;
 					}
 			}
-// 			std::cout << "\n\n ************* FIN bucle showRobot "<<nodes.size()<<" ******************* \n";			
-			
+// 			std::cout << "\n\n ************* FIN bucle showRobot "<<nodes.size()<<" ******************* \n";
+
 		}
 		if (showInner and showMesh == false)
 		{
 			for (uint32_t e1=0; e1<nodes.size();e1++)
 			{
 				if ( meshList.contains(nodes[e1].identifier))
-				{	
+				{
 					nodes[e1].show=false;
 				}
 			}
@@ -531,7 +531,7 @@ private:
 			for (uint32_t e1=0; e1<nodes.size();e1++)
 			{
 				if ( planeList.contains(nodes[e1].identifier))
-				{	
+				{
 					nodes[e1].show=false;
 				}
 			}
@@ -551,16 +551,17 @@ private:
 		// Draw links
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
-			
 			if (nodes[n].show==false)
 				continue;
-			
+
 			if (modified)
 			{
 				/*printf("IDENTIFIER %s  index:%d (LINKS:%d,%d)\n", nodes[n].name.c_str(), n, (int)nodes[n].edgesOriented.size(), (int)nodes[n].edgesNames.size());*/
 			}
 			for (uint32_t e=0; e<nodes[n].edgesOriented.size(); e++)
 			{
+				if (nodes[n].edgesOriented[e] == n) printf("self-edge: %s\n", nodes[n].edgesNames[e].c_str());
+
 				int32_t o1 = n;
 				int32_t d1 = nodes[n].edgesOriented[e];
 				int pos = 0;
@@ -581,14 +582,19 @@ private:
 						}
 					}
 				}
-				
+
+
 				QPointF p1 = QPointF(nodes[            n            ].pos[0]+wW2, wH2-nodes[            n            ].pos[1]);
 				QPointF p2 = QPointF(nodes[nodes[n].edgesOriented[e]].pos[0]+wW2, wH2-nodes[nodes[n].edgesOriented[e]].pos[1]);
 				QPointF inc = (p2 - p1);
-				inc /= sqrt(inc.x()*inc.x() + inc.y()*inc.y());
+				float divv = sqrt(inc.x()*inc.x() + inc.y()*inc.y());
+				if (fabs(divv)>0.0001)
+				{
+					inc /= divv;
+				}
 				p1 = p1 + radius*inc;
 				p2 = p2 - radius*inc;
-				
+
 				// Link itself
 				drawer->drawLine(QLineF(p1, p2), QColor(0, 0, 0));
 				// Arrow
@@ -598,33 +604,32 @@ private:
 					QPointF pr = QPointF(p2.x()-(radius*0.5)*cos(angle+a), p2.y()+(radius*0.5)*sin(angle+a));
 					drawer->drawLine(QLineF(p2,  pr), QColor(0, 0, 0));
 				}
-				
+
 				// Text
 				int32_t linkHeight = 16;
 				int32_t linkGroupBase = (-linkGroupCount+1)*linkHeight/2;
 				QPointF reLl(0, linkHeight*pos + linkGroupBase);
 				QPointF labelTextPosition=p1*0.6+p2*0.4-reLl;
-				
+				if (nodes[n].edgesOriented[e] == n)
+				{
+					labelTextPosition += QPointF(0, radius+15);
+				}
+
 				//Label
 				//destiny e in edgesOriented
-// 				std::cout<<"nodes[n].name "<<nodes[n].name<<"\n";
-// 				qDebug()<<"nodes[n].edgesOriented.size()"<<nodes[n].edgesOriented.size();
-// 				qDebug()<<"destiny e in edgesOriented "<<e;				
 				int32_t dst=nodes[n].edgesOriented[e];
 // 				qDebug()<<"dst"<<dst;
-				std::string nameSymbolDst=nodes[dst].name;				
-// 				std::cout<<"nameSymbolDst "<<nameSymbolDst<<"\n";
+				std::string nameSymbolDst=nodes[dst].name;
 				std::string stringStream;
 				stringStream =nodes[n].edgesNames[e] +" "+nodes[n].name+" "+nameSymbolDst;
-// 				std::cout<<"stringStream "<<stringStream<<"\n";
 				QString labelKey = QString::fromStdString( stringStream );
 				if (nodes[n].labelsPositions.contains(labelKey) == true )
-				{   
+				{
 					qDebug()<<"edge repeated"<<labelKey;
 					qDebug()<<"nodes["<<n<<"].labelsPositions"<<nodes[n].labelsPositions;
 					qFatal("Error:: Two equal edges!!!");
 				}
-				else 
+				else
 				{
 					nodes[n].labelsPositions[labelKey]=labelTextPosition;
 					drawer->drawText(labelTextPosition, QString::fromStdString(nodes[n].edgesNames[e]), 10, QColor(255), true, QColor(127,127,127,127));
@@ -644,7 +649,7 @@ private:
 			drawer->drawText(p+QPointF(0,-7), QString::number(nodes[n].identifier), 10, QColor(255), true);
 		}
 		modified = false;
-		
+
 		if (tableWidget != NULL) drawTable();
 // 		qDebug()<<"\t\tEND DRAW";
 	}
@@ -663,7 +668,7 @@ private:
 		std::vector<uint32_t> edgesOriented;
 		std::vector<std::string> edgesNames;
 		QHash<QString, QPointF> labelsPositions;
-		
+
 	};
 
 private:
@@ -681,21 +686,21 @@ private:
 	QList<int> visited;
 	QList<int> meshList;
 	QList<int> planeList;
-	
-	
+
+
 
 
 	void print ()
 	{
 		qDebug()<<"\nAGMModelPrinter::printWorld(model)\n";
 		AGMModelPrinter::printWorld(model);
-// 		
+//
 		qDebug()<<"\nAGMModelDrawer::Print Graphical Structure\n";
-		qDebug()<<"nodes.size()"<<nodes.size();		
-		
+		qDebug()<<"nodes.size()"<<nodes.size();
+
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
-			
+
 			qDebug()<<"\nNode"<<n;
 			std::cout<<"nodes["<<n<<"].name "<<nodes[n].name<<std::endl;
 			std::cout<<"nodes["<<n<<"].type "<<nodes[n].type<<std::endl;
@@ -724,7 +729,7 @@ private:
 			{
 				qDebug() <<"\t"<< name << ":" << nodes[n].labelsPositions.value(name);
 			}
-			
+
 		}
 	}
 
@@ -734,7 +739,7 @@ public slots:
 	{
 		if (tableWidget == NULL) return;
 		QPointF c = drawer->getWindow().center();
-		
+
 		int wW2 = c.x();
 		int wH2 = c.y();
 		float x = pC.x();
@@ -746,7 +751,7 @@ public slots:
 		QString clickedLabel;
 		for (uint32_t n=0; n<nodes.size(); n++)
 		{
-			
+
 			const QPointF p = QPointF(nodes[n].pos[0]+wW2, wH2+nodes[n].pos[1]);
 			const float dist = sqrt( pow(p.x()-x, 2)+pow(p.y()-y, 2));
 // 			qDebug()<<QString::fromStdString(nodes[n].name)<<"node pos ("<<nodes[n].pos[0]<<","<<nodes[n].pos[1]<<")"<<"p"<<p<<"dist"<<dist;
@@ -766,7 +771,7 @@ public slots:
 				const QPointF pLabel = QPointF(labelTextPosition.x(), -1*(labelTextPosition.y()-drawer->getWindow().height()));
 				const float distLabel = sqrt( pow(pLabel.x()-x, 2)+pow(pLabel.y()-y, 2));
 // 				qDebug()<<"\tlabel"<<str<<":"<<nodes[n].labelsPositions.value(str)<<"pLabel"<<pLabel<<"distLabel"<<distLabel;
-				
+
 				if ( distLabel < 20.)
 				{
 					if (distLabel < minDistLink or minDistLink < 0)
@@ -785,13 +790,12 @@ public slots:
 		}
 		else if (indexLink > -1)
 		{
-			
+
 			interest = clickedLabel.toStdString();
 		}
-		
+
 	}
 };
 
 
 #endif
-

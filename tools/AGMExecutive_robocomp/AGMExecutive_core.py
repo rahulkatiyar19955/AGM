@@ -440,7 +440,6 @@ class Executive(object):
 						if str(self.worldModelICE.edges[i].b) == str(edge.b):
 							if str(self.worldModelICE.edges[i].edgeType) == str(edge.edgeType):
 								self.worldModelICE.edges[i].attributes = copy.deepcopy(edge.attributes)
-								print 'hecho'
 								found = True
 				if not found:
 					print 'Executive::edgesUpdate: couldn\'t update edge because no match was found'
