@@ -58,7 +58,7 @@ AGMModel::AGMModel(const std::string path)
 		exit(1);
 	}
 
-	
+
 	// Read symbols (just symbols, then links in other loop)
 	for (xmlNodePtr cur=root->xmlChildrenNode; cur!=NULL; cur=cur->next)
 	{
@@ -90,7 +90,7 @@ AGMModel::AGMModel(const std::string path)
 		else if (xmlStrcmp(cur->name, (const xmlChar *)"comment") == 0) { }  // coments are always ignored
 		else { printf("unexpected tag #1: %s\n", cur->name); exit(-1); }      // unexpected tags make the program exit
 	}
-	
+
 	// Read links
 	for (xmlNodePtr cur=root->xmlChildrenNode; cur!=NULL; cur=cur->next)
 	{
@@ -106,7 +106,7 @@ AGMModel::AGMModel(const std::string path)
 			int b = atoi((char *)dstn);
 			xmlFree(dstn);
 
-			
+
 			xmlChar *label = xmlGetProp(cur, (const xmlChar *)"label");
 			if (label == NULL) { printf("Link %s lacks of attribute 'label'.\n", (char *)cur->name); exit(-1); }
 			std::string edgeName((char *)label);
@@ -127,7 +127,7 @@ AGMModel::AGMModel(const std::string path)
 				else if (xmlStrcmp(cur2->name, (const xmlChar *)"text") == 0) { }     // we'll ignore 'text'
 				else { printf("unexpected tag inside symbol: %s ==> %s\n", cur2->name,xmlGetProp(cur2, (const xmlChar *)"id") ); exit(-1); } // unexpected tags make the program exit
 			}
-			
+
 			addEdgeByIdentifiers(a, b, edgeName, attrs);
 		}
 		else if (xmlStrcmp(cur->name, (const xmlChar *)"symbol") == 0) { }   // symbols are now ignored
@@ -925,7 +925,7 @@ void AGMModel::removeEdge(AGMModelEdge &edge)
 	removeEdgeByIdentifiers(pair.first, pair.second, edge.getLabel());
 }
 
-	
+
 void AGMModel::setSymbols(std::vector<AGMModelSymbol::SPtr> s)
 {
 	symbols = s;
@@ -948,10 +948,12 @@ int32_t AGMModel::getNewId()
 
 void AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr)
 {
+	printf("%d %d (%s)\n", a, b, edgeName.c_str());
 	// Nodes must exist.
 	if (a < 0 or b < 0)
 	{
-		AGMMODELEXCEPTION("Trying to link invalid identifiers");;
+		printf("Trying to link invalid identifiers\n");
+		AGMMODELEXCEPTION("Trying to link invalid identifiers");
 	}
 
 	// Check the edge doesn't already exists
@@ -963,11 +965,14 @@ void AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edg
 			{
 				if (edges[i].getLabel() == edgeName)
 				{
-					AGMMODELEXCEPTION(std::string("Exception: addEdgeByIdentifiers"));
+					printf("Exception: addEdgeByIdentifiers: repeated edge\n");
+					AGMMODELEXCEPTION("Exception: addEdgeByIdentifiers: repeated edge");
 				}
 			}
 		}
 	}
+
+	printf("%d %d (%s)\n", a, b, edgeName.c_str());
 	AGMModelEdge edge(a, b, edgeName, atr);
 	edges.push_back(edge);
 }
@@ -1217,6 +1222,3 @@ std::map<std::string, AGMModelSymbol::SPtr> AGMModel::getSymbolsMap(::RoboCompAG
 }
 
 #endif
-
-
-

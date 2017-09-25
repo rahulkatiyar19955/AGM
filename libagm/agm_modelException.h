@@ -11,14 +11,14 @@
  * @brief Generic AGM exception.
  *
  * @ingroup CPPAPI
- * 
- * 
+ *
+ *
  */
 class AGMModelException : public std::exception
 {
 public:
 	/// Constructor
-	AGMModelException(std::string file__, int32_t line__, std::string text__="") throw()
+	AGMModelException(std::string file__, int32_t line__, std::string text__=std::string("")) throw()
 	{
 		file_      =      file__;
 		line_      =      line__;
@@ -32,6 +32,7 @@ public:
 	/// <strong>This is the method you should call when capturing an AGMModelException object</strong>.
 	const char* what() const throw()
 	{
+		printf("%s <%s>", __FILE__, text_.c_str());
 		std::ostringstream ss;
 		ss << file_ << "(" << line_ << "): " << ": Exeception";
 		if (text_.size() > 0)
@@ -45,7 +46,7 @@ private:
 	std::string file_;
 	uint32_t line_;
 	std::string text_;
-	
+
 	std::string file()      { return file_; }
 	uint32_t line()         { return line_; }
 	std::string text()      { return text_; }

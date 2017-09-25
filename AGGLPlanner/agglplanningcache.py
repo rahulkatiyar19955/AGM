@@ -29,6 +29,10 @@ class PlanningCache:
 					ret = False
 				self.include(D, I, G, plan, success, False)
 				#print 'Read planning context', self.availableId
+				D.close()
+				I.close()
+				G.close()
+				plan.close()
 		except IOError:
 			print 'can\'t open', self.availableId
 			pass

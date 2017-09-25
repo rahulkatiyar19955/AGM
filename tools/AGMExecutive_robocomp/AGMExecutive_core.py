@@ -300,6 +300,9 @@ class Executive(object):
 		self.executiveVisualizationTopic = executiveVisualizationTopic
 
 		self.agglPath = agglPath
+		self.domainParsed = self.parsed = AGMFileDataParsing.fromFile(self.agglPath)
+
+
 		self.initialModelPath = initialModelPath
 		try:
 			self.initialModel = xmlModelParser.graphFromXMLFile(initialModelPath)
@@ -550,7 +553,13 @@ class Executive(object):
 			params[p].editable = False
 			params[p].value = parameterMap[p]
 			params[p].type = 'string'
-		# Send plan
+
+		typesStr = '#'.join([ ' '.join(self.domainParsed.agm.inverseTypes[x]+[x]) for x in self.domainParsed.agm.inverseTypes])
+		params['types'] = RoboCompAGMCommonBehavior.Parameter()
+ 		params['types'].editable = False
+		params['types'].type = 'string'
+		params['types'].value = typesStr
+
 		self.lastParamsSent = copy.deepcopy(params)
 		print 'CURRENT PLAN\n', self.plan
 		self.sendParams()
@@ -589,5 +598,6 @@ class Executive(object):
 			try:
 				self.agents[agent].activateAgent(self.lastParamsSent)
 			except:
+				traceback.print_exc()
 				print '     (can\'t connect to', agent, '!!!)',
 			print ''
