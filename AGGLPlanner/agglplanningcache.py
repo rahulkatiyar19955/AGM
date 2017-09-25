@@ -20,8 +20,11 @@ class PlanningCache:
 			while True:
 				#print 'Try including', self.availableId
 				D    = open('cache_D'+str(self.availableId)+'.py', 'r').read()
+				D.close()
 				I    = open('cache_I'+str(self.availableId)+'.xml', 'r').read()
+				I.close()
 				G    = open('cache_G'+str(self.availableId)+'.py', 'r').read()
+				G.close()
 				plan = open('cache_plan'+str(self.availableId)+'.agglp', 'r').read()
 				ret = True
 				success = (plan=='fail')
@@ -29,9 +32,6 @@ class PlanningCache:
 					ret = False
 				self.include(D, I, G, plan, success, False)
 				#print 'Read planning context', self.availableId
-				D.close()
-				I.close()
-				G.close()
 				plan.close()
 		except IOError:
 			print 'can\'t open', self.availableId
