@@ -462,6 +462,8 @@ class AGMRule(object):
 		self.effect = effect
 		if lhs == None: self.lhs = AGMGraph()
 		if rhs == None: self.rhs = AGMGraph()
+	def isHierarchical(self):
+		return True
 	def toString(self):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
@@ -563,6 +565,8 @@ class AGMHierarchicalRule(AGMRule):
 		self.activates = activates
 		self.passive = passive
 		self.text = self.generateTextFromHierarchical()
+	def isHierarchical(self):
+		return True
 	def generateTextFromHierarchical(self):
 		ret = ''
 		ret += self.lhs.toString() + '\n'

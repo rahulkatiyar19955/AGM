@@ -93,6 +93,8 @@ class AGMRulePDDL:
 	def toPDDL(rule, pddlVerbose=False, skipPassive=False):
 		if skipPassive==True and rule.passive == True:
 			return ''
+		if rule.isHierarchical():
+			return ''
 		if pddlVerbose:
 			print '\n----------------------------- ----------------------------------------   ', rule.name
 			print rule.name
