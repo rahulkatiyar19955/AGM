@@ -463,7 +463,7 @@ class AGMRule(object):
 		if lhs == None: self.lhs = AGMGraph()
 		if rhs == None: self.rhs = AGMGraph()
 	def isHierarchical(self):
-		return True
+		return False
 	def toString(self):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
@@ -756,7 +756,8 @@ class AGM(object):
 			if not rule.dormant:
 				ret.add(str(rule.name))
 		return ret
-
+	def validTypesForType(self, t):
+		return self.inverseTypes[t]
 ## AGM file data
 # @ingroup PyAPI
 #
@@ -785,6 +786,9 @@ class AGMFileData(object):
 
 	def getInitiallyAwakeRules(self):
 		return self.agm.getInitiallyAwakeRules()
+
+	def validTypesForType(self, t):
+		return self.agm.validTypesForType(t)
 
 	def toFile(self, filename):
 		writeString = ''

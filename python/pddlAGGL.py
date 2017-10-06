@@ -40,7 +40,7 @@ class AGMPDDL:
 			writeString += '\t(:functions\n\t\t(total-cost)\n\t)\n\n'
 		for r in agm.rules:
 			if hasattr(r, 'newNodesList'):
-				writeString += AGMRulePDDL.toPDDL(r, skipPassive=skipPassive) + '\n'
+				writeString += AGMRulePDDL.toPDDL(agm, r, skipPassive=skipPassive) + '\n'
 		writeString += ')\n'
 		return writeString
 	@staticmethod
@@ -90,7 +90,7 @@ class AGMRulePDDL:
 
 		return agmlist, nodeDict
 	@staticmethod
-	def toPDDL(rule, pddlVerbose=False, skipPassive=False):
+	def toPDDL(agmFD, rule, pddlVerbose=False, skipPassive=False):
 		if skipPassive==True and rule.passive == True:
 			return ''
 		if rule.isHierarchical():
@@ -118,7 +118,7 @@ class AGMRulePDDL:
 			string += ' - tipo'
 		string += ' )\n'
 		string += '\t\t:precondition (and'
-		string += AGMRulePDDL.existingNodesPDDLTypes(rule, nodeDict) # TYPE preconditions
+		string += AGMRulePDDL.existingNodesPDDLTypes(agmFD, rule, nodeDict) # TYPE preconditions
 		string += AGMRulePDDL.listPDDLPreconditions(rule, agmlist, forgetList, newList, nodeDict) # Include precondition for nodes to be created
 		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule, rule.stayingNodeList()+agmlist+forgetList) # Avoid using the same node more than once "!=". NOT INCLUDING THOSE IN THE LIST
 		string += AGMRulePDDL.linkPatternsPDDLPreconditions(rule, nodeDict)
@@ -143,10 +143,17 @@ class AGMRulePDDL:
 	# P  R  E  C  O  N  D  I  T  I  O  N  S
 	#
 	@staticmethod
-	def existingNodesPDDLTypes(rule, nodeDict, pddlVerbose=False):
+	def existingNodesPDDLTypes(agmFD, rule, nodeDict, pddlVerbose=False):
 		ret  = ''
 		for name,node in rule.lhs.nodes.items():
-			ret += ' (is'+node.sType+' ?v'+nodeDict[name]+')'
+			if len (agmFD.validTypesForType(node.sType)) > 1:
+				ret += ' (or'
+			first = True
+			for t in agmFD.validTypesForType(node.sType):
+				ret += ' (is'+t+' ?v'+nodeDict[name]+')'
+				first = False
+			if len (agmFD.validTypesForType(node.sType)) > 1:
+				ret += ')'
 		return ret
 	@staticmethod
 	def listPDDLPreconditions(rule, agmlist, forgetList, newList, nodeDict, pddlVerbose=False):
