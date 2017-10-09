@@ -386,8 +386,6 @@ class AGGLPlanner2(object):
 		self.excludeList = copy.deepcopy(excludeList)
 		self.indent = copy.deepcopy(indent)
 		self.resultFile = resultFile
-		print type(targetTuple[2])
-		print targetTuple[2]
 		target = targetTuple[0]
 		self.targetFile = targetTuple[2]
 		self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary = targetTuple[1]()
