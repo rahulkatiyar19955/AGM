@@ -1,5 +1,13 @@
+import sys
+sys.path.append('/usr/local/share/agm/')
+
 import itertools
 import re
+
+from AGGL import *
+from parseAGGL import *
+from xmlModelParser import *
+import agglplanner2_utils
 
 global useDiff
 useDiff = False
@@ -57,14 +65,8 @@ class AGMPDDL:
 	@staticmethod
 	def typePredicatesPDDL(agm, typeStr):
 		writeString = ''
-		typeSet = set()
-		for r in agm.rules:
-			if hasattr(r, 'nodeTypes'):
-				typeSet = typeSet.union(r.nodeTypes())
-			#else:
-				#raise Exception("Combo rule")
-		for t in typeSet:
-			writeString += '\t\t(is'+t+' ?n'+typeStr+')\n'
+		for t in agm.typesDirect:
+			writeString += '\t\t(IS'+t+' ?n'+typeStr+')\n'
 		return writeString
 
 #
@@ -150,7 +152,7 @@ class AGMRulePDDL:
 				ret += ' (or'
 			first = True
 			for t in agmFD.validTypesForType(node.sType):
-				ret += ' (is'+t+' ?v'+nodeDict[name]+')'
+				ret += ' (IS'+t+' ?v'+nodeDict[name]+')'
 				first = False
 			if len (agmFD.validTypesForType(node.sType)) > 1:
 				ret += ')'
@@ -233,7 +235,7 @@ class AGMRulePDDL:
 			while len(forgetList)>0:
 				nextn = forgetList.pop()
 				for tip in typeSet:
-					ret += ' (not (is' + tip + ' ' + nextn + '))'
+					ret += ' (not (IS' + tip + ' ' + nextn + '))'
 		# Internal error :-D
 		else:
 			raise Exception(":-)")
@@ -243,10 +245,10 @@ class AGMRulePDDL:
 		ret = ''
 		# Handle new nodes
 		for node in newList:
-			ret += ' (is' + rule.rhs.nodes[node].sType + ' ?v' + nodeDict[node] + ')'
+			ret += ' (IS' + rule.rhs.nodes[node].sType + ' ?v' + nodeDict[node] + ')'
 		# Handle forget nodes
 		for node in forgetList:
-			ret += ' (not (is' + rule.lhs.nodes[node].sType + ' ?v' + nodeDict[node] + '))'
+			ret += ' (not (IS' + rule.lhs.nodes[node].sType + ' ?v' + nodeDict[node] + '))'
 		return ret
 	@staticmethod
 	def linkPatternsPDDLEffects(rule, nodeDict, pddlVerbose=False):
@@ -295,7 +297,7 @@ class AGMRulePDDL:
 			symbol_name = m.group(1)
 			symbol_type = m.group(2)
 			blank_space = m.group(3)
-			ret = ret[:m.end(3)] + '(is' + symbol_type + ' ?v' + symbol_name + ')' + blank_space + ret[m.end(3):]
+			ret = ret[:m.end(3)] + '(IS' + symbol_type + ' ?v' + symbol_name + ')' + blank_space + ret[m.end(3):]
 			ret = ret.replace(symbol_name+':'+symbol_type, '( ?v' + symbol_name + typeStr + ' )')
 			ret = ret.replace(' ' + symbol_name, ' ?v' + symbol_name)
 		return ret
@@ -319,5 +321,118 @@ class AGMRulePDDL:
 			typeR = rule.rhs.nodes[n].sType
 			if typeL != typeR:
 				#if pddlVerbose: print 'EFFECTS modify', n
-				ret += ' (not(is'+typeL + ' ?v' + nodeDict[n] +')) (is'+typeR + ' ?v' + nodeDict[n] +')'
+				ret += ' (not(IS'+typeL + ' ?v' + nodeDict[n] +')) (IS'+typeR + ' ?v' + nodeDict[n] +')'
 		return ret
+
+
+def generatePDDLProblem(domain, initXMLPath, target, outputPath):
+	output = open(outputPath, 'w')
+
+	if type(domain) == AGMFileData:
+		domainParsed = domain
+	elif type(domain) == str:
+		domainParsed = AGMFileDataParsing.fromFile(domain)
+	else:
+		print 'generatePDDLProblem received a domain which is neither a path or an AGMFileData instance, exiting...'
+		sys.exit(-1)
+	initModel = graphFromXMLFile(initXMLPath)
+
+	target = AGMFileDataParsing.targetFromFile(target)
+	agglplanner2_utils.groundAutoTypesInTarget(target, initXMLPath)
+
+	output.write('(define (problem PROBLEM_NAME)\n\n\t(:domain AGGL)\n\n\t(:requirements :typing :strips :adl)\n\n\t(:objects\n')
+
+	originalObjects = []
+	for n in initModel.nodes:
+		originalObjects.append(n)
+		nn = initModel.nodes[n].sType + '_' + n + ' - tipo'
+		output.write('\t\t' + nn + '\n')
+	unknowns = 8
+	targetObjects = []
+	for n in target['graph'].nodes:
+		if not n in originalObjects:
+			nn = target['graph'].nodes[n].sType + '_' + n + ' - tipo'
+			targetObjects.append(nn)
+	unknownObjectsVec = []
+	for u in xrange(unknowns):
+		nn = 'unknown_' + str(u)
+		output.write('\t\t' + nn + ' - tipo \n')
+		unknownObjectsVec.append(nn)
+
+
+	output.write('\t)\n\n')
+
+
+	#
+	#  INIT MODEL
+	#
+	output.write('\t(:init\n')
+	# 	//output.write('		(= (total-cost) 0)\n')
+	# unknowns
+	if unknowns>0:
+		output.write('\t\t(firstunknown unknown_0)\n')
+	for u in xrange(unknowns):
+		output.write('\t\t(unknownorder unknown_' + str(u) + ' unknown_' + str(u+1) + ')\n')
+	# Set not='s
+	allObjects = originalObjects + unknownObjectsVec # + targetObjects
+	useDiff = False
+	# useDiff = True
+	if useDiff:
+		for ind1 in xrange(len(allObjects)):
+			for ind2 in xrange(len(allObjects)):
+				if (ind1 != ind2):
+					output.write('\t\t(diff ' + allObjects[ind1] + ' ' + allObjects[ind2] + ')\n')
+	# Known symbols type for the objects in the initial world
+	for s in initModel.nodes:
+		output.write('\t\t(IS' + initModel.nodes[s].sType + ' ' + initModel.nodes[s].sType + '_' + s + ' )\n')
+	# Introduce edges themselves
+	for l in initModel.links:
+		a = initModel.nodes[l.a].sType + '_' + l.a
+		b = initModel.nodes[l.b].sType + '_' + l.b
+		output.write('\t\t(' + str(l.linkType) + ' ' + str(a) + ' ' + str(b) + ')\n')
+	output.write('\t)\n')
+
+	#
+	# T A R G E T    W O R L D
+	output.write('\n\t(:goal\n')
+	if len(targetObjects) > 0:
+		output.write('\t\t(exists (')
+		for x in targetObjects:
+			output.write(' ?' + x)
+		output.write(' )\n')
+	output.write('\t\t(and\n')
+	# Known symbols type for the objects in the target world
+	for s in target['graph'].nodes:
+		kStr = ' '
+		for i in targetObjects:
+			if target['graph'].nodes[s].sType + '_' + s == i:
+				kStr = ' ?'
+				break
+		for t in domainParsed.validTypesForType(target['graph'].nodes[s].sType):
+			output.write('\t\t\t(IS' + t + kStr + target['graph'].nodes[s].sType + '_' + s + ')\n')
+	# Edges
+	for e in target['graph'].links:
+		a = target['graph'].nodes[e.a].sType + '_' + e.a
+		b = target['graph'].nodes[e.b].sType + '_' + e.b
+		label = e.linkType
+		output.write('\t\t\t(' + label)
+		kStr = ' '
+		if a in targetObjects: kStr = ' ?'
+		output.write(kStr + a)
+		kStr = ' '
+		if b in targetObjects: kStr = ' ?'
+		output.write(kStr + b)
+		output.write(')\n')
+		output.write('\t\t)\n')
+
+	if target['precondition']:
+		output.write(target['precondition'])
+
+	if len(targetObjects)>0:
+		output.write('\t\t)\n')
+	output.write('\t)\n')
+
+	# Metric definition
+	# output.write('	(:metric minimize (total-cost))\n')
+	output.write('\n')
+	output.write(')\n')
