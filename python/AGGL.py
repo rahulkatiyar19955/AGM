@@ -1,6 +1,6 @@
 import math, traceback, itertools, copy, sys, inspect
 
-from pddlAGGL import *
+# from pddlAGGL import *
 
 def distance(x1, y1, x2, y2):
 	return math.sqrt(math.pow(x1-x2, 2) + math.pow(y1-y2, 2))
@@ -462,6 +462,8 @@ class AGMRule(object):
 		self.effect = effect
 		if lhs == None: self.lhs = AGMGraph()
 		if rhs == None: self.rhs = AGMGraph()
+	def isHierarchical(self):
+		return False
 	def toString(self):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
@@ -563,6 +565,8 @@ class AGMHierarchicalRule(AGMRule):
 		self.activates = activates
 		self.passive = passive
 		self.text = self.generateTextFromHierarchical()
+	def isHierarchical(self):
+		return True
 	def generateTextFromHierarchical(self):
 		ret = ''
 		ret += self.lhs.toString() + '\n'
@@ -752,7 +756,8 @@ class AGM(object):
 			if not rule.dormant:
 				ret.add(str(rule.name))
 		return ret
-
+	def validTypesForType(self, t):
+		return self.inverseTypes[t]
 ## AGM file data
 # @ingroup PyAPI
 #
@@ -781,6 +786,9 @@ class AGMFileData(object):
 
 	def getInitiallyAwakeRules(self):
 		return self.agm.getInitiallyAwakeRules()
+
+	def validTypesForType(self, t):
+		return self.agm.validTypesForType(t)
 
 	def toFile(self, filename):
 		writeString = ''
