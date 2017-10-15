@@ -597,7 +597,6 @@ class Executive(object):
 			print '\t', agent,
 			try:
 				self.agents[agent].activateAgent(self.lastParamsSent)
-			except:
-				traceback.print_exc()
+			except Ice.ConnectionRefusedException:
 				print '     (can\'t connect to', agent, '!!!)',
 			print ''

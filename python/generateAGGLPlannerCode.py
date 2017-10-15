@@ -219,7 +219,6 @@ def ruleImplementation(agm, rule):
 		#print rule.name, 'hierarchical'
 		ret += normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=True)
 		ret += generateTarget_AGGT(agm, {'graph':rule.rhs, 'precondition':rule.precondition}, rule.name, rule.lhs)
-
 	else:
 		print 'Unknown rule type'
 		sys.exit(-2346)
