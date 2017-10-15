@@ -987,10 +987,8 @@ if __name__ == '__main__': # program domain problem result
 			agglplanner2_utils.groundAutoTypesInTarget(theTarget, initPath)
 			outputText = generateTarget_AGGT(agmData, theTarget)
 		else:
-			# This sentence creates a graph based on the target world status
-			graph = graphFromXMLFile(targetFile)
-			## Generate the python code correspondig to the graph and
-			outputText = generateTarget(graph)
+			print targetFile.lower()
+			sys.exit(1)
 		## Save the python code of the target world status in the file target.py.
 		ofile = open("/tmp/target.py", 'w')
 		ofile.write(outputText)
@@ -1002,7 +1000,10 @@ if __name__ == '__main__': # program domain problem result
 		domainAGM = AGMFileDataParsing.fromFile(sys.argv[1]) # From domain.aggl
 		domainPath = "/tmp/domain.py"                        # ActiveRules.py path
 		targetPath = "/tmp/target.py"                        # Target model or world.
-		trainFile = sys.argv[5] # Sorting actions by relevance
+		try:
+			trainFile = sys.argv[5] # Sorting actions by relevance
+		except:
+			trainFile = 'none'
 
 		if result:
 			resultFile = open(result, 'w')

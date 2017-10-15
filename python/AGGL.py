@@ -370,17 +370,38 @@ class AGMGraph(object):
 		else:
 			print 'No such node', str(name)+'. Internal editor error.'
 			pass
-	def addEdge(self, a, b, linkname='link',attrs=None):
+
+	def addEdge(self, a, b, linkname='link', attrs=None):
 		if attrs==None: attrs=dict()
-		self.links.append(AGMLink(a, b, linkname, attrs, enabled=True))
-	def removeEdge(self, a, b):
+		if not self.getEdge(a, b, linkname):
+			self.links.append(AGMLink(a, b, linkname, attrs, enabled=True))
+		else:
+			e = self.getEdge(a, b, linkname)
+			e.linkType = linkname
+			e.attributes = attrs
+			if e.attributes == None:
+				e.attributes = {}
+			elif type(e.attributes) == type({}):
+				e.attributes = attrs
+
+
+	def removeEdge(self, a, b, linkLabel=''):
+		ret = 0
 		i = 0
 		while i < len(self.links):
 			l = self.links[i]
-			if l.a == a and l.b == b:
+			if l.a == a and l.b == b and (linkLabel==l.linkType or linkLabel==''):
+				ret += 1
 				del self.links[i]
 			else:
 				i += 1
+		return ret
+	def getEdge(self, a, b, linkLabel):
+		for l in self.links:
+			if l.a == a and l.b == b:
+				if linkLabel==l.linkType:
+					return l
+		return None
 	def toString(self):
 		ret = '\t{\n'
 		for v in sorted(self.nodes.keys()):
