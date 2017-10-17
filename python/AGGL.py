@@ -855,7 +855,8 @@ class AGMFileData(object):
 		#print 'Generating (partial =', str(skipPassiveRules)+') PDDL file'
 		w = open(filename, 'w')
 		a = copy.deepcopy(self.agm)
-		text = AGMPDDL.toPDDL(a, self.properties["name"], skipPassiveRules)
+		import pddlAGGL
+		text = pddlAGGL.AGMPDDL.toPDDL(a, self.properties["name"], skipPassiveRules)
 		w.write(text)
 		w.close()
 
