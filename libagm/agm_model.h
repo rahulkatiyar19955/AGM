@@ -279,12 +279,12 @@ public:
 	AGMModelSymbol::SPtr getSymbolByIdentifier(int32_t targetId) const;
 
 
-	/*! \brief Returns a shared pointer to the symbol with name '<em>name</em>', where a symbol's name is considered to be the concatenation of its type, the underscore character ('_') and its identifier.
+	/*! \brief Returns a shared pointer to the symbol with name '<em>symbolName</em>', where a symbol's name is considered to be the concatenation of its type, the underscore character ('_') and its identifier.
 	 *
 	 * \throws AGMException If no symbol with identifier 'targetId' is found.
 	 *
 	 */
-	AGMModelSymbol::SPtr getSymbolByName(const std::string &name) const;
+	AGMModelSymbol::SPtr getSymbolByName(const std::string &symbolName) const;
 
 
 	/*! \brief Includes a new edge in the model given the identifiers of two symbols with an optional attribute map.  Returns True on success.
