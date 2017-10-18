@@ -756,16 +756,16 @@ AGMModelSymbol::SPtr AGMModel::getSymbol(int32_t identif) const
 	return getSymbolByIdentifier(identif);
 }
 
-AGMModelSymbol::SPtr AGMModel::getSymbolByName(const std::string &ss) const
+AGMModelSymbol::SPtr AGMModel::getSymbolByName(const std::string &symbolName) const
 {
 	for (uint32_t i=0; i<symbols.size(); ++i)
 	{
-		if (symbols[i]->toString() == name)
+		if (symbols[i]->toString() == symbolName)
 		{
 			return symbols[i];
 		}
 	}
-	AGMMODELEXCEPTION(std::string("Exception: Trying to get a node with an unexistent name (")+ss+std::string(")."));
+	AGMMODELEXCEPTION(std::string("Exception: Trying to get a node with an unexistent name (")+symbolName+std::string(")."));
 }
 
 

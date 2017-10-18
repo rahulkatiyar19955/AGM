@@ -170,7 +170,8 @@ std::string AGMModelSymbol::getAttribute(const std::string &a, bool debug) const
 	}
 	else
 	{
-		throw ("couldn't find attribute");
+		AGMMODELEXCEPTION(std::string("Couldn't find attribute"));
+// 		throw ("couldn't find attribute");
 	}
 }
 
