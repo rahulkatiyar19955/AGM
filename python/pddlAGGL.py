@@ -400,7 +400,7 @@ def generatePDDLProblem(domain, initXMLPath, target, outputPath):
 		for x in targetObjects:
 			output.write(' ?' + x)
 		output.write(' )\n')
-	output.write('\t\t(and\n')
+	output.write('\t\t\t(and\n')
 	# Known symbols type for the objects in the target world
 	for s in target['graph'].nodes:
 		kStr = ' '
@@ -409,13 +409,13 @@ def generatePDDLProblem(domain, initXMLPath, target, outputPath):
 				kStr = ' ?'
 				break
 		for t in domainParsed.validTypesForType(target['graph'].nodes[s].sType):
-			output.write('\t\t\t(IS' + t + kStr + target['graph'].nodes[s].sType + '_' + s + ')\n')
+			output.write('\t\t\t\t(IS' + t + kStr + target['graph'].nodes[s].sType + '_' + s + ')\n')
 	# Edges
 	for e in target['graph'].links:
 		a = target['graph'].nodes[e.a].sType + '_' + e.a
 		b = target['graph'].nodes[e.b].sType + '_' + e.b
 		label = e.linkType
-		output.write('\t\t\t(' + label)
+		output.write('\t\t\t\t(' + label)
 		kStr = ' '
 		if a in targetObjects: kStr = ' ?'
 		output.write(kStr + a)
@@ -423,10 +423,11 @@ def generatePDDLProblem(domain, initXMLPath, target, outputPath):
 		if b in targetObjects: kStr = ' ?'
 		output.write(kStr + b)
 		output.write(')\n')
-		output.write('\t\t)\n')
+	output.write('\t\t\t)\n')
 
 	if target['precondition']:
-		output.write(target['precondition'])
+		print type(target['precondition'])
+		output.write(str(target['precondition']))
 
 	if len(targetObjects)>0:
 		output.write('\t\t)\n')
