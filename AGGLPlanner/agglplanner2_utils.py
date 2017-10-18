@@ -3,12 +3,7 @@ import xmlModelParser
 def groundAutoTypesInTarget(target, world):
 	# Make sure the world model provided is a graph (not the path to it)
 	if type(world) == str:
-		print 'reading xml world file', world
 		world = xmlModelParser.graphFromXMLFile(world)
-
-	# print target["graph"]
-
-
 	# Iterate over the target's graph, grounding the auto symbols according to the types of the init world model
 	for node in target["graph"].nodes:
 		if target["graph"].nodes[node].sType == "auto":
@@ -20,7 +15,3 @@ def groundAutoTypesInTarget(target, world):
 			except ValueError: # Ok, if the node is not a constant, we should fail
 				print 'Found an \'auto\' symbol type for a symbol which is not a constant'
 				sys.exit(-1)
-
-	# print '--------------------------------------------------------------------------------------------------------------------------------------'
-	# print target["graph"]
-	# print '--------------------------------------------------------------------------------------------------------------------------------------'

@@ -386,8 +386,6 @@ class AGGLPlanner2(object):
 		self.excludeList = copy.deepcopy(excludeList)
 		self.indent = copy.deepcopy(indent)
 		self.resultFile = resultFile
-		print type(targetTuple[2])
-		print targetTuple[2]
 		target = targetTuple[0]
 		self.targetFile = targetTuple[2]
 		self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary = targetTuple[1]()
@@ -989,10 +987,8 @@ if __name__ == '__main__': # program domain problem result
 			agglplanner2_utils.groundAutoTypesInTarget(theTarget, initPath)
 			outputText = generateTarget_AGGT(agmData, theTarget)
 		else:
-			# This sentence creates a graph based on the target world status
-			graph = graphFromXMLFile(targetFile)
-			## Generate the python code correspondig to the graph and
-			outputText = generateTarget(graph)
+			print targetFile.lower()
+			sys.exit(1)
 		## Save the python code of the target world status in the file target.py.
 		ofile = open("/tmp/target.py", 'w')
 		ofile.write(outputText)
@@ -1004,7 +1000,10 @@ if __name__ == '__main__': # program domain problem result
 		domainAGM = AGMFileDataParsing.fromFile(sys.argv[1]) # From domain.aggl
 		domainPath = "/tmp/domain.py"                        # ActiveRules.py path
 		targetPath = "/tmp/target.py"                        # Target model or world.
-		trainFile = sys.argv[5] # Sorting actions by relevance
+		try:
+			trainFile = sys.argv[5] # Sorting actions by relevance
+		except:
+			trainFile = 'none'
 
 		if result:
 			resultFile = open(result, 'w')
@@ -1020,7 +1019,7 @@ if __name__ == '__main__': # program domain problem result
 
 		## We store the initial or start time of the planner and call the agglplaner, the main program that makes all the process...
 		start = time.time()
-		#                domainParsed domainModule   initWorld           targetTuple,                         trainfile  indent symbol_mapping excludeList, resultFile, decomposing, awakenRules):
+		#                domainParsed domainModule   initWorld                                                    targetTuple, trainfile  indent symbol_mapping excludeList, resultFile, decomposing, awakenRules)
 		p = AGGLPlanner2(domainAGM,   domainRuleSet, initPath, (targetCode, targetVariablesCode, open(targetFile, 'r').read()), trainFile, '',    dict(),        [],         resultFile)
 		p.run()
 		end = time.time()
