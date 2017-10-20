@@ -636,6 +636,19 @@ std::vector<AGMModelSymbol::SPtr> AGMModel::getSymbols() const
 {
 	return symbols;
 }
+std::vector<AGMModelSymbol::SPtr> AGMModel::getSymbolsByType(std::string symbolType) const
+{
+	std::vector<AGMModelSymbol::SPtr> v;
+	v.clear();
+	for (uint32_t idx=0; idx<symbols.size(); ++idx)
+	{
+		if (symbols[idx]->symbolType == symbolType)
+		{
+			v.push_back(symbols[idx]);
+		}
+	}
+	return v;
+}
 
 // std::vector<AGMModelEdge> AGMModel::getEdges() const
 // {

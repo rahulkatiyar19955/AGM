@@ -203,6 +203,9 @@ public:
 
 	/// Returns a reference to the symbol vector. Use with care.
 	std::vector<AGMModelSymbol::SPtr> getSymbols() const;
+	/*! \brief Returns a reference to the symbols vector that match with the symbol type given by the param '<em>symbolType</em>'. Use with care. If not found any, returns an empty vector.
+	 */
+	std::vector<AGMModelSymbol::SPtr> getSymbolsByType(std::__cxx11::string symbolType) const;
 
 #if ROBOCOMP_SUPPORT == 1
 	/// Returns a map of smart pointers to a list of symbools
