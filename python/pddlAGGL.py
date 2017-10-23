@@ -70,6 +70,15 @@ def pddlASTtoTXT_rec(ast, tabs=4, varTypesToCheck=None, allVariables=None, added
 		ret += pddlASTtoTXT_rec(ast[1], tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)+'\n'
 		ret += pddlASTtoTXT_rec(ast[2], tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)+'\n'
 		ret += '\t'*tabs+')\n'
+	elif ast[0] == 'eq':
+		ret = '\t'*tabs+'(='
+		for x in ast[1:]:
+			if x in addedVariables:
+				ret += ' ?'
+			else:
+				ret += ' '
+			ret += allVariables[x]+'_'+x
+ 		ret += ')\n'
 	else:
 		print 'OTRO', ast[0]
 		ret = '\t'*tabs+'('+ ast[0]
@@ -187,7 +196,7 @@ class AGMRulePDDL:
 		print 'PREC', rule.name
 		print 'PREC', rule.name
 		print 'PREC', rule.name
-		string += pddlASTtoTXT(rule.preconditionAST, [rule.lhs, rule.rhs], 2)
+		string += '\n'+pddlASTtoTXT(rule.preconditionAST, [rule.lhs, rule.rhs], 2)
 		string += ' )\n'
 
 		string += '\t\t:effect (and'
@@ -198,7 +207,7 @@ class AGMRulePDDL:
 		print 'EFFCT', rule.name
 		print 'EFFCT', rule.name
 		print 'EFFCT', rule.name
-		string += pddlASTtoTXT(rule.effectAST, [rule.lhs, rule.rhs], 2)
+		string += '\n'+pddlASTtoTXT(rule.effectAST, [rule.lhs, rule.rhs], 2)
 		if not splitActionModif:
 			string += ' (increase (total-cost) '
 			string += rule.cost
