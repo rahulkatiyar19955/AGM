@@ -205,7 +205,7 @@ public:
 	std::vector<AGMModelSymbol::SPtr> getSymbols() const;
 	/*! \brief Returns a reference to the symbols vector that match with the symbol type given by the param '<em>symbolType</em>'. Use with care. If not found any, returns an empty vector.
 	 */
-	std::vector<AGMModelSymbol::SPtr> getSymbolsByType(std::__cxx11::string symbolType) const;
+	std::vector<AGMModelSymbol::SPtr> getSymbolsByType(std::string symbolType) const;
 
 #if ROBOCOMP_SUPPORT == 1
 	/// Returns a map of smart pointers to a list of symbools
@@ -328,7 +328,7 @@ public:
 	}
 
 	/*! \brief Removes an edge given an AGMModelEdge containing the ending symbol and label
-	 * 
+	 *
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
@@ -420,5 +420,3 @@ private:
 	int32_t lastId;
 
 };
-
-
