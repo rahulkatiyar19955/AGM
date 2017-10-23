@@ -21,6 +21,66 @@ AGMListLastUsedName = 'ListAGMInternal'
 def translateList(alist, dictionary):
 	return [dictionary[x] for x in alist]
 
+
+def pddlASTtoTXT(ast, graphs, tabs=4):
+	if ast == None:
+		return ''
+	if len(ast) == 0:
+		return ''
+	allVariables = {}
+	print 'pddlASTtoTXT', type(graphs)
+	if type(graphs) != list:
+		graphs = [graphs]
+	for graph in graphs:
+		for n in graph.nodes:
+			allVariables[n] = graph.nodes[n].sType
+	return pddlASTtoTXT_rec(ast, tabs, varTypesToCheck=[], allVariables=allVariables)
+
+def pddlASTtoTXT_rec(ast, tabs=4, varTypesToCheck=None, allVariables=None, addedVariables=None):
+	if varTypesToCheck == None:
+		varTypesToCheck = []
+	if allVariables == None:
+		allVariables = {}
+	if addedVariables == None:
+		addedVariables = []
+	print '\nENTRO', ast
+
+	if ast[0] == 'forall':
+		ret = '\t'*tabs+'(forall ('
+		for v in ast[1]:
+			varTypesToCheck.append(v)
+			addedVariables.append(v[0])
+			allVariables[v[0]] = v[1]
+			ret += '?'+v[1]+'_'+v[0]+' '
+		ret += '- tipo )\n'
+		ret += pddlASTtoTXT_rec(ast[2], tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)
+		ret += '\t'*tabs+')'
+	elif ast[0] == 'not':
+		ret =  '\t'*tabs+'(not\n'
+		ret += pddlASTtoTXT_rec(ast[1], tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)
+		ret += '\t'*tabs+')\n'
+	elif ast[0] == 'and':
+		ret = '\t'*tabs+'(and\n'
+		for v in ast[1]:
+			print 'REC', v
+			ret += pddlASTtoTXT_rec(v, tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)+'\n'
+		ret += '\t'*tabs+')\n'
+	elif ast[0] == 'when':
+		ret = '\t'*tabs+'(when\n'
+		ret += pddlASTtoTXT_rec(ast[1], tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)+'\n'
+		ret += pddlASTtoTXT_rec(ast[2], tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)+'\n'
+		ret += '\t'*tabs+')\n'
+	else:
+		print 'OTRO', ast[0]
+		ret = '\t'*tabs+'('+ ast[0]
+		for x in ast[1:]:
+			if x in addedVariables:
+				ret += ' ?'
+			else:
+				ret += ' '
+			ret += allVariables[x]+'_'+x
+ 		ret += ')\n'
+	return ret
 #
 # AGM to PDDL
 #
@@ -124,6 +184,10 @@ class AGMRulePDDL:
 		string += AGMRulePDDL.listPDDLPreconditions(rule, agmlist, forgetList, newList, nodeDict) # Include precondition for nodes to be created
 		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule, rule.stayingNodeList()+agmlist+forgetList) # Avoid using the same node more than once "!=". NOT INCLUDING THOSE IN THE LIST
 		string += AGMRulePDDL.linkPatternsPDDLPreconditions(rule, nodeDict)
+		print 'PREC', rule.name
+		print 'PREC', rule.name
+		print 'PREC', rule.name
+		string += pddlASTtoTXT(rule.preconditionAST, [rule.lhs, rule.rhs], 2)
 		string += ' )\n'
 
 		string += '\t\t:effect (and'
@@ -131,6 +195,10 @@ class AGMRulePDDL:
 		string += AGMRulePDDL.listHandlingPDDLEffects(rule, forgetList, newList, agmlist, nodeDict) # List handling
 		string += AGMRulePDDL.newAndForgetNodesTypesPDDLEffects(rule, newList, forgetList, nodeDict) # TYPE assignment for created nod
 		string += AGMRulePDDL.linkPatternsPDDLEffects(rule, nodeDict)
+		print 'EFFCT', rule.name
+		print 'EFFCT', rule.name
+		print 'EFFCT', rule.name
+		string += pddlASTtoTXT(rule.effectAST, [rule.lhs, rule.rhs], 2)
 		if not splitActionModif:
 			string += ' (increase (total-cost) '
 			string += rule.cost
@@ -424,11 +492,12 @@ def generatePDDLProblem(domain, initXMLPath, target, outputPath):
 		if e.b in targetObjects: kStr = ' ?'
 		output.write(kStr + b)
 		output.write(')\n')
-	output.write('\t\t\t)\n')
+	output.write('\n')
 
 	if target['precondition']:
-		print type(target['precondition'])
-		output.write(str(target['precondition']))
+		output.write(pddlASTtoTXT(target['precondition'], target['graph'], tabs=3))
+	output.write('\n')
+	output.write('\t\t\t)\n')
 
 	if len(targetObjects)>0:
 		output.write('\t\t)\n')
