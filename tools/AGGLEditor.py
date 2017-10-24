@@ -284,12 +284,9 @@ class AGMEditor(QMainWindow):
 		sh = self.ui.centralwidget.height()
 		self.ui.splitter.setSizes([int(0.65*sh), int(0.35*sh)])
 
-
 		self.tool = 'move node'
 		self.uncheckOtherTools(self.tool)
 
-		self.agmData.generatePDDL('out.pddl', True)
-		sys.exit(1)
 	def pgDown(self):
 		r = self.ui.rulesList.currentRow()+1
 		if r>=0 and r<self.ui.rulesList.count():
