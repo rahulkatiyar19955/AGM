@@ -463,7 +463,7 @@ class AGMRule(object):
 		if lhs == None: self.lhs = AGMGraph()
 		if rhs == None: self.rhs = AGMGraph()
 	def isHierarchical(self):
-		return True
+		return False
 	def toString(self):
 		passiveStr = "active"
 		if self.passive: passiveStr = "passive"
