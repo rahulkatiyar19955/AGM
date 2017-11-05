@@ -284,7 +284,6 @@ class AGMEditor(QMainWindow):
 		sh = self.ui.centralwidget.height()
 		self.ui.splitter.setSizes([int(0.65*sh), int(0.35*sh)])
 
-
 		self.tool = 'move node'
 		self.uncheckOtherTools(self.tool)
 

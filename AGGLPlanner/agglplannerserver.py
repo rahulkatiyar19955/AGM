@@ -63,6 +63,7 @@ class Worker(object):
 		finally:
 			self.mapsLock.release()
 			print '------------------------------------------------------------------------'
+		sys.exit(-1) # Should not get here
 
 	def getTargetIdentifier(self, targetText, domainId):
 		print '------------------------------------------------------------------------'
@@ -91,6 +92,7 @@ class Worker(object):
 		finally:
 			self.mapsLock.release()
 			print '------------------------------------------------------------------------'
+		sys.exit(-1) # Should not get here
 
 	def startPlanning(self, domainId, initWorld, targetId, excludeList, awakenRules):
 		print '------------------------------------------------------------------------'
@@ -127,6 +129,7 @@ class Worker(object):
 		finally:
 			self.mapsLock.release()
 			print '------------------------------------------------------------------------'
+		sys.exit(-1) # Should not get here
 
 	def getPlanningResults(self, jobIdentifier):
 		print '------------------------------------------------------------------------'
@@ -179,11 +182,8 @@ class Worker(object):
 		# Second: try planning
 		#
 		try:
-			print 'i'
 			plan = job.jobInstance.run()
-			print 'j'
 			self.cache.includeFromFiles(dI.text, job.jobInstance.initWorld.graph.toXMLString(), tI.code, str(plan), True)
-			print 'k'
 			ret.plan = str(plan)
 			ret.cost = 1
 			print 'PLAN:', ret.plan
@@ -204,5 +204,5 @@ class Worker(object):
 
 
 
-server = make_server(agglplanner_thrift.AGGLPlanner, Worker(), '127.0.0.1', 6000, client_timeout=1000000)
+server = make_server(agglplanner_thrift.AGGLPlanner, Worker(), '127.0.0.1', 6000, client_timeout=None)
 server.serve()

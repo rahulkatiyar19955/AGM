@@ -203,6 +203,9 @@ public:
 
 	/// Returns a reference to the symbol vector. Use with care.
 	std::vector<AGMModelSymbol::SPtr> getSymbols() const;
+	/*! \brief Returns a reference to the symbols vector that match with the symbol type given by the param '<em>symbolType</em>'. Use with care. If not found any, returns an empty vector.
+	 */
+	std::vector<AGMModelSymbol::SPtr> getSymbolsByType(std::string symbolType) const;
 
 #if ROBOCOMP_SUPPORT == 1
 	/// Returns a map of smart pointers to a list of symbools
@@ -279,12 +282,12 @@ public:
 	AGMModelSymbol::SPtr getSymbolByIdentifier(int32_t targetId) const;
 
 
-	/*! \brief Returns a shared pointer to the symbol with name '<em>name</em>', where a symbol's name is considered to be the concatenation of its type, the underscore character ('_') and its identifier.
+	/*! \brief Returns a shared pointer to the symbol with name '<em>symbolName</em>', where a symbol's name is considered to be the concatenation of its type, the underscore character ('_') and its identifier.
 	 *
 	 * \throws AGMException If no symbol with identifier 'targetId' is found.
 	 *
 	 */
-	AGMModelSymbol::SPtr getSymbolByName(const std::string &name) const;
+	AGMModelSymbol::SPtr getSymbolByName(const std::string &symbolName) const;
 
 
 	/*! \brief Includes a new edge in the model given the identifiers of two symbols with an optional attribute map.  Returns True on success.
@@ -325,7 +328,7 @@ public:
 	}
 
 	/*! \brief Removes an edge given an AGMModelEdge containing the ending symbol and label
-	 * 
+	 *
 	 * \throws AGMException Nodes a and b must exist
 	 *
 	 */
@@ -417,5 +420,3 @@ private:
 	int32_t lastId;
 
 };
-
-

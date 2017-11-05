@@ -1,5 +1,13 @@
+import sys
+sys.path.append('/usr/local/share/agm/')
+
 import itertools
 import re
+
+from AGGL import *
+from parseAGGL import *
+from xmlModelParser import *
+import agglplanner2_utils
 
 global useDiff
 useDiff = False
@@ -13,6 +21,75 @@ AGMListLastUsedName = 'ListAGMInternal'
 def translateList(alist, dictionary):
 	return [dictionary[x] for x in alist]
 
+
+def pddlASTtoTXT(ast, graphs, tabs=4):
+	if ast == None:
+		return ''
+	if len(ast) == 0:
+		return ''
+	allVariables = {}
+	print 'pddlASTtoTXT', type(graphs)
+	if type(graphs) != list:
+		graphs = [graphs]
+	for graph in graphs:
+		for n in graph.nodes:
+			allVariables[n] = graph.nodes[n].sType
+	return pddlASTtoTXT_rec(ast, tabs, varTypesToCheck=[], allVariables=allVariables)
+
+def pddlASTtoTXT_rec(ast, tabs=4, varTypesToCheck=None, allVariables=None, addedVariables=None):
+	if varTypesToCheck == None:
+		varTypesToCheck = []
+	if allVariables == None:
+		allVariables = {}
+	if addedVariables == None:
+		addedVariables = []
+	print '\nENTRO', ast
+
+	if ast[0] == 'forall':
+		ret = '\t'*tabs+'(forall ('
+		for v in ast[1]:
+			varTypesToCheck.append(v)
+			addedVariables.append(v[0])
+			allVariables[v[0]] = v[1]
+			ret += '?'+v[1]+'_'+v[0]+' '
+		ret += '- tipo )\n'
+		ret += pddlASTtoTXT_rec(ast[2], tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)
+		ret += '\t'*tabs+')'
+	elif ast[0] == 'not':
+		ret =  '\t'*tabs+'(not\n'
+		ret += pddlASTtoTXT_rec(ast[1], tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)
+		ret += '\t'*tabs+')\n'
+	elif ast[0] == 'and':
+		ret = '\t'*tabs+'(and\n'
+		for v in ast[1]:
+			print 'REC', v
+			ret += pddlASTtoTXT_rec(v, tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)+'\n'
+		ret += '\t'*tabs+')\n'
+	elif ast[0] == 'when':
+		ret = '\t'*tabs+'(when\n'
+		ret += pddlASTtoTXT_rec(ast[1], tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)+'\n'
+		ret += pddlASTtoTXT_rec(ast[2], tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)+'\n'
+		ret += '\t'*tabs+')\n'
+	elif ast[0] == 'eq':
+		ret = '\t'*tabs+'(='
+		for x in ast[1:]:
+			if x in addedVariables:
+				ret += ' ?'
+			else:
+				ret += ' '
+			ret += allVariables[x]+'_'+x
+ 		ret += ')\n'
+	else:
+		print 'OTRO', ast[0]
+		ret = '\t'*tabs+'('+ ast[0]
+		for x in ast[1:]:
+			if x in addedVariables:
+				ret += ' ?'
+			else:
+				ret += ' '
+			ret += allVariables[x]+'_'+x
+ 		ret += ')\n'
+	return ret
 #
 # AGM to PDDL
 #
@@ -40,7 +117,7 @@ class AGMPDDL:
 			writeString += '\t(:functions\n\t\t(total-cost)\n\t)\n\n'
 		for r in agm.rules:
 			if hasattr(r, 'newNodesList'):
-				writeString += AGMRulePDDL.toPDDL(r, skipPassive=skipPassive) + '\n'
+				writeString += AGMRulePDDL.toPDDL(agm, r, skipPassive=skipPassive) + '\n'
 		writeString += ')\n'
 		return writeString
 	@staticmethod
@@ -57,14 +134,8 @@ class AGMPDDL:
 	@staticmethod
 	def typePredicatesPDDL(agm, typeStr):
 		writeString = ''
-		typeSet = set()
-		for r in agm.rules:
-			if hasattr(r, 'nodeTypes'):
-				typeSet = typeSet.union(r.nodeTypes())
-			#else:
-				#raise Exception("Combo rule")
-		for t in typeSet:
-			writeString += '\t\t(is'+t+' ?n'+typeStr+')\n'
+		for t in agm.typesDirect:
+			writeString += '\t\t(IS'+t+' ?n'+typeStr+')\n'
 		return writeString
 
 #
@@ -90,7 +161,7 @@ class AGMRulePDDL:
 
 		return agmlist, nodeDict
 	@staticmethod
-	def toPDDL(rule, pddlVerbose=False, skipPassive=False):
+	def toPDDL(agmFD, rule, pddlVerbose=False, skipPassive=False):
 		if skipPassive==True and rule.passive == True:
 			return ''
 		if rule.isHierarchical():
@@ -118,10 +189,14 @@ class AGMRulePDDL:
 			string += ' - tipo'
 		string += ' )\n'
 		string += '\t\t:precondition (and'
-		string += AGMRulePDDL.existingNodesPDDLTypes(rule, nodeDict) # TYPE preconditions
+		string += AGMRulePDDL.existingNodesPDDLTypes(agmFD, rule, nodeDict) # TYPE preconditions
 		string += AGMRulePDDL.listPDDLPreconditions(rule, agmlist, forgetList, newList, nodeDict) # Include precondition for nodes to be created
 		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule, rule.stayingNodeList()+agmlist+forgetList) # Avoid using the same node more than once "!=". NOT INCLUDING THOSE IN THE LIST
 		string += AGMRulePDDL.linkPatternsPDDLPreconditions(rule, nodeDict)
+		print 'PREC', rule.name
+		print 'PREC', rule.name
+		print 'PREC', rule.name
+		string += '\n'+pddlASTtoTXT(rule.preconditionAST, [rule.lhs, rule.rhs], 2)
 		string += ' )\n'
 
 		string += '\t\t:effect (and'
@@ -129,6 +204,10 @@ class AGMRulePDDL:
 		string += AGMRulePDDL.listHandlingPDDLEffects(rule, forgetList, newList, agmlist, nodeDict) # List handling
 		string += AGMRulePDDL.newAndForgetNodesTypesPDDLEffects(rule, newList, forgetList, nodeDict) # TYPE assignment for created nod
 		string += AGMRulePDDL.linkPatternsPDDLEffects(rule, nodeDict)
+		print 'EFFCT', rule.name
+		print 'EFFCT', rule.name
+		print 'EFFCT', rule.name
+		string += '\n'+pddlASTtoTXT(rule.effectAST, [rule.lhs, rule.rhs], 2)
 		if not splitActionModif:
 			string += ' (increase (total-cost) '
 			string += rule.cost
@@ -143,10 +222,17 @@ class AGMRulePDDL:
 	# P  R  E  C  O  N  D  I  T  I  O  N  S
 	#
 	@staticmethod
-	def existingNodesPDDLTypes(rule, nodeDict, pddlVerbose=False):
+	def existingNodesPDDLTypes(agmFD, rule, nodeDict, pddlVerbose=False):
 		ret  = ''
 		for name,node in rule.lhs.nodes.items():
-			ret += ' (is'+node.sType+' ?v'+nodeDict[name]+')'
+			if len (agmFD.validTypesForType(node.sType)) > 1:
+				ret += ' (or'
+			first = True
+			for t in agmFD.validTypesForType(node.sType):
+				ret += ' (IS'+t+' ?v'+nodeDict[name]+')'
+				first = False
+			if len (agmFD.validTypesForType(node.sType)) > 1:
+				ret += ')'
 		return ret
 	@staticmethod
 	def listPDDLPreconditions(rule, agmlist, forgetList, newList, nodeDict, pddlVerbose=False):
@@ -226,7 +312,7 @@ class AGMRulePDDL:
 			while len(forgetList)>0:
 				nextn = forgetList.pop()
 				for tip in typeSet:
-					ret += ' (not (is' + tip + ' ' + nextn + '))'
+					ret += ' (not (IS' + tip + ' ' + nextn + '))'
 		# Internal error :-D
 		else:
 			raise Exception(":-)")
@@ -236,10 +322,10 @@ class AGMRulePDDL:
 		ret = ''
 		# Handle new nodes
 		for node in newList:
-			ret += ' (is' + rule.rhs.nodes[node].sType + ' ?v' + nodeDict[node] + ')'
+			ret += ' (IS' + rule.rhs.nodes[node].sType + ' ?v' + nodeDict[node] + ')'
 		# Handle forget nodes
 		for node in forgetList:
-			ret += ' (not (is' + rule.lhs.nodes[node].sType + ' ?v' + nodeDict[node] + '))'
+			ret += ' (not (IS' + rule.lhs.nodes[node].sType + ' ?v' + nodeDict[node] + '))'
 		return ret
 	@staticmethod
 	def linkPatternsPDDLEffects(rule, nodeDict, pddlVerbose=False):
@@ -288,7 +374,7 @@ class AGMRulePDDL:
 			symbol_name = m.group(1)
 			symbol_type = m.group(2)
 			blank_space = m.group(3)
-			ret = ret[:m.end(3)] + '(is' + symbol_type + ' ?v' + symbol_name + ')' + blank_space + ret[m.end(3):]
+			ret = ret[:m.end(3)] + '(IS' + symbol_type + ' ?v' + symbol_name + ')' + blank_space + ret[m.end(3):]
 			ret = ret.replace(symbol_name+':'+symbol_type, '( ?v' + symbol_name + typeStr + ' )')
 			ret = ret.replace(' ' + symbol_name, ' ?v' + symbol_name)
 		return ret
@@ -312,5 +398,121 @@ class AGMRulePDDL:
 			typeR = rule.rhs.nodes[n].sType
 			if typeL != typeR:
 				#if pddlVerbose: print 'EFFECTS modify', n
-				ret += ' (not(is'+typeL + ' ?v' + nodeDict[n] +')) (is'+typeR + ' ?v' + nodeDict[n] +')'
+				ret += ' (not(IS'+typeL + ' ?v' + nodeDict[n] +')) (IS'+typeR + ' ?v' + nodeDict[n] +')'
 		return ret
+
+
+def generatePDDLProblem(domain, initXMLPath, target, outputPath):
+	output = open(outputPath, 'w')
+
+	if type(domain) == AGMFileData:
+		domainParsed = domain
+	elif type(domain) == str:
+		domainParsed = AGMFileDataParsing.fromFile(domain)
+	else:
+		print 'generatePDDLProblem received a domain which is neither a path or an AGMFileData instance, exiting...'
+		sys.exit(-1)
+	initModel = graphFromXMLFile(initXMLPath)
+
+	target = AGMFileDataParsing.targetFromFile(target)
+	agglplanner2_utils.groundAutoTypesInTarget(target, initXMLPath)
+
+	output.write('(define (problem PROBLEM_NAME)\n\n\t(:domain AGGL)\n\n\t(:requirements :typing :strips :adl)\n\n\t(:objects\n')
+
+	originalObjects = []
+	for n in initModel.nodes:
+		originalObjects.append(n)
+		nn = initModel.nodes[n].sType + '_' + n + ' - tipo'
+		output.write('\t\t' + nn + '\n')
+	unknowns = 8
+	targetObjects = []
+	for n in target['graph'].nodes:
+		if not n in originalObjects:
+			nn = target['graph'].nodes[n].sType + '_' + n + ' - tipo'
+			targetObjects.append(nn)
+	unknownObjectsVec = []
+	for u in xrange(unknowns):
+		nn = 'unknown_' + str(u)
+		output.write('\t\t' + nn + ' - tipo \n')
+		unknownObjectsVec.append(nn)
+
+
+	output.write('\t)\n\n')
+
+
+	#
+	#  INIT MODEL
+	#
+	output.write('\t(:init\n')
+	# 	//output.write('		(= (total-cost) 0)\n')
+	# unknowns
+	if unknowns>0:
+		output.write('\t\t(firstunknown unknown_0)\n')
+	for u in xrange(unknowns):
+		output.write('\t\t(unknownorder unknown_' + str(u) + ' unknown_' + str(u+1) + ')\n')
+	# Set not='s
+	allObjects = originalObjects + unknownObjectsVec # + targetObjects
+	useDiff = False
+	# useDiff = True
+	if useDiff:
+		for ind1 in xrange(len(allObjects)):
+			for ind2 in xrange(len(allObjects)):
+				if (ind1 != ind2):
+					output.write('\t\t(diff ' + allObjects[ind1] + ' ' + allObjects[ind2] + ')\n')
+	# Known symbols type for the objects in the initial world
+	for s in initModel.nodes:
+		output.write('\t\t(IS' + initModel.nodes[s].sType + ' ' + initModel.nodes[s].sType + '_' + s + ' )\n')
+	# Introduce edges themselves
+	for l in initModel.links:
+		a = initModel.nodes[l.a].sType + '_' + l.a
+		b = initModel.nodes[l.b].sType + '_' + l.b
+		output.write('\t\t(' + str(l.linkType) + ' ' + str(a) + ' ' + str(b) + ')\n')
+	output.write('\t)\n')
+
+	#
+	# T A R G E T    W O R L D
+	output.write('\n\t(:goal\n')
+	if len(targetObjects) > 0:
+		output.write('\t\t(exists (')
+		for x in targetObjects:
+			output.write(' ?' + x)
+		output.write(' )\n')
+	output.write('\t\t\t(and\n')
+	# Known symbols type for the objects in the target world
+	for s in target['graph'].nodes:
+		sn = target['graph'].nodes[s].sType + '_' + s
+		kStr = ' '
+		for i in targetObjects:
+			if sn == i:
+				kStr = ' ?'
+				break
+		for t in domainParsed.validTypesForType(target['graph'].nodes[s].sType):
+			output.write('\t\t\t\t(IS' + t + kStr + sn + ')\n')
+	# Edges
+	for e in target['graph'].links:
+		a = target['graph'].nodes[e.a].sType + '_' + e.a
+		b = target['graph'].nodes[e.b].sType + '_' + e.b
+		label = e.linkType
+		output.write('\t\t\t\t(' + label)
+		kStr = ' '
+		if e.a in targetObjects: kStr = ' ?'
+		output.write(kStr + a)
+		kStr = ' '
+		if e.b in targetObjects: kStr = ' ?'
+		output.write(kStr + b)
+		output.write(')\n')
+	output.write('\n')
+
+	if target['precondition']:
+		output.write(pddlASTtoTXT(target['precondition'], target['graph'], tabs=3))
+	output.write('\n')
+	output.write('\t\t\t)\n')
+
+	if len(targetObjects)>0:
+		output.write('\t\t)\n')
+	output.write('\t)\n')
+
+	# Metric definition
+	# output.write('	(:metric minimize (total-cost))\n')
+	output.write('\n')
+	output.write(')\n')

@@ -636,6 +636,19 @@ std::vector<AGMModelSymbol::SPtr> AGMModel::getSymbols() const
 {
 	return symbols;
 }
+std::vector<AGMModelSymbol::SPtr> AGMModel::getSymbolsByType(std::string symbolType) const
+{
+	std::vector<AGMModelSymbol::SPtr> v;
+	v.clear();
+	for (uint32_t idx=0; idx<symbols.size(); ++idx)
+	{
+		if (symbols[idx]->symbolType == symbolType)
+		{
+			v.push_back(symbols[idx]);
+		}
+	}
+	return v;
+}
 
 // std::vector<AGMModelEdge> AGMModel::getEdges() const
 // {
@@ -756,16 +769,16 @@ AGMModelSymbol::SPtr AGMModel::getSymbol(int32_t identif) const
 	return getSymbolByIdentifier(identif);
 }
 
-AGMModelSymbol::SPtr AGMModel::getSymbolByName(const std::string &ss) const
+AGMModelSymbol::SPtr AGMModel::getSymbolByName(const std::string &symbolName) const
 {
 	for (uint32_t i=0; i<symbols.size(); ++i)
 	{
-		if (symbols[i]->toString() == name)
+		if (symbols[i]->toString() == symbolName)
 		{
 			return symbols[i];
 		}
 	}
-	AGMMODELEXCEPTION(std::string("Exception: Trying to get a node with an unexistent name (")+ss+std::string(")."));
+	AGMMODELEXCEPTION(std::string("Exception: Trying to get a node with an unexistent name (")+symbolName+std::string(")."));
 }
 
 
