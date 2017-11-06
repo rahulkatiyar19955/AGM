@@ -526,6 +526,8 @@ class AGMRule(object):
 		### 3 Generate derivate rules
 		ret = []
 		for i in itertools.product(*changes):
+			if len(set(i)) > 1:                             # THIS IS THE GENERALLY DESIRED BEHAVIOUR, BUT IT MIGHT NOT BE IN THE FUTURE. THE LANGUAGE MUST BUG ERROR  FIXME ERROR
+				continue                                    # TAKE THIS INTO ACCOUNT (THE VARIABLE TYPES MAY DIFFER AMONG THEMSELVES BUG ERROR  FIXME ERROR BUG ERROR  FIXME ERROR)
 			change = zip(toModifyId, i)
 			print 'Generate copy', change
 			log = ''

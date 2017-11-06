@@ -429,7 +429,7 @@ def generatePDDLProblem(domain, initXMLPath, target, outputPath):
 	for n in target['graph'].nodes:
 		if not n in originalObjects:
 			nn = target['graph'].nodes[n].sType + '_' + n + ' - tipo'
-			targetObjects.append(nn)
+			targetObjects.append(target['graph'].nodes[n].sType + '_' + n)
 	unknownObjectsVec = []
 	for u in xrange(unknowns):
 		nn = 'unknown_' + str(u)
@@ -448,7 +448,7 @@ def generatePDDLProblem(domain, initXMLPath, target, outputPath):
 	# unknowns
 	if unknowns>0:
 		output.write('\t\t(firstunknown unknown_0)\n')
-	for u in xrange(unknowns):
+	for u in xrange(unknowns-1):
 		output.write('\t\t(unknownorder unknown_' + str(u) + ' unknown_' + str(u+1) + ')\n')
 	# Set not='s
 	allObjects = originalObjects + unknownObjectsVec # + targetObjects
@@ -479,26 +479,29 @@ def generatePDDLProblem(domain, initXMLPath, target, outputPath):
 		output.write(' )\n')
 	output.write('\t\t\t(and\n')
 	# Known symbols type for the objects in the target world
+	print 'targetObjects', targetObjects
 	for s in target['graph'].nodes:
 		sn = target['graph'].nodes[s].sType + '_' + s
+		print 'A', sn
 		kStr = ' '
-		for i in targetObjects:
-			if sn == i:
-				kStr = ' ?'
-				break
+		if sn in targetObjects:
+			kStr = ' ?'
+			break
+		print 'x', sn, kStr
 		for t in domainParsed.validTypesForType(target['graph'].nodes[s].sType):
 			output.write('\t\t\t\t(IS' + t + kStr + sn + ')\n')
 	# Edges
 	for e in target['graph'].links:
 		a = target['graph'].nodes[e.a].sType + '_' + e.a
 		b = target['graph'].nodes[e.b].sType + '_' + e.b
+		print 'B', a, b
 		label = e.linkType
 		output.write('\t\t\t\t(' + label)
 		kStr = ' '
-		if e.a in targetObjects: kStr = ' ?'
+		if a in targetObjects: kStr = ' ?'
 		output.write(kStr + a)
 		kStr = ' '
-		if e.b in targetObjects: kStr = ' ?'
+		if b in targetObjects: kStr = ' ?'
 		output.write(kStr + b)
 		output.write(')\n')
 	output.write('\n')
