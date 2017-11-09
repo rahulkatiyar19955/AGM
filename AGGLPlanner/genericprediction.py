@@ -33,6 +33,33 @@ def outputVectorFromPlan(planLines, actionDictionary):
 		#print planLines
 	return ret
 
+def outputVectorFromPDDLPlan(planLines, actionDictionary):
+	ret = np.zeros( (1, len(actionDictionary)) )
+	#try:
+	for line in planLines:
+		if len(line) > 0:
+			if line[0] != ';' and line[0] != '#':
+				actionName  = line[1:].split()[0]
+				try:
+					actionIndex = actionDictionary[actionName]
+				except KeyError, e:
+					try:
+						for k in actionDictionary.keys():
+							if actionName == k.lower():
+								actionName = k
+						actionIndex = actionDictionary[actionName]
+					except KeyError, e:
+						print 'Non existent action in plann: ', actionName
+						print '-------------'
+						for xx in actionDictionary.keys():
+							print 'x', xx
+						print '-------------'
+						sys.exit(1)
+				ret[0][actionIndex] = 1.
+	#except KeyError:
+		#print planLines
+	return ret
+
 
 def getPredicateDictionary(domain):
 	predicates = set()
@@ -120,7 +147,10 @@ def inputVectorFromTarget(domain, prdDictionary, actDictionary, target, initWorl
 
 def inputVectorFromTargetAndInit(domain, prdDictionary, actDictionary, target, initWorld):
 	if type(initWorld) == str:
-		initWorld = xmlModelParser.graphFromXMLText(initWorld)
+		if initWorld.startswith('<'):
+			initWorld = xmlModelParser.graphFromXMLText(initWorld)
+		else:
+			initWorld = xmlModelParser.graphFromXMLFile(initWorld)
 
 	# Fill vector with the predicates from the target
 	if type(target) == type(''):

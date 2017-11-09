@@ -69,4 +69,98 @@ class LinearRegressionPredictor3(object):
 		print chunkSize
 		return result, chunkSize, chunkTime
 
+
+def generateLinearRegressionMatricesFromDomainAndPlansDirectory3(domain, data, outX, outY):
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Reading domain'
+	domainAGM = AGMFileDataParsing.fromFile(domain)
+
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Generating prdsHeader'
+	prdDictionary = getPredicateDictionary(domainAGM)
+	prdsHeader=range(len(prdDictionary))
+	for x in prdDictionary:
+		prdsHeader[prdDictionary[x]] = x
+	print prdsHeader
+
+
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Generating actsHeader'
+	actDictionary = getActionDictionary(domainAGM)
+	actsHeader=range(len(actDictionary))
+	for x in actDictionary:
+		actsHeader[actDictionary[x]] = x
+	print actsHeader
+
+
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Gathering data from stored files'
+	lim = -1
+	n = 0
+	for (dirpath, dirnames, filenames) in os.walk(data):
+		for x in filenames:
+			target = dirpath  +   '/'   + x
+			plan   = target   + '.plan.plan.pddl'
+			if x.endswith('.aggt'):
+				# print 'x', x
+				# print os.path.exists(plan), os.path.exists(target)
+				if os.path.exists(plan) and os.path.exists(target):
+					# print 'x1'
+					if os.path.getsize(plan)>15:
+						# print 'x2'
+						planLines = [x.strip().strip('*') for x in open(plan, 'r').readlines() if (not x.startswith('#')) and len(x) > 3 ]
+						try:
+							yi = outputVectorFromPDDLPlan(planLines, actDictionary)
+						except KeyError:
+							print 'Non existent action in', plan
+							continue
+						try:
+							data_y = np.concatenate( (data_y, yi), axis=0)
+						except NameError:
+							data_y = yi # traceback.print_exc()
+						xi = np.zeros( (1, 2*len(prdDictionary)) )
+						initWorld = plan.split('/')[:-1]
+						initWorld.append(initWorld[-1]+'.xml')
+						initWorld = '/'.join(initWorld)
+						# print initWorld
+						# sys.exit(-1)
+						xi = inputVectorFromTargetAndInit(domainAGM, prdDictionary, actDictionary, target, initWorld)
+						try:
+							try:
+								data_x = np.concatenate( (data_x, xi), axis=0)
+							except NameError:
+								data_x = xi # traceback.print_exc()
+							n += 1
+							if n%100 == 0:
+								print n, 'generateLinearRegressionMatricesFromDomainAndPlansDirectory3'
+							if n == lim:
+								print 'wiiiiiiiiiii'
+								break
+						except KeyError:
+							print 'KeyError _ ', plan
+							traceback.print_exc()
+			if n == lim:
+				break
+		if n == lim:
+			break
+
+	print 'x', np.sum(data_x)
+	print data_x.shape
+	# print data_x
+
+	print 'y', np.sum(data_y)
+	print data_y.shape
+	# print data_y
+
+
+	with open(outY, 'wb') as f:
+		print actsHeader
+		f.write(';'.join(actsHeader)+'\n')
+		np.savetxt(f, data_y, delimiter=";")
+
+	with open(outX, 'wb') as f:
+		f.write(';'.join(prdsHeader)+'\n')
+		np.savetxt(f, data_x, delimiter=";")
+
+
+
+
+
+
 #
