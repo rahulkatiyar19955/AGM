@@ -76,7 +76,7 @@ maxWorldIncrement = 4
 maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
-maxTimeWaitAchieved = 1.0001
+maxTimeWaitAchieved = 0.0001
 maxTimeWaitLimit = 1000.
 
 
