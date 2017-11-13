@@ -482,10 +482,11 @@ class Executive(object):
 			self.publishExecutiveVisualizationTopic()
 			print 'broadcastPlan'
 			self.sendParams()
-		except:
+		except Exception, e:
 			print traceback.print_exc()
-			print 'Executive::broadcastPlan: was some problem broadcasting the plan'
-			sys.exit(1)
+			print 'Executive::broadcastPlan: There was some problem broadcasting the plan'
+			print e
+			# sys.exit(1)
 		self.mutex.release()
 
 	def broadcastModel(self):
@@ -598,5 +599,7 @@ class Executive(object):
 			try:
 				self.agents[agent].activateAgent(self.lastParamsSent)
 			except Ice.ConnectionRefusedException:
-				print '     (can\'t connect to', agent, '!!!)',
+				print '     (can\'t connect to', agent, '!!! (ice exc))',
+			except Exception, e:
+				print '     (can\'t connect to', agent, '!!! (exc))', e,
 			print ''
