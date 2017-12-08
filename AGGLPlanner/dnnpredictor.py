@@ -58,40 +58,51 @@ def generateDNNMatricesFromDomainAndPlansDirectory(domain, data, outX, outY):
 	for (dirpath, dirnames, filenames) in os.walk(data):
 		for x in filenames:
 			target = dirpath  +   '/'   + x
-			plan   = target   + '.plan'
+			planE   = target   + '.plane'
+			planPDDL   = target   + '.plan.plan.pddl'
 			if x.endswith('.aggt'):
-				if os.path.exists(plan) and os.path.exists(target) and os.path.getsize(plan)>15:
-					planLines = [x.strip().strip('*') for x in open(plan, 'r').readlines() if (not x.startswith('#')) and len(x) > 3 ]
-					try:
-						yi = outputVectorFromPlan(planLines, actDictionary)
-					except KeyError:
-						print 'Non existent action in', plan
-						continue
-					try:
-						data_y = np.concatenate( (data_y, yi), axis=0)
-					except NameError:
-						data_y = yi # traceback.print_exc()
-					xi = np.zeros( (1, 2*len(prdDictionary)) )
-					initWorld = plan.split('/')[:-1]
-					initWorld.append(initWorld[-1]+'.xml')
-					initWorld = '/'.join(initWorld)
-					# print initWorld
-					# sys.exit(-1)
-					xi = inputVectorFromTargetAndInit(domainAGM, prdDictionary, actDictionary, target, initWorld)
-					try:
-						try:
-							data_x = np.concatenate( (data_x, xi), axis=0)
-						except NameError:
-							data_x = xi # traceback.print_exc()
-						n += 1
-						if n%100 == 0:
-							print n, 'generateLinearRegressionMatricesFromDomainAndPlansDirectory2'
-						if n == lim:
-							print 'wiiiiiiiiiii'
-							break
-					except KeyError:
-						print 'KeyError _ ', plan
-						traceback.print_exc()
+				for plan in [planE, planPDDL]:
+					if os.path.exists(plan) and os.path.exists(target):
+						# print 'x1'
+						if os.path.getsize(plan)>15:
+							# print 'x2'
+							planLines = [x.strip().strip('*') for x in open(plan, 'r').readlines() if (not x.startswith('#')) and len(x) > 3 ]
+							try:
+								if plan.endswith('pddl'):
+									yi = outputVectorFromPDDLPlan(planLines, actDictionary)
+								elif plan.endswith('plane'):
+									yi = outputVectorFromPlan(planLines, actDictionary)
+								else:
+									print 'plan which is not .pddl or .plan'
+									sys.exit(-3)
+							except KeyError:
+								print 'Non existent action in', plan
+								continue
+							try:
+								data_y = np.concatenate( (data_y, yi), axis=0)
+							except NameError:
+								data_y = yi # traceback.print_exc()
+							xi = np.zeros( (1, 2*len(prdDictionary)) )
+							initWorld = plan.split('/')[:-1]
+							initWorld.append(initWorld[-1]+'.xml')
+							initWorld = '/'.join(initWorld)
+							# print initWorld
+							# sys.exit(-1)
+							xi = inputVectorFromTargetAndInit(domainAGM, prdDictionary, actDictionary, target, initWorld)
+							try:
+								try:
+									data_x = np.concatenate( (data_x, xi), axis=0)
+								except NameError:
+									data_x = xi # traceback.print_exc()
+								n += 1
+								if n%100 == 0:
+									print n, 'generateLinearRegressionMatricesFromDomainAndPlansDirectory2'
+								if n == lim:
+									print 'wiiiiiiiiiii'
+									break
+							except KeyError:
+								print 'KeyError _ ', plan
+								traceback.print_exc()
 			if n == lim:
 				break
 		if n == lim:
@@ -113,7 +124,6 @@ def generateDNNMatricesFromDomainAndPlansDirectory(domain, data, outX, outY):
 	with open(outX, 'wb') as f:
 		f.write(';'.join(prdsHeader)+'\n')
 		np.savetxt(f, data_x, delimiter=";")
-
 
 
 

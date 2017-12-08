@@ -1,6 +1,7 @@
 import copy
 import pickle
 import numpy as np
+from operator import itemgetter
 
 from parseAGGL import AGMFileDataParsing
 
@@ -24,7 +25,6 @@ class LinearRegressionPredictor3(object):
 
 	def get_distrb(self, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary, target): # returns data size time
 		inputv = inputVectorFromTargetAndInit(self.domainParsed, self.prdDictionary, self.actDictionary, target, initModel)
-		print inputv.shape, '*', self.coeff.shape, '+', self.intercept.shape
 		outputv = np.dot(inputv, self.coeff)+self.intercept
 
 		result = copy.deepcopy(self.actDictionary)
@@ -32,12 +32,11 @@ class LinearRegressionPredictor3(object):
 			value = self.actDictionary[key]
 			result[key] = outputv[0][value]
 
-		from operator import itemgetter
 		kk = sorted([ [x, result[x] ] for x in result ], reverse=True, key=itemgetter(1))
 		indexes = []
-		thresholds = [0.5, 0.1, 0.0]
+		thresholds = [0.4, 0.12, 0.0]
 		for idx, action in enumerate(sorted([ [x, result[x] ] for x in result ], reverse=True, key=itemgetter(1))):
-			#print idx, type(idx), action, type(action)
+			# print idx, type(idx), action, type(action)
 			if action[1] < thresholds[0]:
 				if idx != 0:
 					indexes.append(idx)
@@ -62,11 +61,11 @@ class LinearRegressionPredictor3(object):
 			chunkSize.append(1)
 
 		chunkTime = []
-		timeSplitter = 10.
+		timeSplitter = 4.
 		for x in chunkSize:
 			chunkTime.append(timeSplitter)
-			timeSplitter *= 0.05
-		print chunkSize
+			timeSplitter *= 0.5
+		# print chunkSize
 		return result, chunkSize, chunkTime
 
 
@@ -96,45 +95,67 @@ def generateLinearRegressionMatricesFromDomainAndPlansDirectory3(domain, data, o
 	for (dirpath, dirnames, filenames) in os.walk(data):
 		for x in filenames:
 			target = dirpath  +   '/'   + x
-			plan   = target   + '.plan.plan.pddl'
+			planE   = target   + '.plane'
+			planPDDL   = target   + '.plan.plan.pddl'
+			yi_e = None
+			yi_pddl = None
 			if x.endswith('.aggt'):
 				# print 'x', x
 				# print os.path.exists(plan), os.path.exists(target)
-				if os.path.exists(plan) and os.path.exists(target):
-					# print 'x1'
-					if os.path.getsize(plan)>15:
-						# print 'x2'
-						planLines = [x.strip().strip('*') for x in open(plan, 'r').readlines() if (not x.startswith('#')) and len(x) > 3 ]
-						try:
-							yi = outputVectorFromPDDLPlan(planLines, actDictionary)
-						except KeyError:
-							print 'Non existent action in', plan
-							continue
-						try:
-							data_y = np.concatenate( (data_y, yi), axis=0)
-						except NameError:
-							data_y = yi # traceback.print_exc()
-						xi = np.zeros( (1, 2*len(prdDictionary)) )
-						initWorld = plan.split('/')[:-1]
-						initWorld.append(initWorld[-1]+'.xml')
-						initWorld = '/'.join(initWorld)
-						# print initWorld
-						# sys.exit(-1)
-						xi = inputVectorFromTargetAndInit(domainAGM, prdDictionary, actDictionary, target, initWorld)
-						try:
+				for plan in [planE, planPDDL]:
+					if os.path.exists(plan) and os.path.exists(target):
+						# print 'x1'
+						planLines = [x.strip().strip('*') for x in open(plan, 'r').readlines() if (not x.startswith('#') and not x.startswith(';')) and len(x) > 3 ]
+						if os.path.getsize(plan)>15 and len(planLines) > 0:
+							# print 'x2'
 							try:
-								data_x = np.concatenate( (data_x, xi), axis=0)
+								if plan.endswith('pddl'):
+									yi_e = outputVectorFromPDDLPlan(planLines, actDictionary, 0.8)
+									yi = yi_e
+								elif plan.endswith('plane'):
+									yi_pddl = outputVectorFromPlan(planLines, actDictionary, 0.8)
+									yi = yi_pddl
+								else:
+									print 'plan which is not .pddl or .plan'
+									sys.exit(-3)
+								if np.linalg.norm(yi) < 0.5:
+									print plan
+									print plan
+									print plan
+									print planLines
+									print yi
+								if not (yi_e is None) and not (yi_pddl is None):
+									if (yi_e!=yi_pddl).all():
+										print planE, yi_e, np.linalg.norm(yi_e)
+										print planPDDL, yi_pddl, np.linalg.norm(yi_pddl)
+							except KeyError:
+								print 'Non existent action in', plan
+								continue
+							try:
+								data_y = np.concatenate( (data_y, yi), axis=0)
 							except NameError:
-								data_x = xi # traceback.print_exc()
-							n += 1
-							if n%100 == 0:
-								print n, 'generateLinearRegressionMatricesFromDomainAndPlansDirectory3'
-							if n == lim:
-								print 'wiiiiiiiiiii'
-								break
-						except KeyError:
-							print 'KeyError _ ', plan
-							traceback.print_exc()
+								data_y = yi # traceback.print_exc()
+							xi = np.zeros( (1, 2*len(prdDictionary)) )
+							initWorld = plan.split('/')[:-1]
+							initWorld.append(initWorld[-1]+'.xml')
+							initWorld = '/'.join(initWorld)
+							# print initWorld
+							# sys.exit(-1)
+							xi = inputVectorFromTargetAndInit(domainAGM, prdDictionary, actDictionary, target, initWorld)
+							try:
+								try:
+									data_x = np.concatenate( (data_x, xi), axis=0)
+								except NameError:
+									data_x = xi # traceback.print_exc()
+								n += 1
+								if n%100 == 0:
+									print n, 'generateLinearRegressionMatricesFromDomainAndPlansDirectory3'
+								if n == lim:
+									print 'wiiiiiiiiiii'
+									break
+							except KeyError:
+								print 'KeyError _ ', plan
+								traceback.print_exc()
 			if n == lim:
 				break
 		if n == lim:
@@ -150,16 +171,12 @@ def generateLinearRegressionMatricesFromDomainAndPlansDirectory3(domain, data, o
 
 
 	with open(outY, 'wb') as f:
-		print actsHeader
 		f.write(';'.join(actsHeader)+'\n')
 		np.savetxt(f, data_y, delimiter=";")
 
 	with open(outX, 'wb') as f:
 		f.write(';'.join(prdsHeader)+'\n')
 		np.savetxt(f, data_x, delimiter=";")
-
-
-
 
 
 

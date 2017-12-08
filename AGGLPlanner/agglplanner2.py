@@ -77,7 +77,7 @@ maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 0.0001
-maxTimeWaitLimit = 1000.
+maxTimeWaitLimit = 300.
 
 
 
@@ -486,18 +486,9 @@ class AGGLPlanner2(object):
 		else:
 			self.initWorld.score, achieved, variables_achieved = self.targetCode(self.initWorld.graph)
 
-
-		# print 'TARGET VARIABLES'
-		# print self.targetVariables_types
-		# print self.targetVariables_binary
-		# print self.targetVariables_unary
 		types_achieved  = variables_achieved[0] & self.targetVariables_types
 		binary_achieved = variables_achieved[1] & self.targetVariables_binary
 		unary_achieved  = variables_achieved[2] & self.targetVariables_unary
-		# print 'ACHIEVED VARIABLES'
-		# print types_achieved
-		# print binary_achieved
-		# print unary_achieved
 
 		# Getting Action Preference data
 		self.g = self.getProbabilityDensityFunctionGenerator(self.trainFile)
@@ -506,7 +497,7 @@ class AGGLPlanner2(object):
 		self.threshData, chunkSize, chunkTime = self.g.get_distrb(types_achieved, binary_achieved, unary_achieved, self.initWorld.graph, self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary, self.targetFile)
 		self.chunkSize = chunkSize
 		self.chunkTime = chunkTime
-		print 'ACTIONS', sorted([ [x, self.threshData[x] ] for x in self.threshData ], reverse=True, key=itemgetter(1))
+		# print 'ACTIONS', sorted([ [x, self.threshData[x] ] for x in self.threshData ], reverse=True, key=itemgetter(1))
 		# print self.threshData
 		self.threshData = sorted(self.threshData, reverse=True, key=self.threshData.__getitem__)
 		# print self.threshData
@@ -834,6 +825,23 @@ class AGGLPlanner2(object):
 				# be reached from the state described in 'head'.
 				#
 				if verbose>5: print 'Expanding'.ljust(5), head
+				######
+				###### HIGHLY EXPERIMENTAL CODE THAT COULD SAFELY BE REMOVED   S T A R T S
+				######
+				if self.symbol_mapping:
+					kkscore, kkachieved, kkvariables_achieved = self.targetCode(head.graph, self.symbol_mapping)
+				else:
+					kkscore, kkachieved, kkvariables_achieved = self.targetCode(head.graph)
+				kktypes_achieved  = kkvariables_achieved[0] & self.targetVariables_types
+				kkbinary_achieved = kkvariables_achieved[1] & self.targetVariables_binary
+				kkunary_achieved  = kkvariables_achieved[2] & self.targetVariables_unary
+				kkthreshData, kkchunkSize, kkchunkTime = self.g.get_distrb(kktypes_achieved, kkbinary_achieved, kkunary_achieved, head.graph, self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary, self.targetFile)
+				kkthreshData = sorted(kkthreshData, reverse=True, key=kkthreshData.__getitem__)
+				selectedActions = kkthreshData[0:int(len(kkthreshData) * kkchunkSize[chunkNumber])]
+				# print 'SEL('+str(kkchunkSize[chunkNumber])+'):', selectedActions
+				######
+				###### HIGHLY EXPERIMENTAL CODE THAT COULD SAFELY BE REMOVED   E N D S
+				######
 				for k in selectedActions:
 					if k not in head.actionList and k in ruleMap:
 						head.actionList.append(k)

@@ -2,6 +2,8 @@ import sys, random, os, traceback
 from subprocess import call
 import numpy as np
 import imp
+import pickle, copy
+
 import xmlModelParser
 import agglplanner2_utils
 
@@ -22,18 +24,21 @@ def getActionDictionary(domain):
 	return ret
 
 
-def outputVectorFromPlan(planLines, actionDictionary):
+def outputVectorFromPlan(planLines, actionDictionary, factor=1.):
+	F = 1.
 	ret = np.zeros( (1, len(actionDictionary)) )
 	#try:
 	for line in planLines:
 		actionName  = line.split('@')[0]
 		actionIndex = actionDictionary[actionName]
-		ret[0][actionIndex] = 1.
+		ret[0][actionIndex] = F
+		F *= factor
 	#except KeyError:
 		#print planLines
 	return ret
 
-def outputVectorFromPDDLPlan(planLines, actionDictionary):
+def outputVectorFromPDDLPlan(planLines, actionDictionary, factor=1.):
+	F = 1.
 	ret = np.zeros( (1, len(actionDictionary)) )
 	#try:
 	for line in planLines:
@@ -55,7 +60,8 @@ def outputVectorFromPDDLPlan(planLines, actionDictionary):
 							print 'x', xx
 						print '-------------'
 						sys.exit(1)
-				ret[0][actionIndex] = 1.
+				ret[0][actionIndex] = F
+				F *= factor
 	#except KeyError:
 		#print planLines
 	return ret
@@ -191,6 +197,127 @@ def inputVectorFromTargetAndInit(domain, prdDictionary, actDictionary, target, i
 
 	return ret
 
+
+class LinearRegressionHeuristic(object):
+	def __init__(self, pickleFile):
+		try:
+			f = open(pickleFile, 'r')
+		except IOError:
+			print 'agglplanner error: Could not open', pickleFile
+		self.coeff, self.intercept, self.xHeaders, self.yHeaders = pickle.load(f)
+		self.coeff = np.array(self.coeff)
+		self.intercept = np.array(self.intercept)
+		self.prdDictionary = setInverseDictionaryFromList(self.xHeaders)
+		self.actDictionary = setInverseDictionaryFromList(self.yHeaders)
+	def get_heuristic(self, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary, target): # returns data size time
+		inputv = inputVectorFromTargetAndInit(self.domainParsed, self.prdDictionary, self.actDictionary, target, initModel)
+		outputv = np.dot(inputv, self.coeff)+self.intercept
+		return 100.*outputv[0][0]
+
+
+
+class DNNHeuristic(object):
+	def __init__(self, pickleFile):
+		try:
+			with open(pickleFile, 'r') as ff:
+				self.model, self.xHeaders, self.yHeaders = pickle.load(f)
+		except IOError:
+			print 'agglplanner error: Could not open', pickleFile
+		self.coeff = np.array(self.coeff)
+		self.intercept = np.array(self.intercept)
+		self.prdDictionary = setInverseDictionaryFromList(self.xHeaders)
+		self.actDictionary = setInverseDictionaryFromList(self.yHeaders)
+	def get_heuristic(self, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary, target): # returns data size time
+		inputv = inputVectorFromTargetAndInit(self.domainParsed, self.prdDictionary, self.actDictionary, target, initModel)
+		outputv = np.dot(inputv, self.coeff)+self.intercept
+		return 100.*outputv[0][0]
+
+
+
+#   generateHeuristicMatricesFromDomainAndPlansDirectory(domain, data, "xHeuristicData.csv", "yHeuristicData.csv")
+def generateHeuristicMatricesFromDomainAndPlansDirectory(domain, data, outX, outY):
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Reading domain'
+	domainAGM = AGMFileDataParsing.fromFile(domain)
+
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Generating prdsHeader'
+	prdDictionary = getPredicateDictionary(domainAGM)
+	prdsHeader=range(len(prdDictionary))
+	for x in prdDictionary:
+		prdsHeader[prdDictionary[x]] = x
+	print prdsHeader
+
+
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Generating actsHeader'
+	actDictionary = getActionDictionary(domainAGM)
+	actsHeader=range(len(actDictionary))
+	for x in actDictionary:
+		actsHeader[actDictionary[x]] = x
+	print actsHeader
+
+
+	print '<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Gathering data from stored files'
+	lim = -1
+	n = 0
+	for (dirpath, dirnames, filenames) in os.walk(data):
+		for x in filenames:
+			target = dirpath  +   '/'   + x
+			planE   = target   + '.plane'
+			planPDDL   = target   + '.plan.plan.pddl'
+			if x.endswith('.aggt'):
+				# print 'x', x
+				# print os.path.exists(plan), os.path.exists(target)
+				for plan in [planE, planPDDL]:
+					if os.path.exists(plan) and os.path.exists(target):
+						# print 'x1'
+						if os.path.getsize(plan)>15:
+							# print 'x2'
+							planLines = [x.strip().strip('*') for x in open(plan, 'r').readlines() if (not x.startswith('#')) and len(x) > 3 ]
+							yi = np.zeros( (1, 1) )
+							yi[0][0] = -float(len(planLines))
+							try:
+								data_y = np.concatenate( (data_y, yi), axis=0)
+							except NameError:
+								data_y = yi # traceback.print_exc()
+							xi = np.zeros( (1, 2*len(prdDictionary)) )
+							initWorld = plan.split('/')[:-1]
+							initWorld.append(initWorld[-1]+'.xml')
+							initWorld = '/'.join(initWorld)
+							xi = inputVectorFromTargetAndInit(domainAGM, prdDictionary, actDictionary, target, initWorld)
+							try:
+								try:
+									data_x = np.concatenate( (data_x, xi), axis=0)
+								except NameError:
+									data_x = xi # traceback.print_exc()
+								n += 1
+								if n%100 == 0:
+									print n, 'generateHeuristicMatricesFromDomainAndPlansDirectory'
+								if n == lim:
+									print 'wiiiiiiiiiii'
+									break
+							except KeyError:
+								print 'KeyError _ ', plan
+								traceback.print_exc()
+			if n == lim:
+				break
+		if n == lim:
+			break
+
+	print 'x', np.sum(data_x)
+	print data_x.shape
+	# print data_x
+
+	print 'y', np.sum(data_y)
+	print data_y.shape
+	# print data_y
+
+
+	with open(outY, 'wb') as f:
+		f.write(';'.join(actsHeader)+'\n')
+		np.savetxt(f, data_y, delimiter=";")
+
+	with open(outX, 'wb') as f:
+		f.write(';'.join(prdsHeader)+'\n')
+		np.savetxt(f, data_x, delimiter=";")
 
 
 #
