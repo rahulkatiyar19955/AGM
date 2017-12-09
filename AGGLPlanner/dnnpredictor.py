@@ -3,32 +3,35 @@ import pickle, tempfile
 import numpy as np
 
 from parseAGGL import AGMFileDataParsing
-from zipfile import ZipFile
+# from zipfile import ZipFile
 
 from genericprediction import *
 
-try:
-	import keras.models
-	from keras.models import Sequential
-	from keras.layers import Dense
-except:
-	pass
+# import chainer
+# from chainer import Function, gradient_check, report, training, utils, Variable
+from chainer import Variable
+# from chainer import datasets, iterators, optimizers, serializers
+from chainer import Link, Chain, ChainList
+# from chainer.datasets import tuple_dataset
+import chainer.functions as F
+import chainer.links as L
+# from chainer.training import extensions
 
 
-def zipFiles(files_paths, output_path):
-	print 'output_path', output_path
-	with ZipFile(output_path, 'w') as zip_out:
-		for f in files_paths:
-			print f
-			print zip_out.write(f)
+# def zipFiles(files_paths, output_path):
+# 	print 'output_path', output_path
+# 	with ZipFile(output_path, 'w') as zip_out:
+# 		for f in files_paths:
+# 			print f
+# 			print zip_out.write(f)
 
 
-def getModel(input_path):
-	zip_base = tempfile.mkdtemp(prefix='agmDNN')
-	print 'zip_base', zip_base
-	with ZipFile(input_path, 'r') as zip:
-		zip.extractall(zip_base)
-	return zip_base+'/model.h5', zip_base+'/xHeaders.pckl', zip_base+'/yHeaders.pckl'
+# def getModel(input_path):
+# 	zip_base = tempfile.mkdtemp(prefix='agmDNN')
+# 	print 'zip_base', zip_base
+# 	with ZipFile(input_path, 'r') as zip:
+# 		zip.extractall(zip_base)
+# 	return zip_base+'/model.h5', zip_base+'/xHeaders.pckl', zip_base+'/yHeaders.pckl'
 
 
 
@@ -129,6 +132,21 @@ def generateDNNMatricesFromDomainAndPlansDirectory(domain, data, outX, outY):
 
 
 
+class MLP(Chain):
+	def __init__(self, n_units_a, n_units_b, n_out):
+		super(MLP, self).__init__()
+		with self.init_scope():
+			self.l1 = L.Linear(None, n_units_a)
+			self.l2 = L.Linear(None, n_units_b)
+			self.l3 = L.Linear(None, n_out)
+	def predict(self, x):
+		h1 = F.relu(self.l1(x))
+		h2 = F.relu(self.l2(h1))
+		return F.sigmoid(self.l3(h2))
+	def __call__(self, x, y):
+		predict = self.predict(x)
+		loss = F.sum(F.square(predict - y))
+		return loss
 
 
 
@@ -136,12 +154,10 @@ def generateDNNMatricesFromDomainAndPlansDirectory(domain, data, outX, outY):
 class DNNPredictor(object):
 	def __init__(self, inputFile):
 		try:
-			model_path, xHeaders_path, yHeaders_path = getModel(inputFile)
-			self.model = keras.models.load_model(model_path)
-			self.xHeaders = pickle.load(xHeaders_path, 'r')
-			self.yHeaders = pickle.load(yHeaders_path, 'r')
+			with open(inputFile, 'r') as ff:
+				self.model, self.xHeaders, self.yHeaders = pickle.load(ff)
 		except IOError:
-			print 'agglplanner error: Could not open', pickleFile
+			print 'Couldn\'t write', dnnFile
 		print '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
 		print self.xHeaders
 		print '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
@@ -150,20 +166,10 @@ class DNNPredictor(object):
 		self.actDictionary = setInverseDictionaryFromList(self.yHeaders)
 
 
-	def get_distrb(self, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary): # returns data size time
-		# yr2 = np.dot(values, self.coeff)+self.intercept
-		#inputv = inputVectorFromTarget(self.domainParsed, self.prdDictionary, self.actDictionary, "ex.aggt")
-		print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-		print targetVariables_types
-		print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-		print targetVariables_unary
-		print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-		print targetVariables_binary
-		print '+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
-		inputv = inputVectorFromSets(self.domainParsed, self.prdDictionary, self.actDictionary, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary)
-		#print 'INPUT V', inputv
-		print inputv.shape, '*', self.coeff.shape, '+', self.intercept.shape
-		outputv = np.dot(inputv, self.coeff)+self.intercept
+	def get_distrb(self, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary, target): # returns data size time
+		inputv = inputVectorFromTargetAndInit(self.domainParsed, self.prdDictionary, self.actDictionary, target, initModel)
+		outputv = self.model.predict(Variable(inputv.astype(np.float32)))
+		outputv = outputv.array
 		#print '---------------------'
 		#print outputv
 		#print '<--------------------'

@@ -109,7 +109,7 @@ def generateLinearRegressionMatricesFromDomainAndPlansDirectory2(domain, data, o
 							try:
 								if plan.endswith('pddl'):
 									yi = outputVectorFromPDDLPlan(planLines, actDictionary)
-								elif plan.endswith('plane'):
+								elif plan.endswith('plan2'):
 									yi = outputVectorFromPlan(planLines, actDictionary)
 								else:
 									print 'plan which is not .pddl or .plan'
