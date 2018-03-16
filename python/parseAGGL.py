@@ -429,7 +429,9 @@ class AGMFileDataParsing:
 	## This method makes the analysis of the .aggt file representing a robot's target
 	@staticmethod
 	def targetFromFile(filename, verbose=False, includeIncludes=True):
-		return AGMFileDataParsing.targetFromText(open(filename, 'r').read(), verbose, includeIncludes)
+        with open(filename, 'r') as fd:
+            ret = AGMFileDataParsing.targetFromText(fd.read(), verbose, includeIncludes)
+        return ret
 
 	## This method makes the analysis of the .aggt file representing a robot's target
 	@staticmethod
