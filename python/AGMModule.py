@@ -415,6 +415,12 @@ class GraphDraw(QWidget):
 				d = 2
 				outterLinkRect = QRectF(rect.x()-5+d, rect.y()-3, rect.width()+10, rect.height()+6)
 				innerLinkRect = QRectF(rect.x()-3+d, rect.y()-1.5, rect.width()+6, rect.height()+3)
+
+				if e.a != e.b:
+					rect.translate(-cc[0]*outterLinkRect.width()/2, -cc[1]*outterLinkRect.height()/2)
+				outterLinkRect = QRectF(rect.x()-5+d, rect.y()-3, rect.width()+10, rect.height()+6)
+				innerLinkRect = QRectF(rect.x()-3+d, rect.y()-1.5, rect.width()+6, rect.height()+3)
+
 				self.linkPositionMap[linkindex] = outterLinkRect
 				painter.fillRect(outterLinkRect, Qt.black)
 				painter.fillRect(innerLinkRect, fill)
