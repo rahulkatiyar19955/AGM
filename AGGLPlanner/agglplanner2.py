@@ -77,7 +77,7 @@ maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 0.0001
-maxTimeWaitLimit = 300.
+maxTimeWaitLimit = 200.
 
 
 
@@ -500,7 +500,7 @@ class AGGLPlanner2(object):
 		# print 'ACTIONS', sorted([ [x, self.threshData[x] ] for x in self.threshData ], reverse=True, key=itemgetter(1))
 		# print self.threshData
 		self.threshData = sorted(self.threshData, reverse=True, key=self.threshData.__getitem__)
-		# print self.threshData
+		# print 'THRESHD2', self.threshData
 
 		if achieved:
 			# If the goal is achieved, we save the solution in the result list, the
@@ -754,8 +754,8 @@ class AGGLPlanner2(object):
 
 			# Loop shall ran for one chunk time
 			selectedActions = self.threshData[0:int(len(self.threshData) * self.chunkSize[chunkNumber])]
-			if type(self.g) == LinearRegressionPredictor or type(self.g) == DNNPredictor:
- 				print 'SELECTED', selectedActions
+			# if type(self.g) == LinearRegressionPredictor or type(self.g) == DNNPredictor:
+ 			# 	print 'SELECTED', selectedActions
 			# print 'selectedActions', selectedActions
 			while True:
 				timeC = datetime.datetime.now()
@@ -837,7 +837,9 @@ class AGGLPlanner2(object):
 				kkunary_achieved  = kkvariables_achieved[2] & self.targetVariables_unary
 				kkthreshData, kkchunkSize, kkchunkTime = self.g.get_distrb(kktypes_achieved, kkbinary_achieved, kkunary_achieved, head.graph, self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary, self.targetFile)
 				kkthreshData = sorted(kkthreshData, reverse=True, key=kkthreshData.__getitem__)
+				# print thres
 				selectedActions = kkthreshData[0:int(len(kkthreshData) * kkchunkSize[chunkNumber])]
+				# selectedActions = [ selectedActions[0] ]
 				# print 'SEL('+str(kkchunkSize[chunkNumber])+'):', selectedActions
 				######
 				###### HIGHLY EXPERIMENTAL CODE THAT COULD SAFELY BE REMOVED   E N D S

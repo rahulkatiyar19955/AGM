@@ -216,21 +216,27 @@ class LinearRegressionHeuristic(object):
 
 
 
+from chainer import Variable
+# from chainer import datasets, iterators, optimizers, serializers
+from chainer import Link, Chain, ChainList
+# from chainer.datasets import tuple_dataset
+import chainer.functions as F
+import chainer.links as L
+
 class DNNHeuristic(object):
 	def __init__(self, pickleFile):
 		try:
 			with open(pickleFile, 'r') as ff:
-				self.model, self.xHeaders, self.yHeaders = pickle.load(f)
+				self.model, self.xHeaders, self.yHeaders = pickle.load(ff)
 		except IOError:
 			print 'agglplanner error: Could not open', pickleFile
-		self.coeff = np.array(self.coeff)
-		self.intercept = np.array(self.intercept)
 		self.prdDictionary = setInverseDictionaryFromList(self.xHeaders)
 		self.actDictionary = setInverseDictionaryFromList(self.yHeaders)
 	def get_heuristic(self, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary, target): # returns data size time
 		inputv = inputVectorFromTargetAndInit(self.domainParsed, self.prdDictionary, self.actDictionary, target, initModel)
-		outputv = np.dot(inputv, self.coeff)+self.intercept
-		return 100.*outputv[0][0]
+		outputv = self.model.predict(Variable(inputv.astype(np.float32))).array[0][0]
+		# print outputv
+		return 100.*outputv
 
 
 
@@ -262,18 +268,19 @@ def generateHeuristicMatricesFromDomainAndPlansDirectory(domain, data, outX, out
 		for x in filenames:
 			target = dirpath  +   '/'   + x
 			planE   = target   + '.plane'
+			plan2   = target   + '.plan2'
 			planPDDL   = target   + '.plan.plan.pddl'
 			if x.endswith('.aggt'):
 				# print 'x', x
 				# print os.path.exists(plan), os.path.exists(target)
-				for plan in [planE, planPDDL]:
+				for plan in [planE, plan2, planPDDL]:
 					if os.path.exists(plan) and os.path.exists(target):
 						# print 'x1'
 						if os.path.getsize(plan)>15:
 							# print 'x2'
 							planLines = [x.strip().strip('*') for x in open(plan, 'r').readlines() if (not x.startswith('#')) and len(x) > 3 ]
 							yi = np.zeros( (1, 1) )
-							yi[0][0] = -float(len(planLines))
+							yi[0][0] = float(len(planLines))
 							try:
 								data_y = np.concatenate( (data_y, yi), axis=0)
 							except NameError:

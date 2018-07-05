@@ -72,9 +72,9 @@ def generateDNNMatricesFromDomainAndPlansDirectory(domain, data, outX, outY):
 							planLines = [x.strip().strip('*') for x in open(plan, 'r').readlines() if (not x.startswith('#')) and len(x) > 3 ]
 							try:
 								if plan.endswith('pddl'):
-									yi = outputVectorFromPDDLPlan(planLines, actDictionary)
+									yi = outputVectorFromPDDLPlan(planLines, actDictionary, factor=0.5)
 								elif plan.endswith('plane'):
-									yi = outputVectorFromPlan(planLines, actDictionary)
+									yi = outputVectorFromPlan(planLines, actDictionary, factor=0.5)
 								else:
 									print 'plan which is not .pddl or .plan'
 									sys.exit(-3)
@@ -133,16 +133,36 @@ def generateDNNMatricesFromDomainAndPlansDirectory(domain, data, outX, outY):
 
 
 class MLP(Chain):
-	def __init__(self, n_units_a, n_units_b, n_out):
+	def __init__(self, n_units_a, n_units_b, n_units_c, n_out):
 		super(MLP, self).__init__()
 		with self.init_scope():
 			self.l1 = L.Linear(None, n_units_a)
 			self.l2 = L.Linear(None, n_units_b)
-			self.l3 = L.Linear(None, n_out)
+			self.l3 = L.Linear(None, n_units_c)
+			self.l4 = L.Linear(None, n_out)
 	def predict(self, x):
 		h1 = F.relu(self.l1(x))
 		h2 = F.relu(self.l2(h1))
-		return F.sigmoid(self.l3(h2))
+		h3 = F.relu(self.l3(h2))
+		return F.sigmoid(self.l4(h3))
+	def __call__(self, x, y):
+		predict = self.predict(x)
+		loss = F.sum(F.square(predict - y))
+		return loss
+
+
+class MLPSigmoid(Chain):
+	def __init__(self, layers):
+		super(MLPSigmoid, self).__init__()
+		with self.init_scope():
+			self.l = []
+			for i in layers:
+				self.l.append(L.Linear(None, i))
+	def predict(self, x):
+		out = self.l[0](x)
+		for i in self.l[1:-1]:
+			out = F.relu(i(copy.deepcopy(out)))
+		return F.sigmoid(self.l[-1](out))
 	def __call__(self, x, y):
 		predict = self.predict(x)
 		loss = F.sum(F.square(predict - y))
@@ -157,7 +177,8 @@ class DNNPredictor(object):
 			with open(inputFile, 'r') as ff:
 				self.model, self.xHeaders, self.yHeaders = pickle.load(ff)
 		except IOError:
-			print 'Couldn\'t write', dnnFile
+			print 'Couldn\'t read', inputFile
+			sys.exit(1)
 		print '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
 		print self.xHeaders
 		print '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@'
@@ -168,8 +189,10 @@ class DNNPredictor(object):
 
 	def get_distrb(self, init_types, init_binary, init_unary, initModel, targetVariables_types, targetVariables_binary, targetVariables_unary, target): # returns data size time
 		inputv = inputVectorFromTargetAndInit(self.domainParsed, self.prdDictionary, self.actDictionary, target, initModel)
-		outputv = self.model.predict(Variable(inputv.astype(np.float32)))
-		outputv = outputv.array
+		outputv = self.model.predict(Variable(inputv.astype(np.float32))).array
+		outputv = outputv - outputv.min()
+		outputv = outputv / outputv.max()
+
 		#print '---------------------'
 		#print outputv
 		#print '<--------------------'
@@ -185,9 +208,8 @@ class DNNPredictor(object):
 		from operator import itemgetter
 		kk = sorted([ [x, result[x] ] for x in result ], reverse=True, key=itemgetter(1))
 		indexes = []
-		thresholds = [0.5, 0.125, 0.0]
+		thresholds = [0.75, 0.25, 0.0]
 		for idx, action in enumerate(sorted([ [x, result[x] ] for x in result ], reverse=True, key=itemgetter(1))):
-			#print idx, type(idx), action, type(action)
 			if action[1] < thresholds[0]:
 				if idx != 0:
 					indexes.append(idx)
@@ -210,9 +232,20 @@ class DNNPredictor(object):
 		chunkSize = [ float(x)/(len(self.actDictionary)-1) for x in reversed(chunkSize)]
 		if chunkSize[-1] < 0.999999:
 			chunkSize.append(1)
-		chunkTime = [ 2 for x in chunkSize ]
-		print chunkSize
+
+		chunkTime = [ 1 for x in chunkSize ]
+		# print result, chunkSize, chunkTime
 		return result, chunkSize, chunkTime
+
+
+
+
+
+
+
+
+
+
 
 
 

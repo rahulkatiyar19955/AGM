@@ -36,7 +36,6 @@ class LinearRegressionPredictor2(object):
 		indexes = []
 		thresholds = [0.5, 0.125, 0.0]
 		for idx, action in enumerate(sorted([ [x, result[x] ] for x in result ], reverse=True, key=itemgetter(1))):
-			# print idx, type(idx), action, type(action)
 			if action[1] < thresholds[0]:
 				if idx != 0:
 					indexes.append(idx)
@@ -65,7 +64,6 @@ class LinearRegressionPredictor2(object):
 		for x in chunkSize:
 			chunkTime.append(timeSplitter)
 			timeSplitter *= 0.5
-		# print chunkSize
 		return result, chunkSize, chunkTime
 
 
@@ -108,9 +106,9 @@ def generateLinearRegressionMatricesFromDomainAndPlansDirectory2(domain, data, o
 							planLines = [x.strip().strip('*') for x in open(plan, 'r').readlines() if (not x.startswith('#')) and len(x) > 3 ]
 							try:
 								if plan.endswith('pddl'):
-									yi = outputVectorFromPDDLPlan(planLines, actDictionary)
+									yi = outputVectorFromPDDLPlan(planLines, actDictionary, factor=0.5)
 								elif plan.endswith('plan2'):
-									yi = outputVectorFromPlan(planLines, actDictionary)
+									yi = outputVectorFromPlan(planLines, actDictionary, factor=0.5)
 								else:
 									print 'plan which is not .pddl or .plan'
 									sys.exit(-3)

@@ -77,7 +77,7 @@ maxCost = 2000000000000
 stopWithFirstPlan = False
 verbose = 1
 maxTimeWaitAchieved = 0.0001
-maxTimeWaitLimit = 300.
+maxTimeWaitLimit = 200.
 
 
 
@@ -485,6 +485,7 @@ class AGGLPlanner2(object):
 			self.initWorld.score, achieved, variables_achieved = self.targetCode(self.initWorld.graph, self.symbol_mapping)
 		else:
 			self.initWorld.score, achieved, variables_achieved = self.targetCode(self.initWorld.graph)
+
 		types_achieved  = variables_achieved[0] & self.targetVariables_types
 		binary_achieved = variables_achieved[1] & self.targetVariables_binary
 		unary_achieved  = variables_achieved[2] & self.targetVariables_unary
@@ -499,9 +500,9 @@ class AGGLPlanner2(object):
 		# print 'ACTIONS', sorted([ [x, self.threshData[x] ] for x in self.threshData ], reverse=True, key=itemgetter(1))
 		# print self.threshData
 		self.threshData = sorted(self.threshData, reverse=True, key=self.threshData.__getitem__)
-		# print self.threshData
+		print 'THRESHD3', self.threshData
 
-		self.h = LinearRegressionHeuristic('out.agmHeuristic')
+		self.h = DNNHeuristic('chainerDNN.pickleh')
 		self.h.domainParsed = self.domainParsed
 
 
@@ -757,8 +758,8 @@ class AGGLPlanner2(object):
 
 			# Loop shall ran for one chunk time
 			selectedActions = self.threshData[0:int(len(self.threshData) * self.chunkSize[chunkNumber])]
-			if type(self.g) == LinearRegressionPredictor or type(self.g) == DNNPredictor:
- 				print 'SELECTED', selectedActions
+			# if type(self.g) == LinearRegressionPredictor or type(self.g) == DNNPredictor:
+ 			# 	print 'SELECTED', selectedActions
 			# print 'selectedActions', selectedActions
 			while True:
 				timeC = datetime.datetime.now()
@@ -836,8 +837,8 @@ class AGGLPlanner2(object):
 				else:
 					kkscore, kkachieved, kkvariables_achieved = self.targetCode(head.graph)
 				kktypes_achieved  = kkvariables_achieved[0] & self.targetVariables_types
-				kkunary_achieved  = kkvariables_achieved[2] & self.targetVariables_unary
 				kkbinary_achieved = kkvariables_achieved[1] & self.targetVariables_binary
+				kkunary_achieved  = kkvariables_achieved[2] & self.targetVariables_unary
 				kkthreshData, kkchunkSize, kkchunkTime = self.g.get_distrb(kktypes_achieved, kkbinary_achieved, kkunary_achieved, head.graph, self.targetVariables_types, self.targetVariables_binary, self.targetVariables_unary, self.targetFile)
 				kkthreshData = sorted(kkthreshData, reverse=True, key=kkthreshData.__getitem__)
 				selectedActions = kkthreshData[0:int(len(kkthreshData) * kkchunkSize[chunkNumber])]
@@ -878,7 +879,8 @@ class AGGLPlanner2(object):
 								if notDerivInKnownNodes and notDerivInStaleNodes:
 									if deriv.stop == False:
 										if len(deriv.graph.nodes.keys()) <= self.maxWorldSize:
-											self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+											self.openNodes.heapqPush( (float(deriv.cost)-100000.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
+											# self.openNodes.heapqPush( (float(deriv.cost)-10.*float(deriv.score), deriv) ) # The more the better TAKES INTO ACCOUNT COST AND SCORE
 				if verbose > 0:
 					doIt=False
 					nowNow = datetime.datetime.now()

@@ -592,7 +592,7 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 			ret += indent+'\tprecondition'+str(formulaId)+' = False # make the AND false'
 	elif preconditionType == "forall":
 		ret += indent+'precondition'+str(formulaId)+' = True # FORALL initialization as true'
-		indentA = indent
+		indentA = copy.deepcopy(indent)
 		for V in preconditionBody[0]:
 			n = V[0]
 			t = V[1]
@@ -605,8 +605,8 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 			indent += "\t"
 		text, indent, formulaIdRet, stuff = normalRuleImplementation_PRECONDITION(preconditionBody[1], indent, 'forall', stuff)
 		ret += text
-		ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the FORALL is false'
-		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the FORALL false'
+		ret += indentA+'\t\tif precondition'+str(formulaIdRet)+' == False: # if what\'s inside the FORALL is false YYY'
+		ret += indentA+'\t\t\tprecondition'+str(formulaId)+' = False # make the FORALL false YYY'
 		for V in preconditionBody[0]:
 			ret += indentA+"del n2id['"+V[0]+"']"
 		indent = indentA
@@ -1267,7 +1267,7 @@ def targetPreconditionImplementation(precondition, indent, modifier='', stuff=No
 			ret += indentC+'\tprecondition'+str(formulaId)+' = False # make the AND false'
 	elif preconditionType == "forall":
 		ret += indent+'precondition'+str(formulaId)+' = True # FORALL initialization as true'
-		indentA = indent
+		indentA = copy.deepcopy(indent)
 		for V in preconditionBody[0]:
 			n = V[0]
 			t = V[1]
@@ -1278,10 +1278,10 @@ def targetPreconditionImplementation(precondition, indent, modifier='', stuff=No
 			ret += indent+"n2id['"+n+"'] = symbol_"+n+"_name"
 			ret += indent+"if typeValid(symbol_"+n+".sType, '"+t+"'):  # now the body of the FORALL"
 			indent += "\t"
-		text, indento, formulaIdRet, stuff = targetPreconditionImplementation(preconditionBody[1], indent, 'forall', stuff)
+		text, indento, formulaIdRet, stuff = targetPreconditionImplementation(preconditionBody[1], copy.deepcopy(indent), 'forall', stuff)
 		ret += text
-		ret += indent+'if precondition'+str(formulaIdRet)+' == False: # if what\'s inside the FORALL is false'
-		ret += indent+'\tprecondition'+str(formulaId)+' = False # make the FORALL false'
+		ret += indentA+'\t\tif precondition'+str(formulaIdRet)+' == False: # if what\'s inside the FORALL is false XXXX'
+		ret += indentA+'\t\t\tprecondition'+str(formulaId)+' = False # make the FORALL false XXXX'
 		for V in preconditionBody[0]:
 			ret += indentA+"del n2id['"+V[0]+"']"
 		indent = indentA
