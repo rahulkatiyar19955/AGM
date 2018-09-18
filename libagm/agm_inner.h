@@ -84,6 +84,7 @@ public:
 	//this three functions work together.
 	static InnerModel* extractInnerModel( AGMModel::SPtr &worldModel, QString imNodeName="world", bool ignoreMeshes=false);
 
+	
 	//udpate AGM with the info contains in *im
 	static void updateAgmWithInnerModel( AGMModel::SPtr &worldModel, InnerModel* im);
 
@@ -95,6 +96,10 @@ public:
 	static void updateImNodeFromEdge( AGMModel::SPtr &worldModel, AGMModelEdge edge, InnerModel *innerModel);
 	static void updateImNodeFromEdge( AGMModel::SPtr &worldModel, const RoboCompAGMWorldModel::Edge& edge, InnerModel *innerModel);
 
+	//update innermodel node from edges shared pointer
+	static void updateImNodeFromEdge( AGMModel::SPtr &worldModel, AGMModelEdge edge, std::shared_ptr<InnerModel>& innerModel);
+	static void updateImNodeFromEdge( AGMModel::SPtr &worldModel, const RoboCompAGMWorldModel::Edge& edge, std::shared_ptr<InnerModel>& innerModel);
+	
 	//DEPRECATED
 	//Insert innermodel in AGM graph matching nodes from innerModel to their correspondent symbols.
 	//este método empareja diferentes nodos a diferentes símbolos

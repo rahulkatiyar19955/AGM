@@ -1660,6 +1660,16 @@ void AGMInner::updateImNodeFromEdge(AGMModel::SPtr &worldModel, const RoboCompAG
 	updateImNodeFromEdge(worldModel, dst,innerModel);
 }
 
+void AGMInner::updateImNodeFromEdge( AGMModel::SPtr &worldModel, AGMModelEdge edge, std::shared_ptr<InnerModel>& innerModel)
+{
+	updateImNodeFromEdge(worldModel,edge,innerModel.get());
+}
+
+void AGMInner::updateImNodeFromEdge( AGMModel::SPtr &worldModel, const RoboCompAGMWorldModel::Edge& edge, std::shared_ptr<InnerModel>& innerModel)
+{
+	updateImNodeFromEdge(worldModel,edge,innerModel.get());
+}
+
 
 #endif
 
