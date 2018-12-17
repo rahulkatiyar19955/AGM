@@ -174,11 +174,11 @@ target_link_libraries ( testagm agm -L. -L.. -lagm ${LIBS} ${ICE_LIBS} ${Boost_L
 add_dependencies(testagm agm)
 
 add_executable ( agm_xml2pddlProblem tools/agm_xml2pddlProblem.cpp ${ROBOCOMP_ADDITIONAL_SRC} )
-target_link_libraries ( agm_xml2pddlProblem agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+target_link_libraries ( agm_xml2pddlProblem agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${Ice_LIBRARIES})
 add_dependencies(testagm agm)
 
 add_executable ( agm_xmlViewer3D ${CMAKE_SOURCE_DIR}/tools/agm_xmlViewer3D.cpp ${ROBOCOMP_ADDITIONAL_SRC} )
-target_link_libraries ( agm_xmlViewer3D agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+target_link_libraries ( agm_xmlViewer3D agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${Ice_LIBRARIES})
 add_dependencies(testagm agm)
 
 
