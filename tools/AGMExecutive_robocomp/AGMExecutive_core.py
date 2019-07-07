@@ -300,7 +300,8 @@ class Executive(object):
 		self.executiveVisualizationTopic = executiveVisualizationTopic
 
 		self.agglPath = agglPath
-		self.domainParsed = self.parsed = AGMFileDataParsing.fromFile(self.agglPath)
+		if not self.doNotPlan:
+			self.domainParsed = self.parsed = AGMFileDataParsing.fromFile(self.agglPath)
 
 
 		self.initialModelPath = initialModelPath
@@ -320,9 +321,9 @@ class Executive(object):
 		if not self.doNotPlan:
 			self.plannerCaller = PlannerCaller(self, agglPath, self.startPlanServer)
 			self.plannerCaller.start()
-		print '--- setMission ---------------------------------------------'
-		self.setMission(initialMissionPath, avoidUpdate=True)
-		print '--- setMission ---------------------------------------------'
+			print '--- setMission ---------------------------------------------'
+			self.setMission(initialMissionPath, avoidUpdate=True)
+			print '--- setMission ---------------------------------------------'
 
 	#######################################################################
 	#                                                                     #
