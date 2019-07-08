@@ -86,8 +86,8 @@ InitialModelPath =   /PATH/TO/initialModel.xml
 The content of the file deserves its own section, so we'll look into that in the future (see section [Writing initial models](#Writing initial models)). Meantime we will assume that the initial model of the robot is a graph where the robot is represented by a _robot_ symbol with an identifier _1_.
 ~~~
 <AGMModel>
-	<symbol id="1" type="robot">
-	</symbol>
+    <symbol id="1" type="robot">
+    </symbol>
 </AGMModel>
 ~~~
 
@@ -104,7 +104,40 @@ python2 AGMExecutive_robocomp.py ~/devel/socnav/robocomp_agm/etc/dsr.conf
 ~~~
 
 ## Generating agents
-option agmagent;
+Generating AGM/CORTEX agents does not differ much from other RoboComp components. The main characteristic of agents is that their CDSL file should use the _agmagent_ option.
+~~~
+options agmagent;
+~~~
+
+The following is an example of a _Python_ agent using a _Qt_ (which is optional too).
+~~~
+Component agent_name
+{
+    Communications
+    {
+    };
+    language Python;
+    gui Qt(QWidget);
+    options agmagent;
+};
+~~~
+
+Assuming that you have a file called _agent\_name.cdsl_ in a directory called _agent_name_, you would run the following command to generate the agent's code:
+~~~
+cd agent_name
+robocompdsl agent_name.cdsl .
+~~~
+
+Probably the best moment to edit the config file of your component is straight after creating it. There are two main lines that we need to edit:
+~~~
+AGMCommonBehavior.Endpoints=tcp -p 0
+AGMExecutiveProxy = agmexecutive:tcp -h localhost -p 0
+~~~
+The ports in the previous lines should match the ports in the DSR configuration file. If you followed the example :
+~~~
+AGMCommonBehavior.Endpoints=tcp -p 11198
+AGMExecutiveProxy = agmexecutive:tcp -h localhost -p 10198
+~~~
 
 
 ## Modifying the models and subscribing to changes
