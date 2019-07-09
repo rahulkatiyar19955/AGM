@@ -179,7 +179,14 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &w)
 {
 	QMutexLocker dd(&modelMutex);
 	AGMModelConverter::fromIceToInternal(w, worldModel);
-	changeInner(AGMInner::extractInnerModel(worldModel));
+	try
+	{
+		changeInner(AGMInner::extractInnerModel(worldModel));
+	}
+	catch(std::string s)
+	{
+		printf("Error when converting the AGM model to InnerModel: %s\n", s.c_str());
+	}
 	fillItemList();
 }
 
