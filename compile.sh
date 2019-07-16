@@ -2,6 +2,9 @@
 
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.
 
+echo "Installing dependencies..."
+sudo apt-get install libxml2-dev
+
 
 # Should we compile with RoboComp support?
 finished=""
