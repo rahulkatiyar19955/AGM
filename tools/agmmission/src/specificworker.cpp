@@ -185,7 +185,14 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &w)
 	}
 	catch(std::string s)
 	{
-		printf("Error when converting the AGM model to InnerModel: %s\n", s.c_str());
+		static bool firstReport = true;
+		static QTime lastReport = QTime::currentTime();
+		if (lastReport.elapsed() > 60000 or firstReport)
+		{
+			firstReport = false;
+			lastReport = QTime::currentTime();
+			printf("Error when converting the AGM model to InnerModel: %s\n", s.c_str());
+		}
 	}
 	fillItemList();
 }
