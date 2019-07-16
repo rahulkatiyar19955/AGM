@@ -19,7 +19,8 @@ search [link](https://link.springer.com/epdf/10.1007/s10339-017-0828-3?author_ac
 ## Software requirements
 To run AGMExecutive, whether as a DSR or as a DSR+Executive, you will need:
 - a working RoboComp Installation [https://github.com/robocomp/robocomp/](https://github.com/robocomp/robocomp/)
-- thriftpy (it can be easily installed using pip)
+- libxml2: sudo apt-get install libxml2-dev
+- thriftpy: pip install thriftpy
 
 ## Installation
 The Installation script will ask you if you want to have RoboComp support.
