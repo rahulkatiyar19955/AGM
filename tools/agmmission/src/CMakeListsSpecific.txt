@@ -2,23 +2,26 @@
 SET ( SOURCES
   specificworker.cpp
   specificmonitor.cpp
-  $ENV{ROBOCOMP}/classes/rcdraw/rcdraw.cpp
 )
-
 
 SET (LIBS ${LIBS}
   -L../../../..
   -L../../..
-  -lagm
   -lboost_system
 )
 
-SET (LIBS ${LIBS} -losgViewer )
+# Headers set
+SET ( HEADERS
+  specificworker.h
+  specificmonitor.h
+)
 
-INCLUDE_DIRECTORIES( /usr/local/include/osg /usr/include/osgViewer )
+FIND_PACKAGE( Boost REQUIRED ) # COMPONENTS XXX
+INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 
-SET( LIBS ${LIBS} -L/usr/local/lib64/ -L${CMAKE_BINARY_DIR} -losg -losgViewer -losgGA -losgText -losgDB -losgUtil )
-
+SET (LIBS ${LIBS} -losgViewer ${Boost_LIBRARIES})
+INCLUDE_DIRECTORIES( /usr/local/include/osg /usr/include/osgViewer /usr/include/libxml2/ )
+SET( LIBS ${LIBS} -L/usr/local/lib64/ -L${CMAKE_BINARY_DIR} -lagm  -losg -losgViewer -losgGA -losgText -losgDB -losgUtil )
 ADD_DEFINITIONS( -std=c++11 )
 
 

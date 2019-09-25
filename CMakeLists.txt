@@ -19,10 +19,12 @@ SET (AGM_CODE
   libagm/agm_modelEdge.cpp
   libagm/agm_modelPrinter.cpp
   libagm/agm_modelSymbols.cpp
+  libagm/agm_modelDrawer.cpp
   libagm/agm_modelConverter.cpp
   libagm/agm_plan.cpp
   libagm/agm_inner.cpp
   libagm/graphModelViewer.cpp
+  $ENV{ROBOCOMP}/classes/rcdraw/rcdraw.cpp
 )
 
 
@@ -61,6 +63,15 @@ endif (ROBOCOMP_SUPPORT)
 
 MESSAGE(STATUS "\n\n")
 
+set(CMAKE_CXX_STANDARD 11)
+
+#  Boost library  #
+set(Boost_USE_STATIC_LIBS   OFF)
+set(Boost_USE_MULTITHREADED ON)
+find_package(Boost COMPONENTS system thread python REQUIRED)
+include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${Boost_LIBRARY_DIRS})
+# set(LIBS ${LIBS} ${Boost_INCLUDE_DIRS})
 
 #  Handle optional features  #
 ##############################
@@ -71,18 +82,6 @@ if (PYTHON_BINDINGS)
 	SET(SOURCES ${SOURCES} libagm/agm_python.cpp)
 endif (PYTHON_BINDINGS)
 
-#  Boost library  #
-set(Boost_USE_STATIC_LIBS   OFF)
-set(Boost_USE_MULTITHREADED ON)
-if (PYTHON_BINDINGS)
-	#find_package(Boost COMPONENTS system thread python REQUIRED)
-	SET(Boost_LIBRARIES -lboost_system -lboost_thread -lboost_python )
-else (PYTHON_BINDINGS)
-	SET(Boost_LIBRARIES -lboost_system -lboost_thread )
-	#find_package(Boost COMPONENTS system thread REQUIRED)
-endif (PYTHON_BINDINGS)
-include_directories(${Boost_INCLUDE_DIRS})
-link_directories(${Boost_LIBRARY_DIRS})
 # (libpython)
 if (PYTHON_BINDINGS)
 	find_package(PythonLibs REQUIRED)
@@ -100,7 +99,11 @@ if (ROBOCOMP_SUPPORT)
 	SET(ICE_LIBS -lIce)
 	ROBOCOMP_WRAP_ICE( AGMWorldModel AGMExecutive Planning AGMCommonBehavior )
 	ADD_DEFINITIONS(-DROBOCOMP_SUPPORT=1)
-	SUBDIRS (${CMAKE_SOURCE_DIR}/tools/agmmission tools/agminner tools/agmagentsim)
+	SUBDIRS (
+		${CMAKE_SOURCE_DIR}/tools/agmmission
+		tools/agminner
+		tools/agmagentsim
+    )
 endif (ROBOCOMP_SUPPORT)
 
 # LibXML
@@ -108,13 +111,12 @@ FIND_PACKAGE(LibXml2 REQUIRED)
 include_directories(${LIBXML2_INCLUDE_DIR})
 set(LIBS ${LIBS} ${LIBXML2_LIBRARIES} )
 
-# Qt4
 ADD_DEFINITIONS( -Wall  -DQT_XML_LIB -DQT_DLL -DQT_GUI_LIB -DQT_CORE_LIB )
-FIND_PACKAGE( Qt4 )
+# FIND_PACKAGE( Qt5 )
 SET( QT_USE_QTGUI TRUE )
 SET( QT_USE_QTOPENGL TRUE )
 SET( CMAKE_AUTOMOC TRUE )
-INCLUDE( ${QT_USE_FILE} )
+INCLUDE( $ENV{ROBOCOMP}/cmake/modules/qt.cmake )
 # QT4_WRAP_CPP(XMLVIEWER3D_MOCS libagm/graphModelViewer.h )
 
 # OSG
@@ -160,7 +162,7 @@ WRAP_PYTHON_QRC( resource )
 #  Library building  #
 ######################
 add_library(agm SHARED ${AGM_CODE} ${XMLVIEWER3D_MOCS} )
-target_link_libraries(agm ${Boost_LIBRARIES} ${LIBS} ${PYTHON_LIBRARIES} ${OSG_LIBS} ${QT_LIBRARIES} )
+target_link_libraries(agm ${LIBS} ${PYTHON_LIBRARIES} ${OSG_LIBS} ${QT_LIBRARIES} ${Boost_LIBRARIES} )
 
 if (ROBOCOMP_SUPPORT)
    add_library(agmdummy SHARED AGMWorldModel.cpp AGMExecutive.cpp AGMCommonBehavior.cpp Planning.cpp )

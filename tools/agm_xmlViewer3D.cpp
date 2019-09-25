@@ -3,6 +3,7 @@
 #include <libxml2/libxml/parser.h>
 #include <libxml2/libxml/tree.h>
 
+#include <QApplication>
 int main(int argc, char **argv)
 {
 	osg::ArgumentParser arguments(&argc, argv);

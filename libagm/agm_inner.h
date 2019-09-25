@@ -27,10 +27,10 @@
 
 #include <innermodel/innermodel.h>
 #include <qmat/QMatAll>
-#include <qt4/QtCore/QHash>
-#include <qt4/QtCore/QList>
-#include <qt4/QtCore/QString>
-#include <qt4/QtCore/QStringList>
+#include <QtCore/QHash>
+#include <QtCore/QList>
+#include <QtCore/QString>
+#include <QtCore/QStringList>
 #include <iostream>
 #include <string>
 

@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2016 by YOUR NAME HERE
+ *    Copyright (C)2019 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -20,41 +20,40 @@
 #define GENERICWORKER_H
 
 #include "config.h"
-#include <QtGui>
 #include <stdint.h>
 #include <qlog/qlog.h>
 
+#if Qt5_FOUND
+	#include <QtWidgets>
+#else
+	#include <QtGui>
+#endif
 #include <ui_mainUI.h>
-
 #include <CommonBehavior.h>
+
 #include <Planning.h>
-#include <AGMExecutive.h>
-#include <AGMCommonBehavior.h>
 #include <AGMWorldModel.h>
-
-
+#include <AGMCommonBehavior.h>
+#include <AGMExecutive.h>
 
 #define CHECK_PERIOD 5000
 #define BASIC_PERIOD 100
 
+using namespace std;
+using namespace RoboCompPlanning;
+using namespace RoboCompAGMWorldModel;
+using namespace RoboCompAGMCommonBehavior;
+using namespace RoboCompAGMExecutive;
+
 typedef map <string,::IceProxy::Ice::Object*> MapPrx;
 
-using namespace std;
 
-using namespace RoboCompPlanning;
-using namespace RoboCompAGMExecutive;
-using namespace RoboCompAGMCommonBehavior;
-using namespace RoboCompAGMWorldModel;
-
-
-
-
-class GenericWorker : 
+class GenericWorker :
 #ifdef USE_QTGUI
-public QWidget, public Ui_guiDlg
+	public QWidget, public Ui_guiDlg
 #else
-public QObject
-#endif
+	public QObject
+ #endif
 {
 Q_OBJECT
 public:
@@ -62,34 +61,39 @@ public:
 	virtual ~GenericWorker();
 	virtual void killYourSelf();
 	virtual void setPeriod(int p);
-	
+
 	virtual bool setParams(RoboCompCommonBehavior::ParameterList params) = 0;
 	QMutex *mutex;
-	
+
 
 	AGMExecutivePrx agmexecutive_proxy;
 
-	virtual bool reloadConfigAgent() = 0;
-	virtual bool activateAgent(const ParameterMap &prs) = 0;
-	virtual bool setAgentParameters(const ParameterMap &prs) = 0;
-	virtual ParameterMap getAgentParameters() = 0;
-	virtual void killAgent() = 0;
-	virtual int uptimeAgent() = 0;
-	virtual bool deactivateAgent() = 0;
-	virtual StateStruct getAgentState() = 0;
-	virtual void structuralChange(const RoboCompAGMWorldModel::World &w) = 0;
-	virtual void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &es) = 0;
-	virtual void edgeUpdated(const RoboCompAGMWorldModel::Edge &e) = 0;
-	virtual void symbolUpdated(const RoboCompAGMWorldModel::Node &n) = 0;
-	virtual void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &ns) = 0;
-        virtual void update(const RoboCompAGMWorldModel::World &a, const string &target, const RoboCompPlanning::Plan &p) = 0;
+	virtual bool AGMCommonBehavior_reloadConfigAgent() = 0;
+	virtual bool AGMCommonBehavior_activateAgent(const ParameterMap &prs) = 0;
+	virtual bool AGMCommonBehavior_setAgentParameters(const ParameterMap &prs) = 0;
+	virtual ParameterMap AGMCommonBehavior_getAgentParameters() = 0;
+	virtual void AGMCommonBehavior_killAgent() = 0;
+	virtual int AGMCommonBehavior_uptimeAgent() = 0;
+	virtual bool AGMCommonBehavior_deactivateAgent() = 0;
+	virtual StateStruct AGMCommonBehavior_getAgentState() = 0;
+	virtual void AGMExecutiveTopic_structuralChange(const RoboCompAGMWorldModel::World &w) = 0;
+	virtual void AGMExecutiveTopic_edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications) = 0;
+	virtual void AGMExecutiveTopic_edgeUpdated(const RoboCompAGMWorldModel::Edge &modification) = 0;
+	virtual void AGMExecutiveTopic_symbolUpdated(const RoboCompAGMWorldModel::Node &modification) = 0;
+	virtual void AGMExecutiveTopic_symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications) = 0;
 
 protected:
+
 	QTimer timer;
 	int Period;
 
+private:
+
+
 public slots:
 	virtual void compute() = 0;
+    virtual void initialize(int period) = 0;
+	
 signals:
 	void kill();
 };

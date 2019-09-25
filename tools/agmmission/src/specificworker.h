@@ -16,31 +16,29 @@
  *    You should have received a copy of the GNU General Public License
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+/**
+       \brief
+       @author authorname
+*/
+
 #ifndef SPECIFICWORKER_H
 #define SPECIFICWORKER_H
 
-
-
+#include <genericworker.h>
 #include <agm_modelDrawer.h>
 #include <graphModelViewer.h>
 
-#ifndef Q_MOC_RUN
-	#include <agm_modelPrinter.h>
-	#include <genericworker.h>
-	#include <agm.h>
-	#include <agm_model.h>
+#include <agm_modelPrinter.h>
+#include <genericworker.h>
+#include <agm.h>
+#include <agm_model.h>
 
-	#include <innermodel/innermodel.h>
-	#include <innermodel/innermodeldraw.h>
-	#include <innermodel/innermodelreader.h>
-	#include <osgviewer/osgview.h>
-	#include <innermodel/innermodelviewer.h>
-#endif
-
-/**
-	   \brief
-	   @author authorname
-*/
+#include <innermodel/innermodel.h>
+#include <innermodel/innermodeldraw.h>
+#include <innermodel/innermodelreader.h>
+#include <osgviewer/osgview.h>
+#include <innermodel/innermodelviewer.h>
 
 class SpecificWorker : public GenericWorker
 {
@@ -48,28 +46,28 @@ Q_OBJECT
 public:
 	SpecificWorker(MapPrx& mprx);
 	~SpecificWorker();
-	void structuralChange(const RoboCompAGMWorldModel::World &w);
-	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &es);
-	void edgeUpdated(const RoboCompAGMWorldModel::Edge &e);
-	void symbolUpdated(const RoboCompAGMWorldModel::Node &n);
-	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &ns);
-	void update(const RoboCompAGMWorldModel::World &a, const string &target, const RoboCompPlanning::Plan &p);
+	bool setParams(RoboCompCommonBehavior::ParameterList params);
 
-	bool setParams(RoboCompCommonBehavior::ParameterList params) { return true; }
-	bool activateAgent(const ParameterMap& params) {return true; }
-	bool deactivateAgent() {return true; }
-	StateStruct getAgentState() { StateStruct a; return a; }
-	ParameterMap getAgentParameters() { ParameterMap a; return a; }
-	bool setAgentParameters(const ParameterMap& params);
-	void killAgent() {}
-	int uptimeAgent() { return 1; }
-	bool reloadConfigAgent() { return true; }
+	bool AGMCommonBehavior_reloadConfigAgent();
+	bool AGMCommonBehavior_activateAgent(const ParameterMap &prs);
+	bool AGMCommonBehavior_setAgentParameters(const ParameterMap &prs);
+	ParameterMap AGMCommonBehavior_getAgentParameters();
+	void AGMCommonBehavior_killAgent();
+	int AGMCommonBehavior_uptimeAgent();
+	bool AGMCommonBehavior_deactivateAgent();
+	StateStruct AGMCommonBehavior_getAgentState();
+
+	void AGMExecutiveTopic_structuralChange(const RoboCompAGMWorldModel::World &w);
+	void AGMExecutiveTopic_edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
+	void AGMExecutiveTopic_edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
+	void AGMExecutiveTopic_symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
+	void AGMExecutiveTopic_symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications);
+	void update(const RoboCompAGMWorldModel::World &a, const string &target, const RoboCompPlanning::Plan &p);
 //	void set3DViewer();
 
+    void structuralChange(const RoboCompAGMWorldModel::World &w) { AGMExecutiveTopic_structuralChange(w); }
+
 public slots:
-	
-	
-	
 	void compute();
 	void setGeometry();
 	void quitButtonClicked();
@@ -103,6 +101,7 @@ public slots:
 	
 	
 private:
+	void initialize(int period);
 	bool refreshPlan;
 	std::string stopMission;
 	std::map<int, std::string> missionPaths;

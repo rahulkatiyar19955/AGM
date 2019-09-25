@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2015-2019 by RoboLab - University of Extremadura
  *
  *    This file is part of RoboComp
  *
@@ -17,7 +17,12 @@
  *    along with RoboComp.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <QCompleter>
+#include <QMessageBox>
+#include <QFileDialog>
+
 #include "specificworker.h"
+
 
 /**
 * \brief Default constructor
@@ -61,7 +66,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 	connect(itemList,     SIGNAL(activated(QString)), this, SLOT(itemSelected(QString)));
 	
 	itemList->completer()->setCompletionMode (QCompleter::UnfilteredPopupCompletion);
-// 	itemList->completer()->setCompletionMode (QCompleter::PopupCompletion);
+    // // itemList->completer()->setCompletionMode (QCompleter::PopupCompletion);
 	
 	
 	scrollArea->setAlignment (Qt::AlignCenter);
@@ -93,7 +98,7 @@ SpecificWorker::~SpecificWorker()
 
 }
 
-void SpecificWorker::compute( )
+void SpecificWorker::compute()
 {
 	secondsLabel->setText(QString::number(float(lastChange.elapsed())/1000));
 // 	printf("compute 1\n");
@@ -156,6 +161,21 @@ void SpecificWorker::compute( )
 }
 
 
+bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
+{
+    return false;
+//       THE FOLLOWING IS JUST AN EXAMPLE
+//	To use innerModelPath parameter you should uncomment specificmonitor.cpp readConfig method content
+//	try
+//	{
+//		RoboCompCommonBehavior::Parameter par = params.at("InnerModelPath");
+//		std::string innermodel_path = par.value;
+//		innerModel = new InnerModel(innermodel_path);
+//	}
+//	catch(std::exception e) { qFatal("Error reading config params"); }
+}
+
+
 void SpecificWorker::changeInner (InnerModel *inner)
 {
 	static InnerModel *b = innerModelVacio;
@@ -170,14 +190,64 @@ void SpecificWorker::changeInner (InnerModel *inner)
 	lastChange = QTime::currentTime();
 }
 
-bool SpecificWorker::setAgentParameters(const ParameterMap& params)
+
+bool SpecificWorker::AGMCommonBehavior_setAgentParameters(const ParameterMap &prs)
 {
 	return true;
 }
 
-void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &w)
+void SpecificWorker::initialize(int period)
 {
-	QMutexLocker dd(&modelMutex);
+	std::cout << "Initialize worker" << std::endl;
+	this->Period = period;
+	timer.start(Period);
+}
+
+
+bool SpecificWorker::AGMCommonBehavior_reloadConfigAgent()
+{
+    return false;
+}
+
+bool SpecificWorker::AGMCommonBehavior_activateAgent(const ParameterMap &prs)
+{
+    return false;
+}
+
+
+ParameterMap SpecificWorker::AGMCommonBehavior_getAgentParameters()
+{
+    ParameterMap p;
+    return p;
+}
+
+void SpecificWorker::AGMCommonBehavior_killAgent()
+{
+//implementCODE
+
+}
+
+int SpecificWorker::AGMCommonBehavior_uptimeAgent()
+{
+    return -1;
+}
+
+bool SpecificWorker::AGMCommonBehavior_deactivateAgent()
+{
+    return false;
+
+}
+
+StateStruct SpecificWorker::AGMCommonBehavior_getAgentState()
+{
+    StateStruct s;
+    return s;
+
+}
+
+void SpecificWorker::AGMExecutiveTopic_structuralChange(const RoboCompAGMWorldModel::World &w)
+{
+QMutexLocker dd(&modelMutex);
 	AGMModelConverter::fromIceToInternal(w, worldModel);
 	try
 	{
@@ -194,41 +264,38 @@ void SpecificWorker::structuralChange(const RoboCompAGMWorldModel::World &w)
 			printf("Error when converting the AGM model to InnerModel: %s\n", s.c_str());
 		}
 	}
-	fillItemList();
+	fillItemList();  
 }
 
-
-void SpecificWorker::symbolUpdated(const RoboCompAGMWorldModel::Node &n)
+void SpecificWorker::AGMExecutiveTopic_edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications)
 {
 	QMutexLocker dd(&modelMutex);
-	AGMModelConverter::includeIceModificationInInternalModel(n, worldModel);
-}
-
-void SpecificWorker::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &ns)
-{
-	QMutexLocker dd(&modelMutex);
-	for (auto n : ns)
-		AGMModelConverter::includeIceModificationInInternalModel(n, worldModel);
-}
-
-
-void SpecificWorker::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &es)
-{
-	QMutexLocker dd(&modelMutex);
-	for (auto e : es)
+	for (auto e : modifications)
 	{
 		AGMModelConverter::includeIceModificationInInternalModel(e, worldModel);
 		AGMInner::updateImNodeFromEdge(worldModel, e, innerViewer->innerModel);
 	}
 }
 
-void SpecificWorker::edgeUpdated(const RoboCompAGMWorldModel::Edge &e)
+void SpecificWorker::AGMExecutiveTopic_edgeUpdated(const RoboCompAGMWorldModel::Edge &modification)
 {
 	QMutexLocker dd(&modelMutex);
-	AGMModelConverter::includeIceModificationInInternalModel(e, worldModel);
-	AGMInner::updateImNodeFromEdge(worldModel, e, innerViewer->innerModel);
+	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+	AGMInner::updateImNodeFromEdge(worldModel, modification, innerViewer->innerModel);
 }
 
+void SpecificWorker::AGMExecutiveTopic_symbolUpdated(const RoboCompAGMWorldModel::Node &modification)
+{
+	QMutexLocker dd(&modelMutex);
+	AGMModelConverter::includeIceModificationInInternalModel(modification, worldModel);
+}
+
+void SpecificWorker::AGMExecutiveTopic_symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications)
+{
+	QMutexLocker dd(&modelMutex);
+	for (auto n : modifications)
+		AGMModelConverter::includeIceModificationInInternalModel(n, worldModel);
+}
 
 
 void SpecificWorker::update(const RoboCompAGMWorldModel::World &a,  const string &target_, const RoboCompPlanning::Plan &pl)

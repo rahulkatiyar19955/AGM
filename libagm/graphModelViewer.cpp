@@ -1,5 +1,6 @@
 #include "graphModelViewer.h"
 
+#include<QGridLayout>
 
 #ifndef Q_MOC_RUN
 	#include <osgGA/TrackballManipulator>
