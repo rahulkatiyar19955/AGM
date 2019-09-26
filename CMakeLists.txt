@@ -23,7 +23,7 @@ SET (AGM_CODE
   libagm/agm_modelConverter.cpp
   libagm/agm_plan.cpp
   libagm/agm_inner.cpp
-  libagm/graphModelViewer.cpp
+#   libagm/graphModelViewer.cpp
   $ENV{ROBOCOMP}/classes/rcdraw/rcdraw.cpp
 )
 
@@ -125,8 +125,8 @@ FIND_PACKAGE(osg)
 FIND_PACKAGE(osgDB)
 FIND_PACKAGE(osgViewer)
 FIND_PACKAGE(osgText)
-FIND_PACKAGE(osgQt)
-SET(OSG_LIBS ${OSG_LIBRARY} ${OSGUTIL_LIBRARY} ${OSGDB_LIBRARY} ${OSGVIEWER_LIBRARY} ${OPENTHREADS_LIBRARY} ${OSGTEXT_LIBRARY} ${OSGQT_LIBRARY})
+# FIND_PACKAGE(osgQt)
+SET(OSG_LIBS ${OSG_LIBRARY} ${OSGUTIL_LIBRARY} ${OSGDB_LIBRARY} ${OSGVIEWER_LIBRARY} ${OPENTHREADS_LIBRARY} ${OSGTEXT_LIBRARY})
 INCLUDE_DIRECTORIES(${OPENTHREADS_INCLUDE_DIR} ${OSG_INCLUDE_DIR})
 LINK_DIRECTORIES(${OSG_LIB_DIR})
 
@@ -179,9 +179,9 @@ add_executable ( agm_xml2pddlProblem tools/agm_xml2pddlProblem.cpp ${ROBOCOMP_AD
 target_link_libraries ( agm_xml2pddlProblem agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${Ice_LIBRARIES})
 add_dependencies(testagm agm)
 
-add_executable ( agm_xmlViewer3D ${CMAKE_SOURCE_DIR}/tools/agm_xmlViewer3D.cpp ${ROBOCOMP_ADDITIONAL_SRC} )
-target_link_libraries ( agm_xmlViewer3D agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${Ice_LIBRARIES})
-add_dependencies(testagm agm)
+# add_executable ( agm_xmlViewer3D ${CMAKE_SOURCE_DIR}/tools/agm_xmlViewer3D.cpp ${ROBOCOMP_ADDITIONAL_SRC} )
+# target_link_libraries ( agm_xmlViewer3D agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${Ice_LIBRARIES})
+# add_dependencies(testagm agm)
 
 
 
