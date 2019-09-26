@@ -23,7 +23,7 @@ SET (AGM_CODE
   libagm/agm_modelConverter.cpp
   libagm/agm_plan.cpp
   libagm/agm_inner.cpp
-  libagm/graphModelViewer.cpp
+#   libagm/graphModelViewer.cpp
   $ENV{ROBOCOMP}/classes/rcdraw/rcdraw.cpp
 )
 
@@ -117,7 +117,7 @@ SET( QT_USE_QTGUI TRUE )
 SET( QT_USE_QTOPENGL TRUE )
 SET( CMAKE_AUTOMOC TRUE )
 INCLUDE( $ENV{ROBOCOMP}/cmake/modules/qt.cmake )
-INCLUDE( $ENV{ROBOCOMP}/cmake/modules/qmat.cmake )
+# QT4_WRAP_CPP(XMLVIEWER3D_MOCS libagm/graphModelViewer.h )
 
 # OSG
 FIND_PACKAGE(OpenThreads)
@@ -125,9 +125,9 @@ FIND_PACKAGE(osg)
 FIND_PACKAGE(osgDB)
 FIND_PACKAGE(osgViewer)
 FIND_PACKAGE(osgText)
-FIND_PACKAGE(osgQt)
-SET(OSG_LIBS ${OSG_LIBRARY} ${OSGUTIL_LIBRARY} ${OSGDB_LIBRARY} ${OSGVIEWER_LIBRARY} ${OPENTHREADS_LIBRARY} ${OSGTEXT_LIBRARY} ${OSGQT_LIBRARY})
-INCLUDE_DIRECTORIES(${OPENTHREADS_INCLUDE_DIR} ${OSG_INCLUDE_DIR} /opt/robocomp/include /opt/robocomp/classes )
+# FIND_PACKAGE(osgQt)
+SET(OSG_LIBS ${OSG_LIBRARY} ${OSGUTIL_LIBRARY} ${OSGDB_LIBRARY} ${OSGVIEWER_LIBRARY} ${OPENTHREADS_LIBRARY} ${OSGTEXT_LIBRARY})
+INCLUDE_DIRECTORIES(${OPENTHREADS_INCLUDE_DIR} ${OSG_INCLUDE_DIR})
 LINK_DIRECTORIES(${OSG_LIB_DIR})
 
 
@@ -172,16 +172,16 @@ endif (ROBOCOMP_SUPPORT)
 
 
 add_executable ( testagm tools/testagm.cpp ${ROBOCOMP_ADDITIONAL_SRC} )
-target_link_libraries ( testagm agm -L. -L.. -lagm -luuid ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
+target_link_libraries ( testagm agm -L. -L.. -lagm ${LIBS} ${ICE_LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} )
 add_dependencies(testagm agm)
 
 add_executable ( agm_xml2pddlProblem tools/agm_xml2pddlProblem.cpp ${ROBOCOMP_ADDITIONAL_SRC} )
-target_link_libraries ( agm_xml2pddlProblem agm -L. -L.. -lagm -luuid ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${Ice_LIBRARIES})
+target_link_libraries ( agm_xml2pddlProblem agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${Ice_LIBRARIES})
 add_dependencies(testagm agm)
 
-add_executable ( agm_xmlViewer3D ${CMAKE_SOURCE_DIR}/tools/agm_xmlViewer3D.cpp ${ROBOCOMP_ADDITIONAL_SRC} )
-target_link_libraries ( agm_xmlViewer3D agm -L. -L.. -lagm -luuid ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${Ice_LIBRARIES})
-add_dependencies(testagm agm)
+# add_executable ( agm_xmlViewer3D ${CMAKE_SOURCE_DIR}/tools/agm_xmlViewer3D.cpp ${ROBOCOMP_ADDITIONAL_SRC} )
+# target_link_libraries ( agm_xmlViewer3D agm -L. -L.. -lagm ${LIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} ${Ice_LIBRARIES})
+# add_dependencies(testagm agm)
 
 
 
@@ -277,6 +277,16 @@ INSTALL(PROGRAMS python/generateAGGLPlannerCode.py DESTINATION ${INST_SHARE_PATH
 INSTALL(PROGRAMS python/AGMModule.py DESTINATION ${INST_SHARE_PATH})
 INSTALL(PROGRAMS python/AGMModelConversion.py DESTINATION ${INST_SHARE_PATH})
 INSTALL(PROGRAMS python/AGGL.py DESTINATION ${INST_SHARE_PATH})
+
+
+INSTALL(PROGRAMS Learner/classifier.py DESTINATION ${INST_SHARE_PATH})
+INSTALL(PROGRAMS Learner/const.py DESTINATION ${INST_SHARE_PATH})
+INSTALL(PROGRAMS Learner/generate.py DESTINATION ${INST_SHARE_PATH})
+
+INSTALL(PROGRAMS Learner/AGMParser.py DESTINATION ${INST_SHARE_PATH})
+
+INSTALL(PROGRAMS Learner/test.py DESTINATION ${INST_SHARE_PATH})
+INSTALL(PROGRAMS Learner/train.py DESTINATION ${INST_SHARE_PATH})
 
 
 
