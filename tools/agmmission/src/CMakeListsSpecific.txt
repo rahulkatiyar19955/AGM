@@ -21,7 +21,7 @@ INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
 
 SET (LIBS ${LIBS} -losgViewer ${Boost_LIBRARIES})
 INCLUDE_DIRECTORIES( /usr/local/include/osg /usr/include/osgViewer /usr/include/libxml2/ )
-SET( LIBS ${LIBS} -L/usr/local/lib64/ -L${CMAKE_BINARY_DIR} -lagm  -losg -losgViewer -losgGA -losgText -losgDB -losgUtil )
+SET( LIBS ${LIBS} -L/usr/local/lib64/ -L${CMAKE_BINARY_DIR} -lagm -luuid -losg -losgViewer -losgGA -losgText -losgDB -losgUtil )
 ADD_DEFINITIONS( -std=c++11 )
 
 

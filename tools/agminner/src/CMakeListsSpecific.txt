@@ -9,6 +9,7 @@ SET (LIBS ${LIBS}
   -L../../../..
   -L../../..
   -lagm
+  -luuid
   -lboost_system
 )
 
