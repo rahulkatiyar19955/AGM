@@ -4,7 +4,10 @@ export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:.
 
 echo "Installing dependencies..."
 sudo apt-get install libxml2-dev
-python -m pip install thriftpy
+
+wget https://bootstrap.pypa.io/get-pip.py
+sudo pypy get-pip.py
+sudo pypy -m pip install thriftpy
 
 # Should we compile with RoboComp support?
 finished=""
@@ -30,6 +33,9 @@ done
 #	esac
 #done
 PYTHON_BINDINGS="False"
+
+
+
 
 mkdir -p build
 cd build && pwd && cmake .. -DROBOCOMP_SUPPORT=${ROBOCOMP_SUPPORT} -DPYTHON_BINDINGS=${PYTHON_BINDINGS} && make -j4 && sudo make install
