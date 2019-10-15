@@ -12,12 +12,7 @@ IF(NOT EXISTS $ENV{ROBOCOMP}/cmake)
 ENDIF(NOT EXISTS $ENV{ROBOCOMP}/cmake)
 
 INCLUDE( $ENV{ROBOCOMP}/cmake/robocomp.cmake )
-
-SET( QT_USE_QTGUI TRUE )
-SET( QT_USE_QTOPENGL TRUE )
-SET( CMAKE_AUTOMOC TRUE )
 INCLUDE( $ENV{ROBOCOMP}/cmake/modules/qt.cmake )
-
 INCLUDE ( CMakeListsSpecific.txt)
 
 # Sources set
@@ -32,20 +27,18 @@ SET ( SOURCES
   genericworker.cpp
   agmcommonbehaviorI.cpp
   agmexecutivetopicI.cpp
+  agmexecutivevisualizationtopicI.cpp
 )
 
-FIND_PACKAGE(Qt5Core)
-FIND_PACKAGE(Qt5Gui)
-FIND_PACKAGE(Qt5Widgets)
 
-SET(CMAKE_AUTOMOC ON)
-SET(CMAKE_INCLUDE_CURRENT_DIR ON)
+
 
 #ROBOCOMP
 ROBOCOMP_INITIALIZE( $ENV{ROBOCOMP}/ )
-ROBOCOMP_WRAP_ICE( CommonBehavior Planning AGMWorldModel AGMCommonBehavior AGMExecutive)
+ROBOCOMP_WRAP_ICE( CommonBehavior Planning AGMCommonBehavior AGMExecutive AGMExecutiveTopic AGMExecutiveVisualizationTopic)
 SET (EXECUTABLE_OUTPUT_PATH ${RC_COMPONENT_DEVEL_PATH}/bin)
 
+QT_WRAP_UI( UI_HEADERS mainUI.ui )
 
 # Specify construction and link process
 ADD_EXECUTABLE( agmmission ${SOURCES} ${MOC_SOURCES} ${RC_SOURCES} ${UI_HEADERS} )

@@ -83,12 +83,10 @@
 
 #include <agmcommonbehaviorI.h>
 #include <agmexecutivetopicI.h>
+#include <agmexecutivevisualizationtopicI.h>
 
 #include <Planning.h>
-#include <AGMWorldModel.h>
 
-
-// User includes here
 
 // Namespaces
 using namespace std;
@@ -268,6 +266,46 @@ int ::agmmission::run(int argc, char* argv[])
 		}
 
 		// Server adapter creation and publication
+		IceStorm::TopicPrx agmexecutivevisualizationtopic_topic;
+		Ice::ObjectPrx agmexecutivevisualizationtopic;
+		try
+		{
+			if (not GenericMonitor::configGetString(communicator(), prefix, "AGMExecutiveVisualizationTopicTopic.Endpoints", tmp, ""))
+			{
+				cout << "[" << PROGRAM_NAME << "]: Can't read configuration for proxy AGMExecutiveVisualizationTopicProxy";
+			}
+			Ice::ObjectAdapterPtr AGMExecutiveVisualizationTopic_adapter = communicator()->createObjectAdapterWithEndpoints("agmexecutivevisualizationtopic", tmp);
+			AGMExecutiveVisualizationTopicPtr agmexecutivevisualizationtopicI_ =  new AGMExecutiveVisualizationTopicI(worker);
+			Ice::ObjectPrx agmexecutivevisualizationtopic = AGMExecutiveVisualizationTopic_adapter->addWithUUID(agmexecutivevisualizationtopicI_)->ice_oneway();
+			if(!agmexecutivevisualizationtopic_topic)
+			{
+				try {
+					agmexecutivevisualizationtopic_topic = topicManager->create("AGMExecutiveVisualizationTopic");
+				}
+				catch (const IceStorm::TopicExists&) {
+					//Another client created the topic
+					try{
+						cout << "[" << PROGRAM_NAME << "]: Probably other client already opened the topic. Trying to connect.\n";
+						agmexecutivevisualizationtopic_topic = topicManager->retrieve("AGMExecutiveVisualizationTopic");
+					}
+					catch(const IceStorm::NoSuchTopic&)
+					{
+						cout << "[" << PROGRAM_NAME << "]: Topic doesn't exists and couldn't be created.\n";
+						//Error. Topic does not exist
+					}
+				}
+				IceStorm::QoS qos;
+				agmexecutivevisualizationtopic_topic->subscribeAndGetPublisher(qos, agmexecutivevisualizationtopic);
+			}
+			AGMExecutiveVisualizationTopic_adapter->activate();
+		}
+		catch(const IceStorm::NoSuchTopic&)
+		{
+			cout << "[" << PROGRAM_NAME << "]: Error creating AGMExecutiveVisualizationTopic topic.\n";
+			//Error. Topic does not exist
+		}
+
+		// Server adapter creation and publication
 		cout << SERVER_FULL_NAME " started" << endl;
 
 		// User defined QtGui elements ( main window, dialogs, etc )
@@ -287,6 +325,15 @@ int ::agmmission::run(int argc, char* argv[])
 		catch(const Ice::Exception& ex)
 		{
 			std::cout << "ERROR Unsubscribing topic: agmexecutivetopic " <<std::endl;
+		}
+		try
+		{
+			std::cout << "Unsubscribing topic: agmexecutivevisualizationtopic " <<std::endl;
+			agmexecutivevisualizationtopic_topic->unsubscribe( agmexecutivevisualizationtopic );
+		}
+		catch(const Ice::Exception& ex)
+		{
+			std::cout << "ERROR Unsubscribing topic: agmexecutivevisualizationtopic " <<std::endl;
 		}
 
 		status = EXIT_SUCCESS;

@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2016 by YOUR NAME HERE
+ *    Copyright (C) 2019 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -18,10 +18,9 @@
  */
 #include "agmexecutivevisualizationtopicI.h"
 
-AGMExecutiveVisualizationTopicI::AGMExecutiveVisualizationTopicI(GenericWorker *_worker, QObject *parent) : QObject(parent)
+AGMExecutiveVisualizationTopicI::AGMExecutiveVisualizationTopicI(GenericWorker *_worker)
 {
 	worker = _worker;
-	mutex = worker->mutex;       // Shared worker mutex
 }
 
 
@@ -29,13 +28,8 @@ AGMExecutiveVisualizationTopicI::~AGMExecutiveVisualizationTopicI()
 {
 }
 
-void AGMExecutiveVisualizationTopicI::update(const RoboCompAGMWorldModel::World  &world, const string &target, const RoboCompPlanning::Plan  &plan, const Ice::Current&)
+void AGMExecutiveVisualizationTopicI::update(const RoboCompAGMWorldModel::World  &world, const string  &target, const RoboCompPlanning::Plan  &plan, const Ice::Current&)
 {
-	worker->update(world, target, plan);
+	worker->AGMExecutiveVisualizationTopic_update(world, target, plan);
 }
-
-
-
-
-
 

@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2006-2010 by RoboLab - University of Extremadura
+ *    Copyright (C) 2019 by Luis J. Manso
  *
  *    This file is part of RoboComp
  *
@@ -29,16 +29,18 @@
 #include <agm_modelDrawer.h>
 #include <graphModelViewer.h>
 
-#include <agm_modelPrinter.h>
-#include <genericworker.h>
-#include <agm.h>
-#include <agm_model.h>
+#ifndef Q_MOC_RUN
+	#include <agm_modelPrinter.h>
+	#include <genericworker.h>
+	#include <agm.h>
+	#include <agm_model.h>
 
-#include <innermodel/innermodel.h>
-#include <innermodel/innermodeldraw.h>
-#include <innermodel/innermodelreader.h>
-#include <osgviewer/osgview.h>
-#include <innermodel/innermodelviewer.h>
+	#include <innermodel/innermodel.h>
+	#include <innermodel/innermodeldraw.h>
+	#include <innermodel/innermodelreader.h>
+	#include <osgviewer/osgview.h>
+	#include <innermodel/innermodelviewer.h>
+#endif
 
 class SpecificWorker : public GenericWorker
 {
@@ -48,24 +50,23 @@ public:
 	~SpecificWorker();
 	bool setParams(RoboCompCommonBehavior::ParameterList params);
 
-	bool AGMCommonBehavior_reloadConfigAgent();
 	bool AGMCommonBehavior_activateAgent(const ParameterMap &prs);
-	bool AGMCommonBehavior_setAgentParameters(const ParameterMap &prs);
-	ParameterMap AGMCommonBehavior_getAgentParameters();
-	void AGMCommonBehavior_killAgent();
-	int AGMCommonBehavior_uptimeAgent();
 	bool AGMCommonBehavior_deactivateAgent();
 	StateStruct AGMCommonBehavior_getAgentState();
-
+	ParameterMap AGMCommonBehavior_getAgentParameters();
+	bool AGMCommonBehavior_setAgentParameters(const ParameterMap &prs);
+	void AGMCommonBehavior_killAgent();
+	int AGMCommonBehavior_uptimeAgent();
+	bool AGMCommonBehavior_reloadConfigAgent();
 	void AGMExecutiveTopic_structuralChange(const RoboCompAGMWorldModel::World &w);
-	void AGMExecutiveTopic_edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
-	void AGMExecutiveTopic_edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
 	void AGMExecutiveTopic_symbolUpdated(const RoboCompAGMWorldModel::Node &modification);
 	void AGMExecutiveTopic_symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications);
-	void update(const RoboCompAGMWorldModel::World &a, const string &target, const RoboCompPlanning::Plan &p);
-//	void set3DViewer();
+	void AGMExecutiveTopic_edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
+	void AGMExecutiveTopic_edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
+	void AGMExecutiveVisualizationTopic_update(const RoboCompAGMWorldModel::World &world, const string &target, const RoboCompPlanning::Plan &plan);
 
-    void structuralChange(const RoboCompAGMWorldModel::World &w) { AGMExecutiveTopic_structuralChange(w); }
+
+	void update(const RoboCompAGMWorldModel::World &a, const string &target, const RoboCompPlanning::Plan &p);
 
 public slots:
 	void compute();

@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2015-2019 by RoboLab - University of Extremadura
+ *    Copyright (C) 2019 by Luis J. Manso 
  *
  *    This file is part of RoboComp
  *
@@ -23,13 +23,9 @@
 
 #include "specificworker.h"
 
-
 /**
 * \brief Default constructor
 */
-
-#define BUUU printf("%s: %d\n", __FILE__, __LINE__);
-
 SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 {
 	refreshPlan = false;
@@ -87,7 +83,7 @@ SpecificWorker::SpecificWorker(MapPrx& mprx) : GenericWorker(mprx)
 
 	
 	RoboCompAGMWorldModel::World w = agmexecutive_proxy->getModel();
-	structuralChange(w);
+	AGMExecutiveTopic_structuralChange(w);
 }
 
 /**
@@ -163,7 +159,7 @@ void SpecificWorker::compute()
 
 bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 {
-    return false;
+	return true;
 //       THE FOLLOWING IS JUST AN EXAMPLE
 //	To use innerModelPath parameter you should uncomment specificmonitor.cpp readConfig method content
 //	try
@@ -172,9 +168,8 @@ bool SpecificWorker::setParams(RoboCompCommonBehavior::ParameterList params)
 //		std::string innermodel_path = par.value;
 //		innerModel = new InnerModel(innermodel_path);
 //	}
-//	catch(std::exception e) { qFatal("Error reading config params"); }
+//	catch(const std::exception &e) { qFatal("Error reading config params"); }
 }
-
 
 void SpecificWorker::changeInner (InnerModel *inner)
 {
@@ -298,7 +293,7 @@ void SpecificWorker::AGMExecutiveTopic_symbolsUpdated(const RoboCompAGMWorldMode
 }
 
 
-void SpecificWorker::update(const RoboCompAGMWorldModel::World &a,  const string &target_, const RoboCompPlanning::Plan &pl)
+void SpecificWorker::AGMExecutiveVisualizationTopic_update(const RoboCompAGMWorldModel::World &a,  const string &target_, const RoboCompPlanning::Plan &pl)
 {
 	printf("SpecificWorker::update plan and target\n");
 	QMutexLocker dd(&planMutex);

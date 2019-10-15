@@ -33,16 +33,6 @@ void AGMExecutiveTopicI::structuralChange(const RoboCompAGMWorldModel::World  &w
 	worker->AGMExecutiveTopic_structuralChange(w);
 }
 
-void AGMExecutiveTopicI::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &modifications, const Ice::Current&)
-{
-	worker->AGMExecutiveTopic_edgesUpdated(modifications);
-}
-
-void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge  &modification, const Ice::Current&)
-{
-	worker->AGMExecutiveTopic_edgeUpdated(modification);
-}
-
 void AGMExecutiveTopicI::symbolUpdated(const RoboCompAGMWorldModel::Node  &modification, const Ice::Current&)
 {
 	worker->AGMExecutiveTopic_symbolUpdated(modification);
@@ -51,5 +41,15 @@ void AGMExecutiveTopicI::symbolUpdated(const RoboCompAGMWorldModel::Node  &modif
 void AGMExecutiveTopicI::symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence  &modifications, const Ice::Current&)
 {
 	worker->AGMExecutiveTopic_symbolsUpdated(modifications);
+}
+
+void AGMExecutiveTopicI::edgeUpdated(const RoboCompAGMWorldModel::Edge  &modification, const Ice::Current&)
+{
+	worker->AGMExecutiveTopic_edgeUpdated(modification);
+}
+
+void AGMExecutiveTopicI::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &modifications, const Ice::Current&)
+{
+	worker->AGMExecutiveTopic_edgesUpdated(modifications);
 }
 

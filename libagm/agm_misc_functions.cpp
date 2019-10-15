@@ -89,7 +89,7 @@ void AGMMisc::publishEdgeUpdate(AGMModelEdge &edge, AGMExecutivePrx &agmexecutiv
 {
 	RoboCompAGMWorldModel::Edge iceEdge;
 	AGMModelConverter::fromInternalToIce(&edge, iceEdge);
-	agmexecutive->edgeUpdate(iceEdge);
+	agmexecutive->edgeUpdated(iceEdge);
 }
 
 void AGMMisc::publishEdgesUpdate(std::vector<AGMModelEdge> edges, AGMExecutivePrx &agmexecutive)
@@ -101,7 +101,7 @@ void AGMMisc::publishEdgesUpdate(std::vector<AGMModelEdge> edges, AGMExecutivePr
 		AGMModelConverter::fromInternalToIce(&(*it), iceEdge);
 		edge_sequence.push_back(iceEdge);
 	}
-	agmexecutive->edgesUpdate(edge_sequence);
+	agmexecutive->edgesUpdated(edge_sequence);
 }
 
 #endif

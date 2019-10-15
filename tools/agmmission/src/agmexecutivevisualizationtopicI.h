@@ -1,5 +1,5 @@
 /*
- *    Copyright (C) 2016 by YOUR NAME HERE
+ *    Copyright (C)2019 by YOUR NAME HERE
  *
  *    This file is part of RoboComp
  *
@@ -19,33 +19,26 @@
 #ifndef AGMEXECUTIVEVISUALIZATIONTOPIC_H
 #define AGMEXECUTIVEVISUALIZATIONTOPIC_H
 
-// QT includes
-#include <QtCore/QObject>
-
 // Ice includes
 #include <Ice/Ice.h>
-#include <AGMExecutive.h>
+#include <AGMExecutiveVisualizationTopic.h>
 
 #include <config.h>
 #include "genericworker.h"
 
-using namespace RoboCompAGMExecutive;
+using namespace RoboCompAGMExecutiveVisualizationTopic;
 
-class AGMExecutiveVisualizationTopicI : public QObject , public virtual RoboCompAGMExecutive::AGMExecutiveVisualizationTopic
+class AGMExecutiveVisualizationTopicI : public virtual RoboCompAGMExecutiveVisualizationTopic::AGMExecutiveVisualizationTopic
 {
-Q_OBJECT
 public:
-	AGMExecutiveVisualizationTopicI( GenericWorker *_worker, QObject *parent = 0 );
+AGMExecutiveVisualizationTopicI(GenericWorker *_worker);
 	~AGMExecutiveVisualizationTopicI();
-	
-	void update(const RoboCompAGMWorldModel::World  &world, const string &target, const RoboCompPlanning::Plan  &plan, const Ice::Current&);
 
-	QMutex *mutex;
+	void update(const RoboCompAGMWorldModel::World  &world, const string  &target, const RoboCompPlanning::Plan  &plan, const Ice::Current&);
+
 private:
 
 	GenericWorker *worker;
-public slots:
-
 
 };
 

@@ -1,6 +1,8 @@
-import "/robocomp/interfaces/IDSLs/AGMExecutive.idsl";
-import "/robocomp/interfaces/IDSLs/AGMCommonBehavior.idsl";
-import "/robocomp/interfaces/IDSLs/AGMWorldModel.idsl";
+import "AGMExecutive.idsl";
+import "AGMCommonBehavior.idsl";
+import "AGMWorldModel.idsl";
+import "AGMExecutiveTopic.idsl";
+import "AGMExecutiveVisualizationTopic.idsl";
 
 Component agmmission
 {
@@ -8,7 +10,7 @@ Component agmmission
 	{
 		requires AGMExecutive;
 		implements AGMCommonBehavior;
-		subscribesTo AGMExecutiveTopic;
+		subscribesTo AGMExecutiveTopic, AGMExecutiveVisualizationTopic;
 	};
 
 	language Cpp;
