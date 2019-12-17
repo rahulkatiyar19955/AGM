@@ -47,10 +47,14 @@ if len(ROBOCOMP)<1:
 preStr = "-I"+ROBOCOMP+"/interfaces/ --all "+ROBOCOMP+"/interfaces/"
 Ice.loadSlice(preStr+"AGMCommonBehavior.ice")
 Ice.loadSlice(preStr+"AGMExecutive.ice")
+Ice.loadSlice(preStr+"AGMExecutiveTopic.ice")
+Ice.loadSlice(preStr+"AGMExecutiveVisualizationTopic.ice")
 Ice.loadSlice(preStr+"AGMWorldModel.ice")
 Ice.loadSlice(preStr+"RCRemote.ice")
 import RoboCompAGMCommonBehavior
 import RoboCompAGMExecutive
+import RoboCompAGMExecutiveTopic
+import RoboCompAGMExecutiveVisualizationTopic
 import RoboCompAGMWorldModel
 import RoboCompRemote
 
@@ -142,7 +146,7 @@ class Server (Ice.Application):
 					except:
 						print 'Another client created the AGMExecutiveTopic topic... ok'
 			pub = topic.getPublisher().ice_oneway()
-			executiveTopic = RoboCompAGMExecutive.AGMExecutiveTopicPrx.uncheckedCast(pub)
+			executiveTopic = RoboCompAGMExecutiveTopic.AGMExecutiveTopicPrx.uncheckedCast(pub)
 
 
 			# Proxy to publish AGMExecutiveVisualizationTopic
@@ -163,7 +167,7 @@ class Server (Ice.Application):
 					except:
 						print 'Another client created the AGMExecutiveVisualizationTopic topic... ok'
 			pub = topic.getPublisher().ice_oneway()
-			executiveVisualizationTopic = RoboCompAGMExecutive.AGMExecutiveVisualizationTopicPrx.uncheckedCast(pub)
+			executiveVisualizationTopic = RoboCompAGMExecutiveVisualizationTopic.AGMExecutiveVisualizationTopicPrx.uncheckedCast(pub)
 
 			# Create the executive
 			executive = Executive(agglPath, initialModelPath, initialMissionPath, doNotPlan, executiveTopic, executiveVisualizationTopic, startPlanServer)
