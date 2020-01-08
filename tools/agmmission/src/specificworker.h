@@ -63,7 +63,11 @@ public:
 	void AGMExecutiveTopic_symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence &modifications);
 	void AGMExecutiveTopic_edgeUpdated(const RoboCompAGMWorldModel::Edge &modification);
 	void AGMExecutiveTopic_edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence &modifications);
-	void AGMExecutiveVisualizationTopic_update(const RoboCompAGMWorldModel::World &world, const string &target, const RoboCompPlanning::Plan &plan);
+	void AGMExecutiveTopic_selfEdgeAdded(const int nodeid, const string &edgeType, const RoboCompAGMWorldModel::StringDictionary &attributes);
+	void AGMExecutiveTopic_selfEdgeDeleted(const int nodeid, const string &edgeType);
+
+    
+    void AGMExecutiveVisualizationTopic_update(const RoboCompAGMWorldModel::World &world, const string &target, const RoboCompPlanning::Plan &plan);
 
 
 	void update(const RoboCompAGMWorldModel::World &a, const string &target, const RoboCompPlanning::Plan &p);

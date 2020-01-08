@@ -39,6 +39,8 @@ AGMExecutiveTopicI(GenericWorker *_worker);
 	void symbolsUpdated(const RoboCompAGMWorldModel::NodeSequence  &modifications, const Ice::Current&);
 	void edgeUpdated(const RoboCompAGMWorldModel::Edge  &modification, const Ice::Current&);
 	void edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence  &modifications, const Ice::Current&);
+    void selfEdgeAdded(const int nodeid, const string &edgeType, const RoboCompAGMWorldModel::StringDictionary &attributes, const Ice::Current&);
+    void selfEdgeDeleted(const int nodeid, const string &edgeType, const Ice::Current&);
 
 private:
 

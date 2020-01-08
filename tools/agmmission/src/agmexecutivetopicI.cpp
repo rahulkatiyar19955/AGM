@@ -53,3 +53,12 @@ void AGMExecutiveTopicI::edgesUpdated(const RoboCompAGMWorldModel::EdgeSequence 
 	worker->AGMExecutiveTopic_edgesUpdated(modifications);
 }
 
+void AGMExecutiveTopicI::selfEdgeAdded(const int nodeid, const string &edgeType, const RoboCompAGMWorldModel::StringDictionary &attributes, const Ice::Current&)
+{
+	worker->AGMExecutiveTopic_selfEdgeAdded(nodeid, edgeType, attributes);
+}
+
+void AGMExecutiveTopicI::selfEdgeDeleted(const int nodeid, const string &edgeType, const Ice::Current&)
+{
+	worker->AGMExecutiveTopic_selfEdgeDeleted(nodeid, edgeType);
+}

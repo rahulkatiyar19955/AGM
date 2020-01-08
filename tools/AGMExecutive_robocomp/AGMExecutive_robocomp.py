@@ -19,7 +19,7 @@
 #    along with AGM.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-import sys, traceback, Ice, subprocess, threading, time, Queue, os
+import sys, traceback, Ice, subprocess, threading, time, queue, os
 import IceStorm
 
 
@@ -40,7 +40,7 @@ try:
 except:
 	pass
 if len(ROBOCOMP)<1:
-	print 'ROBOCOMP environment variable not set! Exiting.'
+	print('ROBOCOMP environment variable not set! Exiting.')
 	sys.exit()
 
 
@@ -79,6 +79,12 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 
 	def symbolsUpdate(self, s, current=None):
 		self.handler.symbolsUpdate(ss)
+
+	def addSelfEdge(self, a, b, c, current=None):
+		self.handler.addSelfEdge(a, b, c)
+
+	def delSelfEdge(self, a, b, current=None):
+		self.handler.delSelfEdge(a, b)
 
 	def edgeUpdate(self, e, current=None):
 		#print 'robocomp edgesUpdate a'
@@ -144,7 +150,7 @@ class Server (Ice.Application):
 					try:
 						topic = topicManager.create("AGMExecutiveTopic")
 					except:
-						print 'Another client created the AGMExecutiveTopic topic... ok'
+						print('Another client created the AGMExecutiveTopic topic... ok')
 			pub = topic.getPublisher().ice_oneway()
 			executiveTopic = RoboCompAGMExecutiveTopic.AGMExecutiveTopicPrx.uncheckedCast(pub)
 
@@ -165,7 +171,7 @@ class Server (Ice.Application):
 					try:
 						topic = topicManager.create("AGMExecutiveVisualizationTopic")
 					except:
-						print 'Another client created the AGMExecutiveVisualizationTopic topic... ok'
+						print('Another client created the AGMExecutiveVisualizationTopic topic... ok')
 			pub = topic.getPublisher().ice_oneway()
 			executiveVisualizationTopic = RoboCompAGMExecutiveVisualizationTopic.AGMExecutiveVisualizationTopicPrx.uncheckedCast(pub)
 
@@ -180,31 +186,31 @@ class Server (Ice.Application):
 
 			# Read agent's configurations and create the correspoding proxies
 			agentConfigs = self.communicator().getProperties().getProperty( "AGENTS" ).split(',')
-			print 'AGENT configs:', agentConfigs
+			print(('AGENT configs:', agentConfigs))
 			for agent in agentConfigs:
-				print 'Configuring ', agent
+				print(('Configuring ', agent))
 				proxy = self.communicator().getProperties().getProperty(agent)
 				if len(proxy)>0:
 					behavior_proxy = RoboCompAGMCommonBehavior.AGMCommonBehaviorPrx.uncheckedCast(self.communicator().stringToProxy(proxy))
 					if not behavior_proxy:
-						print agentConfigs
-						print parameters.agents[i].c_str()
-						print parameters.agents[i].c_str()
-						print "Error loading behavior proxy!"
+						print(agentConfigs)
+						print((parameters.agents[i].c_str()))
+						print((parameters.agents[i].c_str()))
+						print("Error loading behavior proxy!")
 						sys.exit(1)
 					executive.setAgent(agent,  behavior_proxy)
-					print "Agent" , agent, "initialized ok"
+					print(("Agent" , agent, "initialized ok"))
 				else:
-					print 'Agent', agent, 'was not properly configured. Check config file'
+					print(('Agent', agent, 'was not properly configured. Check config file'))
 
-			print 'AGMExecutive initialization ok'
+			print('AGMExecutive initialization ok')
 
-			print '-------------------------------------------------------------'
-			print '----     R u n     A G M E x e c u t i v e,     r u n   -----'
-			print '-------------------------------------------------------------'
-			print '---- updatePlan ------------------------------------------------'
+			print('-------------------------------------------------------------')
+			print('----     R u n     A G M E x e c u t i v e,     r u n   -----')
+			print('-------------------------------------------------------------')
+			print('---- updatePlan ------------------------------------------------')
 			executive.updatePlan()
-			print '---- updatePlan ------------------------------------------------'
+			print('---- updatePlan ------------------------------------------------')
 			self.shutdownOnInterrupt()
 			self.communicator().waitForShutdown()
 		except:

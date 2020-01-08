@@ -19,17 +19,16 @@ IceStormProxy = IceStorm/TopicManager:tcp -h localhost -p 9999
 # AutostartAGGLPlannerServer = off
 AutostartAGGLPlannerServer = rcremote,localhost,agglplanner,/home/robocomp/AGM/tmp
 
+DoNotPlan = True
 # A G M   -   F i l e   p a t h s
 AGGLPath =           /home/robocomp/robocomp/components/prp/planningDomain/domain.aggl
-InitialModelPath =   /home/robocomp/robocomp/components/prp/etc/initialModel.xml
+InitialModelPath =   initialModel_example.xml
 InitialMissionPath = /home/robocomp/robocomp/components/prp/etc/target.aggt
 
 
 # A G E N T S
-AGENTS = navigation,object,oracle
-navigation = agmcommonbehavior:tcp -h localhost -p 10330
-object = agmcommonbehavior:tcp -h localhost -p 10331
-oracle = agmcommonbehavior:tcp -h localhost -p 10332
+AGENTS = navigation
+navigation = agmcommonbehavior:tcp -h localhost -p 12300
 
 
 WriteAcceptedModels=True

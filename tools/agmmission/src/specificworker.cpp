@@ -292,6 +292,47 @@ void SpecificWorker::AGMExecutiveTopic_symbolsUpdated(const RoboCompAGMWorldMode
 		AGMModelConverter::includeIceModificationInInternalModel(n, worldModel);
 }
 
+void SpecificWorker::AGMExecutiveTopic_selfEdgeAdded(const int nodeid, const string &edgeType, const RoboCompAGMWorldModel::StringDictionary &attributes)
+{
+    try
+    {
+        worldModel->addEdgeByIdentifiers(nodeid, nodeid, edgeType, attributes);
+    }
+    catch(...)
+    {
+        printf("Couldn't add an edge. Duplicate?\n");
+    }
+
+	try
+	{
+		changeInner(AGMInner::extractInnerModel(worldModel));
+	}
+	catch(std::string s)
+	{
+		static bool firstReport = true;
+		static QTime lastReport = QTime::currentTime();
+		if (lastReport.elapsed() > 60000 or firstReport)
+		{
+			firstReport = false;
+			lastReport = QTime::currentTime();
+			printf("Error when converting the AGM model to InnerModel: %s\n", s.c_str());
+		}
+	}
+}
+
+void SpecificWorker::AGMExecutiveTopic_selfEdgeDeleted(const int nodeid, const string &edgeType)
+{
+    try
+    {
+        worldModel->removeEdgeByIdentifiers(nodeid, nodeid, edgeType);
+    }
+    catch(...)
+    {
+        printf("Couldn't remove an edge\n");
+    }
+
+}
+
 
 void SpecificWorker::AGMExecutiveVisualizationTopic_update(const RoboCompAGMWorldModel::World &a,  const string &target_, const RoboCompPlanning::Plan &pl)
 {

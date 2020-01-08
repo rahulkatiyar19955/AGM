@@ -530,7 +530,7 @@ void AGMModelDrawer::draw()
         }
         for (uint32_t e=0; e<nodes[n].edgesOriented.size(); e++)
         {
-            if (nodes[n].edgesOriented[e] == n) printf("self-edge: %s\n", nodes[n].edgesNames[e].c_str());
+//             if (nodes[n].edgesOriented[e] == n) printf("self-edge: %s\n", nodes[n].edgesNames[e].c_str());
 
             int32_t o1 = n;
             int32_t d1 = nodes[n].edgesOriented[e];
