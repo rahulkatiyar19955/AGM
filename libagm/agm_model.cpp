@@ -27,8 +27,6 @@ AGMModel::AGMModel(const AGMModel::SPtr &src)
 
 AGMModel::AGMModel(const AGMModel &src)
 {
-	//printf("AGMModel::AGMModel(const AGMModel &src)\n");
-// 	printf("new model (&): (%p)\n", this);
 	setFrom(src);
 }
 
@@ -709,7 +707,6 @@ int32_t AGMModel::getLinkedID(int32_t id, std::string linkname, int32_t i) const
 	}
 	if (ret != -1)
 		return edges[ret].symbolPair.second;
-// 	printf("%d\n", __LINE__);
 	return -1;
 }
 
@@ -961,11 +958,9 @@ int32_t AGMModel::getNewId()
 
 void AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edgeName, std::map<std::string, std::string> atr)
 {
-	printf("%d %d (%s)\n", a, b, edgeName.c_str());
 	// Nodes must exist.
 	if (a < 0 or b < 0)
 	{
-		printf("Trying to link invalid identifiers\n");
 		AGMMODELEXCEPTION("Trying to link invalid identifiers");
 	}
 
@@ -978,14 +973,13 @@ void AGMModel::addEdgeByIdentifiers(int32_t a, int32_t b, const std::string &edg
 			{
 				if (edges[i].getLabel() == edgeName)
 				{
-					printf("Exception: addEdgeByIdentifiers: repeated edge\n");
 					AGMMODELEXCEPTION("Exception: addEdgeByIdentifiers: repeated edge");
+                    return;
 				}
 			}
 		}
 	}
 
-	printf("%d %d (%s)\n", a, b, edgeName.c_str());
 	AGMModelEdge edge(a, b, edgeName, atr);
 	edges.push_back(edge);
 }

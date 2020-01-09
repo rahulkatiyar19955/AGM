@@ -294,14 +294,16 @@ void SpecificWorker::AGMExecutiveTopic_symbolsUpdated(const RoboCompAGMWorldMode
 
 void SpecificWorker::AGMExecutiveTopic_selfEdgeAdded(const int nodeid, const string &edgeType, const RoboCompAGMWorldModel::StringDictionary &attributes)
 {
-    try
-    {
-        worldModel->addEdgeByIdentifiers(nodeid, nodeid, edgeType, attributes);
-    }
-    catch(...)
-    {
-        printf("Couldn't add an edge. Duplicate?\n");
-    }
+	try
+	{
+		worldModel->addEdgeByIdentifiers(nodeid, nodeid, edgeType, attributes);
+	}
+	catch(...)
+	{
+		printf("Couldn't add an edge. Duplicate?\n");
+	}
+
+	fillItemList();  
 
 	try
 	{

@@ -94,7 +94,7 @@ void AGMModelDrawer::setShowRobot( bool s)
     {
         model->getSymbolByIdentifier(symbolID);
     }
-    catch(AGMModelException e)
+    catch(AGMModelException &e)
     {
         std::cout<<"robot, symbol id 1 not found "<<e.what()<<"\n";
     }
@@ -591,13 +591,12 @@ void AGMModelDrawer::draw()
 // 				qDebug()<<"dst"<<dst;
             std::string nameSymbolDst=nodes[dst].name;
             std::string stringStream;
-            stringStream =nodes[n].edgesNames[e] +" "+nodes[n].name+" "+nameSymbolDst;
+            stringStream = nodes[n].edgesNames[e] + " " + nodes[n].name + " " + nameSymbolDst;
             QString labelKey = QString::fromStdString( stringStream );
             if (nodes[n].labelsPositions.contains(labelKey) == true )
             {
                 qDebug()<<"edge repeated"<<labelKey;
                 qDebug()<<"nodes["<<n<<"].labelsPositions"<<nodes[n].labelsPositions;
-                qFatal("Error:: Two equal edges!!!");
             }
             else
             {
