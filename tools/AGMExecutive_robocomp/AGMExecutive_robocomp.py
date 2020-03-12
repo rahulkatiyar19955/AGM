@@ -78,7 +78,7 @@ class ExecutiveI (RoboCompAGMExecutive.AGMExecutive):
 		self.handler.symbolUpdate(s)
 
 	def symbolsUpdate(self, s, current=None):
-		self.handler.symbolsUpdate(ss)
+		self.handler.symbolsUpdate(s)
 
 	def addSelfEdge(self, a, b, c, current=None):
 		self.handler.addSelfEdge(a, b, c)
