@@ -31,7 +31,7 @@ We have had users reporting a falling installation. Most of the times running "m
 Remember to set the $ROBOCOMP environment variable. If you are not going to actively develop RoboComp, setting it as "/opt/robocomp" is a good idea.
 
 ~~~
-git clone https://github.com/ljmanso/AGM'
+git clone https://github.com/ljmanso/AGM
 cd AGM
 sh compile.sh
 ~~~
