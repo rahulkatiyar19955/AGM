@@ -1321,9 +1321,10 @@ void AGMInner::recursiveInsertion(AGMModel::SPtr &worldModel, InnerModelNode* no
 					worldModel->addEdgeByIdentifiers(symbolID, existingID, "RT", linkAttrs);
 				}
 			}
-			catch (...)
+			catch (AGMModelException &e)
 			{
-				qFatal("aqui");
+                fprintf(stderr, "Fatal error agm_inner:%d\n", __LINE__);
+				qFatal(e.what());
 			}
 			recursiveInsertion(worldModel, (*i), existingID);
 		}
