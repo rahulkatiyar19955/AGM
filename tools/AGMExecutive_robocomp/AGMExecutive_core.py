@@ -105,7 +105,6 @@ class PlannerCaller(threading.Thread):
         try: tempStr = unicodedata.normalize('NFKD', tempStr)
         except: pass
         missionStr = open(tempStr, 'r').read()
-        print(type(missionStr), missionStr)
         self.targetId = self.agglplannerclient.getTargetIdentifier(missionStr, self.domainId)
         self.setWork(self.executive.currentModel)
 
@@ -123,9 +122,7 @@ class PlannerCaller(threading.Thread):
                     while True:
                         pend = self.pendingJobs.pop()
                         print('XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX forceStopPlanning')
-                        print('forzando parada')
                         self.agglplannerclient.forceStopPlanning(pend)
-                        print('forzando parada F')
                     self.pendingJobs.release()
                 except:
                     pass
@@ -300,7 +297,7 @@ class Executive(object):
         self.executiveVisualizationTopic = executiveVisualizationTopic
 
         self.agglPath = agglPath
-        if not self.doNotPlan:
+        if self.doNotPlan is not False:
             self.domainParsed = self.parsed = AGMFileDataParsing.fromFile(self.agglPath)
 
 
@@ -318,7 +315,7 @@ class Executive(object):
         self.setAndBroadcastModel(xmlModelParser.graphFromXMLFile(initialModelPath))
         self.worldModelICE = AGMModelConversion.fromInternalToIce(self.currentModel)
 
-        if not self.doNotPlan:
+        if self.doNotPlan is not False:
             self.plannerCaller = PlannerCaller(self, agglPath, self.startPlanServer)
             self.plannerCaller.start()
             print('--- setMission ---------------------------------------------')
@@ -507,7 +504,7 @@ class Executive(object):
         self.executiveTopic.selfEdgeDeleted(identifier, edge_type)
 
     def setMission(self, target, avoidUpdate=False):
-        if self.doNotPlan:
+        if self.doNotPlan is True:
             return
         self.mutex.acquire()
         self.targetStr = target
@@ -577,7 +574,7 @@ class Executive(object):
 
 
     def updatePlan(self):
-        if self.doNotPlan:
+        if self.doNotPlan is False:
             return
         self.plannerCaller.setWork(self.currentModel)
 
