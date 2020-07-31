@@ -220,7 +220,7 @@ def ruleImplementation(agm, rule):
 		ret += normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=True)
 		ret += generateTarget_AGGT(agm, {'graph':rule.rhs, 'precondition':rule.precondition}, rule.name, rule.lhs)
 	else:
-		print 'Unknown rule type'
+		print('Unknown rule type')
 		sys.exit(-2346)
 	return ret
 
@@ -316,7 +316,7 @@ def normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=
 			if n == link[1]:
 				counter[n] = counter[n] + 1
 	optimal_node_list_t = []
-	for n in counter.keys():
+	for n in list(counter.keys()):
 		optimal_node_list_t.append((counter[n], n))
 	optimal_node_list_t = sorted(optimal_node_list_t, reverse=True)
 	optimal_node_list = []
@@ -511,8 +511,8 @@ def normalRuleImplementation(agm, rule, indent, thisIsActuallyAHierarchicalRule=
 		try:
 			effectCode, indent, effectId, stuff = normalRuleImplementation_EFFECT(rule.effectAST, indent)
 		except:
-			print 'Error in the "effects" section of rule', rule.name
-			print traceback.format_exc()
+			print('Error in the "effects" section of rule', rule.name)
+			print(traceback.format_exc())
 			sys.exit(-1)
 		ret += indentP+'backVars = n2id.keys()'
 		ret += effectCode
@@ -622,20 +622,20 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 	elif preconditionType == "=":
 		ret += indent+'precondition'+str(formulaId) + ' = (n2id["'+preconditionBody[0]+'"] == n2id["'+preconditionBody[1]+'"])'
 	elif preconditionType == "create":
-		print '\'create\' statements are not allowed in preconditions'
+		print('\'create\' statements are not allowed in preconditions')
 		sys.exit(1)
 	elif preconditionType == "delete":
-		print '\'delete\' statements are not allowed in preconditions'
+		print('\'delete\' statements are not allowed in preconditions')
 		sys.exit(1)
 	elif preconditionType == "retype":
-		print '\'retype\' statements are not allowed in preconditions'
+		print('\'retype\' statements are not allowed in preconditions')
 		sys.exit(1)
 	elif preconditionType == "eq":
 		try:
 			ret += indent + 'precondition'+str(formulaId) + ' = ' + preconditionBody[0] + " == " + preconditionBody[1] + ' # EQ 1'
 		except:
-			print 'ERROR IN', preconditionType
-			print 'ERROR IN', preconditionBody
+			print('ERROR IN', preconditionType)
+			print('ERROR IN', preconditionBody)
 			traceback.print_exc()
 	else:
 		try:
@@ -644,8 +644,8 @@ def normalRuleImplementation_PRECONDITION(precondition, indent, modifier='', stu
 			ret += 'n2id["'+preconditionBody[1]+'"], "'
 			ret += preconditionType + '"] in snode.graph.links # LINK'
 		except:
-			print 'ERROR IN', preconditionType
-			print 'ERROR IN', preconditionBody
+			print('ERROR IN', preconditionType)
+			print('ERROR IN', preconditionBody)
 			traceback.print_exc()
 	return ret, indent, formulaId, stuff
 
@@ -685,7 +685,7 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 			text, indent, formulaIdRet, stuff = normalRuleImplementation_EFFECT(effectBody, indent, 'not', stuff)
 			ret += text
 	elif effectType == "or":
-		print 'OR statements are not allowed in effects'
+		print('OR statements are not allowed in effects')
 		sys.exit(1)
 	# Partially done, the conditional mode is not tested
 	elif effectType == "and":
@@ -729,7 +729,7 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 		if stuff['mode'] == "condition":
 			ret += indent+'condition'+str(formulaId) + ' = (n2id["'+effectBody[0]+'"] == n2id["'+effectBody[1]+'"])'
 		else:
-			print '\'=\' statements are not allowed in effects'
+			print('\'=\' statements are not allowed in effects')
 			sys.exit(1)
 	elif effectType == "create":
 		ret += indent+"newName = str(getNewIdForSymbol(newNode))"
@@ -748,11 +748,11 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 				ret += indent+'condition'+str(formulaId) + ' = '
 				ret += 'n2id["' + effectBody[0] + '"] == n2id["' + effectBody[1] + '"]  # EQ 2'
 			else:
-				print 'Effects can\'t contain eq operators'
+				print('Effects can\'t contain eq operators')
 				sys.exit(-1)
 		except:
-			print 'ERROR IN', effectType
-			print 'ERROR IN', effectBody
+			print('ERROR IN', effectType)
+			print('ERROR IN', effectBody)
 			traceback.print_exc()
 	else:
 		if effectBody[0] == '':
@@ -772,8 +772,8 @@ def normalRuleImplementation_EFFECT(effect, indent, modifier='', stuff=None):
 					ret += indent+'if not [n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"] in newNode.graph.links:'
 					ret += indent+'\tnewNode.graph.links.append(AGMLink(n2id["'+effectBody[0]+'"], n2id["'+effectBody[1]+'"], "' + effectType + '"))'
 		except:
-			print 'ERROR IN', effectType
-			print 'ERROR IN', effectBody
+			print('ERROR IN', effectType)
+			print('ERROR IN', effectBody)
 			traceback.print_exc()
 	return ret, indent, formulaId, stuff
 
@@ -812,7 +812,7 @@ def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 				consts.append(n)
 			else:
 				#print n, '>>',lgraph.nodes.keys()
-				if n in lgraph.nodes.keys():
+				if n in list(lgraph.nodes.keys()):
 					#print 'constante porque si esta a la izq', n
 					consts.append(n)
 				else:
@@ -835,7 +835,7 @@ def getOptimalTargetNodeCheckOrder(graph, lgraph=None):
 				counter[n] = counter[n] + 1
 	## actually generate the optimal list
 	optimal_node_list_t = []
-	for n in counter.keys():
+	for n in list(counter.keys()):
 		optimal_node_list_t.append((counter[n], n))
 	optimal_node_list_t = sorted(optimal_node_list_t, reverse=True)
 	optimal_node_list = copy.deepcopy(consts)
@@ -1297,13 +1297,13 @@ def targetPreconditionImplementation(precondition, indent, modifier='', stuff=No
 	elif preconditionType == "=":
 		ret += indent+'precondition'+str(formulaId) + ' = (n2id["'+preconditionBody[0]+'"] == n2id["'+preconditionBody[1]+'"])'
 	elif preconditionType == "create":
-		print '\'create\' statements are not allowed in preconditions'
+		print('\'create\' statements are not allowed in preconditions')
 		sys.exit(1)
 	elif preconditionType == "delete":
-		print '\'delete\' statements are not allowed in preconditions'
+		print('\'delete\' statements are not allowed in preconditions')
 		sys.exit(1)
 	elif preconditionType == "retype":
-		print '\'retype\' statements are not allowed in preconditions'
+		print('\'retype\' statements are not allowed in preconditions')
 		sys.exit(1)
 	else:
 		try:
@@ -1312,7 +1312,7 @@ def targetPreconditionImplementation(precondition, indent, modifier='', stuff=No
 			ret += 'n2id["'+preconditionBody[1]+'"], "'
 			ret += preconditionType + '"] in graph.links # LINK'
 		except:
-			print 'ERROR IN', preconditionType
-			print 'ERROR IN', preconditionBody
+			print('ERROR IN', preconditionType)
+			print('ERROR IN', preconditionBody)
 			traceback.print_exc()
 	return ret, indent, formulaId, stuff

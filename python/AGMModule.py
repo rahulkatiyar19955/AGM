@@ -5,10 +5,11 @@
 import sys, traceback, os, re, threading, time, string, math, random
 import numpy as np
 # Qt interface
-from PySide.QtCore import *
-from PySide.QtGui import *
-from PySide.QtSvg import *
-#from PySide.Qt import *
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtSvg import *
+from PySide2.QtWidgets import *
+#from PySide2.Qt import *
 
 from ui_appearance import Ui_Appearance
 
@@ -46,18 +47,18 @@ class NodeNameReader(QLineEdit):
 	def got(self):
 		newName = str(self.text())
 		oldName = ''
-		for v in self.parentW.graph.nodes.keys():
+		for v in list(self.parentW.graph.nodes.keys()):
 			if self.parentW.graph.nodes[v].pos[0] == self.x:
 				if self.parentW.graph.nodes[v].pos[1] == self.y:
 					oldName = self.parentW.graph.nodes[v].name
 		if oldName == '':
-			print 'waaat e245234'
+			print('waaat e245234')
 			return
-		for v in self.parentW.graph.nodes.keys():
+		for v in list(self.parentW.graph.nodes.keys()):
 			if str(v).lower() == newName.lower() and str(v).lower() != oldName.lower():
 				QMessageBox.warning(self, "Invalid node name", "Two nodes can't have the same name in the same graph. Because some planners are case-insensitive, we also perform a case-insensitive comparison.")
 				return
-		for v in self.parentW.graph.nodes.keys():
+		for v in list(self.parentW.graph.nodes.keys()):
 			if self.parentW.graph.nodes[v].pos[0] == self.x:
 				if self.parentW.graph.nodes[v].pos[1] == self.y:
 					self.parentW.graph.nodes[v].name = newName
@@ -87,7 +88,7 @@ class NodeTypeReader(QComboBox):
 		self.connect(self, SIGNAL('currentIndexChanged(QString)'), self.got)
 	def got(self, text):
 		if text == 'select one': return
-		for v in self.parentW.graph.nodes.keys():
+		for v in list(self.parentW.graph.nodes.keys()):
 			try:
 				if self.parentW.graph.nodes[v].pos[0] == self.x:
 					if self.parentW.graph.nodes[v].pos[1] == self.y:
@@ -191,13 +192,13 @@ class GraphDraw(QWidget):
 		if not hasattr(self, 'velocities'):
 			self.velocities = dict()
 		for node in self.graph.nodes:
-			if not node in self.velocities.keys():
+			if not node in list(self.velocities.keys()):
 				self.velocities[node] = [0., 0.]
 			if type(self.graph.nodes[node].x) == str:
 				try:
 					self.graph.nodes[node].x = float(self.graph.nodes[node].x)
 				except:
-					print len(self.graph.nodes[node].x)
+					print(len(self.graph.nodes[node].x))
 					self.graph.nodes[node].x = 0.
 			if type(self.graph.nodes[node].y) == str:
 				self.graph.nodes[node].y = float(self.graph.nodes[node].y)
@@ -316,7 +317,7 @@ class GraphDraw(QWidget):
 			# Draw node
 			try:
 				painter.drawEllipse(v.pos[0]-(vertexDiameter/2), v.pos[1]-0.7001*(vertexDiameter/2), vertexDiameter, vertexDiameter*0.7001)
-			except OverflowError, o:
+			except OverflowError as o:
 				self.graph.nodes[w].pos[0] = float(random.uniform(-100, 100))
 				self.graph.nodes[w].pos[1] = float(random.uniform(-100, 100))
 
@@ -345,7 +346,7 @@ class GraphDraw(QWidget):
 					v1 = self.graph.nodes[e.a]
 					v2 = self.graph.nodes[e.b]
 				except:
-					print 'dangling edge: ', self.graph.links[linkindex].a+'---['+self.graph.links[linkindex].linkType+']--->'+self.graph.links[linkindex].b
+					print('dangling edge: ', self.graph.links[linkindex].a+'---['+self.graph.links[linkindex].linkType+']--->'+self.graph.links[linkindex].b)
 					del self.graph.links[linkindex]
 					continue
 				pos = 0
@@ -481,11 +482,11 @@ class GraphDraw(QWidget):
 				r.show()
 				r.setFocus(Qt.OtherFocusReason)
 			except:
-				print 'no node to rename in these coordinates'
+				print('no node to rename in these coordinates')
 		elif tool == 'change type':
 			try:
 				x, y = self.graph.getCenter(eX, eY, vertexDiameter)
-				types = self.main.agmData.agm.types.keys()
+				types = list(self.main.agmData.agm.types.keys())
 				r = NodeTypeReader(x, y, self.sumaX+x, self.sumaY+y-4, self, types)
 				r.show()
 				r.setFocus(Qt.OtherFocusReason)

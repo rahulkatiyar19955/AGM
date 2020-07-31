@@ -28,12 +28,12 @@ signal.signal(signal.SIGINT, signal.SIG_DFL)
 # Python distribution imports
 import sys, traceback, os, re, threading, time, string, math
 # Qt interface
-import PySide
-from PySide.QtCore import *
-from PySide.QtGui import *
-from PySide.QtSvg import *
+import PySide2
+from PySide2.QtCore import *
+from PySide2.QtGui import *
+from PySide2.QtSvg import *
 
-import Image, ImageOps
+from PIL import Image, ImageOps
 import numpy as np
 
 from inspect import currentframe, getframeinfo
@@ -70,12 +70,12 @@ from AGMModule import *
 import networkx as nx
 
 import matplotlib
-matplotlib.use('Qt4Agg')
-matplotlib.rcParams['backend.qt4'] = 'PySide'
+matplotlib.use('Qt5Agg')
+#matplotlib.rcParams['backend.qt5'] = 'PySide2'
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt4agg import ( FigureCanvasQTAgg as FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
-from PySide import QtGui, QtCore
+from PySide2 import QtGui, QtCore
 import random
 
 from weakref import proxy
@@ -96,7 +96,7 @@ class Plotter(FigureCanvas):
 			g.add_node(symbolType)
 			for d in data[symbolType]:
 				g.add_edge(symbolType, d, weight=1.0)
-		nodes = data.keys()
+		nodes = list(data.keys())
 		labels = {}
 		for n in nodes:
 			labels[n] = n
@@ -470,15 +470,15 @@ AGGLEditor's icons are based on work by Alexander Madyankin and Roman Shamin (MI
 			try:
 				self.ui.textParameters.setText(self.agmData.agm.rules[ruleN].parameters.replace("\n\t\t", "\n").lstrip())
 			except:
-				print traceback.format_exc()
+				print(traceback.format_exc())
 			try:
 				self.ui.textPrecondition.setText(self.agmData.agm.rules[ruleN].precondition.replace("\n\t\t", "\n").lstrip())
 			except:
-				print traceback.format_exc()
+				print(traceback.format_exc())
 			try:
 				self.ui.textEffect.setText(self.agmData.agm.rules[ruleN].effect.replace("\n\t\t", "\n").lstrip())
 			except:
-				print traceback.format_exc()
+				print(traceback.format_exc())
 		else:
 			self.ui.label.hide()
 			self.ui.label_2.hide()
@@ -603,7 +603,7 @@ AGGLEditor's icons are based on work by Alexander Madyankin and Roman Shamin (MI
 		path = str(QFileDialog.getOpenFileName(self, "Export rule", "", "*.aggl")[0])
 		self.openFromFile(path)
 	def currentTypeChanged(self):
-		print 'a'
+		print('a')
 		try:
 			if self.typeHierarchyWidget.previousSelected != self.typeHierarchyWidget.typeList.selectedItems():
 				self.reloadTypes()
@@ -628,7 +628,7 @@ AGGLEditor's icons are based on work by Alexander Madyankin and Roman Shamin (MI
 
 		if selected:
 			# available
-			print 'in parents'
+			print('in parents')
 			prevlist = sorted([item.text().encode('latin1') for item in self.typeHierarchyWidget.availableList.findItems('', QtCore.Qt.MatchContains)])
 			currlist = sorted(self.agmData.getPossibleParentsFor(selected))
 			if prevlist != currlist:
@@ -679,8 +679,8 @@ AGGLEditor's icons are based on work by Alexander Madyankin and Roman Shamin (MI
 		text = self.typeHierarchyWidget.edit.text()
 		self.typeHierarchyWidget.edit.hide()
 		items = self.typeHierarchyWidget.typeList.selectedItems()
-		print items, len(items)
-		if text in self.agmData.agm.types.keys():
+		print(items, len(items))
+		if text in list(self.agmData.agm.types.keys()):
 			ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor warning"), self.tr("The type "+text+" already exists"))
 			return
 		if len(items) != 0:
@@ -699,7 +699,7 @@ AGGLEditor's icons are based on work by Alexander Madyankin and Roman Shamin (MI
 		except:
 			ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor Warning"), self.tr("No type to include as parent to "+selectedType+" was selected"))
 			return
-		print 'include', selectedType, selectedParent
+		print('include', selectedType, selectedParent)
 		self.agmData.agm.includeTypeInheritance(selectedType, selectedParent)
 		self.reloadTypes()
 	def removeTypeInheritance(self):
@@ -715,7 +715,7 @@ AGGLEditor's icons are based on work by Alexander Madyankin and Roman Shamin (MI
 			traceback.print_exc()
 			ret = QMessageBox.warning(self.typeHierarchyWidget, self.tr("AGGLEditor Warning"), self.tr("No type to remove from the parent list of "+selectedType+" was selected"))
 			return
-		print 'remove', selectedType, selectedParent
+		print('remove', selectedType, selectedParent)
 		self.agmData.agm.removeTypeInheritance(selectedType, selectedParent)
 		self.reloadTypes()
 	def openFromFile(self, path):

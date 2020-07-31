@@ -137,7 +137,7 @@ MACRO( WRAP_PYTHON_UI )
   FOREACH( input_file ${ARGN} )
     ADD_CUSTOM_COMMAND (
       OUTPUT                                                              ${CMAKE_BINARY_DIR}/ui_${input_file}.py
-      COMMAND pyside-uic ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.ui -o ${CMAKE_BINARY_DIR}/ui_${input_file}.py
+      COMMAND pyside2-uic ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.ui -o ${CMAKE_BINARY_DIR}/ui_${input_file}.py
       DEPENDS            ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.ui
       COMMENT "Generating ${CMAKE_BINARY_DIR}/ui_${input_file}.py from ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.ui"
     )
@@ -148,7 +148,7 @@ MACRO( WRAP_PYTHON_QRC )
   FOREACH( input_file ${ARGN} )
     ADD_CUSTOM_COMMAND (
       OUTPUT                                                               ${CMAKE_BINARY_DIR}/${input_file}_rc.py
-      COMMAND pyside-rcc ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.qrc -o ${CMAKE_BINARY_DIR}/${input_file}_rc.py
+      COMMAND pyside2-rcc ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.qrc -o ${CMAKE_BINARY_DIR}/${input_file}_rc.py
       DEPENDS            ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.qrc
       COMMENT "Generating ${CMAKE_BINARY_DIR}/${input_file}_rc.py from ${CMAKE_SOURCE_DIR}/tools/ui/${input_file}.qrc"
     )

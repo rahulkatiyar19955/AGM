@@ -28,7 +28,7 @@ def pddlASTtoTXT(ast, graphs, tabs=4):
 	if len(ast) == 0:
 		return ''
 	allVariables = {}
-	print 'pddlASTtoTXT', type(graphs)
+	print('pddlASTtoTXT', type(graphs))
 	if type(graphs) != list:
 		graphs = [graphs]
 	for graph in graphs:
@@ -43,7 +43,7 @@ def pddlASTtoTXT_rec(ast, tabs=4, varTypesToCheck=None, allVariables=None, added
 		allVariables = {}
 	if addedVariables == None:
 		addedVariables = []
-	print '\nENTRO', ast
+	print('\nENTRO', ast)
 
 	if ast[0] == 'forall':
 		ret = '\t'*tabs+'(forall ('
@@ -62,7 +62,7 @@ def pddlASTtoTXT_rec(ast, tabs=4, varTypesToCheck=None, allVariables=None, added
 	elif ast[0] == 'and':
 		ret = '\t'*tabs+'(and\n'
 		for v in ast[1]:
-			print 'REC', v
+			print('REC', v)
 			ret += pddlASTtoTXT_rec(v, tabs=tabs+1, varTypesToCheck=varTypesToCheck, allVariables=allVariables, addedVariables=addedVariables)+'\n'
 		ret += '\t'*tabs+')\n'
 	elif ast[0] == 'when':
@@ -80,7 +80,7 @@ def pddlASTtoTXT_rec(ast, tabs=4, varTypesToCheck=None, allVariables=None, added
 			ret += allVariables[x]+'_'+x
  		ret += ')\n'
 	else:
-		print 'OTRO', ast[0]
+		print('OTRO', ast[0])
 		ret = '\t'*tabs+'('+ ast[0]
 		for x in ast[1:]:
 			if x in addedVariables:
@@ -167,19 +167,19 @@ class AGMRulePDDL:
 		if rule.isHierarchical():
 			return ''
 		if pddlVerbose:
-			print '\n----------------------------- ----------------------------------------   ', rule.name
-			print rule.name
-			print 'Staying: ', rule.stayingNodeList()
+			print('\n----------------------------- ----------------------------------------   ', rule.name)
+			print(rule.name)
+			print('Staying: ', rule.stayingNodeList())
 		newList = rule.newNodesList()
 		if pddlVerbose:
-			print 'New:   ', newList
+			print('New:   ', newList)
 		forgetList = rule.forgetNodesList()
 		if pddlVerbose:
-			print 'Forget:', forgetList
+			print('Forget:', forgetList)
 		agmlist, nodeDict = AGMRulePDDL.computePDDLMemoryListAndDictionary(rule, newList, forgetList)
 		if pddlVerbose:
-			print 'List:    ', agmlist
-			print 'Node dict:', nodeDict
+			print('List:    ', agmlist)
+			print('Node dict:', nodeDict)
 		string  = '\t(:action ' + rule.name + '\n'
 		string += '\t\t:parameters ('
 		for n in rule.stayingNodeList()+agmlist+forgetList:
@@ -193,9 +193,9 @@ class AGMRulePDDL:
 		string += AGMRulePDDL.listPDDLPreconditions(rule, agmlist, forgetList, newList, nodeDict) # Include precondition for nodes to be created
 		string += AGMRulePDDL.differentNodesPDDLPreconditions(rule, rule.stayingNodeList()+agmlist+forgetList) # Avoid using the same node more than once "!=". NOT INCLUDING THOSE IN THE LIST
 		string += AGMRulePDDL.linkPatternsPDDLPreconditions(rule, nodeDict)
-		print 'PREC', rule.name
-		print 'PREC', rule.name
-		print 'PREC', rule.name
+		print('PREC', rule.name)
+		print('PREC', rule.name)
+		print('PREC', rule.name)
 		string += '\n'+pddlASTtoTXT(rule.preconditionAST, [rule.lhs, rule.rhs], 2)
 		string += ' )\n'
 
@@ -204,9 +204,9 @@ class AGMRulePDDL:
 		string += AGMRulePDDL.listHandlingPDDLEffects(rule, forgetList, newList, agmlist, nodeDict) # List handling
 		string += AGMRulePDDL.newAndForgetNodesTypesPDDLEffects(rule, newList, forgetList, nodeDict) # TYPE assignment for created nod
 		string += AGMRulePDDL.linkPatternsPDDLEffects(rule, nodeDict)
-		print 'EFFCT', rule.name
-		print 'EFFCT', rule.name
-		print 'EFFCT', rule.name
+		print('EFFCT', rule.name)
+		print('EFFCT', rule.name)
+		print('EFFCT', rule.name)
 		string += '\n'+pddlASTtoTXT(rule.effectAST, [rule.lhs, rule.rhs], 2)
 		if not splitActionModif:
 			string += ' (increase (total-cost) '
@@ -224,7 +224,7 @@ class AGMRulePDDL:
 	@staticmethod
 	def existingNodesPDDLTypes(agmFD, rule, nodeDict, pddlVerbose=False):
 		ret  = ''
-		for name,node in rule.lhs.nodes.items():
+		for name,node in list(rule.lhs.nodes.items()):
 			if len (agmFD.validTypesForType(node.sType)) > 1:
 				ret += ' (or'
 			first = True
@@ -257,11 +257,11 @@ class AGMRulePDDL:
 		for i in itertools.combinations(nodesToUse, 2):
 			if i[0] != i[1]:
 				avoid = False
-				if i[0] in rule.lhs.nodes.keys() and not i[1] in rule.lhs.nodes.keys():
+				if i[0] in list(rule.lhs.nodes.keys()) and not i[1] in list(rule.lhs.nodes.keys()):
 					avoid = True
-				if i[1] in rule.lhs.nodes.keys() and not i[0] in rule.lhs.nodes.keys():
+				if i[1] in list(rule.lhs.nodes.keys()) and not i[0] in list(rule.lhs.nodes.keys()):
 					avoid = True
-				if i[0] in rule.lhs.nodes.keys() and i[1] in rule.lhs.nodes.keys():
+				if i[0] in list(rule.lhs.nodes.keys()) and i[1] in list(rule.lhs.nodes.keys()):
 					if rule.lhs.nodes[i[0]].sType != rule.lhs.nodes[i[1]].sType:
 						avoid = True
 				#if avoid:
@@ -284,11 +284,11 @@ class AGMRulePDDL:
 		forgetList = translateList(forgetList_, nodeDict)
 		newList = translateList(newList_, nodeDict)
 		if pddlVerbose:
-			print '- listHandlingPDDLEffects ----------------------------------------------'
-			print 'Forget list', forgetList
-			print 'New list   ', newList
-			print 'List      ', agmlist
-			print '------------------------------------------------------------------------'
+			print('- listHandlingPDDLEffects ----------------------------------------------')
+			print('Forget list', forgetList)
+			print('New list   ', newList)
+			print('List      ', agmlist)
+			print('------------------------------------------------------------------------')
 		# Same old, same old
 		if len(forgetList)==0 and len(newList)==0:
 			return ret
@@ -410,7 +410,7 @@ def generatePDDLProblem(domain, initXMLPath, target, outputPath):
 	elif type(domain) == str:
 		domainParsed = AGMFileDataParsing.fromFile(domain)
 	else:
-		print 'generatePDDLProblem received a domain which is neither a path or an AGMFileData instance, exiting...'
+		print('generatePDDLProblem received a domain which is neither a path or an AGMFileData instance, exiting...')
 		sys.exit(-1)
 	initModel = graphFromXMLFile(initXMLPath)
 
@@ -431,7 +431,7 @@ def generatePDDLProblem(domain, initXMLPath, target, outputPath):
 			nn = target['graph'].nodes[n].sType + '_' + n + ' - tipo'
 			targetObjects.append(target['graph'].nodes[n].sType + '_' + n)
 	unknownObjectsVec = []
-	for u in xrange(unknowns):
+	for u in range(unknowns):
 		nn = 'unknown_' + str(u)
 		output.write('\t\t' + nn + ' - tipo \n')
 		unknownObjectsVec.append(nn)
@@ -448,15 +448,15 @@ def generatePDDLProblem(domain, initXMLPath, target, outputPath):
 	# unknowns
 	if unknowns>0:
 		output.write('\t\t(firstunknown unknown_0)\n')
-	for u in xrange(unknowns-1):
+	for u in range(unknowns-1):
 		output.write('\t\t(unknownorder unknown_' + str(u) + ' unknown_' + str(u+1) + ')\n')
 	# Set not='s
 	allObjects = originalObjects + unknownObjectsVec # + targetObjects
 	useDiff = False
 	# useDiff = True
 	if useDiff:
-		for ind1 in xrange(len(allObjects)):
-			for ind2 in xrange(len(allObjects)):
+		for ind1 in range(len(allObjects)):
+			for ind2 in range(len(allObjects)):
 				if (ind1 != ind2):
 					output.write('\t\t(diff ' + allObjects[ind1] + ' ' + allObjects[ind2] + ')\n')
 	# Known symbols type for the objects in the initial world
@@ -479,22 +479,22 @@ def generatePDDLProblem(domain, initXMLPath, target, outputPath):
 		output.write(' )\n')
 	output.write('\t\t\t(and\n')
 	# Known symbols type for the objects in the target world
-	print 'targetObjects', targetObjects
+	print('targetObjects', targetObjects)
 	for s in target['graph'].nodes:
 		sn = target['graph'].nodes[s].sType + '_' + s
-		print 'A', sn
+		print('A', sn)
 		kStr = ' '
 		if sn in targetObjects:
 			kStr = ' ?'
 			break
-		print 'x', sn, kStr
+		print('x', sn, kStr)
 		for t in domainParsed.validTypesForType(target['graph'].nodes[s].sType):
 			output.write('\t\t\t\t(IS' + t + kStr + sn + ')\n')
 	# Edges
 	for e in target['graph'].links:
 		a = target['graph'].nodes[e.a].sType + '_' + e.a
 		b = target['graph'].nodes[e.b].sType + '_' + e.b
-		print 'B', a, b
+		print('B', a, b)
 		label = e.linkType
 		output.write('\t\t\t\t(' + label)
 		kStr = ' '
